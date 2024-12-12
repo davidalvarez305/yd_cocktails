@@ -1,0 +1,73 @@
+{{ define "content.html" }}
+<div class="flex flex-col my-6 overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800 dark:text-gray-100">
+	<div
+		class="flex flex-col gap-3 bg-gray-50 px-5 py-4 text-center dark:bg-gray-700/50 sm:flex-row sm:items-center sm:justify-between sm:text-left">
+		<form id="filters" class="flex items-center gap-2">
+			<button type="submit"
+				class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+				Filter
+			</button>
+			<select id="vending_type" name="vending_type"
+				class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold leading-5 focus:border-blue-500 focus:ring focus:ring-blue-500/50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-blue-500 sm:w-36">
+				<option value="" selected>Vending Type</option>
+				{{ range .VendingTypes }}
+				<option value="{{ .VendingTypeID }}">
+					{{ .MachineType }}
+				</option>
+				{{ end }}
+			</select>
+			<select id="location_type" name="location_type"
+				class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold leading-5 focus:border-blue-500 focus:ring focus:ring-blue-500/50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-blue-500 sm:w-36">
+				<option value="" selected>Location Type</option>
+				{{ range .VendingLocations }}
+				<option value="{{ .VendingLocationID }}">
+					{{ .LocationType }}
+				</option>
+				{{ end }}
+			</select>
+		</form>
+		<button id="clearButton" type="button"
+			class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+			Clear
+		</button>
+	</div>
+</div>
+
+<div id="alertModal"></div>
+
+{{ template "leads_table.html" . }}
+
+<script nonce="{{ .Nonce }}">
+	const params = new URLSearchParams(window.location.search);
+	const form = document.getElementById("filters");
+	const clear = document.getElementById("clearButton");
+
+	clear.addEventListener('click', () => window.location.href = "/crm/lead");
+
+	form.addEventListener("submit", e => {
+		e.preventDefault();
+
+		const formData = new FormData(e.target);
+		for (const [key, value] of formData.entries()) {
+
+			if (value) params.set(key, value);
+		}
+
+		if (!params.toString()) return;
+
+		redirectUrl();
+	});
+
+	function redirectUrl() {
+		const { origin, pathname } = window.location;
+		const url = new URL(origin + pathname);
+		url.search = params.toString();
+
+		window.location.replace(url.href);
+	}
+</script>
+
+<script src="{{ .StaticPath }}/main.js" nonce="{{ .Nonce }}"></script>
+<script src="{{ .StaticPath }}/pagination.js" nonce="{{ .Nonce }}"></script>
+
+{{ end }}

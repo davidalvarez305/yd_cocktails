@@ -1,0 +1,12 @@
+*.sh
+*.env
+*.sql
+*.json
+*.conf
+*.xls
+*.py
+*.csv
+node_modules
+env.md
+exec
+output.log

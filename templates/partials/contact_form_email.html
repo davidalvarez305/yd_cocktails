@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>HTML Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333333;
+        }
+
+        p {
+            color: #666666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <p>First Name: {{ .FirstName}}</p>
+        <p>Last Name: {{ .LastName }}</p>
+        <p>From: {{ .Email }}</p>
+        <p>{{ .Message }}</p>
+    </div>
+</body>
+
+</html>
