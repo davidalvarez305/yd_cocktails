@@ -30,9 +30,6 @@ func init() {
 		log.Fatalf("ERROR CONNECTING TO DB: %+v\n", err)
 	}
 	fmt.Println("Database connected.")
-
-	// services.StartEmailScheduler()
-	fmt.Println("Email scheduler started.")
 }
 
 func main() {
