@@ -404,7 +404,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		subject := "YD Vending: New Lead"
+		subject := "YD Cocktails: New Lead"
 		recipients := []string{constants.CompanyEmail}
 		templateFile := constants.PARTIAL_TEMPLATES_DIR + "new_lead_notification_email.html"
 
