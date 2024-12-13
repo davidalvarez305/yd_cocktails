@@ -136,15 +136,15 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 	data.PageTitle = "Miami Mobile Bartending Services — " + constants.CompanyName
 	data.Nonce = nonce
 	data.Features = []string{
-		"Offering customizable selections that fits your wants & needs.",
-		"Being prompt with repairs and maintenance so the machines are always running.",
-		"Being able to replace and/or refill products on-request to meet the demands of your clients, employees, and/or customers.",
-		"Our working hours are flexible so that we can respond to requests at moment's notice.",
-		"We stay on tops of trends so that if your clients and/or employees want a drink or snack that's hot on socials, we're able to get it for them.",
-		"Tending to our machines is the most important thing for us. To ensure that they're always running and stocked with products.",
-		"Our machines are modern and accept cashless payment solutions such as debit/credit cards, apple pay, and touchless payments.",
-		"We stay on top of ADA compliance so that everyone has access and is able to use our machines.",
-		"By making our contact information easily accessible, people are able to report problems directly to use so that managers & business owners don't need to take time out of their busy schedules to speak to us.",
+		"We'll work with you to create a custom menu that features our signature cocktails + your favorites.",
+		"We'll always be early to setup & make sure everything that's necessary is ready for use.",
+		"We have high standards of service to make sure your guests are able to enjoy their time with cold & delicious drinks.",
+		"We will DEFINITELY clean up after ourselves and leave your area as clean as it was before we got there.",
+		"Our team can dress to the occasion in the event that you require a specific outfit or a certain theme.",
+		"We're very flexible in terms of capacity for number of attendees, and can serve small as well as larger events.",
+		"We offer zero nonsense fixed rates with no hidden fees so that you know 100% what you're paying for, and what we agree to.",
+		"Your guests are first, and it's our priority to put forth an incredible service so that their experience at your event is awesome.",
+		"Our bartenders are highly skilled with years of experience so your cocktails come out delish.",
 	}
 	data.CSRFToken = csrfToken
 	data.VenueTypes = venueTypes
