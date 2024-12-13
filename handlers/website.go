@@ -68,8 +68,6 @@ func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 			GetContactForm(w, r, ctx)
 		case "/login":
 			GetLogin(w, r, ctx)
-		case "/about":
-			GetAbout(w, r, ctx)
 		case "/privacy-policy":
 			GetPrivacyPolicy(w, r, ctx)
 		case "/terms-and-conditions":
@@ -172,25 +170,6 @@ func GetRobots(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext)
 	if err != nil {
 		http.Error(w, "Error writing robots.txt content.", http.StatusInternalServerError)
 	}
-}
-
-func GetAbout(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
-	fileName := "about.html"
-	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
-	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + fileName, quoteForm}
-	nonce, ok := r.Context().Value("nonce").(string)
-	if !ok {
-		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
-		return
-	}
-
-	data := ctx
-	data.PageTitle = "About Us — " + constants.CompanyName
-	data.Nonce = nonce
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-	helpers.ServeContent(w, files, data)
 }
 
 func GetPrivacyPolicy(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
