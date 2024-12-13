@@ -269,6 +269,7 @@ type WebsiteContext struct {
 	LeadGeneratedEventName       string             `json:"lead_generated_event_name"`
 	DefaultCurrency              string             `json:"default_currency"`
 	DefaultLeadGeneratedValue    float64            `json:"default_lead_generated_value"`
+	YovaHeroImage                string             `json:"yova_hero_image"`
 }
 
 type FacebookUserData struct {

@@ -16,6 +16,10 @@ import (
 	"github.com/gorilla/schema"
 )
 
+const (
+	YovaHeroImage string = "https://ydcocktails.s3.us-east-1.amazonaws.com/media/yova_hero.jpeg"
+)
+
 var decoder = schema.NewDecoder()
 
 var websiteBaseFilePath = constants.WEBSITE_TEMPLATES_DIR + "base.html"
@@ -39,6 +43,7 @@ func createWebsiteContext() types.WebsiteContext {
 		LeadGeneratedEventName:       constants.LeadGeneratedEventName,
 		DefaultCurrency:              constants.DefaultCurrency,
 		DefaultLeadGeneratedValue:    constants.DefaultLeadGeneratedValue,
+		YovaHeroImage:                YovaHeroImage,
 	}
 }
 
