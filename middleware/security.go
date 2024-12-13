@@ -61,8 +61,8 @@ func SecurityMiddleware(next http.Handler) http.Handler {
 		frame-src 'self' https://www.youtube.com https://td.doubleclick.net https://www.facebook.com https://www.googletagmanager.com;
 		script-src-elem 'self' https://bat.bing.com https://snap.licdn.com https://jspm.dev https://www.googletagmanager.com 'nonce-%s' https://connect.facebook.net http://cdn.jsdelivr.net https://cdn.jsdelivr.net https://code.jquery.com;
 		style-src 'self' %s http://cdn.jsdelivr.net https://cdn.jsdelivr.net;
-		img-src 'self' https://www.linkedin.com https://bat.bing.com https://px.ads.linkedin.com https://stats.g.doubleclick.net https://www.google-analytics.com data: https://cdn.tailkit.com https://www.facebook.com https://www.google.com https://adservice.google.com https://www.googletagmanager.com https://cdn.jsdelivr.net %s %s;
-		connect-src 'self' https://px.ads.linkedin.com https://stats.g.doubleclick.net https://analytics.google.com https://www.google-analytics.com https://www.googleadservices.com https://www.google.com https://adservice.google.com https://www.facebook.com https://world.openfoodfacts.org;
+		img-src 'self' https://googleads.g.doubleclick.net https://google.com https://www.linkedin.com https://bat.bing.com https://px.ads.linkedin.com https://stats.g.doubleclick.net https://www.google-analytics.com data: https://cdn.tailkit.com https://www.facebook.com https://www.google.com https://adservice.google.com https://www.googletagmanager.com https://cdn.jsdelivr.net %s %s;
+		connect-src 'self' https://google.com https://px.ads.linkedin.com https://stats.g.doubleclick.net https://analytics.google.com https://www.google-analytics.com https://www.googleadservices.com https://www.google.com https://adservice.google.com https://www.facebook.com https://world.openfoodfacts.org;
 		style-src-elem 'self' https://fonts.bunny.net %s http://cdn.jsdelivr.net https://cdn.jsdelivr.net https://cdn.ckeditor.com;
 		style-src-attr 'self' 'unsafe-inline';`, constants.AWSStorageBucket, nonceBase64, nonceBase64, constants.AWSStorageBucket, constants.AWSStorageBucket, constants.AWSStorageBucket, constants.AWSStorageBucket)
 
