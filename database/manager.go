@@ -466,7 +466,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	l.last_name,
 	l.phone_number,
 	et.name,
-	vt.namne,
+	vt.name,
 	lm.ad_campaign,
 	lm.medium,
 	lm.source,
@@ -500,7 +500,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	var eventType, venueType, message, externalId, userAgent, clickId, googleClientId sql.NullString
 	var guests sql.NullInt32
 
-	var website, companyName, city, buttonClicked sql.NullString
+	var buttonClicked sql.NullString
 
 	err := row.Scan(
 		&leadDetails.LeadID,
@@ -526,9 +526,6 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&userAgent,
 		&clickId,
 		&googleClientId,
-		&website,
-		&companyName,
-		&city,
 		&buttonClicked,
 		&guests,
 	)
