@@ -133,7 +133,7 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 	}
 
 	data := ctx
-	data.PageTitle = "Miami Vending Services — " + constants.CompanyName
+	data.PageTitle = "Miami Mobile Bartending Services — " + constants.CompanyName
 	data.Nonce = nonce
 	data.Features = []string{
 		"Offering customizable selections that fits your wants & needs.",
@@ -514,7 +514,7 @@ func PostContactForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	subject := "Contact Form: YD Vending"
+	subject := "Contact Form: YD Cocktails"
 	recipients := []string{constants.CompanyEmail}
 	templateFile := constants.PARTIAL_TEMPLATES_DIR + "contact_form_email.html"
 
