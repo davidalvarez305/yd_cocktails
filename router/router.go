@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/davidalvarez305/yd_vending/handlers"
-	"github.com/davidalvarez305/yd_vending/middleware"
+	"github.com/davidalvarez305/yd_cocktails/handlers"
+	"github.com/davidalvarez305/yd_cocktails/middleware"
 )
 
 func Router() *http.ServeMux {

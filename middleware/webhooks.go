@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/davidalvarez305/yd_vending/constants"
+	"github.com/davidalvarez305/yd_cocktails/constants"
 	"github.com/twilio/twilio-go/client"
 )
 

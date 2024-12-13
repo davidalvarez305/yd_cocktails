@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/davidalvarez305/yd_vending/sessions"
-	"github.com/davidalvarez305/yd_vending/utils"
+	"github.com/davidalvarez305/yd_cocktails/sessions"
+	"github.com/davidalvarez305/yd_cocktails/utils"
 )
 
 var urlsToSkip = []string{"/static/", "/partials/", "/sms/", "/call/", "/webhooks/"}

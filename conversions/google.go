@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/davidalvarez305/yd_vending/constants"
-	"github.com/davidalvarez305/yd_vending/types"
+	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/types"
 )
 
 func SendGoogleConversion(payload types.GooglePayload) error {

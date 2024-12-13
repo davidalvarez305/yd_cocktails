@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davidalvarez305/yd_vending/constants"
+	"github.com/davidalvarez305/yd_cocktails/constants"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )

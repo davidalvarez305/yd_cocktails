@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/davidalvarez305/yd_vending/types"
+	"github.com/davidalvarez305/yd_cocktails/types"
 )
 
 func ServeDynamicPartialTemplate(w http.ResponseWriter, ctx types.DynamicPartialTemplate) {

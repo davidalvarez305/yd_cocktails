@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/davidalvarez305/yd_vending/constants"
-	"github.com/davidalvarez305/yd_vending/helpers"
-	"github.com/davidalvarez305/yd_vending/types"
+	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/types"
 )
 
 func PartialsHandler(w http.ResponseWriter, r *http.Request) {

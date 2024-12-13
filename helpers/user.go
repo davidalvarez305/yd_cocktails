@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/davidalvarez305/yd_vending/csrf"
-	"github.com/davidalvarez305/yd_vending/database"
-	"github.com/davidalvarez305/yd_vending/models"
-	"github.com/davidalvarez305/yd_vending/sessions"
-	"github.com/davidalvarez305/yd_vending/utils"
+	"github.com/davidalvarez305/yd_cocktails/csrf"
+	"github.com/davidalvarez305/yd_cocktails/database"
+	"github.com/davidalvarez305/yd_cocktails/models"
+	"github.com/davidalvarez305/yd_cocktails/sessions"
+	"github.com/davidalvarez305/yd_cocktails/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 

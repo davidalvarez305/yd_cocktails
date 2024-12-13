@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/davidalvarez305/yd_vending/constants"
-	"github.com/davidalvarez305/yd_vending/models"
-	"github.com/davidalvarez305/yd_vending/types"
-	"github.com/davidalvarez305/yd_vending/utils"
+	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/models"
+	"github.com/davidalvarez305/yd_cocktails/types"
+	"github.com/davidalvarez305/yd_cocktails/utils"
 )
 
 func InsertCSRFToken(token models.CSRFToken) error {

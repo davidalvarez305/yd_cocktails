@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/davidalvarez305/yd_vending/constants"
-	"github.com/davidalvarez305/yd_vending/conversions"
-	"github.com/davidalvarez305/yd_vending/database"
-	"github.com/davidalvarez305/yd_vending/helpers"
-	"github.com/davidalvarez305/yd_vending/services"
-	"github.com/davidalvarez305/yd_vending/sessions"
-	"github.com/davidalvarez305/yd_vending/types"
-	"github.com/davidalvarez305/yd_vending/utils"
+	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/conversions"
+	"github.com/davidalvarez305/yd_cocktails/database"
+	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/services"
+	"github.com/davidalvarez305/yd_cocktails/sessions"
+	"github.com/davidalvarez305/yd_cocktails/types"
+	"github.com/davidalvarez305/yd_cocktails/utils"
 	"github.com/gorilla/schema"
 )
 

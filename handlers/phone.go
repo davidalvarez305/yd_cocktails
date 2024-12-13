@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/davidalvarez305/yd_vending/constants"
-	"github.com/davidalvarez305/yd_vending/conversions"
-	"github.com/davidalvarez305/yd_vending/database"
-	"github.com/davidalvarez305/yd_vending/helpers"
-	"github.com/davidalvarez305/yd_vending/models"
-	"github.com/davidalvarez305/yd_vending/types"
+	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/conversions"
+	"github.com/davidalvarez305/yd_cocktails/database"
+	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/models"
+	"github.com/davidalvarez305/yd_cocktails/types"
 )
 
 func PhoneServiceHandler(w http.ResponseWriter, r *http.Request) {

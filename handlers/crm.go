@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davidalvarez305/yd_vending/constants"
-	"github.com/davidalvarez305/yd_vending/database"
-	"github.com/davidalvarez305/yd_vending/helpers"
-	"github.com/davidalvarez305/yd_vending/sessions"
-	"github.com/davidalvarez305/yd_vending/types"
+	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/database"
+	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/sessions"
+	"github.com/davidalvarez305/yd_cocktails/types"
 )
 
 var crmBaseFilePath = constants.CRM_TEMPLATES_DIR + "base.html"

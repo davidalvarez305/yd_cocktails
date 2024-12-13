@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/davidalvarez305/yd_vending/constants"
+	"github.com/davidalvarez305/yd_cocktails/constants"
 	_ "github.com/lib/pq"
 )
 

@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/davidalvarez305/yd_vending/constants"
+	"github.com/davidalvarez305/yd_cocktails/constants"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"

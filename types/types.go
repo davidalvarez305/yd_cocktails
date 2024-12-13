@@ -3,7 +3,7 @@ package types
 import (
 	"time"
 
-	"github.com/davidalvarez305/yd_vending/models"
+	"github.com/davidalvarez305/yd_cocktails/models"
 )
 
 type QuoteForm struct {

@@ -8,10 +8,10 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/davidalvarez305/yd_vending/constants"
-	"github.com/davidalvarez305/yd_vending/database"
-	"github.com/davidalvarez305/yd_vending/middleware"
-	"github.com/davidalvarez305/yd_vending/router"
+	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/database"
+	"github.com/davidalvarez305/yd_cocktails/middleware"
+	"github.com/davidalvarez305/yd_cocktails/router"
 )
 
 func init() {

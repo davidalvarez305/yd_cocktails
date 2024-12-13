@@ -1,4 +1,4 @@
-module github.com/davidalvarez305/yd_vending
+module github.com/davidalvarez305/yd_cocktails
 
 go 1.22.3
 
