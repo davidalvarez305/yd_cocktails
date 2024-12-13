@@ -19,7 +19,7 @@ function setUser() {
 }
 
 function preserveQuerystring() {
-	if (["crm", "inventory", "reports"].some(link => window.location.pathname.includes(link))) return;
+	if (["crm"].some(link => window.location.pathname.includes(link))) return;
 
 	const links = document.querySelectorAll('a');
 
