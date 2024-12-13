@@ -201,6 +201,22 @@
             .then(html => {
                 alertModal.outerHTML = html;
 
+                // Report Google Conversion
+                gtag("set", "user_data", {
+                    "phone_number": "+1" + data.get("phone_number"),
+                    "address": {
+                        "first_name": data.get("first_name"),
+                        "last_name": data.get("last_name"),
+                        "region": "Florida",
+                        "country": "US"
+                    }
+                });
+
+                gtag("event", "{{ .LeadGeneratedEventName }}", {
+                    currency: "{{ .DefaultCurrency }}",
+                    value: parseFloat("{{ .DefaultLeadGeneratedValue }}"),
+                });
+
                 // Report FB Conversion
                 fbq("track", "{{ .LeadEventName }}", {
                     event_time: Math.floor(Date.now() / 1000),
@@ -213,27 +229,8 @@
                     fbc: marketingHelper.facebookClickId,
                     fbp: marketingHelper.facebookClientId,
                     client_user_agent: marketingHelper.userAgent,
-                });
-
-                // Report LinkedIn Conversion
-                window.lintrk("setUserData", { 
-                    phone: data.get("phone_number"),
-                    fn: data.get("first_name"),
-                    ln: data.get("last_name"),
-                    external_id: "{{ .ExternalID }}",
-                });
-
-                window.lintrk('track', { conversion_id: "{{ .LinkedInEventID }}" });
-
-                // Report Microsoft Ads Conversion
-                window.uetq = window.uetq || [];
-
-                window.uetq.push('event', '{{ .QuoteEventName }}', {
-                    pid: {
-                        fn: data.get("first_name"),
-                        ln: data.get("last_name"),
-                        ph: data.get("phone_number"),
-                    }
+                    currency: "{{ .DefaultCurrency }}",
+                    value: parseFloat("{{ .DefaultLeadGeneratedValue }}"),
                 });
             })
             .catch(err => {

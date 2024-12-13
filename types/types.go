@@ -260,7 +260,9 @@ type WebsiteContext struct {
 	GoogleAdsID                  string                   `json:"google_ads_id"`
 	GoogleAdsCallConversionLabel string                   `json:"google_ads_call_conversion_label"`
 	LeadEventName                string                   `json:"lead_event_name"`
-	QuoteEventName               string                   `json:"quote_event_name"`
+	LeadGeneratedEventName       string                   `json:"lead_generated_event_name"`
+	DefaultCurrency              string                   `json:"default_currency"`
+	DefaultLeadGeneratedValue    float64                  `json:"default_lead_generated_value"`
 }
 
 type FacebookUserData struct {

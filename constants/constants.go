@@ -11,8 +11,11 @@ const (
 
 	TimeZone string = "America/New_York"
 
-	QuoteEventName string = "quote"
-	LeadEventName  string = "Lead"
+	LeadGeneratedEventName string = "generate_lead"
+	LeadEventName          string = "Lead"
+
+	DefaultLeadGeneratedValue float64 = 150.00
+	DefaultCurrency           string  = "USD"
 )
 
 var (

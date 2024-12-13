@@ -24,7 +24,7 @@ var websiteFooterFilePath = constants.WEBSITE_TEMPLATES_DIR + "footer.html"
 func createWebsiteContext() types.WebsiteContext {
 	return types.WebsiteContext{
 		PageTitle:                    constants.CompanyName,
-		MetaDescription:              "Get a quote for vending machine services.",
+		MetaDescription:              "Get a quote for mobile bartending services in Miami, FL.",
 		SiteName:                     constants.SiteName,
 		StaticPath:                   constants.StaticPath,
 		MediaPath:                    constants.MediaPath,
@@ -36,7 +36,9 @@ func createWebsiteContext() types.WebsiteContext {
 		FacebookDataSetID:            constants.FacebookDatasetID,
 		CompanyName:                  constants.CompanyName,
 		LeadEventName:                constants.LeadEventName,
-		QuoteEventName:               constants.QuoteEventName,
+		LeadGeneratedEventName:       constants.LeadGeneratedEventName,
+		DefaultCurrency:              constants.DefaultCurrency,
+		DefaultLeadGeneratedValue:    constants.DefaultLeadGeneratedValue,
 	}
 }
 
@@ -363,9 +365,11 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		UserId:   helpers.SafeString(form.ExternalID),
 		Events: []types.GoogleEventLead{
 			{
-				Name: constants.QuoteEventName,
+				Name: constants.LeadGeneratedEventName,
 				Params: types.GoogleEventParamsLead{
-					GCLID: helpers.SafeString(form.ClickID),
+					GCLID:    helpers.SafeString(form.ClickID),
+					Value:    constants.DefaultLeadGeneratedValue,
+					Currency: constants.DefaultCurrency,
 				},
 			},
 		},
