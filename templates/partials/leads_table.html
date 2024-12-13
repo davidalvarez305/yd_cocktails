@@ -21,11 +21,11 @@
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Vending Type
+					Event & Venue Types
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Vending Location
+					Guests
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
@@ -58,13 +58,13 @@
 				<td class="p-3 text-center">
 					<div
 						class="inline-flex rounded-full border border-transparent bg-emerald-100 px-2 py-1 text-xs font-semibold leading-4 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-700/10 dark:font-medium dark:text-emerald-200">
-						{{ .MachineType }}
+						{{ .EventType }}, {{ .VenueType }}
 					</div>
 				</td>
 				<td class="p-3 text-center">
 					<div
 						class="inline-flex rounded-full border border-transparent bg-emerald-100 px-2 py-1 text-xs font-semibold leading-4 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-700/10 dark:font-medium dark:text-emerald-200">
-						{{ .LocationType }}
+						{{ .Guests }}
 					</div>
 				</td>
 				<td class="p-3 text-center">

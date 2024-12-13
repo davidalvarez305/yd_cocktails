@@ -1,13 +1,13 @@
 package models
 
-type VendingType struct {
-	VendingTypeID int    `json:"vending_type_id" form:"vending_type_id" schema:"vending_type_id"`
-	MachineType   string `json:"machine_type" form:"machine_type" schema:"machine_type"`
+type EventType struct {
+	EventTypeID int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	Name        string `json:"name" form:"name" schema:"name"`
 }
 
-type VendingLocation struct {
-	VendingLocationID int    `json:"vending_location_id" form:"vending_location_id" schema:"vending_location_id"`
-	LocationType      string `json:"location_type" form:"location_type" schema:"location_type"`
+type VenueType struct {
+	VenueTypeID int    `json:"vending_location_id" form:"vending_location_id" schema:"vending_location_id"`
+	Name        string `json:"name" form:"name" schema:"name"`
 }
 
 type User struct {
@@ -27,8 +27,9 @@ type Lead struct {
 	PhoneNumber        string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Email              string `json:"email" form:"email" schema:"email"`
 	CreatedAt          int64  `json:"created_at" form:"created_at" schema:"created_at"`
-	VendingTypeID      int    `json:"vending_type_id" form:"vending_type_id" schema:"vending_type_id"`
-	VendingLocationID  int    `json:"vending_location_id" form:"vending_location_id" schema:"vending_location_id"`
+	EventTypeID        int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID        int    `json:"vending_location_id" form:"vending_location_id" schema:"vending_location_id"`
+	Guests             int    `json:"guests" form:"guests" schema:"guests"`
 	Message            string `json:"message" form:"message" schema:"message"`
 	OptInTextMessaging bool   `json:"opt_in_text_messaging" form:"opt_in_text_messaging" schema:"opt_in_text_messaging"`
 }

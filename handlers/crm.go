@@ -19,7 +19,7 @@ var crmFooterFilePath = constants.CRM_TEMPLATES_DIR + "footer.html"
 func createCrmContext() map[string]any {
 	return map[string]any{
 		"PageTitle":       constants.CompanyName,
-		"MetaDescription": "Get a quote for vending machine services.",
+		"MetaDescription": "Get a quote for mobile bartending services in Miami, FL.",
 		"SiteName":        constants.SiteName,
 		"StaticPath":      constants.StaticPath,
 		"MediaPath":       constants.MediaPath,
@@ -98,8 +98,8 @@ func GetLeads(w http.ResponseWriter, r *http.Request, ctx map[string]interface{}
 	}
 
 	var params types.GetLeadsParams
-	params.LocationType = helpers.SafeStringToPointer(r.URL.Query().Get("location_type"))
-	params.VendingType = helpers.SafeStringToPointer(r.URL.Query().Get("vending_type"))
+	params.EventType = helpers.SafeStringToPointer(r.URL.Query().Get("event_type"))
+	params.VenueType = helpers.SafeStringToPointer(r.URL.Query().Get("venue_type"))
 	params.PageNum = helpers.SafeStringToPointer(r.URL.Query().Get("page_num"))
 
 	leads, totalRows, err := database.GetLeadList(params)
@@ -109,14 +109,14 @@ func GetLeads(w http.ResponseWriter, r *http.Request, ctx map[string]interface{}
 		return
 	}
 
-	vendingTypes, err := database.GetVendingTypes()
+	eventTypes, err := database.GetEventTypes()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting vending types.", http.StatusInternalServerError)
 		return
 	}
 
-	vendingLocations, err := database.GetVendingLocations()
+	venueTypes, err := database.GetVenueTypes()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
@@ -130,8 +130,8 @@ func GetLeads(w http.ResponseWriter, r *http.Request, ctx map[string]interface{}
 	data["CSRFToken"] = csrfToken
 	data["Leads"] = leads
 	data["MaxPages"] = helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage)
-	data["VendingTypes"] = vendingTypes
-	data["VendingLocations"] = vendingLocations
+	data["EventTypes"] = eventTypes
+	data["VenueTypes"] = venueTypes
 
 	data["CurrentPage"] = 1
 	if params.PageNum != nil {
@@ -181,14 +181,14 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	vendingTypes, err := database.GetVendingTypes()
+	eventTypes, err := database.GetEventTypes()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting vending types.", http.StatusInternalServerError)
+		http.Error(w, "Error getting event types.", http.StatusInternalServerError)
 		return
 	}
 
-	vendingLocations, err := database.GetVendingLocations()
+	venueTypes, err := database.GetVenueTypes()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
@@ -201,8 +201,8 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["CSRFToken"] = csrfToken
 	data["Lead"] = leadDetails
 	data["CRMUserPhoneNumber"] = phoneNumber
-	data["VendingTypes"] = vendingTypes
-	data["VendingLocations"] = vendingLocations
+	data["EventTypes"] = eventTypes
+	data["VenueTypes"] = venueTypes
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -385,8 +385,8 @@ func DeleteLead(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var params types.GetLeadsParams
-	params.LocationType = helpers.SafeStringToPointer(r.URL.Query().Get("location_type"))
-	params.VendingType = helpers.SafeStringToPointer(r.URL.Query().Get("vending_type"))
+	params.EventType = helpers.SafeStringToPointer(r.URL.Query().Get("event_type"))
+	params.VenueType = helpers.SafeStringToPointer(r.URL.Query().Get("venue_type"))
 	params.PageNum = helpers.SafeStringToPointer(r.URL.Query().Get("page_num"))
 
 	leads, totalRows, err := database.GetLeadList(params)

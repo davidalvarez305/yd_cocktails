@@ -7,21 +7,21 @@
 				class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
 				Filter
 			</button>
-			<select id="vending_type" name="vending_type"
+			<select id="event_type" name="event_type"
 				class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold leading-5 focus:border-blue-500 focus:ring focus:ring-blue-500/50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-blue-500 sm:w-36">
-				<option value="" selected>Vending Type</option>
-				{{ range .VendingTypes }}
-				<option value="{{ .VendingTypeID }}">
-					{{ .MachineType }}
+				<option value="" selected>Event Type</option>
+				{{ range .EventTypes }}
+				<option value="{{ .EventTypeID }}">
+					{{ .Name }}
 				</option>
 				{{ end }}
 			</select>
-			<select id="location_type" name="location_type"
+			<select id="venue_type" name="venue_type"
 				class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold leading-5 focus:border-blue-500 focus:ring focus:ring-blue-500/50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-blue-500 sm:w-36">
-				<option value="" selected>Location Type</option>
-				{{ range .VendingLocations }}
-				<option value="{{ .VendingLocationID }}">
-					{{ .LocationType }}
+				<option value="" selected>Venue Type</option>
+				{{ range .VenueTypes }}
+				<option value="{{ .VenueTypeID }}">
+					{{ .Name }}
 				</option>
 				{{ end }}
 			</select>

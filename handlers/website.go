@@ -107,17 +107,17 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
 		return
 	}
-	vendingTypes, err := database.GetVendingTypes()
+	eventTypes, err := database.GetEventTypes()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting vending types.", http.StatusInternalServerError)
+		http.Error(w, "Error getting event types.", http.StatusInternalServerError)
 		return
 	}
 
-	vendingLocations, err := database.GetVendingLocations()
+	venueTypes, err := database.GetVenueTypes()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
+		http.Error(w, "Error getting venue types.", http.StatusInternalServerError)
 		return
 	}
 
@@ -142,8 +142,8 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 		"By making our contact information easily accessible, people are able to report problems directly to use so that managers & business owners don't need to take time out of their busy schedules to speak to us.",
 	}
 	data.CSRFToken = csrfToken
-	data.VendingTypes = vendingTypes
-	data.VendingLocations = vendingLocations
+	data.VenueTypes = venueTypes
+	data.EventTypes = eventTypes
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -245,8 +245,9 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	form.FirstName = helpers.GetStringPointerFromForm(r, "first_name")
 	form.LastName = helpers.GetStringPointerFromForm(r, "last_name")
 	form.PhoneNumber = helpers.GetStringPointerFromForm(r, "phone_number")
-	form.LocationType = helpers.GetIntPointerFromForm(r, "location_type")
-	form.MachineType = helpers.GetIntPointerFromForm(r, "machine_type")
+	form.EventType = helpers.GetIntPointerFromForm(r, "event_type")
+	form.VenueType = helpers.GetIntPointerFromForm(r, "venue_type")
+	form.Guests = helpers.GetIntPointerFromForm(r, "guests")
 	form.Message = helpers.GetStringPointerFromForm(r, "message")
 	form.Source = helpers.GetStringPointerFromForm(r, "source")
 	form.Medium = helpers.GetStringPointerFromForm(r, "medium")
@@ -347,12 +348,17 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			FirstName:       helpers.HashString(helpers.SafeString(form.FirstName)),
 			LastName:        helpers.HashString(helpers.SafeString(form.LastName)),
 			Phone:           helpers.HashString(helpers.SafeString(form.PhoneNumber)),
+			Email:           helpers.HashString(helpers.SafeString(form.Email)),
 			FBC:             helpers.SafeString(form.FacebookClickID),
 			FBP:             helpers.SafeString(form.FacebookClientID),
 			State:           helpers.HashString("Florida"),
 			ExternalID:      helpers.HashString(helpers.SafeString(form.ExternalID)),
 			ClientIPAddress: helpers.SafeString(form.IP),
 			ClientUserAgent: helpers.SafeString(form.UserAgent),
+		},
+		CustomData: types.FacebookCustomData{
+			Value:    fmt.Sprint(constants.DefaultLeadGeneratedValue),
+			Currency: constants.DefaultCurrency,
 		},
 	}
 
@@ -374,7 +380,8 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 		UserData: types.GoogleUserData{
-			Sha256PhoneNumber: []string{helpers.HashString(utils.AddPhonePrefixIfNeeded(helpers.SafeString(form.PhoneNumber)))},
+			Sha256PhoneNumber:  []string{helpers.HashString(utils.AddPhonePrefixIfNeeded(helpers.SafeString(form.PhoneNumber)))},
+			Sha256EmailAddress: []string{helpers.HashString(helpers.SafeString(form.Email))},
 			Address: []types.GoogleUserAddress{
 				{
 					Sha256FirstName: helpers.HashString(helpers.SafeString(form.FirstName)),
@@ -405,8 +412,9 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			"Name":           helpers.SafeString(form.FirstName) + " " + helpers.SafeString(form.LastName),
 			"PhoneNumber":    helpers.SafeString(form.PhoneNumber),
 			"DateCreated":    utils.FormatTimestampEST(lead.CreatedAt),
-			"MachineType":    lead.MachineType,
-			"LocationType":   lead.LocationType,
+			"EventType":      lead.EventType,
+			"VenueType":      lead.VenueType,
+			"Guests":         lead.Guests,
 			"Message":        helpers.SafeString(form.Message),
 			"LeadDetailsURL": fmt.Sprintf("%s/crm/lead/%d", constants.RootDomain, leadID),
 			"Location":       "",

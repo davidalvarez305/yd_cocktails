@@ -10,38 +10,41 @@ type QuoteForm struct {
 	FirstName          *string `json:"first_name" form:"first_name" schema:"first_name"`
 	LastName           *string `json:"last_name" form:"last_name" schema:"last_name"`
 	PhoneNumber        *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	LocationType       *int    `json:"location_type" form:"location_type" schema:"location_type"`
-	MachineType        *int    `json:"machine_type" form:"machine_type" schema:"machine_type"`
+	VenueType          *int    `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	EventType          *int    `json:"event_type" form:"event_type" schema:"event_type"`
+	Guests             *int    `json:"guests" form:"guests" schema:"guests"`
 	Message            *string `json:"message" form:"message" schema:"message"`
-	Source             *string `json:"source" form:"source" schema:"source"`
-	Medium             *string `json:"medium" form:"medium" schema:"medium"`
-	Channel            *string `json:"channel" form:"channel" schema:"channel"`
-	LandingPage        *string `json:"landing_page" form:"landing_page" schema:"landing_page"`
-	Keyword            *string `json:"keyword" form:"keyword" schema:"keyword"`
-	Referrer           *string `json:"referrer" form:"referrer" schema:"referrer"`
-	ClickID            *string `json:"click_id" form:"click_id" schema:"click_id"`
-	CampaignID         *int64  `json:"campaign_id" form:"campaign_id" schema:"campaign_id"`
-	AdCampaign         *string `json:"ad_campaign" form:"ad_campaign" schema:"ad_campaign"`
-	AdGroupID          *int64  `json:"ad_group_id" form:"ad_group_id" schema:"ad_group_id"`
-	AdGroupName        *string `json:"ad_group_name" form:"ad_group_name" schema:"ad_group_name"`
-	AdSetID            *int64  `json:"ad_set_id" form:"ad_set_id" schema:"ad_set_id"`
-	AdSetName          *string `json:"ad_set_name" form:"ad_set_name" schema:"ad_set_name"`
-	AdID               *int64  `json:"ad_id" form:"ad_id" schema:"ad_id"`
-	AdHeadline         *int64  `json:"ad_headline" form:"ad_headline" schema:"ad_headline"`
-	Language           *string `json:"language" form:"language" schema:"language"`
-	Longitude          *string `json:"longitude" form:"longitude" schema:"longitude"`
-	Latitude           *string `json:"latitude" form:"latitude" schema:"latitude"`
-	UserAgent          *string `json:"user_agent" form:"user_agent" schema:"user_agent"`
-	ButtonClicked      *string `json:"button_clicked" form:"button_clicked" schema:"button_clicked"`
-	IP                 *string `json:"ip" form:"ip" schema:"ip"`
-	CSRFToken          *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	ExternalID         *string `json:"external_id" form:"external_id" schema:"external_id"`
-	GoogleClientID     *string `json:"google_client_id" form:"google_client_id" schema:"google_client_id"`
-	FacebookClickID    *string `json:"facebook_click_id" form:"facebook_click_id" schema:"facebook_click_id"`
-	FacebookClientID   *string `json:"facebook_client_id" form:"facebook_client_id" schema:"facebook_client_id"`
-	CSRFSecret         *string `json:"csrf_secret" form:"csrf_secret"`
 	Email              *string `json:"email" form:"email" schema:"email"`
 	OptInTextMessaging *bool   `json:"opt_in_text_messaging" form:"opt_in_text_messaging" schema:"opt_in_text_messaging"`
+
+	Source        *string `json:"source" form:"source" schema:"source"`
+	Medium        *string `json:"medium" form:"medium" schema:"medium"`
+	Channel       *string `json:"channel" form:"channel" schema:"channel"`
+	LandingPage   *string `json:"landing_page" form:"landing_page" schema:"landing_page"`
+	Keyword       *string `json:"keyword" form:"keyword" schema:"keyword"`
+	Referrer      *string `json:"referrer" form:"referrer" schema:"referrer"`
+	ClickID       *string `json:"click_id" form:"click_id" schema:"click_id"`
+	CampaignID    *int64  `json:"campaign_id" form:"campaign_id" schema:"campaign_id"`
+	AdCampaign    *string `json:"ad_campaign" form:"ad_campaign" schema:"ad_campaign"`
+	AdGroupID     *int64  `json:"ad_group_id" form:"ad_group_id" schema:"ad_group_id"`
+	AdGroupName   *string `json:"ad_group_name" form:"ad_group_name" schema:"ad_group_name"`
+	AdSetID       *int64  `json:"ad_set_id" form:"ad_set_id" schema:"ad_set_id"`
+	AdSetName     *string `json:"ad_set_name" form:"ad_set_name" schema:"ad_set_name"`
+	AdID          *int64  `json:"ad_id" form:"ad_id" schema:"ad_id"`
+	AdHeadline    *int64  `json:"ad_headline" form:"ad_headline" schema:"ad_headline"`
+	Language      *string `json:"language" form:"language" schema:"language"`
+	Longitude     *string `json:"longitude" form:"longitude" schema:"longitude"`
+	Latitude      *string `json:"latitude" form:"latitude" schema:"latitude"`
+	UserAgent     *string `json:"user_agent" form:"user_agent" schema:"user_agent"`
+	ButtonClicked *string `json:"button_clicked" form:"button_clicked" schema:"button_clicked"`
+	IP            *string `json:"ip" form:"ip" schema:"ip"`
+
+	CSRFToken        *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	ExternalID       *string `json:"external_id" form:"external_id" schema:"external_id"`
+	GoogleClientID   *string `json:"google_client_id" form:"google_client_id" schema:"google_client_id"`
+	FacebookClickID  *string `json:"facebook_click_id" form:"facebook_click_id" schema:"facebook_click_id"`
+	FacebookClientID *string `json:"facebook_client_id" form:"facebook_client_id" schema:"facebook_client_id"`
+	CSRFSecret       *string `json:"csrf_secret" form:"csrf_secret"`
 }
 
 type ContactForm struct {
@@ -60,13 +63,15 @@ type OutboundMessageForm struct {
 }
 
 type LeadDetails struct {
-	LeadID           int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FirstName        string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName         string `json:"last_name" form:"last_name" schema:"last_name"`
-	Email            string `json:"email" form:"email" schema:"email"`
-	PhoneNumber      string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	VendingType      string `json:"vending_type" form:"vending_type" schema:"vending_type"`
-	VendingLocation  string `json:"vending_location" form:"vending_location" schema:"vending_location"`
+	LeadID      int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	FirstName   string `json:"first_name" form:"first_name" schema:"first_name"`
+	LastName    string `json:"last_name" form:"last_name" schema:"last_name"`
+	Email       string `json:"email" form:"email" schema:"email"`
+	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	EventType   string `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType   string `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	Guests      int    `json:"guests" form:"guests" schema:"guests"`
+
 	CampaignName     string `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
 	Medium           string `json:"medium" form:"medium" schema:"medium"`
 	Source           string `json:"source" form:"source" schema:"source"`
@@ -87,23 +92,24 @@ type LeadDetails struct {
 }
 
 type LeadList struct {
-	LeadID            int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FirstName         string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName          string `json:"last_name" form:"last_name" schema:"last_name"`
-	PhoneNumber       string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	CreatedAt         string `json:"created_at" form:"created_at" schema:"created_at"`
-	MachineType       string `json:"machine_type" form:"machine_type" schema:"machine_type"`
-	LocationType      string `json:"location_type" form:"location_type" schema:"location_type"`
-	Language          string `json:"language" form:"language" schema:"language"`
-	VendingTypeID     int    `json:"vending_type_id" form:"vending_type_id" schema:"vending_type_id"`
-	VendingLocationID int    `json:"vending_location_id" form:"vending_location_id" schema:"vending_location_id"`
-	TotalRows         int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
+	LeadID      int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	FirstName   string `json:"first_name" form:"first_name" schema:"first_name"`
+	LastName    string `json:"last_name" form:"last_name" schema:"last_name"`
+	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	CreatedAt   string `json:"created_at" form:"created_at" schema:"created_at"`
+	EventType   string `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType   string `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	Language    string `json:"language" form:"language" schema:"language"`
+	EventTypeID int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	Guests      int    `json:"guests" form:"guests" schema:"guests"`
+	TotalRows   int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
 }
 
 type GetLeadsParams struct {
-	VendingType  *string `json:"vending_type" form:"vending_type" schema:"vending_type"`
-	LocationType *string `json:"location_type" form:"location_type" schema:"location_type"`
-	PageNum      *string `json:"page_num" form:"page_num" schema:"page_num"`
+	EventType *string `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType *string `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	PageNum   *string `json:"page_num" form:"page_num" schema:"page_num"`
 }
 
 type DynamicPartialTemplate struct {
@@ -127,14 +133,14 @@ type TwilioMessage struct {
 }
 
 type UpdateLeadForm struct {
-	Method          *string `json:"_method" form:"_method" schema:"_method"`
-	CSRFToken       *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	LeadID          *string `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FirstName       *string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName        *string `json:"last_name" form:"last_name" schema:"last_name"`
-	PhoneNumber     *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	VendingType     *int    `json:"vending_type" form:"vending_type" schema:"vending_type"`
-	VendingLocation *int    `json:"vending_location" form:"vending_location" schema:"vending_location"`
+	Method      *string `json:"_method" form:"_method" schema:"_method"`
+	CSRFToken   *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	LeadID      *string `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	FirstName   *string `json:"first_name" form:"first_name" schema:"first_name"`
+	LastName    *string `json:"last_name" form:"last_name" schema:"last_name"`
+	PhoneNumber *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	EventType   *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueType   *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
 }
 
 type UpdateLeadMarketingForm struct {
@@ -240,29 +246,29 @@ type IncomingPhoneCallDialStatus struct {
 }
 
 type WebsiteContext struct {
-	PageTitle                    string                   `json:"page_title" form:"page_title"`
-	MetaDescription              string                   `json:"meta_description" form:"meta_description"`
-	SiteName                     string                   `json:"site_name" form:"site_name"`
-	StaticPath                   string                   `json:"static_path" form:"static_path"`
-	MediaPath                    string                   `json:"media_path" form:"media_path"`
-	PhoneNumber                  string                   `json:"phone_number" form:"phone_number"`
-	CurrentYear                  int                      `json:"current_year" form:"current_year"`
-	GoogleAnalyticsID            string                   `json:"google_analytics_id" form:"google_analytics_id"`
-	FacebookDataSetID            string                   `json:"facebook_data_set_id" form:"facebook_data_set_id"`
-	CompanyName                  string                   `json:"company_name" form:"company_name"`
-	PagePath                     string                   `json:"page_path" form:"page_path"`
-	Nonce                        string                   `json:"nonce" form:"nonce"`
-	Features                     []string                 `json:"features" form:"features"`
-	CSRFToken                    string                   `json:"csrf_token" form:"csrf_token"`
-	VendingTypes                 []models.VendingType     `json:"vending_types" form:"vending_types"`
-	VendingLocations             []models.VendingLocation `json:"vending_locations" form:"vending_location"`
-	ExternalID                   string                   `json:"external_id" form:"external_id"`
-	GoogleAdsID                  string                   `json:"google_ads_id"`
-	GoogleAdsCallConversionLabel string                   `json:"google_ads_call_conversion_label"`
-	LeadEventName                string                   `json:"lead_event_name"`
-	LeadGeneratedEventName       string                   `json:"lead_generated_event_name"`
-	DefaultCurrency              string                   `json:"default_currency"`
-	DefaultLeadGeneratedValue    float64                  `json:"default_lead_generated_value"`
+	PageTitle                    string             `json:"page_title" form:"page_title"`
+	MetaDescription              string             `json:"meta_description" form:"meta_description"`
+	SiteName                     string             `json:"site_name" form:"site_name"`
+	StaticPath                   string             `json:"static_path" form:"static_path"`
+	MediaPath                    string             `json:"media_path" form:"media_path"`
+	PhoneNumber                  string             `json:"phone_number" form:"phone_number"`
+	CurrentYear                  int                `json:"current_year" form:"current_year"`
+	GoogleAnalyticsID            string             `json:"google_analytics_id" form:"google_analytics_id"`
+	FacebookDataSetID            string             `json:"facebook_data_set_id" form:"facebook_data_set_id"`
+	CompanyName                  string             `json:"company_name" form:"company_name"`
+	PagePath                     string             `json:"page_path" form:"page_path"`
+	Nonce                        string             `json:"nonce" form:"nonce"`
+	Features                     []string           `json:"features" form:"features"`
+	CSRFToken                    string             `json:"csrf_token" form:"csrf_token"`
+	EventTypes                   []models.EventType `json:"event_types" form:"event_types"`
+	VenueTypes                   []models.VenueType `json:"venue_types" form:"venue_types"`
+	ExternalID                   string             `json:"external_id" form:"external_id"`
+	GoogleAdsID                  string             `json:"google_ads_id"`
+	GoogleAdsCallConversionLabel string             `json:"google_ads_call_conversion_label"`
+	LeadEventName                string             `json:"lead_event_name"`
+	LeadGeneratedEventName       string             `json:"lead_generated_event_name"`
+	DefaultCurrency              string             `json:"default_currency"`
+	DefaultLeadGeneratedValue    float64            `json:"default_lead_generated_value"`
 }
 
 type FacebookUserData struct {
@@ -331,8 +337,9 @@ type GoogleUserAddress struct {
 }
 
 type ConversionLeadInfo struct {
-	LeadID       int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	MachineType  string `json:"machine_type" form:"machine_type" schema:"machine_type"`
-	LocationType string `json:"location_type" form:"location_type" schema:"location_type"`
-	CreatedAt    int64  `json:"created_at" form:"created_at" schema:"created_at"`
+	LeadID    int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventType string `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType string `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	CreatedAt int64  `json:"created_at" form:"created_at" schema:"created_at"`
+	Guests    int    `json:"guests" form:"guests" schema:"guests"`
 }

@@ -56,8 +56,8 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	defer tx.Rollback()
 
 	leadStmt, err := tx.Prepare(`
-		INSERT INTO lead (first_name, last_name, phone_number, created_at, vending_type_id, vending_location_id, message, opt_in_text_messaging)
-		VALUES ($1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5, $6, $7, $8)
+		INSERT INTO lead (first_name, last_name, phone_number, created_at, event_type_id, venue_type_id, message, opt_in_text_messaging, guests, email)
+		VALUES ($1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5, $6, $7, $8, $9, $10)
 		RETURNING lead_id
 	`)
 	if err != nil {
@@ -71,18 +71,20 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	}
 
 	message := utils.CreateNullString(quoteForm.Message)
-	vendingTypeID := utils.CreateNullInt(quoteForm.MachineType)
-	vendingLocationID := utils.CreateNullInt(quoteForm.LocationType)
+	eventTypeId := utils.CreateNullInt(quoteForm.EventType)
+	venueTypeId := utils.CreateNullInt(quoteForm.VenueType)
 
 	err = leadStmt.QueryRow(
 		utils.CreateNullString(quoteForm.FirstName),
 		utils.CreateNullString(quoteForm.LastName),
 		utils.CreateNullString(quoteForm.PhoneNumber),
 		createdAt,
-		vendingTypeID,
-		vendingLocationID,
+		eventTypeId,
+		venueTypeId,
 		message,
 		utils.CreateNullBool(quoteForm.OptInTextMessaging),
+		utils.CreateNullInt(quoteForm.Guests),
+		utils.CreateNullString(quoteForm.Email),
 	).Scan(&leadID)
 	if err != nil {
 		return leadID, fmt.Errorf("error inserting lead: %w", err)
@@ -239,10 +241,10 @@ func GetUserIDFromPhoneNumber(from string) (int, error) {
 func GetConversionLeadInfo(leadId int) (types.ConversionLeadInfo, error) {
 	var leadConversionInfo types.ConversionLeadInfo
 
-	stmt, err := DB.Prepare(`SELECT l.lead_id, l.created_at, vt.machine_type, vl.location_type
-		FROM "lead" AS l
-	JOIN vending_type  AS vt ON vt.vending_type_id = l.vending_type_id
-	JOIN vending_location AS vl ON vl.vending_location_id  = l.vending_location_id 
+	stmt, err := DB.Prepare(`SELECT l.lead_id, l.created_at, et.name, vt.name, l.guests
+	FROM "lead" AS l
+	JOIN event_type  AS et ON et.event_type_id = l.event_type_id
+	JOIN venue_type AS vt ON vt.venue_type_id  = l.venue_type_id 
 	WHERE l.lead_id = $1;`)
 
 	if err != nil {
@@ -255,8 +257,9 @@ func GetConversionLeadInfo(leadId int) (types.ConversionLeadInfo, error) {
 	var createdAt time.Time
 	err = row.Scan(&leadConversionInfo.LeadID,
 		&createdAt,
-		&leadConversionInfo.MachineType,
-		&leadConversionInfo.LocationType,
+		&leadConversionInfo.EventType,
+		&leadConversionInfo.VenueType,
+		&leadConversionInfo.Guests,
 	)
 	if err != nil {
 		return leadConversionInfo, fmt.Errorf("error scanning row: %w", err)
@@ -324,69 +327,68 @@ func GetUserByUsername(username string) (models.User, error) {
 	return user, nil
 }
 
-func GetVendingTypes() ([]models.VendingType, error) {
-	var vendingTypes []models.VendingType
+func GetEventTypes() ([]models.EventType, error) {
+	var eventTypes []models.EventType
 
-	rows, err := DB.Query(`SELECT vending_type_id, machine_type FROM "vending_type"`)
+	rows, err := DB.Query(`SELECT event_type_id, name FROM "event_type"`)
 	if err != nil {
-		return vendingTypes, fmt.Errorf("error executing query: %w", err)
+		return eventTypes, fmt.Errorf("error executing query: %w", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var vt models.VendingType
-		err := rows.Scan(&vt.VendingTypeID, &vt.MachineType)
+		var et models.EventType
+		err := rows.Scan(&et.EventTypeID, &et.Name)
 		if err != nil {
-			return vendingTypes, fmt.Errorf("error scanning row: %w", err)
+			return eventTypes, fmt.Errorf("error scanning row: %w", err)
 		}
-		vendingTypes = append(vendingTypes, vt)
+		eventTypes = append(eventTypes, et)
 	}
 
 	if err := rows.Err(); err != nil {
-		return vendingTypes, fmt.Errorf("error iterating rows: %w", err)
+		return eventTypes, fmt.Errorf("error iterating rows: %w", err)
 	}
 
-	return vendingTypes, nil
+	return eventTypes, nil
 }
 
-func GetVendingLocations() ([]models.VendingLocation, error) {
-	var vendingLocations []models.VendingLocation
+func GetVenueTypes() ([]models.VenueType, error) {
+	var venueTypes []models.VenueType
 
-	rows, err := DB.Query(`SELECT vending_location_id, location_type FROM "vending_location"`)
+	rows, err := DB.Query(`SELECT venue_type_id, name FROM "venue_type"`)
 	if err != nil {
-		return vendingLocations, fmt.Errorf("error executing query: %w", err)
+		return venueTypes, fmt.Errorf("error executing query: %w", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var vl models.VendingLocation
-		err := rows.Scan(&vl.VendingLocationID, &vl.LocationType)
+		var vt models.VenueType
+		err := rows.Scan(&vt.VenueTypeID, &vt.Name)
 		if err != nil {
-			return vendingLocations, fmt.Errorf("error scanning row: %w", err)
+			return venueTypes, fmt.Errorf("error scanning row: %w", err)
 		}
-		vendingLocations = append(vendingLocations, vl)
+		venueTypes = append(venueTypes, vt)
 	}
 
 	if err := rows.Err(); err != nil {
-		return vendingLocations, fmt.Errorf("error iterating rows: %w", err)
+		return venueTypes, fmt.Errorf("error iterating rows: %w", err)
 	}
 
-	return vendingLocations, nil
+	return venueTypes, nil
 }
 
 func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
 	query := `SELECT l.lead_id, l.first_name, l.last_name, l.phone_number, 
-		l.created_at, vt.machine_type, vl.location_type, lm.language, l.vending_type_id, l.vending_location_id, lt.lead_type,
+		l.created_at, et.name AS event_type, vt.name AS venue_type, lm.language, l.event_type_id, l.venue_type_id, l.guests,
 		COUNT(*) OVER() AS total_rows
 		FROM lead AS l
-		LEFT JOIN vending_type AS vt ON vt.vending_type_id = l.vending_type_id
-		LEFT JOIN vending_location AS vl ON vl.vending_location_id = l.vending_location_id
+		JOIN event_type AS et ON et.event_type_id = l.event_type_id
+		JOIN venue_type AS vt ON vt.venue_type_id = l.venue_type_id
 		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
-		JOIN lead_type AS lt ON lt.lead_type_id = l.lead_type_id
-		WHERE (vt.vending_type_id = $1 OR $1 IS NULL) 
-		AND (vl.vending_location_id = $2 OR $2 IS NULL)
+		WHERE (et.event_type_id = $1 OR $1 IS NULL) 
+		AND (vt.venue_type_id = $2 OR $2 IS NULL)
 		ORDER BY l.created_at ASC
 		LIMIT $3
 		OFFSET $4`
@@ -402,7 +404,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		offset = (pageNum - 1) * int(constants.LeadsPerPage)
 	}
 
-	rows, err := DB.Query(query, params.VendingType, params.LocationType, constants.LeadsPerPage, offset)
+	rows, err := DB.Query(query, params.EventType, params.VenueType, constants.LeadsPerPage, offset)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error executing query: %w", err)
 	}
@@ -412,36 +414,40 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	for rows.Next() {
 		var lead types.LeadList
 		var createdAt time.Time
-		var vendingType, locationType sql.NullString
-		var vendingTypeId, vendingLocationId sql.NullInt64
+		var eventType, venueType sql.NullString
+		var eventTypeId, venueTypeId, guests sql.NullInt64
 
 		err := rows.Scan(&lead.LeadID,
 			&lead.FirstName,
 			&lead.LastName,
 			&lead.PhoneNumber,
 			&createdAt,
-			&vendingType,
-			&locationType,
+			&eventType,
+			&venueType,
 			&lead.Language,
-			&vendingTypeId,
-			&vendingLocationId,
+			&eventTypeId,
+			&venueTypeId,
+			&guests,
 			&totalRows)
 		if err != nil {
 			return nil, 0, fmt.Errorf("error scanning row: %w", err)
 		}
 		lead.CreatedAt = utils.FormatTimestampEST(createdAt.Unix())
 
-		if vendingTypeId.Valid {
-			lead.VendingTypeID = int(vendingTypeId.Int64)
+		if guests.Valid {
+			lead.Guests = int(guests.Int64)
 		}
-		if vendingLocationId.Valid {
-			lead.VendingLocationID = int(vendingLocationId.Int64)
+		if eventTypeId.Valid {
+			lead.EventTypeID = int(eventTypeId.Int64)
 		}
-		if vendingType.Valid {
-			lead.MachineType = vendingType.String
+		if venueTypeId.Valid {
+			lead.VenueTypeID = int(venueTypeId.Int64)
 		}
-		if locationType.Valid {
-			lead.LocationType = locationType.String
+		if eventType.Valid {
+			lead.EventType = eventType.String
+		}
+		if venueType.Valid {
+			lead.VenueType = venueType.String
 		}
 
 		leads = append(leads, lead)
@@ -459,8 +465,8 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	l.first_name,
 	l.last_name,
 	l.phone_number,
-	vt.machine_type,
-	vl.location_type,
+	et.name,
+	vt.namne,
 	lm.ad_campaign,
 	lm.medium,
 	lm.source,
@@ -478,10 +484,11 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	lm.user_agent,
 	lm.click_id,
 	lm.google_client_id,
-	lm.button_clicked
+	lm.button_clicked,
+	l.guests
 	FROM lead l
-	LEFT JOIN vending_type vt ON l.vending_type_id = vt.vending_type_id
-	LEFT JOIN vending_location vl ON l.vending_location_id = vl.vending_location_id
+	JOIN event_type et ON l.event_type_id = et.event_type_id
+	JOIN venue_type vt ON l.venue_type_id = vt.venue_type_id
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
 	WHERE l.lead_id = $1`
 
@@ -490,7 +497,8 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	row := DB.QueryRow(query, leadID)
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
-	var vendingType, vendingLocation, message, externalId, userAgent, clickId, googleClientId sql.NullString
+	var eventType, venueType, message, externalId, userAgent, clickId, googleClientId sql.NullString
+	var guests sql.NullInt32
 
 	var website, companyName, city, buttonClicked sql.NullString
 
@@ -499,8 +507,8 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&leadDetails.FirstName,
 		&leadDetails.LastName,
 		&leadDetails.PhoneNumber,
-		&vendingType,
-		&vendingLocation,
+		&eventType,
+		&venueType,
 		&adCampaign,
 		&medium,
 		&source,
@@ -522,6 +530,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&companyName,
 		&city,
 		&buttonClicked,
+		&guests,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -562,13 +571,16 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	if email.Valid {
 		leadDetails.Email = email.String
 	}
-
-	if vendingType.Valid {
-		leadDetails.VendingType = vendingType.String
+	if guests.Valid {
+		leadDetails.Guests = int(guests.Int32)
 	}
 
-	if vendingLocation.Valid {
-		leadDetails.VendingLocation = vendingLocation.String
+	if eventType.Valid {
+		leadDetails.EventType = eventType.String
+	}
+
+	if venueType.Valid {
+		leadDetails.VenueType = venueType.String
 	}
 
 	if adCampaign.Valid {
@@ -666,8 +678,8 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		SET first_name = COALESCE($2, first_name), 
 		    last_name = COALESCE($3, last_name), 
 		    phone_number = COALESCE($4, phone_number), 
-		    vending_type_id = COALESCE($5, vending_type_id), 
-		    vending_location_id = COALESCE($6, vending_location_id)
+		    event_type_id = COALESCE($5, event_type_id), 
+		    venue_type_id = COALESCE($6, venue_type_id)
 		WHERE lead_id = $1
 	`
 
@@ -676,8 +688,8 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		utils.CreateNullString(form.FirstName),
 		utils.CreateNullString(form.LastName),
 		utils.CreateNullString(form.PhoneNumber),
-		utils.CreateNullInt(form.VendingType),
-		utils.CreateNullInt(form.VendingLocation),
+		utils.CreateNullInt(form.EventType),
+		utils.CreateNullInt(form.VenueType),
 	}
 
 	_, err := DB.Exec(query, args...)
