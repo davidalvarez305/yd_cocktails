@@ -371,9 +371,14 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			{
 				Name: constants.LeadGeneratedEventName,
 				Params: types.GoogleEventParamsLead{
-					GCLID:    helpers.SafeString(form.ClickID),
-					Value:    constants.DefaultLeadGeneratedValue,
-					Currency: constants.DefaultCurrency,
+					GCLID:      helpers.SafeString(form.ClickID),
+					Value:      constants.DefaultLeadGeneratedValue,
+					Currency:   constants.DefaultCurrency,
+					CampaignID: fmt.Sprint(helpers.SafeInt64(form.CampaignID)),
+					Campaign:   helpers.SafeString(form.AdCampaign),
+					Source:     helpers.SafeString(form.Source),
+					Medium:     helpers.SafeString(form.Medium),
+					Term:       helpers.SafeString(form.Keyword),
 				},
 			},
 		},

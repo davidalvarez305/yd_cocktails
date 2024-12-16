@@ -178,6 +178,13 @@ func SafeString(ptr *string) string {
 	return ""
 }
 
+func SafeInt64(ptr *int64) int64 {
+	if ptr != nil {
+		return *ptr
+	}
+	return 0
+}
+
 func SafeStringToPointer(s string) *string {
 	if s == "" {
 		return nil

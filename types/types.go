@@ -307,9 +307,14 @@ type FacebookPayload struct {
 }
 
 type GoogleEventParamsLead struct {
-	GCLID    string  `json:"gclid" form:"gclid" schema:"gclid"`
-	Value    float64 `json:"value,omitempty" form:"value" schema:"value"`
-	Currency string  `json:"currency,omitempty" form:"currency" schema:"currency"`
+	GCLID      string  `json:"gclid" form:"gclid" schema:"gclid"`
+	Value      float64 `json:"value,omitempty" form:"value" schema:"value"`
+	Currency   string  `json:"currency,omitempty" form:"currency" schema:"currency"`
+	CampaignID string  `json:"campaign_id,omitempty" form:"campaign_id" schema:"campaign_id"`
+	Campaign   string  `json:"campaign,omitempty" form:"campaign" schema:"campaign"`
+	Source     string  `json:"source,omitempty" form:"source" schema:"source"`
+	Medium     string  `json:"medium,omitempty" form:"medium" schema:"medium"`
+	Term       string  `json:"term,omitempty" form:"term" schema:"term"`
 }
 
 type GoogleEventLead struct {

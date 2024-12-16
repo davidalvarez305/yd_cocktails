@@ -269,6 +269,8 @@
         } else if (x >= 121) {
             return 4;
         }
+
+        return 0;
     }
 
     function calculateBartenderRate(numBartenders, hours) {
@@ -339,13 +341,24 @@
     }
     
     const guests = document.getElementById("guests");
+    const hours = document.getElementById("hours");
 
-    const isValidated = validateGuestsInput(guests.value);
+    // Inputs needs to be added
+    const barRentals = document.getElementById("barRentals");
+    const eventHours = document.getElementById("eventHours");
 
-    if (!isValidated) { 
+    const isGuestsValidated = validateGuestsInput(guests.value);
+
+    if (!isGuestsValidated) { 
         alert('Please enter a valid number of guests greater than 0.')
         return;
     };
-    
+
+    let totalCost = 0;
+
+    const bartendersNeeded = calculateBartendersNeeded(guests);
+    const bartenderRate = calculateBartenderRate(bartendersNeeded, eventHours);
+
+    totalCost += bartenderRate;
 </script>
 {{ end }}
