@@ -28,6 +28,7 @@
                         <div class="grow p-5 md:px-16 md:py-6">
                             <form id="quoteForm" class="space-y-6 p-2 md:p-2">
                                 <input type="hidden" id="csrf_token" name="csrf_token" value="{{ .CSRFToken }}" />
+                                <input type="hidden" id="bartendingRate" name="bartendingRate" value="{{ .BartendingRate }}" />
                                 <input type="hidden" id="button_clicked" name="button_clicked" />
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
@@ -255,5 +256,19 @@
     submitQuoteForm.addEventListener("click", () => handleQuoteFormSubmit());
     closeQuoteForm.addEventListener("click", () => handleCloseQuoteForm());
     cancelQuoteForm.addEventListener("click", () => handleCloseQuoteForm());
+</script>
+
+<script nonce="{{ .Nonce }}" type="module">
+    import { calculateBartendersNeeded, validateGuestsInput } from "{{ .StaticPath }}/helpers/estimate.js";
+    
+    const guests = document.getElementById("guests");
+
+    const isValidated = validateGuestsInput(guests.value);
+
+    if (!isValidated) { 
+        alert('Please enter a valid number of guests greater than 0.')
+        return;
+    };
+    
 </script>
 {{ end }}

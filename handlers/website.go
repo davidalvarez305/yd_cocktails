@@ -46,6 +46,7 @@ func createWebsiteContext() types.WebsiteContext {
 		DefaultLeadGeneratedValue:    constants.DefaultLeadGeneratedValue,
 		YovaHeroImage:                YovaHeroImage,
 		YovaMidCTA:                   YovaMidCTA,
+		BartendingRate:               constants.BartendingRate,
 	}
 }
 

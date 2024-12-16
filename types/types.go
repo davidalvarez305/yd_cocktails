@@ -271,6 +271,7 @@ type WebsiteContext struct {
 	DefaultLeadGeneratedValue    float64            `json:"default_lead_generated_value"`
 	YovaHeroImage                string             `json:"yova_hero_image"`
 	YovaMidCTA                   string             `json:"yova_mid_cta"`
+	BartendingRate               float64            `json:"bartending_rate"`
 }
 
 type FacebookUserData struct {

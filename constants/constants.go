@@ -16,6 +16,8 @@ const (
 
 	DefaultLeadGeneratedValue float64 = 150.00
 	DefaultCurrency           string  = "USD"
+
+	BartendingRate float64 = 70.00
 )
 
 var (
