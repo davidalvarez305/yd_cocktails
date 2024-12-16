@@ -142,7 +142,7 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 		"We will DEFINITELY clean up after ourselves and leave your area as clean as it was before we got there.",
 		"Our team can dress to the occasion in the event that you require a specific outfit or a certain theme.",
 		"We're very flexible in terms of capacity for number of attendees, and can serve small as well as larger events.",
-		"We offer zero nonsense fixed rates with no hidden fees so that you know 100% what you're paying for, and what we agree to.",
+		"We offer highly detailed & customized quotes so that you know 100% what you're paying for, and what we agree to.",
 		"Your guests are first, and it's our priority to put forth an incredible service so that their experience at your event is awesome.",
 		"Our bartenders are highly skilled with years of experience so your cocktails come out delish.",
 	}
