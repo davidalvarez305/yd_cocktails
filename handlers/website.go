@@ -47,6 +47,17 @@ func createWebsiteContext() types.WebsiteContext {
 		YovaHeroImage:                YovaHeroImage,
 		YovaMidCTA:                   YovaMidCTA,
 		BartendingRate:               constants.BartendingRate,
+		Custom: map[string]interface{}{
+			"BarRentalCost":           constants.BarRentalCost,
+			"MobileBarFee":            constants.MobileBarFee,
+			"PerPersonAlcoholFee":     constants.PerPersonAlcoholFee,
+			"PerPersonMixersFee":      constants.PerPersonMixersFee,
+			"PerPersonJuicesFee":      constants.PerPersonJuicesFee,
+			"PerPersonSoftDrinksFee":  constants.PerPersonSoftDrinksFee,
+			"PerPersonCupsFee":        constants.PerPersonCupsFee,
+			"PerPersonIceFee":         constants.PerPersonIceFee,
+			"TimeToSetUpAndBreakDown": constants.TimeToSetUpAndBreakDown,
+		},
 	}
 }
 

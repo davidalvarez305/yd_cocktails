@@ -259,7 +259,84 @@
 </script>
 
 <script nonce="{{ .Nonce }}" type="module">
-    import { calculateBartendersNeeded, validateGuestsInput } from "{{ .StaticPath }}/helpers/estimate.js";
+    function calculateBartendersNeeded(x) {
+        if (x <= 50) {
+            return 1;
+        } else if (x >= 41 && x <= 80) {
+            return 2;
+        } else if (x >= 81 && x <= 120) {
+            return 3;
+        } else if (x >= 121) {
+            return 4;
+        }
+    }
+
+    function calculateBartenderRate(numBartenders, hours) {
+        return parseFloat(document.getElementById("bartendingRate").value) * numBartenders * hours;
+    }
+
+    function validateGuestsInput(value) {
+        const guests = Number(value);
+
+        if (isNaN(guests) || guests <= 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    function calculateTotalCost(numBarRentals, willProvideAlcohol, willProvideMixers, willProvideJuices, willProvideSoftDrinks, willProvideCups, willProvideIce, willRequireGlassware, guests) {
+        let totalCost = 0;
+
+        const barRentalCost = parseInt("{{ .Custom.BarRentalCost }}");
+        const mobileBarFee = parseInt("{{ .Custom.MobileBarFee }}");
+        const perPersonAlcoholFee = parseInt("{{ .Custom.PerPersonAlcoholFee }}");
+        const perPersonMixersFee = parseInt("{{ .Custom.PerPersonMixersFee }}");
+        const perPersonJuicesFee = parseInt("{{ .Custom.PerPersonJuicesFee }}");
+        const perPersonSoftDrinksFee = parseInt("{{ .Custom.PerPersonSoftDrinksFee }}");
+        const perPersonCupsFee = parseInt("{{ .Custom.PerPersonCupsFee }}");
+        const perPersonIceFee = parseInt("{{ .Custom.PerPersonIceFee }}");
+        const perPersonGlasswareFee = parseInt("{{ .Custom.PerPersonGlasswareFee }}");
+        const timeToSetupAndBreakdown = parseInt("{{ .Custom.TimeToSetUpAndBreakDown }}");
+
+        totalCost += numBarRentals * barRentalCost;
+        totalCost += numBarRentals * mobileBarFee * timeToSetupAndBreakdown;
+
+        switch (true) {
+            case willProvideAlcohol === false:
+                totalCost += guests * perPersonAlcoholFee;
+                break;
+
+            case willProvideMixers === false:
+                totalCost += guests * perPersonMixersFee;
+                break;
+
+            case willProvideJuices === false:
+                totalCost += guests * perPersonJuicesFee;
+                break;
+
+            case willProvideSoftDrinks === false:
+                totalCost += guests * perPersonSoftDrinksFee;
+                break;
+
+            case willProvideCups === false:
+                totalCost += guests * perPersonCupsFee;
+                break;
+
+            case willProvideIce === false:
+                totalCost += guests * perPersonIceFee;
+                break;
+
+            case willRequireGlassware === true:
+                totalCost += guests * perPersonGlasswareFee;
+            break;
+
+            default:
+                break;
+        }
+
+        return totalCost;
+    }
     
     const guests = document.getElementById("guests");
 
