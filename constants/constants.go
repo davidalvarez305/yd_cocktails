@@ -12,6 +12,7 @@ const (
 	TimeZone string = "America/New_York"
 
 	LeadGeneratedEventName string = "generate_lead"
+	InvoicePaidEventName   string = "invoice_paid"
 	LeadEventName          string = "Lead"
 
 	DefaultLeadGeneratedValue float64 = 150.00
