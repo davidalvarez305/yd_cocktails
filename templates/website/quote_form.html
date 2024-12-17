@@ -209,6 +209,23 @@
             .then(html => {
                 alertModal.outerHTML = html;
 
+                // Report Google Conversion
+                gtag("set", "user_data", {
+                    phone_number: "+1" + data.get("phone_number"),
+                    email: data.get("email"),
+                    address: {
+                        first_name: data.get("first_name"),
+                        last_name: data.get("last_name"),
+                        region: "Florida",
+                        country: "US"
+                    }
+                });
+
+                gtag("event", "{{ .LeadGeneratedEventName }}", {
+                    currency: "{{ .DefaultCurrency }}",
+                    value: parseFloat("{{ .DefaultLeadGeneratedValue }}"),
+                });
+
                 // Report FB Conversion
                 fbq("track", "{{ .LeadEventName }}", {
                     event_time: Math.floor(Date.now() / 1000),
