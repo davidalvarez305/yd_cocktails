@@ -113,4 +113,130 @@
 </div>
 <div id="alertModal"></div>
 <div id="optOutConfirmationModal"></div>
+
+<script nonce="{{ .Nonce }}" type="module">
+    import { MarketingHelper } from "{{ .StaticPath }}/helpers/marketing.js";
+
+    const marketingHelper = new MarketingHelper();
+    document.addEventListener("DOMContentLoaded", () => marketingHelper.getUserLocation());
+
+    const submitQuoteForm = document.getElementById("submitQuoteForm");
+    const cancelQuoteForm = document.getElementById("cancelQuoteForm");
+    const closeQuoteForm = document.getElementById("closeQuoteForm");
+    const optIn = document.getElementById("opt_in_text_messaging");
+
+    function handleOptOutConfirmation(isChecked) {
+        optIn.checked = isChecked;
+
+        const modal = document.getElementById('optOutConfirmationModal');
+        modal.style.display = "none";
+    }
+
+    function handleClickOptIn(event) {
+        const isChecked = event.target.checked;
+        const alertModal = document.getElementById("alertModal");
+
+        if (isChecked) return;
+
+        fetch('/partials/opt-out-confirmation-modal', {
+            credentials: "include",
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            } else {
+                return response.text().then((err) => {
+                    throw new Error(err);
+                });
+            }
+        })
+        .then(html => {
+            const confirmationModal = document.getElementById('optOutConfirmationModal');
+            confirmationModal.outerHTML = html;
+
+            const cancelOptOut = document.getElementById("cancelOptOut");
+            const confirmOptOut = document.getElementById("confirmOptOut");
+
+            cancelOptOut.addEventListener("click", () => handleOptOutConfirmation(false));
+            confirmOptOut.addEventListener("click", () => handleOptOutConfirmation(true));
+        })
+        .catch(err => {
+            alertModal.outerHTML = err.message;
+        })
+    }
+
+    optIn.addEventListener("click", (e) => handleClickOptIn(e));
+
+    function handleCloseQuoteForm() {
+        const modal = document.getElementById('formModalContainer');
+        modal.style.display = 'none';
+    }
+
+    function handleQuoteFormSubmit() {
+        const form = document.getElementById("quoteForm");
+        const alertModal = document.getElementById("alertModal");
+
+        marketingHelper.populate();
+        const data = marketingHelper.data;
+
+        data.set("opt_in_text_messaging", optIn.checked);
+        new FormData(form).forEach((value, key) => {
+            if (key === "opt_in_text_messaging") return;
+
+            if (value) data.set(key, value);
+        });
+
+        fetch("/quote", {
+            method: "POST",
+            credentials: "include",
+            body: data,
+        })
+            .then(response => {
+                const token = response.headers.get("X-Csrf-Token");
+                if (token) {
+                    const tokens = document.querySelectorAll('[name="csrf_token"]');
+                    tokens.forEach((csrf_token) => (csrf_token.value = token));
+                }
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    return response.text().then((err) => {
+                        throw new Error(err);
+                    });
+                }
+            })
+            .then(html => {
+                alertModal.outerHTML = html;
+
+                // Report FB Conversion
+                fbq("track", "{{ .LeadEventName }}", {
+                    event_time: Math.floor(Date.now() / 1000),
+                    action_source: "website",
+                    event_source_url: window.location.href,
+                    fn: data.get("first_name"),
+                    ln: data.get("last_name"),
+                    ph: data.get("phone_number"),
+                    em: data.get("email"),
+                    external_id: "{{ .ExternalID }}",
+                    fbc: marketingHelper.facebookClickId,
+                    fbp: marketingHelper.facebookClientId,
+                    client_user_agent: marketingHelper.userAgent,
+                    currency: "{{ .DefaultCurrency }}",
+                    value: parseFloat("{{ .DefaultLeadGeneratedValue }}"),
+                });
+            })
+            .catch(err => {
+                alertModal.outerHTML = err.message;
+            })
+            .finally(() => {
+                handleCloseAlertModal();
+                handleCloseQuoteForm();
+                form.reset();
+            });
+    }
+
+    submitQuoteForm.addEventListener("click", () => handleQuoteFormSubmit());
+    closeQuoteForm.addEventListener("click", () => handleCloseQuoteForm());
+    cancelQuoteForm.addEventListener("click", () => handleCloseQuoteForm());
+</script>
 {{ end }}
