@@ -18,7 +18,7 @@ import (
 
 const (
 	YovaHeroImage string = "https://ydcocktails.s3.us-east-1.amazonaws.com/media/yova_hero.jpeg"
-	YovaMidCTA    string = "https://ydcocktails.s3.us-east-1.amazonaws.com/media/yova_mid_cta.jpg"
+	YovaMidCTA    string = "https://ydcocktails.s3.us-east-1.amazonaws.com/media/yova_mid_cta.png"
 )
 
 var decoder = schema.NewDecoder()
