@@ -130,7 +130,7 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 	phoneCall.RecordingURL = dialStatus.RecordingURL
 	phoneCall.Status = dialStatus.DialCallStatus
 
-	if phoneCall.CallDuration > 60 {
+	if phoneCall.CallDuration > constants.CallConversionDuration {
 		fbEvent := types.FacebookEventData{
 			EventName:      constants.LeadEventName,
 			EventTime:      phoneCall.DateCreated,

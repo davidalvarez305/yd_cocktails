@@ -238,6 +238,25 @@ func GetUserIDFromPhoneNumber(from string) (int, error) {
 	return userId, nil
 }
 
+func GetLeadByStripeCustomerID(stripeCustomerID string) (int, error) {
+	var userId int
+
+	stmt, err := DB.Prepare(`SELECT lead_id FROM lead WHERE stripe_customer_id = $1`)
+	if err != nil {
+		return userId, fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(stripeCustomerID)
+
+	err = row.Scan(&userId)
+	if err != nil {
+		return userId, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	return userId, nil
+}
+
 func GetConversionLeadInfo(leadId int) (types.ConversionLeadInfo, error) {
 	var leadConversionInfo types.ConversionLeadInfo
 

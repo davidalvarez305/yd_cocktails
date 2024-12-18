@@ -114,3 +114,37 @@ type UserRole struct {
 	RoleID int    `json:"role_id" form:"role_id" schema:"role_id"`
 	Role   string `json:"role" form:"role" schema:"role"`
 }
+
+type Package struct {
+	PackageID        int     `json:"package_id" form:"package_id" schema:"package_id"`
+	PackageTypeID    int     `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
+	AlcoholSegmentID int     `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
+	Price            float64 `json:"price" form:"price" schema:"price"`
+	Guests           int     `json:"guests" form:"guests" schema:"guests"`
+	Hours            int     `json:"hours" form:"hours" schema:"hours"`
+
+	WillProvideLiquor      bool `json:"will_provide_liquor" form:"will_provide_liquor" schema:"will_provide_liquor"`
+	WillProvideBeerAndWine bool `json:"will_provide_beer_and_wine" form:"will_provide_beer_and_wine" schema:"will_provide_beer_and_wine"`
+	WillProvideMixers      bool `json:"will_provide_mixers" form:"will_provide_mixers" schema:"will_provide_mixers"`
+	WillProvideJuices      bool `json:"will_provide_juices" form:"will_provide_juices" schema:"will_provide_juices"`
+	WillProvideSoftDrinks  bool `json:"will_provide_soft_drinks" form:"will_provide_soft_drinks" schema:"will_provide_soft_drinks"`
+	WillProvideCups        bool `json:"will_provide_cups" form:"will_provide_cups" schema:"will_provide_cups"`
+	WillProvideIce         bool `json:"will_provide_ice" form:"will_provide_ice" schema:"will_provide_ice"`
+
+	WillRequireGlassware bool `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
+
+	WillRequireMobileBar bool `json:"will_require_mobile_bar" form:"will_require_mobile_bar" schema:"will_require_mobile_bar"`
+}
+
+// Full Open Bar, Modified Open Bar
+type PackageType struct {
+	PackageTypeID     int     `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
+	Name              string  `json:"name" form:"name" schema:"name"`
+	PriceModification float64 `json:"price_modification" form:"price_modification" schema:"price_modification"`
+}
+
+// Top Shelf, Premium, Standard
+type AlcoholSegment struct {
+	AlcoholSegmentID  int     `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
+	PriceModification float64 `json:"price_modification" form:"price_modification" schema:"price_modification"`
+}

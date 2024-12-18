@@ -21,8 +21,8 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		switch r.URL.Path {
-		case "/webhooks/stripe-payment":
-			handleStripeCheckoutSession(w, r)
+		case "/webhooks/stripe-invoice":
+			handleStripeInvoice(w, r)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -31,7 +31,7 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleStripeCheckoutSession(w http.ResponseWriter, r *http.Request) {
+func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 	const MaxBodyBytes = int64(65536)
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodyBytes)
 	payload, err := io.ReadAll(r.Body)
@@ -63,8 +63,8 @@ func handleStripeCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var quoteOfferAmount float64
-	var leadId string
+	var invoiceAmount float64
+	var stripeCustomerID, stripeInvoiceID, stripeInvoiceStatus string
 
 	switch event.Type {
 	case "invoice.payment_succeeded":
@@ -77,14 +77,30 @@ func handleStripeCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Extract the relevant data from the invoice
+		stripeInvoiceID = invoice.ID
+		stripeInvoiceStatus = string(invoice.Status)
 		stripeCustomerID = invoice.Customer.ID
-		quoteOfferAmount = float64(invoice.AmountPaid) / 100
+		invoiceAmount = float64(invoice.AmountPaid) / 100
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
 	}
 
-	lead, err := database.GetLeadDetails(leadId)
+	leadId, err := database.GetLeadByStripeCustomerID(stripeCustomerID)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting lead details by stripe customer ID: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	lead, err := database.GetLeadDetails(fmt.Sprint(leadId))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting lead details: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = database.UpdateInvoiceStatus(stripeInvoiceID, stripeInvoiceStatus)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error getting lead details: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -109,7 +125,7 @@ func handleStripeCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		},
 		CustomData: types.FacebookCustomData{
 			Currency: "USD",
-			Value:    fmt.Sprint(quoteOfferAmount),
+			Value:    fmt.Sprint(invoiceAmount),
 		},
 	}
 
@@ -125,7 +141,7 @@ func handleStripeCheckoutSession(w http.ResponseWriter, r *http.Request) {
 				Name: constants.InvoicePaidEventName,
 				Params: types.GoogleEventParamsLead{
 					GCLID:    lead.ClickID,
-					Value:    float64(quoteOfferAmount),
+					Value:    float64(invoiceAmount),
 					Currency: "USD",
 				},
 			},
