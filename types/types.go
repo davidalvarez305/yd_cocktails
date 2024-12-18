@@ -12,10 +12,12 @@ type QuoteForm struct {
 	PhoneNumber        *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	VenueType          *int    `json:"venue_type" form:"venue_type" schema:"venue_type"`
 	EventType          *int    `json:"event_type" form:"event_type" schema:"event_type"`
-	Guests             *int    `json:"guests" form:"guests" schema:"guests"`
 	Message            *string `json:"message" form:"message" schema:"message"`
 	Email              *string `json:"email" form:"email" schema:"email"`
 	OptInTextMessaging *bool   `json:"opt_in_text_messaging" form:"opt_in_text_messaging" schema:"opt_in_text_messaging"`
+
+	PackageID *int     `json:"package_id" form:"package_id" schema:"package_id"`
+	Estimate  *float64 `json:"estimate" form:"estimate" schema:"estimate"`
 
 	Source        *string `json:"source" form:"source" schema:"source"`
 	Medium        *string `json:"medium" form:"medium" schema:"medium"`
@@ -70,7 +72,6 @@ type LeadDetails struct {
 	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	EventType   string `json:"event_type" form:"event_type" schema:"event_type"`
 	VenueType   string `json:"venue_type" form:"venue_type" schema:"venue_type"`
-	Guests      int    `json:"guests" form:"guests" schema:"guests"`
 
 	CampaignName     string `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
 	Medium           string `json:"medium" form:"medium" schema:"medium"`
@@ -102,7 +103,6 @@ type LeadList struct {
 	Language    string `json:"language" form:"language" schema:"language"`
 	EventTypeID int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
 	VenueTypeID int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	Guests      int    `json:"guests" form:"guests" schema:"guests"`
 	TotalRows   int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
 }
 
@@ -268,7 +268,6 @@ type WebsiteContext struct {
 	LeadEventName                string                 `json:"lead_event_name"`
 	LeadGeneratedEventName       string                 `json:"lead_generated_event_name"`
 	DefaultCurrency              string                 `json:"default_currency"`
-	DefaultLeadGeneratedValue    float64                `json:"default_lead_generated_value"`
 	YovaHeroImage                string                 `json:"yova_hero_image"`
 	YovaMidCTA                   string                 `json:"yova_mid_cta"`
 	BartendingRate               float64                `json:"bartending_rate"`
@@ -350,5 +349,4 @@ type ConversionLeadInfo struct {
 	EventType string `json:"event_type" form:"event_type" schema:"event_type"`
 	VenueType string `json:"venue_type" form:"venue_type" schema:"venue_type"`
 	CreatedAt int64  `json:"created_at" form:"created_at" schema:"created_at"`
-	Guests    int    `json:"guests" form:"guests" schema:"guests"`
 }

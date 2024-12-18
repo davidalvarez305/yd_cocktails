@@ -56,8 +56,8 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	defer tx.Rollback()
 
 	leadStmt, err := tx.Prepare(`
-		INSERT INTO lead (first_name, last_name, phone_number, created_at, event_type_id, venue_type_id, message, opt_in_text_messaging, guests, email)
-		VALUES ($1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5, $6, $7, $8, $9, $10)
+		INSERT INTO lead (first_name, last_name, phone_number, created_at, event_type_id, venue_type_id, message, opt_in_text_messaging, email)
+		VALUES ($1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5, $6, $7, $8, $9)
 		RETURNING lead_id
 	`)
 	if err != nil {
@@ -83,7 +83,6 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 		venueTypeId,
 		message,
 		utils.CreateNullBool(quoteForm.OptInTextMessaging),
-		utils.CreateNullInt(quoteForm.Guests),
 		utils.CreateNullString(quoteForm.Email),
 	).Scan(&leadID)
 	if err != nil {
@@ -260,7 +259,7 @@ func GetLeadByStripeCustomerID(stripeCustomerID string) (int, error) {
 func GetConversionLeadInfo(leadId int) (types.ConversionLeadInfo, error) {
 	var leadConversionInfo types.ConversionLeadInfo
 
-	stmt, err := DB.Prepare(`SELECT l.lead_id, l.created_at, et.name, vt.name, l.guests
+	stmt, err := DB.Prepare(`SELECT l.lead_id, l.created_at, et.name, vt.name
 	FROM "lead" AS l
 	JOIN event_type  AS et ON et.event_type_id = l.event_type_id
 	JOIN venue_type AS vt ON vt.venue_type_id  = l.venue_type_id 
@@ -278,7 +277,6 @@ func GetConversionLeadInfo(leadId int) (types.ConversionLeadInfo, error) {
 		&createdAt,
 		&leadConversionInfo.EventType,
 		&leadConversionInfo.VenueType,
-		&leadConversionInfo.Guests,
 	)
 	if err != nil {
 		return leadConversionInfo, fmt.Errorf("error scanning row: %w", err)
@@ -400,7 +398,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
 	query := `SELECT l.lead_id, l.first_name, l.last_name, l.phone_number, 
-		l.created_at, et.name AS event_type, vt.name AS venue_type, lm.language, l.event_type_id, l.venue_type_id, l.guests,
+		l.created_at, et.name AS event_type, vt.name AS venue_type, lm.language, l.event_type_id, l.venue_type_id,
 		COUNT(*) OVER() AS total_rows
 		FROM lead AS l
 		JOIN event_type AS et ON et.event_type_id = l.event_type_id
@@ -434,7 +432,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		var lead types.LeadList
 		var createdAt time.Time
 		var eventType, venueType sql.NullString
-		var eventTypeId, venueTypeId, guests sql.NullInt64
+		var eventTypeId, venueTypeId sql.NullInt64
 
 		err := rows.Scan(&lead.LeadID,
 			&lead.FirstName,
@@ -446,16 +444,12 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 			&lead.Language,
 			&eventTypeId,
 			&venueTypeId,
-			&guests,
 			&totalRows)
 		if err != nil {
 			return nil, 0, fmt.Errorf("error scanning row: %w", err)
 		}
 		lead.CreatedAt = utils.FormatTimestampEST(createdAt.Unix())
 
-		if guests.Valid {
-			lead.Guests = int(guests.Int64)
-		}
 		if eventTypeId.Valid {
 			lead.EventTypeID = int(eventTypeId.Int64)
 		}
@@ -503,8 +497,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	lm.user_agent,
 	lm.click_id,
 	lm.google_client_id,
-	lm.button_clicked,
-	l.guests
+	lm.button_clicked
 	FROM lead l
 	JOIN event_type et ON l.event_type_id = et.event_type_id
 	JOIN venue_type vt ON l.venue_type_id = vt.venue_type_id
@@ -517,7 +510,6 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
 	var eventType, venueType, message, externalId, userAgent, clickId, googleClientId sql.NullString
-	var guests sql.NullInt32
 
 	var buttonClicked sql.NullString
 
@@ -546,7 +538,6 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&clickId,
 		&googleClientId,
 		&buttonClicked,
-		&guests,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -586,9 +577,6 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	if email.Valid {
 		leadDetails.Email = email.String
-	}
-	if guests.Valid {
-		leadDetails.Guests = int(guests.Int32)
 	}
 
 	if eventType.Valid {

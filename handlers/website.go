@@ -43,7 +43,6 @@ func createWebsiteContext() types.WebsiteContext {
 		LeadEventName:                constants.LeadEventName,
 		LeadGeneratedEventName:       constants.LeadGeneratedEventName,
 		DefaultCurrency:              constants.DefaultCurrency,
-		DefaultLeadGeneratedValue:    constants.DefaultLeadGeneratedValue,
 		YovaHeroImage:                YovaHeroImage,
 		YovaMidCTA:                   YovaMidCTA,
 		BartendingRate:               constants.BartendingRate,
@@ -245,7 +244,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	form.PhoneNumber = helpers.GetStringPointerFromForm(r, "phone_number")
 	form.EventType = helpers.GetIntPointerFromForm(r, "event_type")
 	form.VenueType = helpers.GetIntPointerFromForm(r, "venue_type")
-	form.Guests = helpers.GetIntPointerFromForm(r, "guests")
 	form.Message = helpers.GetStringPointerFromForm(r, "message")
 	form.Source = helpers.GetStringPointerFromForm(r, "source")
 	form.Medium = helpers.GetStringPointerFromForm(r, "medium")
@@ -270,6 +268,9 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	form.IP = helpers.GetStringPointerFromForm(r, "ip")
 	form.Email = helpers.GetStringPointerFromForm(r, "email")
 	form.OptInTextMessaging = helpers.GetBoolPointerFromForm(r, "opt_in_text_messaging")
+
+	form.Estimate = helpers.GetFloat64PointerFromForm(r, "estimate")
+	form.PackageID = helpers.GetIntPointerFromForm(r, "package_id")
 
 	form.FacebookClickID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_fbc", "facebook_click_id")
 	form.FacebookClientID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_fbp", "facebook_client_id")
@@ -355,7 +356,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			ClientUserAgent: helpers.SafeString(form.UserAgent),
 		},
 		CustomData: types.FacebookCustomData{
-			Value:    fmt.Sprint(constants.DefaultLeadGeneratedValue),
+			Value:    fmt.Sprint(helpers.SafeFloat64(form.Estimate)),
 			Currency: constants.DefaultCurrency,
 		},
 	}
@@ -372,7 +373,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 				Name: constants.LeadGeneratedEventName,
 				Params: types.GoogleEventParamsLead{
 					GCLID:      helpers.SafeString(form.ClickID),
-					Value:      constants.DefaultLeadGeneratedValue,
+					Value:      helpers.SafeFloat64(form.Estimate),
 					Currency:   constants.DefaultCurrency,
 					CampaignID: fmt.Sprint(helpers.SafeInt64(form.CampaignID)),
 					Campaign:   helpers.SafeString(form.AdCampaign),
@@ -417,7 +418,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			"DateCreated":    utils.FormatTimestampEST(lead.CreatedAt),
 			"EventType":      lead.EventType,
 			"VenueType":      lead.VenueType,
-			"Guests":         lead.Guests,
 			"Message":        helpers.SafeString(form.Message),
 			"LeadDetailsURL": fmt.Sprintf("%s/crm/lead/%d", constants.RootDomain, leadID),
 			"Location":       "",
