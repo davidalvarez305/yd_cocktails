@@ -100,12 +100,8 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.UpdateInvoiceStatus(stripeInvoiceID, stripeInvoiceStatus)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error getting lead details: %v\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	fmt.Println(stripeInvoiceID)
+	fmt.Println(stripeInvoiceStatus)
 
 	fbEvent := types.FacebookEventData{
 		EventName:      constants.InvoicePaidEventName,

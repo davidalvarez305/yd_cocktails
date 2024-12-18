@@ -35,6 +35,7 @@ const (
 )
 
 var (
+	StrikeAPIKey                 string
 	FacebookAccessToken          string
 	FacebookDatasetID            string
 	GoogleAnalyticsID            string
@@ -124,6 +125,7 @@ func Init() {
 	CompanyEmail = os.Getenv("COMPANY_EMAIL")
 	GoogleAdsID = os.Getenv("GOOGLE_ADS_ID")
 	GoogleAdsCallConversionLabel = os.Getenv("GOOGLE_ADS_CALL_CONVERSION_LABEL")
+	StrikeAPIKey = os.Getenv("STRIPE_API_KEY")
 }
 
 var TEMPLATES_DIR = "./templates/"
