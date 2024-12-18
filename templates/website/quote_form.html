@@ -222,6 +222,8 @@
         const form = document.getElementById("quoteForm");
         const alertModal = document.getElementById("alertModal");
 
+        const estimateData = JSON.parse(document.getElementById("estimateData").textContent);
+
         marketingHelper.populate();
         const data = marketingHelper.data;
 
@@ -268,7 +270,7 @@
 
                 gtag("event", "{{ .LeadGeneratedEventName }}", {
                     currency: "{{ .DefaultCurrency }}",
-                    value: parseFloat("{{ .DefaultLeadGeneratedValue }}"),
+                    value: parseFloat(estimateData.estimate),
                 });
 
                 // Report FB Conversion
@@ -285,7 +287,7 @@
                     fbp: marketingHelper.facebookClientId,
                     client_user_agent: marketingHelper.userAgent,
                     currency: "{{ .DefaultCurrency }}",
-                    value: parseFloat("{{ .DefaultLeadGeneratedValue }}"),
+                    value: parseFloat(estimateData.estimate),
                 });
             })
             .catch(err => {

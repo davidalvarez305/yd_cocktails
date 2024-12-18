@@ -15,8 +15,7 @@ const (
 	InvoicePaidEventName   string = "invoice_paid"
 	LeadEventName          string = "Lead"
 
-	DefaultLeadGeneratedValue float64 = 150.00
-	DefaultCurrency           string  = "USD"
+	DefaultCurrency string = "USD"
 
 	CallConversionDuration int = 15
 
