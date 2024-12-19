@@ -11,20 +11,21 @@ type EstimateForm struct {
 	Guests    *int    `json:"guests" form:"guests" schema:"guests"`
 	Hours     *int    `json:"hours" form:"hours" schema:"hours"`
 
-	PackageTypeID    int `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
-	AlcoholSegmentID int `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
+	PackageTypeID    *int `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
+	AlcoholSegmentID *int `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
 
-	WillProvideLiquor      bool `json:"will_provide_liquor" form:"will_provide_liquor" schema:"will_provide_liquor"`
-	WillProvideBeerAndWine bool `json:"will_provide_beer_and_wine" form:"will_provide_beer_and_wine" schema:"will_provide_beer_and_wine"`
-	WillProvideMixers      bool `json:"will_provide_mixers" form:"will_provide_mixers" schema:"will_provide_mixers"`
-	WillProvideJuices      bool `json:"will_provide_juices" form:"will_provide_juices" schema:"will_provide_juices"`
-	WillProvideSoftDrinks  bool `json:"will_provide_soft_drinks" form:"will_provide_soft_drinks" schema:"will_provide_soft_drinks"`
-	WillProvideCups        bool `json:"will_provide_cups" form:"will_provide_cups" schema:"will_provide_cups"`
-	WillProvideIce         bool `json:"will_provide_ice" form:"will_provide_ice" schema:"will_provide_ice"`
+	WillProvideLiquor      *bool `json:"will_provide_liquor" form:"will_provide_liquor" schema:"will_provide_liquor"`
+	WillProvideBeerAndWine *bool `json:"will_provide_beer_and_wine" form:"will_provide_beer_and_wine" schema:"will_provide_beer_and_wine"`
+	WillProvideMixers      *bool `json:"will_provide_mixers" form:"will_provide_mixers" schema:"will_provide_mixers"`
+	WillProvideJuices      *bool `json:"will_provide_juices" form:"will_provide_juices" schema:"will_provide_juices"`
+	WillProvideSoftDrinks  *bool `json:"will_provide_soft_drinks" form:"will_provide_soft_drinks" schema:"will_provide_soft_drinks"`
+	WillProvideCups        *bool `json:"will_provide_cups" form:"will_provide_cups" schema:"will_provide_cups"`
+	WillProvideIce         *bool `json:"will_provide_ice" form:"will_provide_ice" schema:"will_provide_ice"`
 
-	WillRequireGlassware bool `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
+	WillRequireGlassware *bool `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
 
-	WillRequireMobileBar bool `json:"will_require_mobile_bar" form:"will_require_mobile_bar" schema:"will_require_mobile_bar"`
+	WillRequireMobileBar *bool `json:"will_require_mobile_bar" form:"will_require_mobile_bar" schema:"will_require_mobile_bar"`
+	NumBars              *int  `json:"num_bars" form:"num_bars" schema:"num_bars"`
 }
 
 type QuoteForm struct {
@@ -370,4 +371,13 @@ type ConversionLeadInfo struct {
 	EventType string `json:"event_type" form:"event_type" schema:"event_type"`
 	VenueType string `json:"venue_type" form:"venue_type" schema:"venue_type"`
 	CreatedAt int64  `json:"created_at" form:"created_at" schema:"created_at"`
+}
+
+type GenerateEstimateResponse struct {
+	Data EstimateData `json:"data" form:"data" schema:"data"`
+}
+
+type EstimateData struct {
+	PackageID int     `json:"package_id" form:"package_id" schema:"package_id"`
+	Estimate  float64 `json:"estimate" form:"estimate" schema:"estimate"`
 }

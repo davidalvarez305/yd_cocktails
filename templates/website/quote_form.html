@@ -45,8 +45,8 @@
                                         <label for="alcohol_segment_id" class="font-medium">Alcohol Quality*</label>
                                         <select id="alcohol_segment_id" name="alcohol_segment_id" required
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                                            {{ range .VenueTypes }}
-                                            <option value="{{ .VenueTypeID }}">{{ .Name }}</option>
+                                            {{ range .AlcoholSegments }}
+                                            <option value="{{ .AlcoholSegmentID }}">{{ .Name }}</option>
                                             {{ end }}
                                         </select>
                                     </div>
@@ -54,16 +54,17 @@
                                         <label for="package_type_id" class="font-medium">Package Type*</label>
                                         <select id="package_type_id" name="package_type_id" required
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                                            {{ range .VenueTypes }}
-                                            <option value="{{ .VenueTypeID }}">{{ .Name }}</option>
+                                            {{ range .PackageTypes }}
+                                            <option value="{{ .PackageTypeID }}">{{ .Name }}</option>
                                             {{ end }}
                                         </select>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="space-y-1">
-                                        <label for="will_provide_liquor" class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_liquor" name="will_provide_liquor" checked />
+                                        <label for="will_provide_liquor"
+                                            class="group relative inline-flex items-center gap-3">
+                                            <input type="checkbox" class="peer sr-only" id="will_provide_liquor" name="will_provide_liquor" />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
                                             <span class="font-medium">Will you be providing the liquor?</span>
@@ -71,8 +72,9 @@
                                         <p>Select this option if you will provide spirits such as whiskey, tequila, vodka, etc...</p>
                                     </div>
                                     <div class="space-y-1">
-                                        <label for="will_provide_beer_and_wine" class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_beer_and_wine" name="will_provide_beer_and_wine" checked />
+                                        <label for="will_provide_beer_and_wine"
+                                            class="group relative inline-flex items-center gap-3">
+                                            <input type="checkbox" class="peer sr-only" id="will_provide_beer_and_wine" name="will_provide_beer_and_wine" />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
                                             <span class="font-medium">Will you be providing beer & wine?</span>
@@ -82,68 +84,55 @@
                                 </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="space-y-1">
-                                        <label for="will_provide_mixers" class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_mixers" name="will_provide_mixers" checked />
+                                        <label for="will_provide_mixers"
+                                            class="group relative inline-flex items-center gap-3">
+                                            <input type="checkbox" class="peer sr-only" id="will_provide_mixers" name="will_provide_mixers" />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will you be providing the mixers?</span>
+                                            <span class="font-medium">Will you be providing mixers?</span>
                                         </label>
                                         <p>Select this option if you will provide things like sweet & sour mix, tonic water, margarita mix, etc...</p>
                                     </div>
                                     <div class="space-y-1">
-                                        <label for="will_provide_beer_and_wine" class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_beer_and_wine" name="will_provide_beer_and_wine" checked />
+                                        <label for="will_provide_juices"
+                                            class="group relative inline-flex items-center gap-3">
+                                            <input type="checkbox" class="peer sr-only" id="will_provide_juices" name="will_provide_juices" />
+                                            <span
+                                                class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
+                                            <span class="font-medium">Will you be providing juices?</span>
+                                        </label>
+                                        <p>Select this option if you will provide things like sweet & sour mix, tonic water, margarita mix, etc...</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <div class="space-y-1">
+                                        <label for="will_provide_soft_drinks"
+                                            class="group relative inline-flex items-center gap-3">
+                                            <input type="checkbox" class="peer sr-only" id="will_provide_soft_drinks" name="will_provide_soft_drinks" />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
                                             <span class="font-medium">Will you be providing soft drinks?</span>
                                         </label>
                                         <p>Select this option if you will provide coca cola, club soda, etc...</p>
                                     </div>
-                                </div>
-                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="space-y-1">
-                                        <label for="will_provide_mixers" class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_mixers" name="will_provide_mixers" checked />
-                                            <span
-                                                class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will you be providing the juices?</span>
-                                        </label>
-                                        <p>Select this option if you will provide things like sweet & sour mix, tonic water, margarita mix, etc...</p>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label for="will_provide_beer_and_wine" class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_beer_and_wine" name="will_provide_beer_and_wine" checked />
+                                        <label for="will_provide_ice"
+                                            class="group relative inline-flex items-center gap-3">
+                                            <input type="checkbox" class="peer sr-only" id="will_provide_ice" name="will_provide_ice" />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
                                             <span class="font-medium">Will you be providing ice?</span>
                                         </label>
                                     </div>
                                 </div>
-                                <div class="space-y-1">
-                                    <label for="will_provide_beer_and_wine" class="group relative inline-flex items-center gap-3">
-                                        <input type="checkbox" class="peer sr-only" id="will_provide_beer_and_wine" name="will_provide_beer_and_wine" checked />
-                                        <span
-                                            class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                        <span class="font-medium">Will you be be providing a bar?</span>
-                                        <p>Select this option if your venue has or you will be providing a bar for us to work on.</p>
-                                    </label>
-                                </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="space-y-1">
-                                        <label for="will_provide_mixers" class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_mixers" name="will_provide_mixers" checked />
+                                        <label for="will_require_mobile_bar"
+                                            class="group relative inline-flex items-center gap-3">
+                                            <input type="checkbox" class="peer sr-only" id="will_require_mobile_bar" name="will_require_mobile_bar" />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will your event require glassware?</span>
-                                        </label>
-                                        <p>Select this option if you don't want plastic cups & disposable drinkware.</p>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label for="will_provide_beer_and_wine" class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_beer_and_wine" name="will_provide_beer_and_wine" checked />
-                                            <span
-                                                class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will you be providing cups, napkins, and straws?</span>
+                                            <span class="font-medium">Will you be providing a bar?</span>
                                         </label>
                                     </div>
                                 </div>
@@ -155,7 +144,7 @@
                                         <path
                                             d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" />
                                     </svg>
-                                    <span>Generate Estimate</span>
+                                    <span>Submit</span>
                                 </button>
                             </form>
                         </div>
@@ -209,7 +198,8 @@
                                         class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary"></textarea>
                                 </div>
                                 <div class="space-y-1">
-                                    <label for="opt_in_text_messaging" class="group relative inline-flex items-center gap-3">
+                                    <label for="opt_in_text_messaging"
+                                        class="group relative inline-flex items-center gap-3">
                                         <input type="checkbox" class="peer sr-only" id="opt_in_text_messaging" name="opt_in_text_messaging" checked />
                                         <span
                                             class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
@@ -285,28 +275,28 @@
         fetch('/partials/opt-out-confirmation-modal', {
             credentials: "include",
         })
-        .then(response => {
-            if (response.ok) {
-                return response.text();
-            } else {
-                return response.text().then((err) => {
-                    throw new Error(err);
-                });
-            }
-        })
-        .then(html => {
-            const confirmationModal = document.getElementById('optOutConfirmationModal');
-            confirmationModal.outerHTML = html;
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    return response.text().then((err) => {
+                        throw new Error(err);
+                    });
+                }
+            })
+            .then(html => {
+                const confirmationModal = document.getElementById('optOutConfirmationModal');
+                confirmationModal.outerHTML = html;
 
-            const cancelOptOut = document.getElementById("cancelOptOut");
-            const confirmOptOut = document.getElementById("confirmOptOut");
+                const cancelOptOut = document.getElementById("cancelOptOut");
+                const confirmOptOut = document.getElementById("confirmOptOut");
 
-            cancelOptOut.addEventListener("click", () => handleOptOutConfirmation(false));
-            confirmOptOut.addEventListener("click", () => handleOptOutConfirmation(true));
-        })
-        .catch(err => {
-            alertModal.outerHTML = err.message;
-        })
+                cancelOptOut.addEventListener("click", () => handleOptOutConfirmation(false));
+                confirmOptOut.addEventListener("click", () => handleOptOutConfirmation(true));
+            })
+            .catch(err => {
+                alertModal.outerHTML = err.message;
+            })
     }
 
     optIn.addEventListener("click", (e) => handleClickOptIn(e));
@@ -409,13 +399,10 @@
         const form = document.getElementById("estimateForm");
         const alertModal = document.getElementById("alertModal");
 
-        marketingHelper.populate();
-        const data = marketingHelper.data;
-
         fetch("/estimate", {
             method: "POST",
             credentials: "include",
-            body: data,
+            body: form,
         })
             .then(response => {
                 const token = response.headers.get("X-Csrf-Token");

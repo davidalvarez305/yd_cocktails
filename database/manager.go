@@ -972,3 +972,57 @@ func DeleteLead(id int) error {
 
 	return nil
 }
+
+func GeneratePackageEstimate(form types.EstimateForm, price float64) (int, error) {
+	var packageID int
+
+	tx, err := DB.Begin()
+	if err != nil {
+		return packageID, fmt.Errorf("error starting transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	packageStmt, err := tx.Prepare(`
+		INSERT INTO package (guests, hours, package_type_id, alcohol_segment_id, 
+                             will_provide_liquor, will_provide_beer_and_wine, 
+                             will_provide_mixers, will_provide_juices, 
+                             will_provide_soft_drinks, will_provide_cups, 
+                             will_provide_ice, will_require_glassware, 
+                             will_require_mobile_bar, num_bars, price, date_created)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, to_timestamp($16)::timestamptz AT TIME ZONE 'America/New_York')
+		RETURNING package_id
+	`)
+	if err != nil {
+		return packageID, fmt.Errorf("error preparing package statement: %w", err)
+	}
+	defer packageStmt.Close()
+
+	err = packageStmt.QueryRow(
+		form.Guests,
+		form.Hours,
+		form.PackageTypeID,
+		form.AlcoholSegmentID,
+		utils.CreateNullBool(form.WillProvideLiquor),
+		utils.CreateNullBool(form.WillProvideBeerAndWine),
+		utils.CreateNullBool(form.WillProvideMixers),
+		utils.CreateNullBool(form.WillProvideJuices),
+		utils.CreateNullBool(form.WillProvideSoftDrinks),
+		utils.CreateNullBool(form.WillProvideCups),
+		utils.CreateNullBool(form.WillProvideIce),
+		utils.CreateNullBool(form.WillRequireGlassware),
+		utils.CreateNullBool(form.WillRequireMobileBar),
+		form.NumBars,
+		price,
+		time.Now().Unix(),
+	).Scan(&packageID)
+	if err != nil {
+		return packageID, fmt.Errorf("error inserting package data: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return packageID, fmt.Errorf("error committing transaction: %w", err)
+	}
+
+	return packageID, nil
+}
