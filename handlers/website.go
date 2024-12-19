@@ -94,6 +94,8 @@ func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/quote":
 			PostQuote(w, r)
+		case "/estimate":
+			PostEstimate(w, r)
 		case "/contact":
 			PostContactForm(w, r)
 		case "/login":
@@ -671,4 +673,228 @@ func PostLogout(w http.ResponseWriter, r *http.Request) {
 	sessions.SetCookie(w, time.Now().Add(-1*time.Hour), "")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func PostEstimate(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var form types.QuoteForm
+	form.FirstName = helpers.GetStringPointerFromForm(r, "first_name")
+	form.LastName = helpers.GetStringPointerFromForm(r, "last_name")
+	form.PhoneNumber = helpers.GetStringPointerFromForm(r, "phone_number")
+	form.EventType = helpers.GetIntPointerFromForm(r, "event_type")
+	form.VenueType = helpers.GetIntPointerFromForm(r, "venue_type")
+	form.Message = helpers.GetStringPointerFromForm(r, "message")
+	form.Source = helpers.GetStringPointerFromForm(r, "source")
+	form.Medium = helpers.GetStringPointerFromForm(r, "medium")
+	form.Channel = helpers.GetStringPointerFromForm(r, "channel")
+	form.LandingPage = helpers.GetStringPointerFromForm(r, "landing_page")
+	form.Keyword = helpers.GetStringPointerFromForm(r, "keyword")
+	form.Referrer = helpers.GetStringPointerFromForm(r, "referrer")
+	form.ClickID = helpers.GetStringPointerFromForm(r, "click_id")
+	form.CampaignID = helpers.GetInt64PointerFromForm(r, "campaign_id")
+	form.AdCampaign = helpers.GetStringPointerFromForm(r, "ad_campaign")
+	form.AdGroupID = helpers.GetInt64PointerFromForm(r, "ad_group_id")
+	form.AdGroupName = helpers.GetStringPointerFromForm(r, "ad_group_name")
+	form.AdSetID = helpers.GetInt64PointerFromForm(r, "ad_set_id")
+	form.AdSetName = helpers.GetStringPointerFromForm(r, "ad_set_name")
+	form.AdID = helpers.GetInt64PointerFromForm(r, "ad_id")
+	form.AdHeadline = helpers.GetInt64PointerFromForm(r, "ad_headline")
+	form.Language = helpers.GetStringPointerFromForm(r, "language")
+	form.Longitude = helpers.GetStringPointerFromForm(r, "longitude")
+	form.Latitude = helpers.GetStringPointerFromForm(r, "latitude")
+	form.UserAgent = helpers.GetStringPointerFromForm(r, "user_agent")
+	form.ButtonClicked = helpers.GetStringPointerFromForm(r, "button_clicked")
+	form.IP = helpers.GetStringPointerFromForm(r, "ip")
+	form.Email = helpers.GetStringPointerFromForm(r, "email")
+	form.OptInTextMessaging = helpers.GetBoolPointerFromForm(r, "opt_in_text_messaging")
+
+	form.Estimate = helpers.GetFloat64PointerFromForm(r, "estimate")
+	form.PackageID = helpers.GetIntPointerFromForm(r, "package_id")
+
+	form.FacebookClickID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_fbc", "facebook_click_id")
+	form.FacebookClientID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_fbp", "facebook_client_id")
+	form.GoogleClientID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_ga", "google_client_id")
+
+	session, err := sessions.Get(r)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to retrieve session.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	// User Marketing Variables
+	var userIP = helpers.GetUserIPFromRequest(r)
+	var userAgent = r.Header.Get("User-Agent")
+
+	if userIP != "" {
+		form.IP = &userIP
+	}
+
+	if userAgent != "" {
+		form.UserAgent = &userAgent
+	}
+
+	if session.ExternalID != "" {
+		form.ExternalID = &session.ExternalID
+	}
+
+	if session.CSRFSecret != "" {
+		form.CSRFSecret = &session.CSRFSecret
+	}
+
+	leadID, err := database.CreateLeadAndMarketing(form)
+	if err != nil {
+		fmt.Printf("Error creating lead: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while creating quote request.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	// HTML successful lead creation
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "modal",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
+		Data: map[string]any{
+			"AlertHeader":  "Awesome!",
+			"AlertMessage": "We received your request and will be right with you.",
+		},
+	}
+
+	fbEvent := types.FacebookEventData{
+		EventName:      constants.LeadEventName,
+		EventTime:      time.Now().UTC().Unix(),
+		ActionSource:   "website",
+		EventSourceURL: helpers.SafeString(form.LandingPage),
+		UserData: types.FacebookUserData{
+			FirstName:       helpers.HashString(helpers.SafeString(form.FirstName)),
+			LastName:        helpers.HashString(helpers.SafeString(form.LastName)),
+			Phone:           helpers.HashString(helpers.SafeString(form.PhoneNumber)),
+			Email:           helpers.HashString(helpers.SafeString(form.Email)),
+			FBC:             helpers.SafeString(form.FacebookClickID),
+			FBP:             helpers.SafeString(form.FacebookClientID),
+			State:           helpers.HashString("Florida"),
+			ExternalID:      helpers.HashString(helpers.SafeString(form.ExternalID)),
+			ClientIPAddress: helpers.SafeString(form.IP),
+			ClientUserAgent: helpers.SafeString(form.UserAgent),
+		},
+		CustomData: types.FacebookCustomData{
+			Value:    fmt.Sprint(helpers.SafeFloat64(form.Estimate)),
+			Currency: constants.DefaultCurrency,
+		},
+	}
+
+	metaPayload := types.FacebookPayload{
+		Data: []types.FacebookEventData{fbEvent},
+	}
+
+	payload := types.GooglePayload{
+		ClientID: helpers.SafeString(form.GoogleClientID),
+		UserId:   helpers.SafeString(form.ExternalID),
+		Events: []types.GoogleEventLead{
+			{
+				Name: constants.LeadGeneratedEventName,
+				Params: types.GoogleEventParamsLead{
+					GCLID:      helpers.SafeString(form.ClickID),
+					Value:      helpers.SafeFloat64(form.Estimate),
+					Currency:   constants.DefaultCurrency,
+					CampaignID: fmt.Sprint(helpers.SafeInt64(form.CampaignID)),
+					Campaign:   helpers.SafeString(form.AdCampaign),
+					Source:     helpers.SafeString(form.Source),
+					Medium:     helpers.SafeString(form.Medium),
+					Term:       helpers.SafeString(form.Keyword),
+				},
+			},
+		},
+		UserData: types.GoogleUserData{
+			Sha256PhoneNumber:  []string{helpers.HashString(utils.AddPhonePrefixIfNeeded(helpers.SafeString(form.PhoneNumber)))},
+			Sha256EmailAddress: []string{helpers.HashString(helpers.SafeString(form.Email))},
+			Address: []types.GoogleUserAddress{
+				{
+					Sha256FirstName: helpers.HashString(helpers.SafeString(form.FirstName)),
+					Sha256LastName:  helpers.HashString(helpers.SafeString(form.LastName)),
+				},
+			},
+		},
+	}
+
+	// Send conversion events
+	go conversions.SendGoogleConversion(payload)
+	go conversions.SendFacebookConversion(metaPayload)
+
+	go func() {
+		lead, err := database.GetConversionLeadInfo(leadID)
+
+		if err != nil {
+			fmt.Printf("ERROR GETTING NEW LEAD FROM DB: %+v\n", err)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
+		}
+
+		subject := "YD Cocktails: New Lead"
+		recipients := []string{constants.CompanyEmail}
+		templateFile := constants.PARTIAL_TEMPLATES_DIR + "new_lead_notification_email.html"
+
+		var notificationTemplateData = map[string]any{
+			"Name":           helpers.SafeString(form.FirstName) + " " + helpers.SafeString(form.LastName),
+			"PhoneNumber":    helpers.SafeString(form.PhoneNumber),
+			"DateCreated":    utils.FormatTimestampEST(lead.CreatedAt),
+			"EventType":      lead.EventType,
+			"VenueType":      lead.VenueType,
+			"Message":        helpers.SafeString(form.Message),
+			"LeadDetailsURL": fmt.Sprintf("%s/crm/lead/%d", constants.RootDomain, leadID),
+			"Location":       "",
+		}
+
+		if helpers.SafeString(form.Longitude) != "0.0" && len(helpers.SafeString(form.Longitude)) > 0 || helpers.SafeString(form.Latitude) != "0.0" && len(helpers.SafeString(form.Latitude)) > 0 {
+			notificationTemplateData["Location"] = fmt.Sprintf("https://www.google.com/maps?q=%s,%s", helpers.SafeString(form.Latitude), helpers.SafeString(form.Longitude))
+		}
+
+		template, err := helpers.BuildStringFromTemplate(templateFile, "email", notificationTemplateData)
+
+		if err != nil {
+			fmt.Printf("ERROR BUILDING LEAD NOTIFICATION TEMPLATE: %+v\n", err)
+			return
+		}
+
+		body := fmt.Sprintf("Content-Type: text/html; charset=UTF-8\r\n%s", template)
+		err = services.SendGmail(recipients, subject, constants.CompanyEmail, body)
+		if err != nil {
+			fmt.Printf("ERROR SENDING LEAD NOTIFICATION EMAIL: %+v\n", err)
+			return
+		}
+	}()
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
