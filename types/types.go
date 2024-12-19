@@ -268,32 +268,30 @@ type IncomingPhoneCallDialStatus struct {
 }
 
 type WebsiteContext struct {
-	PageTitle                    string                 `json:"page_title" form:"page_title"`
-	MetaDescription              string                 `json:"meta_description" form:"meta_description"`
-	SiteName                     string                 `json:"site_name" form:"site_name"`
-	StaticPath                   string                 `json:"static_path" form:"static_path"`
-	MediaPath                    string                 `json:"media_path" form:"media_path"`
-	PhoneNumber                  string                 `json:"phone_number" form:"phone_number"`
-	CurrentYear                  int                    `json:"current_year" form:"current_year"`
-	GoogleAnalyticsID            string                 `json:"google_analytics_id" form:"google_analytics_id"`
-	FacebookDataSetID            string                 `json:"facebook_data_set_id" form:"facebook_data_set_id"`
-	CompanyName                  string                 `json:"company_name" form:"company_name"`
-	PagePath                     string                 `json:"page_path" form:"page_path"`
-	Nonce                        string                 `json:"nonce" form:"nonce"`
-	Features                     []string               `json:"features" form:"features"`
-	CSRFToken                    string                 `json:"csrf_token" form:"csrf_token"`
-	EventTypes                   []models.EventType     `json:"event_types" form:"event_types"`
-	VenueTypes                   []models.VenueType     `json:"venue_types" form:"venue_types"`
-	ExternalID                   string                 `json:"external_id" form:"external_id"`
-	GoogleAdsID                  string                 `json:"google_ads_id"`
-	GoogleAdsCallConversionLabel string                 `json:"google_ads_call_conversion_label"`
-	LeadEventName                string                 `json:"lead_event_name"`
-	LeadGeneratedEventName       string                 `json:"lead_generated_event_name"`
-	DefaultCurrency              string                 `json:"default_currency"`
-	YovaHeroImage                string                 `json:"yova_hero_image"`
-	YovaMidCTA                   string                 `json:"yova_mid_cta"`
-	BartendingRate               float64                `json:"bartending_rate"`
-	Custom                       map[string]interface{} `json:"custom"`
+	PageTitle                    string             `json:"page_title" form:"page_title"`
+	MetaDescription              string             `json:"meta_description" form:"meta_description"`
+	SiteName                     string             `json:"site_name" form:"site_name"`
+	StaticPath                   string             `json:"static_path" form:"static_path"`
+	MediaPath                    string             `json:"media_path" form:"media_path"`
+	PhoneNumber                  string             `json:"phone_number" form:"phone_number"`
+	CurrentYear                  int                `json:"current_year" form:"current_year"`
+	GoogleAnalyticsID            string             `json:"google_analytics_id" form:"google_analytics_id"`
+	FacebookDataSetID            string             `json:"facebook_data_set_id" form:"facebook_data_set_id"`
+	CompanyName                  string             `json:"company_name" form:"company_name"`
+	PagePath                     string             `json:"page_path" form:"page_path"`
+	Nonce                        string             `json:"nonce" form:"nonce"`
+	Features                     []string           `json:"features" form:"features"`
+	CSRFToken                    string             `json:"csrf_token" form:"csrf_token"`
+	EventTypes                   []models.EventType `json:"event_types" form:"event_types"`
+	VenueTypes                   []models.VenueType `json:"venue_types" form:"venue_types"`
+	ExternalID                   string             `json:"external_id" form:"external_id"`
+	GoogleAdsID                  string             `json:"google_ads_id"`
+	GoogleAdsCallConversionLabel string             `json:"google_ads_call_conversion_label"`
+	LeadEventName                string             `json:"lead_event_name"`
+	LeadGeneratedEventName       string             `json:"lead_generated_event_name"`
+	DefaultCurrency              string             `json:"default_currency"`
+	YovaHeroImage                string             `json:"yova_hero_image"`
+	YovaMidCTA                   string             `json:"yova_mid_cta"`
 }
 
 type FacebookUserData struct {

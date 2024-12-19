@@ -39,6 +39,8 @@ const (
 
 	FullOpenBarPackageTypeID    int = 1
 	PartialOpenBarPackageTypeID int = 2
+
+	DepositPercentageAmount float64 = 0.50
 )
 
 var (

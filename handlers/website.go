@@ -46,18 +46,6 @@ func createWebsiteContext() types.WebsiteContext {
 		DefaultCurrency:              constants.DefaultCurrency,
 		YovaHeroImage:                YovaHeroImage,
 		YovaMidCTA:                   YovaMidCTA,
-		BartendingRate:               constants.BartendingRate,
-		Custom: map[string]interface{}{
-			"BarRentalCost":           constants.BarRentalCost,
-			"MobileBarFee":            constants.MobileBarFee,
-			"PerPersonAlcoholFee":     constants.PerPersonAlcoholFee,
-			"PerPersonMixersFee":      constants.PerPersonMixersFee,
-			"PerPersonJuicesFee":      constants.PerPersonJuicesFee,
-			"PerPersonSoftDrinksFee":  constants.PerPersonSoftDrinksFee,
-			"PerPersonCupsFee":        constants.PerPersonCupsFee,
-			"PerPersonIceFee":         constants.PerPersonIceFee,
-			"TimeToSetUpAndBreakDown": constants.TimeToSetUpAndBreakDown,
-		},
 	}
 }
 
@@ -402,14 +390,15 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	go conversions.SendGoogleConversion(payload)
 	go conversions.SendFacebookConversion(metaPayload)
 
-	go func() {
-		lead, err := database.GetConversionLeadInfo(leadID)
+	lead, err := database.GetConversionLeadInfo(leadID)
 
-		if err != nil {
-			fmt.Printf("ERROR GETTING NEW LEAD FROM DB: %+v\n", err)
-			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-			return
-		}
+	if err != nil {
+		fmt.Printf("ERROR GETTING NEW LEAD FROM DB: %+v\n", err)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	go func() {
 
 		subject := "YD Cocktails: New Lead"
 		recipients := []string{constants.CompanyEmail}
@@ -445,7 +434,19 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+	var stripeInvoiceId string
+
+	// Insert Lead + Package
+
+	// Create Stripe Customer
+
+	// Create Deposit Invoice
+
+	// Create Remaining Invoice
+
+	// Send Text Message
+
+	http.Redirect(w, r, fmt.Sprintf("/quote/%s?lead_id=%d", stripeInvoiceId, lead.LeadID), http.StatusSeeOther)
 }
 
 func GetContactForm(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
@@ -753,5 +754,4 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(jsonResponse)
-	return
 }
