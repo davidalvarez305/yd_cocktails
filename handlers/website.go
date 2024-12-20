@@ -10,6 +10,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/conversions"
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/models"
 	"github.com/davidalvarez305/yd_cocktails/services"
 	"github.com/davidalvarez305/yd_cocktails/sessions"
 	"github.com/davidalvarez305/yd_cocktails/types"
@@ -319,16 +320,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// HTML successful lead creation
-	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "modal",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
-		Data: map[string]any{
-			"AlertHeader":  "Awesome!",
-			"AlertMessage": "We received your request and will be right with you.",
-		},
-	}
-
 	fbEvent := types.FacebookEventData{
 		EventName:      constants.LeadEventName,
 		EventTime:      time.Now().UTC().Unix(),
@@ -391,15 +382,22 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	go conversions.SendFacebookConversion(metaPayload)
 
 	lead, err := database.GetConversionLeadInfo(leadID)
-
 	if err != nil {
-		fmt.Printf("ERROR GETTING NEW LEAD FROM DB: %+v\n", err)
+		fmt.Printf("Error getting conversion: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Internal error reporting conversions to Google.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
 		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 		return
 	}
 
 	go func() {
-
 		subject := "YD Cocktails: New Lead"
 		recipients := []string{constants.CompanyEmail}
 		templateFile := constants.PARTIAL_TEMPLATES_DIR + "new_lead_notification_email.html"
@@ -434,19 +432,72 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	var stripeInvoiceId string
+	err = database.AssignLeadToPackage(helpers.SafeInt(form.PackageID), lead.LeadID)
+	if err != nil {
+		fmt.Printf("Error creating invoice: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Internal server error while adding package to your account.",
+			},
+		}
 
-	// Insert Lead + Package
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
 
-	// Create Stripe Customer
+	stripeInvoice, err := services.CreateStripeInvoiceForNewCustomer(helpers.SafeString(form.Email), helpers.SafeString(form.FirstName), helpers.SafeString(form.LastName), helpers.SafeFloat64(form.Estimate))
+	if err != nil {
+		fmt.Printf("Error creating invoice: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while creating invoice.",
+			},
+		}
 
-	// Create Deposit Invoice
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
 
-	// Create Remaining Invoice
+	var redirectUrl = fmt.Sprintf("%s/quote/%s", constants.RootDomain, stripeInvoice.ID)
 
-	// Send Text Message
+	go func() {
+		to := "+1" + helpers.RemoveCountryCode(helpers.SafeString(form.PhoneNumber))
+		from := "+1" + constants.CompanyPhoneNumber
 
-	http.Redirect(w, r, fmt.Sprintf("/quote/%s?lead_id=%d", stripeInvoiceId, lead.LeadID), http.StatusSeeOther)
+		textMessage := fmt.Sprintf(`Hey! This is YD Cocktails, LLC.
+		Your quote has been successfully generated. If you'd like to lock down a spot for your event, you can do so here: %s`, redirectUrl)
+
+		twilioMessage, err := services.SendTextMessage(to, from, textMessage)
+		if err != nil {
+			fmt.Printf("Error creating invoice: %+v\n", err)
+		}
+
+		message := models.Message{
+			ExternalID:  helpers.SafeString(twilioMessage.Sid),
+			UserID:      constants.DavidUserID,
+			LeadID:      lead.LeadID,
+			Text:        helpers.SafeString(twilioMessage.Body),
+			TextFrom:    constants.CompanyPhoneNumber,
+			TextTo:      helpers.SafeString(form.PhoneNumber),
+			IsInbound:   false,
+			DateCreated: time.Now().Local().Unix(),
+			Status:      helpers.SafeString(twilioMessage.Status),
+		}
+
+		if err := database.SaveSMS(message); err != nil {
+			fmt.Printf("Error saving SMS to database: %s", err)
+			http.Error(w, "Failed to save message.", http.StatusInternalServerError)
+			return
+		}
+	}()
+
+	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
 }
 
 func GetContactForm(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {

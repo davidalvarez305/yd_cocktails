@@ -1026,3 +1026,19 @@ func GeneratePackageEstimate(form types.EstimateForm, price float64) (int, error
 
 	return packageID, nil
 }
+
+func AssignLeadToPackage(packageId, leadId int) error {
+	stmt, err := DB.Prepare(`UPDATE package SET lead_id = $1 WHERE package_id = $2`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(leadId, packageId)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	fmt.Println("CSRFToken marked as used successfully")
+	return nil
+}
