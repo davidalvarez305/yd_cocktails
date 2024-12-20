@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
@@ -64,6 +65,16 @@ func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
+
+		path := r.URL.Path
+
+		if strings.HasPrefix(path, "/quote/") {
+			if len(path) > len("/quote/") && helpers.IsNumeric(path[len("/quote/"):]) {
+				GetQuoteDetail(w, r, ctx)
+				return
+			}
+			return
+		}
 		switch r.URL.Path {
 		case "/contact":
 			GetContactForm(w, r, ctx)
@@ -805,4 +816,39 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(jsonResponse)
+}
+
+func GetQuoteDetail(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
+	fileName := "quote_detail.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName}
+	nonce, ok := r.Context().Value("nonce").(string)
+	if !ok {
+		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
+		return
+	}
+
+	csrfToken, ok := r.Context().Value("csrf_token").(string)
+	if !ok {
+		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
+		return
+	}
+
+	invoiceId := strings.TrimPrefix(r.URL.Path, "/crm/quote/")
+
+	quoteDetails, err := database.GetQuoteDetailsByInvoiceID(invoiceId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting quote details from DB.", http.StatusInternalServerError)
+		return
+	}
+
+	data := ctx
+	data.PageTitle = quoteDetails.FirstName + " " + quoteDetails.LastName + " Quote — " + constants.CompanyName
+	data.Nonce = nonce
+	data.CSRFToken = csrfToken
+	data.Quote = quoteDetails
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	helpers.ServeContent(w, files, data)
 }

@@ -292,6 +292,7 @@ type WebsiteContext struct {
 	DefaultCurrency              string             `json:"default_currency"`
 	YovaHeroImage                string             `json:"yova_hero_image"`
 	YovaMidCTA                   string             `json:"yova_mid_cta"`
+	Quote                        QuoteDetails       `json:"quote"`
 }
 
 type FacebookUserData struct {
@@ -378,4 +379,11 @@ type GenerateEstimateResponse struct {
 type EstimateData struct {
 	PackageID int     `json:"package_id" form:"package_id" schema:"package_id"`
 	Estimate  float64 `json:"estimate" form:"estimate" schema:"estimate"`
+}
+
+type QuoteDetails struct {
+	FirstName string `json:"first_name" form:"first_name" schema:"first_name"`
+	LastName  string `json:"last_name" form:"last_name" schema:"last_name"`
+	EventType string `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType string `json:"venue_type" form:"venue_type" schema:"venue_type"`
 }

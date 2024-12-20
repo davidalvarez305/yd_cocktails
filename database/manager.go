@@ -1042,3 +1042,33 @@ func AssignLeadToPackage(packageId, leadId int) error {
 	fmt.Println("CSRFToken marked as used successfully")
 	return nil
 }
+
+func GetQuoteDetailsByInvoiceID(invoiceId string) (types.QuoteDetails, error) {
+	query := `SELECT l.first_name,
+	l.last_name,
+	et.name,
+	vt.name
+	FROM lead l
+	JOIN package p ON p.lead_id = p.lead_id AND p.package_id = $1
+	JOIN event_type et ON l.event_type_id = et.event_type_id
+	JOIN venue_type vt ON l.venue_type_id = vt.venue_type_id`
+
+	var quoteDetails types.QuoteDetails
+
+	row := DB.QueryRow(query, invoiceId)
+
+	err := row.Scan(
+		&quoteDetails.FirstName,
+		&quoteDetails.LastName,
+		&quoteDetails.EventType,
+		&quoteDetails.VenueType,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return quoteDetails, fmt.Errorf("no lead found with invoice id: %s", invoiceId)
+		}
+		return quoteDetails, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	return quoteDetails, nil
+}
