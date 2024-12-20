@@ -1,0 +1,32 @@
+{{ define "content.html" }}
+
+<!-- Blog Post Section: Modern Post -->
+<div class="bg-white dark:bg-gray-800 dark:text-gray-100">
+    <div class="container mx-auto space-y-16 px-4 py-16 lg:px-8 lg:py-32 xl:max-w-7xl">
+        <div class="text-center">
+            <div class="mb-1 text-sm font-bold uppercase tracking-wider text-primary-600 dark:text-primary-500">
+                {{ .CompanyName }}
+            </div>
+            <h2 class="mb-4 text-4xl font-black text-black dark:text-white">
+                Terms and Conditions
+            </h2>
+            <h3 class="mx-auto text-xl font-medium leading-relaxed text-gray-700 dark:text-gray-300 lg:w-2/3">
+                <p class="text-primary-600 hover:text-primary-400 dark:text-primary-400 dark:hover:text-primary-300">
+                    Last Updated: 06/15/2024</p>
+            </h3>
+        </div>
+
+        <article class="prose prose-lg prose-primary mx-auto dark:prose-invert">
+            <p>Don't wait too long...</p>
+            <h1>{{ .FirstName}} {{ .LastName}}</h1>
+            <p>Spots may be reserved at any time. Book now while it's available.</p>
+            <div class="space-y-1">
+                <label for="appointment_time" class="font-medium">Booked Time*</label>
+                <input type="datetime-local" id="appointment_time" name="appointment_time" required
+                    class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+            </div>
+        </article>
+    </div>
+</div>
+
+{{ end }}
