@@ -1072,3 +1072,53 @@ func GetQuoteDetailsByInvoiceID(invoiceId string) (types.QuoteDetails, error) {
 
 	return quoteDetails, nil
 }
+
+func GetAlcoholSegments() ([]models.AlcoholSegment, error) {
+	var alcoholSegments []models.AlcoholSegment
+
+	rows, err := DB.Query(`SELECT alcohol_segment_id, name, price_modification FROM "alcohol_segment"`)
+	if err != nil {
+		return alcoholSegments, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var segment models.AlcoholSegment
+		err := rows.Scan(&segment.AlcoholSegmentID, &segment.Name, &segment.PriceModification)
+		if err != nil {
+			return alcoholSegments, fmt.Errorf("error scanning row: %w", err)
+		}
+		alcoholSegments = append(alcoholSegments, segment)
+	}
+
+	if err := rows.Err(); err != nil {
+		return alcoholSegments, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return alcoholSegments, nil
+}
+
+func GetPackageTypes() ([]models.PackageType, error) {
+	var packageTypes []models.PackageType
+
+	rows, err := DB.Query(`SELECT package_type_id, name, price_modification FROM "package_type"`)
+	if err != nil {
+		return packageTypes, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var pkg models.PackageType
+		err := rows.Scan(&pkg.PackageTypeID, &pkg.Name, &pkg.PriceModification)
+		if err != nil {
+			return packageTypes, fmt.Errorf("error scanning row: %w", err)
+		}
+		packageTypes = append(packageTypes, pkg)
+	}
+
+	if err := rows.Err(); err != nil {
+		return packageTypes, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return packageTypes, nil
+}

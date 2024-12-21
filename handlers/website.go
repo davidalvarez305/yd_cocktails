@@ -140,6 +140,20 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 		return
 	}
 
+	alcoholSegments, err := database.GetAlcoholSegments()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting alcohol segments.", http.StatusInternalServerError)
+		return
+	}
+
+	packageTypes, err := database.GetPackageTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting package types.", http.StatusInternalServerError)
+		return
+	}
+
 	csrfToken, ok := r.Context().Value("csrf_token").(string)
 	if !ok {
 		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
@@ -163,6 +177,8 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 	data.CSRFToken = csrfToken
 	data.VenueTypes = venueTypes
 	data.EventTypes = eventTypes
+	data.PackageTypes = packageTypes
+	data.AlcoholSegments = alcoholSegments
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 

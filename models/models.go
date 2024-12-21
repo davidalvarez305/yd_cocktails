@@ -147,5 +147,8 @@ type PackageType struct {
 // Top Shelf, Premium, Standard
 type AlcoholSegment struct {
 	AlcoholSegmentID  int     `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
+	Name              string  `json:"name" form:"name" schema:"name"`
 	PriceModification float64 `json:"price_modification" form:"price_modification" schema:"price_modification"`
 }
+
+type Booking struct{}
