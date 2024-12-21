@@ -24,8 +24,8 @@ type EstimateForm struct {
 
 	WillRequireGlassware *bool `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
 
-	WillRequireMobileBar *bool `json:"will_require_mobile_bar" form:"will_require_mobile_bar" schema:"will_require_mobile_bar"`
-	NumBars              *int  `json:"num_bars" form:"num_bars" schema:"num_bars"`
+	WillRequireBar *bool `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
+	NumBars        *int  `json:"num_bars" form:"num_bars" schema:"num_bars"`
 }
 
 type QuoteForm struct {

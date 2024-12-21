@@ -988,7 +988,7 @@ func GeneratePackageEstimate(form types.EstimateForm, price float64) (int, error
                              will_provide_mixers, will_provide_juices, 
                              will_provide_soft_drinks, will_provide_cups, 
                              will_provide_ice, will_require_glassware, 
-                             will_require_mobile_bar, num_bars, price, date_created)
+                             will_require_bar, num_bars, price, date_created)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, to_timestamp($16)::timestamptz AT TIME ZONE 'America/New_York')
 		RETURNING package_id
 	`)
@@ -1010,7 +1010,7 @@ func GeneratePackageEstimate(form types.EstimateForm, price float64) (int, error
 		utils.CreateNullBool(form.WillProvideCups),
 		utils.CreateNullBool(form.WillProvideIce),
 		utils.CreateNullBool(form.WillRequireGlassware),
-		utils.CreateNullBool(form.WillRequireMobileBar),
+		utils.CreateNullBool(form.WillRequireBar),
 		form.NumBars,
 		price,
 		time.Now().Unix(),

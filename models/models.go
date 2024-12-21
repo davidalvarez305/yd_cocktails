@@ -131,7 +131,7 @@ type Package struct {
 	WillProvideCups        bool    `json:"will_provide_cups" form:"will_provide_cups" schema:"will_provide_cups"`
 	WillProvideIce         bool    `json:"will_provide_ice" form:"will_provide_ice" schema:"will_provide_ice"`
 	WillRequireGlassware   bool    `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
-	WillRequireMobileBar   bool    `json:"will_require_mobile_bar" form:"will_require_mobile_bar" schema:"will_require_mobile_bar"`
+	WillRequireBar         bool    `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
 	NumBars                int     `json:"num_bars" form:"num_bars" schema:"num_bars"`
 	DateCreated            int64   `json:"date_created" form:"date_created" schema:"date_created"`
 	DateUpdated            int64   `json:"date_updated" form:"date_updated" schema:"date_updated"`

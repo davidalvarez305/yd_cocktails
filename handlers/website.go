@@ -784,7 +784,7 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 	form.WillProvideSoftDrinks = helpers.GetBoolPointerFromForm(r, "will_provide_soft_drinks")
 	form.WillProvideCups = helpers.GetBoolPointerFromForm(r, "will_provide_cups")
 	form.WillRequireGlassware = helpers.GetBoolPointerFromForm(r, "will_require_glassware")
-	form.WillRequireMobileBar = helpers.GetBoolPointerFromForm(r, "will_require_mobile_bar")
+	form.WillRequireBar = helpers.GetBoolPointerFromForm(r, "will_require_bar")
 	form.NumBars = helpers.GetIntPointerFromForm(r, "num_bars")
 
 	packagePrice := helpers.CalculatePackagePrice(form)
