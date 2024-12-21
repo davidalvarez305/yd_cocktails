@@ -269,13 +269,13 @@
     const cancelFormModal = document.getElementById("cancelFormModal");
     const closeFormModal = document.getElementById("closeFormModal");
 
-    function handleCloseModal() {
+    function handleCloseFormModal() {
         const modal = document.getElementById('formModalContainer');
         modal.style.display = 'none';
     }
 
-    closeFormModal.addEventListener("click", () => handleCloseModal());
-    cancelFormModal.addEventListener("click", () => handleCloseModal());
+    closeFormModal.addEventListener("click", () => handleCloseFormModal());
+    cancelFormModal.addEventListener("click", () => handleCloseFormModal());
 
     const optIn = document.getElementById("opt_in_text_messaging");
 
@@ -400,7 +400,7 @@
             })
             .finally(() => {
                 handleCloseAlertModal();
-                handleCloseModal();
+                handleCloseFormModal();
                 form.reset();
             });
     }
@@ -435,8 +435,6 @@
 
         handleCheckboxNodes(form);
 
-        return;
-
         fetch("/estimate", {
             method: "POST",
             credentials: "include",
@@ -459,15 +457,15 @@
             .then(({ data }) => {
                 estimateData.textContent = JSON.stringify(data);
 
-                stepOne.classList.add("hidden");
-                stepTwo.classList.remove("hidden");
+                hideElement(stepOne);
+                showElement(stepTwo);
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
             })
             .finally(() => {
                 handleCloseAlertModal();
-                handleCloseModal();
+                handleCloseFormModal();
                 form.reset();
             });
     }
@@ -487,5 +485,13 @@
     willProvideCups.addEventListener("change", (e) => {
         if (isChecked) willProvideGlassware.style.display = e.target.checked ? "" : "none";
     });
+
+    function showElement(el) {
+        el.style.display = "";
+    }
+
+    function hideElement(el) {
+        el.style.display = "none";
+    }
 </script>
 {{ end }}
