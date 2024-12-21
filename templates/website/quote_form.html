@@ -457,8 +457,8 @@
             .then(({ data }) => {
                 estimateData.textContent = JSON.stringify(data);
 
-                hideElement(stepOne);
-                showElement(stepTwo);
+                shouldShowElement(stepOne, false);
+                shouldShowElement(stepTwo, true);
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
@@ -475,23 +475,15 @@
     const alcoholPackages = document.getElementById("alcoholPackages");
     const willProvideLiquor = document.getElementById("will_provide_liquor");
 
-    willProvideLiquor.addEventListener("change", (e) => {
-        alcoholPackages.style.display = e.target.checked ? "" : "none";
-    });
+    willProvideLiquor.addEventListener("change", (e) => shouldShowElement(alcoholPackages, e.target.checked));
 
     const willProvideCups = document.getElementById("will_be_providing_cups");
     const willProvideGlassware = document.getElementById("will_require_glassware");
 
-    willProvideCups.addEventListener("change", (e) => {
-        if (isChecked) willProvideGlassware.style.display = e.target.checked ? "" : "none";
-    });
+    willProvideCups.addEventListener("change", (e) => shouldShowElement(willProvideGlassware, e.target.checked));
 
-    function showElement(el) {
-        el.style.display = "";
-    }
-
-    function hideElement(el) {
-        el.style.display = "none";
+    function shouldShowElement(el, condition) {
+        el.style.display = condition ? "" : "none";
     }
 </script>
 {{ end }}
