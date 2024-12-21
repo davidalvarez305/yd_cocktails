@@ -22,8 +22,7 @@ const (
 	BartendingRate float64 = 70.00
 
 	BarRentalCost           float64 = 150.00
-	MobileBarFee            float64 = 25.00
-	TimeToSetUpAndBreakDown float64 = 4.00
+	BarSetupAndBreakdownFee float64 = 100.00
 
 	PerPersonAlcoholFee     float64 = 15.00
 	PerPersonMixersFee      float64 = 3.00

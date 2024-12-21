@@ -42,15 +42,20 @@ func CalculatePackagePrice(form types.EstimateForm) float64 {
 
 	packageTypeID := SafeInt(form.PackageTypeID)
 
-	numBarsFloat := float64(SafeInt(form.NumBars))
-	totalCost += numBarsFloat * constants.BarRentalCost
+	willProvideLiquor := SafeBoolDefaultFalse(form.WillProvideLiquor)
+	willProvideBeerAndWine := SafeBoolDefaultFalse(form.WillProvideBeerAndWine)
+	willProvideMixers := SafeBoolDefaultFalse(form.WillProvideMixers)
+	willProvideJuices := SafeBoolDefaultFalse(form.WillProvideJuices)
+	willProvideCups := SafeBoolDefaultFalse(form.WillProvideCups)
+	willProvideSoftDrinks := SafeBoolDefaultFalse(form.WillProvideSoftDrinks)
+	willRequireBar := SafeBoolDefaultFalse(form.WillRequireBar)
+	willRequireGlassware := SafeBoolDefaultFalse(form.WillRequireGlassware)
+	willProvideIce := SafeBoolDefaultFalse(form.WillProvideIce)
 
-	totalCost += numBarsFloat * constants.MobileBarFee * constants.TimeToSetUpAndBreakDown
-
-	if form.WillProvideLiquor != nil && !*form.WillProvideLiquor {
+	if willProvideLiquor {
 		totalCost += floatGuests * constants.PerPersonAlcoholFee
 	}
-	if form.WillProvideBeerAndWine != nil && !*form.WillProvideBeerAndWine {
+	if willProvideBeerAndWine {
 		totalCost += floatGuests * constants.PerPersonBeerAndWineFee
 	}
 	if packageTypeID == constants.FullOpenBarPackageTypeID {
@@ -59,23 +64,30 @@ func CalculatePackagePrice(form types.EstimateForm) float64 {
 	if packageTypeID == constants.PartialOpenBarPackageTypeID {
 		totalCost += floatGuests * constants.PartialOpenBarFee
 	}
-	if form.WillProvideMixers != nil && !*form.WillProvideMixers {
+	if willProvideMixers {
 		totalCost += floatGuests * constants.PerPersonMixersFee
 	}
-	if form.WillProvideJuices != nil && !*form.WillProvideJuices {
+	if willProvideJuices {
 		totalCost += floatGuests * constants.PerPersonJuicesFee
 	}
-	if form.WillProvideSoftDrinks != nil && !*form.WillProvideSoftDrinks {
+	if willProvideSoftDrinks {
 		totalCost += floatGuests * constants.PerPersonSoftDrinksFee
 	}
-	if form.WillProvideCups != nil && !*form.WillProvideCups {
+	if willProvideCups {
 		totalCost += floatGuests * constants.PerPersonCupsFee
 	}
-	if form.WillProvideIce != nil && !*form.WillProvideIce {
+	if willProvideIce {
 		totalCost += floatGuests * constants.PerPersonIceFee
 	}
-	if form.WillRequireGlassware != nil && *form.WillRequireGlassware {
+	if willRequireGlassware {
 		totalCost += floatGuests * constants.PerPersonGlasswareFee
+	}
+
+	if willRequireBar {
+		numBarsFloat := float64(SafeInt(form.NumBars))
+		totalCost += numBarsFloat * constants.BarRentalCost
+
+		totalCost += numBarsFloat * constants.BarSetupAndBreakdownFee
 	}
 
 	return totalCost

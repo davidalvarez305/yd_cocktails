@@ -192,6 +192,13 @@ func SafeInt(ptr *int) int {
 	return 0
 }
 
+func SafeBoolDefaultFalse(ptr *bool) bool {
+	if ptr != nil {
+		return *ptr
+	}
+	return false
+}
+
 func SafeFloat64(ptr *float64) float64 {
 	if ptr != nil {
 		return *ptr
