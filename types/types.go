@@ -96,6 +96,7 @@ type LeadDetails struct {
 	VenueType   string `json:"venue_type" form:"venue_type" schema:"venue_type"`
 
 	CampaignName     string `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
+	CampaignID       int64  `json:"campaign_id" form:"campaign_id" schema:"campaign_id"`
 	Medium           string `json:"medium" form:"medium" schema:"medium"`
 	Source           string `json:"source" form:"source" schema:"source"`
 	Referrer         string `json:"referrer" form:"referrer" schema:"referrer"`
@@ -318,6 +319,7 @@ type FacebookCustomData struct {
 type FacebookEventData struct {
 	EventName      string             `json:"event_name,omitempty" form:"event_name,omitempty" schema:"event_name,omitempty"`
 	EventTime      int64              `json:"event_time,omitempty" form:"event_time,omitempty" schema:"event_time,omitempty"`
+	EventID        string             `json:"event_id,omitempty" form:"event_id,omitempty" schema:"event_id,omitempty"`
 	ActionSource   string             `json:"action_source,omitempty" form:"action_source,omitempty" schema:"action_source,omitempty"`
 	EventSourceURL string             `json:"event_source_url,omitempty" form:"event_source_url,omitempty" schema:"event_source_url,omitempty"`
 	UserData       FacebookUserData   `json:"user_data,omitempty" form:"user_data,omitempty" schema:"user_data,omitempty"`
@@ -329,14 +331,15 @@ type FacebookPayload struct {
 }
 
 type GoogleEventParamsLead struct {
-	GCLID      string  `json:"gclid" form:"gclid" schema:"gclid"`
-	Value      float64 `json:"value,omitempty" form:"value" schema:"value"`
-	Currency   string  `json:"currency,omitempty" form:"currency" schema:"currency"`
-	CampaignID string  `json:"campaign_id,omitempty" form:"campaign_id" schema:"campaign_id"`
-	Campaign   string  `json:"campaign,omitempty" form:"campaign" schema:"campaign"`
-	Source     string  `json:"source,omitempty" form:"source" schema:"source"`
-	Medium     string  `json:"medium,omitempty" form:"medium" schema:"medium"`
-	Term       string  `json:"term,omitempty" form:"term" schema:"term"`
+	GCLID         string  `json:"gclid" form:"gclid" schema:"gclid"`
+	TransactionID string  `json:"transaction_id" form:"transaction_id" schema:"transaction_id"`
+	Value         float64 `json:"value,omitempty" form:"value" schema:"value"`
+	Currency      string  `json:"currency,omitempty" form:"currency" schema:"currency"`
+	CampaignID    string  `json:"campaign_id,omitempty" form:"campaign_id" schema:"campaign_id"`
+	Campaign      string  `json:"campaign,omitempty" form:"campaign" schema:"campaign"`
+	Source        string  `json:"source,omitempty" form:"source" schema:"source"`
+	Medium        string  `json:"medium,omitempty" form:"medium" schema:"medium"`
+	Term          string  `json:"term,omitempty" form:"term" schema:"term"`
 }
 
 type GoogleEventLead struct {

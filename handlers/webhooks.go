@@ -64,7 +64,7 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var invoiceAmount float64
-	var stripeCustomerID, stripeInvoiceID, stripeInvoiceStatus string
+	var stripeCustomerID, stripeInvoiceID string
 
 	switch event.Type {
 	case "invoice.payment_succeeded":
@@ -78,7 +78,6 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 
 		// Extract the relevant data from the invoice
 		stripeInvoiceID = invoice.ID
-		stripeInvoiceStatus = string(invoice.Status)
 		stripeCustomerID = invoice.Customer.ID
 		invoiceAmount = float64(invoice.AmountPaid) / 100
 
@@ -100,11 +99,8 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(stripeInvoiceID)
-	fmt.Println(stripeInvoiceStatus)
-
 	fbEvent := types.FacebookEventData{
-		EventName:      constants.InvoicePaidEventName,
+		EventName:      constants.BookingEventName,
 		EventTime:      time.Now().UTC().Unix(),
 		ActionSource:   "website",
 		EventSourceURL: lead.LandingPage,
@@ -123,6 +119,7 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 			Currency: "USD",
 			Value:    fmt.Sprint(invoiceAmount),
 		},
+		EventID: stripeInvoiceID,
 	}
 
 	metaPayload := types.FacebookPayload{
@@ -134,11 +131,17 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 		UserId:   lead.ExternalID,
 		Events: []types.GoogleEventLead{
 			{
-				Name: constants.InvoicePaidEventName,
+				Name: constants.BookingEventName,
 				Params: types.GoogleEventParamsLead{
-					GCLID:    lead.ClickID,
-					Value:    float64(invoiceAmount),
-					Currency: "USD",
+					GCLID:         lead.ClickID,
+					TransactionID: stripeInvoiceID,
+					Value:         float64(invoiceAmount),
+					Currency:      constants.DefaultCurrency,
+					CampaignID:    fmt.Sprint(lead.CampaignID),
+					Campaign:      lead.CampaignName,
+					Source:        lead.Source,
+					Medium:        lead.Medium,
+					Term:          lead.Keyword,
 				},
 			},
 		},

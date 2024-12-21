@@ -12,7 +12,7 @@ const (
 	TimeZone string = "America/New_York"
 
 	LeadGeneratedEventName string = "generate_lead"
-	InvoicePaidEventName   string = "invoice_paid"
+	BookingEventName       string = "booking"
 	LeadEventName          string = "Lead"
 
 	DefaultCurrency string = "USD"

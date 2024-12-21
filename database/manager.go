@@ -497,7 +497,8 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	lm.user_agent,
 	lm.click_id,
 	lm.google_client_id,
-	lm.button_clicked
+	lm.button_clicked,
+	lm.campaign_id
 	FROM lead l
 	JOIN event_type et ON l.event_type_id = et.event_type_id
 	JOIN venue_type vt ON l.venue_type_id = vt.venue_type_id
@@ -510,6 +511,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
 	var eventType, venueType, message, externalId, userAgent, clickId, googleClientId sql.NullString
+	var campaignId sql.NullInt64
 
 	var buttonClicked sql.NullString
 
@@ -538,6 +540,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&clickId,
 		&googleClientId,
 		&buttonClicked,
+		&campaignId,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -589,6 +592,9 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	if adCampaign.Valid {
 		leadDetails.CampaignName = adCampaign.String
+	}
+	if campaignId.Valid {
+		leadDetails.CampaignID = campaignId.Int64
 	}
 
 	if medium.Valid {
@@ -1039,7 +1045,21 @@ func AssignLeadToPackage(packageId, leadId int) error {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
 
-	fmt.Println("CSRFToken marked as used successfully")
+	return nil
+}
+
+func AssignStripeCustomerToLead(stripeCustomerID string, leadId int) error {
+	stmt, err := DB.Prepare(`UPDATE lead SET stripe_customer_id = $1 WHERE lead_id = $2`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(stripeCustomerID, leadId)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
 	return nil
 }
 

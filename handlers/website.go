@@ -491,6 +491,22 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = database.AssignStripeCustomerToLead(stripeInvoice.Customer.ID, lead.LeadID)
+	if err != nil {
+		fmt.Printf("Error creating invoice: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Internal server error while adding package to your account.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
 	var redirectUrl = fmt.Sprintf("%s/quote/%s", constants.RootDomain, stripeInvoice.ID)
 
 	go func() {
