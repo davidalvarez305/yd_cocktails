@@ -558,7 +558,31 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
+	response := map[string]interface{}{
+		"data": map[string]string{
+			"redirect_url": redirectUrl,
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		fmt.Printf("Error marshaling JSON: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while marshaling JSON.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	w.Write(jsonResponse)
 }
 
 func GetContactForm(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {

@@ -358,16 +358,14 @@
                     tokens.forEach((csrf_token) => (csrf_token.value = token));
                 }
                 if (response.ok) {
-                    return response.text();
+                    return response.json();
                 } else {
                     return response.text().then((err) => {
                         throw new Error(err);
                     });
                 }
             })
-            .then(html => {
-                alertModal.outerHTML = html;
-
+            .then(resp => {
                 // Report Google Conversion
                 gtag("set", "user_data", {
                     phone_number: "+1" + data.get("phone_number"),
@@ -401,6 +399,8 @@
                     currency: "{{ .DefaultCurrency }}",
                     value: parseFloat(estimateData.estimate),
                 });
+
+                window.location.replace(resp.data.redirect_url);
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
