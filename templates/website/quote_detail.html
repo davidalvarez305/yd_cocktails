@@ -69,6 +69,10 @@
                                 class="bg-gray-100/75 px-3 py-4 text-right font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
                                 Qty.
                             </th>
+                            <th
+                                class="bg-gray-100/75 px-3 py-4 text-right font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
+                                Total
+                            </th>
                         </tr>
                     </thead>
                     <!-- END Table Header -->
@@ -86,9 +90,25 @@
                                     {{ .Quantity }}
                                 </p>
                             </td>
-                            <td class="p-3 text-right">1</td>
+                            <td class="p-3 text-right">{{ .Total }}</td>
                         </tr>
                         {{ end }}
+                        <tr>
+                            <td colspan="3" class="p-3 text-right font-semibold">Subtotal</td>
+                            <td class="p-3 text-right">{{ .InvoiceSubtotal }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="p-3 text-right font-semibold">24-Hour Bookign Discount</td>
+                            <td class="p-3 text-right">20%</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="bg-gray-50 p-3 text-right font-bold uppercase dark:bg-gray-900/50">
+                                Total Due
+                            </td>
+                            <td class="bg-gray-50 p-3 text-right font-semibold dark:bg-gray-900/50">
+                                {{ .InvoiceTotal }}
+                            </td>
+                        </tr>
                     </tbody>
                     <!-- END Table Body -->
                 </table>
@@ -115,7 +135,7 @@
     const printButton = document.getElementById("printButton");
 
     // Print button downloads stripe invoice to user's browser
-    printButton.addEventListener("click", function(e) {
+    printButton.addEventListener("click", function (e) {
         window.print();
     });
 </script>
