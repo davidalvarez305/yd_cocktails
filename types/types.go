@@ -391,4 +391,17 @@ type QuoteDetails struct {
 	LastName  string `json:"last_name" form:"last_name" schema:"last_name"`
 	EventType string `json:"event_type" form:"event_type" schema:"event_type"`
 	VenueType string `json:"venue_type" form:"venue_type" schema:"venue_type"`
+
+	BartendingRate  float64 `json:"bartending_rate" header:"Hourly Rate Per Bartender" description:"The hourly rate that we charge to hire a bartender."`
+	BartendingHours float64 `json:"bartending_hours" header:"Bartending Hours" description:"The total number of hours allotted for service."`
+	BarRentalCost   float64 `json:"bar_rental_cost" header:"Bar Rental Cost" description:"The cost for renting one of our bars for the night."`
+	BarSetupFee     float64 `json:"bar_setup_fee" header:"Setup & Breakdown Fee For Bar" description:"The logistical cost of transporting, setting up, and breaking down a bar for the event."`
+
+	SpiritsRate         float64 `json:"spirits_rate" header:"Spirits Rate" description:"This covers the cost of purchasing spirits such as whiskey, vodka, rum, and tequila."`
+	BeerAndWineRate     float64 `json:"beer_and_wine_rate" header:"Beer & Wine Rate" description:"This covers the cost of purchasing beer & alcohol."`
+	JuicesAndMixersRate float64 `json:"juices_and_mixes_rate" header:"Juices & Mixers Rate" description:"The cost of purchasing ingredients to craft & mix cocktails with."`
+	SoftDrinksRate      float64 `json:"soft_drinks_rate" header:"Soft Drinks Rate" description:"The cost of purchasing soft drink such as Coca Cola, Sprite, Soda Water, etc..."`
+
+	JuicesAndMixersRate float64 `json:"juices_and_mixes_rate" header:"Juices & Mixers Rate" description:"The cost of purchasing ingredients to craft & mix cocktails with."`
+	SoftDrinksRate      float64 `json:"soft_drinks_rate" header:"Soft Drinks Rate" description:"The cost of purchasing soft drink such as Coca Cola, Sprite, Soda Water, etc..."`
 }
