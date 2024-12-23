@@ -24,17 +24,17 @@ const (
 	BarRentalCost           float64 = 150.00
 	BarSetupAndBreakdownFee float64 = 100.00
 
-	PerPersonAlcoholFee     float64 = 15.00
+	PerPersonAlcoholFee     float64 = 10.00
 	PerPersonMixersFee      float64 = 3.00
-	PerPersonJuicesFee      float64 = 2.00
+	PerPersonJuicesFee      float64 = 1.00
 	PerPersonSoftDrinksFee  float64 = 2.50
 	PerPersonCupsFee        float64 = 2.00
 	PerPersonIceFee         float64 = 2.00
 	PerPersonGlasswareFee   float64 = 3.00
-	PerPersonBeerAndWineFee float64 = 15.00
+	PerPersonBeerAndWineFee float64 = 5.00
 
-	FullOpenBarFee    float64 = 20.00
-	PartialOpenBarFee float64 = 10.00
+	FullOpenBarRate    float64 = 1.50
+	PartialOpenBarRate float64 = 1.00
 
 	FullOpenBarPackageTypeID    int = 1
 	PartialOpenBarPackageTypeID int = 2

@@ -46,11 +46,11 @@
                                         <input type="checkbox" class="peer sr-only" id="will_require_bar" name="will_require_bar" required />
                                         <span
                                             class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                        <span class="font-medium">Will you be providing a bar?</span>
+                                        <span class="font-medium">Will you need us to bring our own bar(s)?</span>
                                     </label>
                                     <p>Select this option if you will provide a workstation for the bartender.</p>
                                 </div>
-                                <div class="numberOfBars grow space-y-1">
+                                <div id="numberOfBars" class="grow space-y-1" style="display: none;">
                                     <label for="num_bars" class="font-medium">How many bars do you need?</label>
                                     <input type="number" id="num_bars" name="num_bars"
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
@@ -58,7 +58,7 @@
                                 <div class="space-y-1">
                                     <label for="will_provide_liquor"
                                         class="group relative inline-flex items-center gap-3">
-                                        <input type="checkbox" class="peer sr-only" id="will_provide_liquor" name="will_provide_liquor" required />
+                                        <input type="checkbox" class="peer sr-only" id="will_provide_liquor" name="will_provide_liquor" checked required />
                                         <span
                                             class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
                                         <span class="font-medium">Will you be providing the liquor?</span>
@@ -70,7 +70,7 @@
                                         <label for="alcohol_segment_id" class="font-medium">Alcohol Quality</label>
                                         <select id="alcohol_segment_id" name="alcohol_segment_id"
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                                            <option>Select One</option>
+                                            <option></option>
                                             {{ range .AlcoholSegments }}
                                             <option value="{{ .AlcoholSegmentID }}">{{ .Name }}</option>
                                             {{ end }}
@@ -80,7 +80,7 @@
                                         <label for="package_type_id" class="font-medium">Package Type</label>
                                         <select id="package_type_id" name="package_type_id"
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                                            <option>Select One</option>
+                                            <option></option>
                                             {{ range .PackageTypes }}
                                             <option value="{{ .PackageTypeID }}">{{ .Name }}</option>
                                             {{ end }}
@@ -172,30 +172,30 @@
                                 </button>
                             </form>
                         </div>
-                        <div id="stepTwo" class="hidden stepTwo grow p-5 md:px-16 md:py-6">
+                        <div id="stepTwo" class="grow p-5 md:px-16 md:py-6" style="display: none;">
                             <form id="quoteForm" class="space-y-6 p-2 md:p-2">
                                 <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
                                 <input type="hidden" id="button_clicked" name="button_clicked" />
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
                                         <label for="first_name" class="font-medium">First Name*</label>
-                                        <input type="text" id="first_name" name="first_name" autocomplete="given-name" required
+                                        <input type="text" id="first_name" name="first_name" required
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                     </div>
                                     <div class="grow space-y-1">
                                         <label for="last_name" class="font-medium">Last Name*</label>
-                                        <input type="text" id="last_name" name="last_name" autocomplete="family-name" required
+                                        <input type="text" id="last_name" name="last_name" required
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                     </div>
                                 </div>
                                 <div class="space-y-1">
                                     <label for="phone_number" class="font-medium">Phone Number*</label>
-                                    <input type="tel" id="phone_number" name="phone_number" autocomplete="tel" required
+                                    <input type="tel" id="phone_number" name="phone_number" required
                                         class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                 </div>
                                 <div class="space-y-1">
                                     <label for="email" class="font-medium">Email*</label>
-                                    <input type="email" id="email" name="email" autocomplete="email" required
+                                    <input type="email" id="email" name="email" required
                                         class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                 </div>
                                 <div class="space-y-1">
@@ -260,7 +260,7 @@
 <script id="estimateData" type="application/json">
     {
         "package_id": "",
-        "estimate": "",
+        "estimate": ""
     }
 </script>
 
@@ -343,6 +343,9 @@
             if (value) data.set(key, value);
         });
 
+        data.set("package_id", estimateData.package_id);
+        data.set("estimate", estimateData.estimate);
+
         fetch("/quote", {
             method: "POST",
             credentials: "include",
@@ -417,6 +420,11 @@
     const stepTwo = document.getElementById("stepTwo");
     const estimateData = document.getElementById("estimateData");
 
+    function handleCloseFormModal() {
+        const modal = document.getElementById('formModalContainer');
+        modal.style.display = 'none';
+    }
+
     const submitEstimateForm = document.getElementById("submitEstimateForm");
 
     function handleSubmitEstimateForm() {
@@ -470,10 +478,10 @@
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
-            })
-            .finally(() => {
                 handleCloseAlertModal();
                 handleCloseFormModal();
+            })
+            .finally(() => {
                 form.reset();
             });
     }
@@ -483,7 +491,7 @@
     const alcoholPackages = document.getElementById("alcoholPackages");
     const willProvideLiquor = document.getElementById("will_provide_liquor");
 
-    willProvideLiquor.addEventListener("change", (e) => shouldShowElement(alcoholPackages, e.target.checked));
+    willProvideLiquor.addEventListener("change", (e) => shouldShowElement(alcoholPackages, !e.target.checked));
 
     const willProvideCups = document.getElementById("will_provide_cups");
     const willProvideGlassware = document.getElementById("will_require_glassware");

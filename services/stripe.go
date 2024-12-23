@@ -15,7 +15,7 @@ func CreateStripeInvoiceForNewCustomer(email, firstName, lastName string, packag
 	stripe.Key = constants.StrikeAPIKey
 
 	custParams := &stripe.CustomerParams{
-		Email: stripe.String(fmt.Sprintf("%s", email)),
+		Email: stripe.String(email),
 		Name:  stripe.String(fmt.Sprintf("%s %s", firstName, lastName)),
 	}
 	cust, err := customer.New(custParams)
@@ -23,13 +23,11 @@ func CreateStripeInvoiceForNewCustomer(email, firstName, lastName string, packag
 		return stripe.Invoice{}, fmt.Errorf("failed to create customer: %v", err)
 	}
 
-	depositAmount := packagePrice * constants.DepositPercentageAmount
-
 	_, err = invoiceitem.New(&stripe.InvoiceItemParams{
 		Customer:    stripe.String(cust.ID),
-		Amount:      stripe.Int64(int64(depositAmount)),
+		Amount:      stripe.Int64(int64(packagePrice * 100)), // Convert to cents
 		Currency:    stripe.String(string(stripe.CurrencyUSD)),
-		Description: stripe.String("50% Deposit"),
+		Description: stripe.String("Full open bar service."),
 	})
 	if err != nil {
 		return stripe.Invoice{}, fmt.Errorf("failed to create invoice item: %v", err)

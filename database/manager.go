@@ -1004,10 +1004,10 @@ func GeneratePackageEstimate(form types.EstimateForm, price float64) (int, error
 	defer packageStmt.Close()
 
 	err = packageStmt.QueryRow(
-		form.Guests,
-		form.Hours,
-		form.PackageTypeID,
-		form.AlcoholSegmentID,
+		utils.CreateNullInt(form.Guests),
+		utils.CreateNullInt(form.Hours),
+		utils.CreateNullInt(form.PackageTypeID),
+		utils.CreateNullInt(form.AlcoholSegmentID),
 		utils.CreateNullBool(form.WillProvideLiquor),
 		utils.CreateNullBool(form.WillProvideBeerAndWine),
 		utils.CreateNullBool(form.WillProvideMixers),
@@ -1017,7 +1017,7 @@ func GeneratePackageEstimate(form types.EstimateForm, price float64) (int, error
 		utils.CreateNullBool(form.WillProvideIce),
 		utils.CreateNullBool(form.WillRequireGlassware),
 		utils.CreateNullBool(form.WillRequireBar),
-		form.NumBars,
+		utils.CreateNullInt(form.NumBars),
 		price,
 		time.Now().Unix(),
 	).Scan(&packageID)

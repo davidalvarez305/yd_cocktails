@@ -52,31 +52,32 @@ func CalculatePackagePrice(form types.EstimateForm) float64 {
 	willRequireGlassware := SafeBoolDefaultFalse(form.WillRequireGlassware)
 	willProvideIce := SafeBoolDefaultFalse(form.WillProvideIce)
 
-	if willProvideLiquor {
-		totalCost += floatGuests * constants.PerPersonAlcoholFee
+	if !willProvideLiquor {
+		feeRate := constants.PartialOpenBarRate
+
+		if packageTypeID == constants.FullOpenBarPackageTypeID {
+			feeRate = constants.FullOpenBarRate
+		}
+
+		totalCost += floatGuests * (constants.PerPersonAlcoholFee * feeRate)
 	}
-	if willProvideBeerAndWine {
+	if !willProvideBeerAndWine {
 		totalCost += floatGuests * constants.PerPersonBeerAndWineFee
 	}
-	if packageTypeID == constants.FullOpenBarPackageTypeID {
-		totalCost += floatGuests * constants.FullOpenBarFee
-	}
-	if packageTypeID == constants.PartialOpenBarPackageTypeID {
-		totalCost += floatGuests * constants.PartialOpenBarFee
-	}
-	if willProvideMixers {
+
+	if !willProvideMixers {
 		totalCost += floatGuests * constants.PerPersonMixersFee
 	}
-	if willProvideJuices {
+	if !willProvideJuices {
 		totalCost += floatGuests * constants.PerPersonJuicesFee
 	}
-	if willProvideSoftDrinks {
+	if !willProvideSoftDrinks {
 		totalCost += floatGuests * constants.PerPersonSoftDrinksFee
 	}
-	if willProvideCups {
+	if !willProvideCups {
 		totalCost += floatGuests * constants.PerPersonCupsFee
 	}
-	if willProvideIce {
+	if !willProvideIce {
 		totalCost += floatGuests * constants.PerPersonIceFee
 	}
 	if willRequireGlassware {

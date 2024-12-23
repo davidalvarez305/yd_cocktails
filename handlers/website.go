@@ -510,15 +510,21 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	var redirectUrl = fmt.Sprintf("%s/quote/%s", constants.RootDomain, stripeInvoice.ID)
 
 	go func() {
-		to := "+1" + helpers.RemoveCountryCode(helpers.SafeString(form.PhoneNumber))
-		from := "+1" + constants.CompanyPhoneNumber
+		cleanedPhoneNumber := helpers.RemoveCountryCode(helpers.SafeString(form.PhoneNumber))
+
+		to := cleanedPhoneNumber
+		from := constants.CompanyPhoneNumber
 
 		textMessage := fmt.Sprintf(`Hey! This is YD Cocktails, LLC.
-		Your quote has been successfully generated. If you'd like to lock down a spot for your event, you can do so here: %s`, redirectUrl)
+
+		Your quote has been successfully generated.
+		
+		If you'd like to lock down a spot for your event, you can do so here: \n%s`, redirectUrl)
 
 		twilioMessage, err := services.SendTextMessage(to, from, textMessage)
 		if err != nil {
-			fmt.Printf("Error creating invoice: %+v\n", err)
+			fmt.Printf("Error sending twilio message: %+v\n", err)
+			return
 		}
 
 		message := models.Message{
@@ -527,7 +533,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			LeadID:      lead.LeadID,
 			Text:        helpers.SafeString(twilioMessage.Body),
 			TextFrom:    constants.CompanyPhoneNumber,
-			TextTo:      helpers.SafeString(form.PhoneNumber),
+			TextTo:      cleanedPhoneNumber,
 			IsInbound:   false,
 			DateCreated: time.Now().Local().Unix(),
 			Status:      helpers.SafeString(twilioMessage.Status),
@@ -535,7 +541,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 
 		if err := database.SaveSMS(message); err != nil {
 			fmt.Printf("Error saving SMS to database: %s", err)
-			http.Error(w, "Failed to save message.", http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -799,6 +804,7 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 	form.WillProvideJuices = helpers.GetBoolPointerFromForm(r, "will_provide_juices")
 	form.WillProvideSoftDrinks = helpers.GetBoolPointerFromForm(r, "will_provide_soft_drinks")
 	form.WillProvideCups = helpers.GetBoolPointerFromForm(r, "will_provide_cups")
+	form.WillProvideIce = helpers.GetBoolPointerFromForm(r, "will_provide_ice")
 	form.WillRequireGlassware = helpers.GetBoolPointerFromForm(r, "will_require_glassware")
 	form.WillRequireBar = helpers.GetBoolPointerFromForm(r, "will_require_bar")
 	form.NumBars = helpers.GetIntPointerFromForm(r, "num_bars")
@@ -829,7 +835,6 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
 
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
