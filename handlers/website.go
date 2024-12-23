@@ -515,11 +515,13 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		to := cleanedPhoneNumber
 		from := constants.CompanyPhoneNumber
 
-		textMessage := fmt.Sprintf(`Hey! This is YD Cocktails, LLC.
+		textMessage := fmt.Sprintf(`Hey! This is YD Cocktails.
 
 		Your quote has been successfully generated.
 		
-		If you'd like to lock down a spot for your event, you can do so here: \n%s`, redirectUrl)
+		If you'd like to lock down a spot for your event, you can do so here:
+		
+		%s`, redirectUrl)
 
 		twilioMessage, err := services.SendTextMessage(to, from, textMessage)
 		if err != nil {
