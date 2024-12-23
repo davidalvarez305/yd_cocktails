@@ -65,14 +65,9 @@ func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-
 		path := r.URL.Path
-
 		if strings.HasPrefix(path, "/quote/") {
-			if len(path) > len("/quote/") && helpers.IsNumeric(path[len("/quote/"):]) {
-				GetQuoteDetail(w, r, ctx)
-				return
-			}
+			GetQuoteDetail(w, r, ctx)
 			return
 		}
 		switch r.URL.Path {
@@ -507,6 +502,22 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = database.AssignStripeInvoiceToPackage(stripeInvoice.ID, helpers.SafeInt(form.PackageID))
+	if err != nil {
+		fmt.Printf("Error assigning invoice to pkg: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Internal server error while adding package to your account.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
 	var redirectUrl = fmt.Sprintf("%s/quote/%s", constants.RootDomain, stripeInvoice.ID)
 
 	go func() {
@@ -859,7 +870,8 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 
 func GetQuoteDetail(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 	fileName := "quote_detail.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName}
+	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
+	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + fileName, quoteForm}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -872,7 +884,7 @@ func GetQuoteDetail(w http.ResponseWriter, r *http.Request, ctx types.WebsiteCon
 		return
 	}
 
-	invoiceId := strings.TrimPrefix(r.URL.Path, "/crm/quote/")
+	invoiceId := strings.TrimPrefix(r.URL.Path, "/quote/")
 
 	quoteDetails, err := database.GetQuoteDetailsByInvoiceID(invoiceId)
 	if err != nil {

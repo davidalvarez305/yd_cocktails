@@ -1063,13 +1063,28 @@ func AssignStripeCustomerToLead(stripeCustomerID string, leadId int) error {
 	return nil
 }
 
+func AssignStripeInvoiceToPackage(stripeInvoiceId string, packageId int) error {
+	stmt, err := DB.Prepare(`UPDATE package SET stripe_invoice_id = $1 WHERE package_id = $2`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(stripeInvoiceId, packageId)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
 func GetQuoteDetailsByInvoiceID(invoiceId string) (types.QuoteDetails, error) {
 	query := `SELECT l.first_name,
 	l.last_name,
 	et.name,
 	vt.name
 	FROM lead l
-	JOIN package p ON p.lead_id = p.lead_id AND p.package_id = $1
+	JOIN package p ON p.lead_id = p.lead_id AND p.stripe_invoice_id = $1
 	JOIN event_type et ON l.event_type_id = et.event_type_id
 	JOIN venue_type vt ON l.venue_type_id = vt.venue_type_id`
 
@@ -1085,7 +1100,7 @@ func GetQuoteDetailsByInvoiceID(invoiceId string) (types.QuoteDetails, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return quoteDetails, fmt.Errorf("no lead found with invoice id: %s", invoiceId)
+			return quoteDetails, fmt.Errorf("no quote found with invoice id: %s", invoiceId)
 		}
 		return quoteDetails, fmt.Errorf("error scanning row: %w", err)
 	}
