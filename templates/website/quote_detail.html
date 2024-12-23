@@ -114,6 +114,7 @@
 <script nonce="{{ .Nonce }}">
     const printButton = document.getElementById("printButton");
 
+    // Print button downloads stripe invoice to user's browser
     printButton.addEventListener("click", function(e) {
         window.print();
     });
