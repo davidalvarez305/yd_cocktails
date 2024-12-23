@@ -402,6 +402,9 @@ type QuoteDetails struct {
 	JuicesAndMixersRate float64 `json:"juices_and_mixes_rate" header:"Juices & Mixers Rate" description:"The cost of purchasing ingredients to craft & mix cocktails with."`
 	SoftDrinksRate      float64 `json:"soft_drinks_rate" header:"Soft Drinks Rate" description:"The cost of purchasing soft drink such as Coca Cola, Sprite, Soda Water, etc..."`
 
-	JuicesAndMixersRate float64 `json:"juices_and_mixes_rate" header:"Juices & Mixers Rate" description:"The cost of purchasing ingredients to craft & mix cocktails with."`
-	SoftDrinksRate      float64 `json:"soft_drinks_rate" header:"Soft Drinks Rate" description:"The cost of purchasing soft drink such as Coca Cola, Sprite, Soda Water, etc..."`
+	CupsRate float64 `json:"cups_rate" header:"Cups, Straws, And Napkins Rate" description:"The cost of purchasing cups, straws, and napkins for the event."`
+	IceRate  float64 `json:"ice_rate" header:"Ice Rate" description:"The cost of purchasing ice for the drinks."`
+
+	AlcoholSegmentRate float64 `json:"alcohol_segment_rate" header:"Alcohol Segment Rate Adjustment" description:"This adjusts the rate for the purchase of liquor depending on the quality of the liquor requested."`
+	GlasswareRate      float64 `json:"glassware_rate" header:"Glassware Rate Adjustment" description:"This fee covers the cost of renting glassware."`
 }
