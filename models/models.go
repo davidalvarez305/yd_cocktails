@@ -115,8 +115,8 @@ type UserRole struct {
 	Role   string `json:"role" form:"role" schema:"role"`
 }
 
-type Package struct {
-	PackageID              int     `json:"package_id" form:"package_id" schema:"package_id"`
+type Estimate struct {
+	EstimateID             int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
 	PackageTypeID          int     `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
 	AlcoholSegmentID       int     `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
 	LeadID                 int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
@@ -151,4 +151,16 @@ type AlcoholSegment struct {
 	PriceModification float64 `json:"price_modification" form:"price_modification" schema:"price_modification"`
 }
 
-type Booking struct{}
+type Booking struct {
+	BookingID     int    `json:"booking_id" form:"booking_id" schema:"booking_id"`
+	EstimateID    int    `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
+	StreetAddress string `json:"street_address" form:"street_address" schema:"street_address"`
+	City          string `json:"city" form:"city" schema:"city"`
+	State         string `json:"state" form:"state" schema:"state"`
+	PostalCode    string `json:"postal_code" form:"postal_code" schema:"postal_code"`
+	Country       string `json:"country" form:"country" schema:"country"`
+	StartTime     int64  `json:"start_time" form:"start_time" schema:"start_time"`
+	EndTime       int64  `json:"end_time" form:"end_time" schema:"end_time"`
+	BartenderID   int    `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
+	LeadID        int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+}
