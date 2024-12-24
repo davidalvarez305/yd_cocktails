@@ -8,7 +8,7 @@
                 class="mx-auto flex w-full sm:w-1/2 flex-col overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800 dark:text-gray-100">
                 <div class="flex items-center justify-between bg-gray-50 px-5 py-4 dark:bg-gray-700/50">
                     <h3 class="flex items-center gap-2 font-medium">
-                        <span>Get Your Mobile Bartending Quote</span>
+                        <span>Request Your Quote With A Few Details</span>
                     </h3>
                     <div class="-my-4">
                         <button type="button" id="closeFormModal"
@@ -24,7 +24,7 @@
                 </div>
                 <div class="grow px-5">
                     <div class="flex flex-col overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800 dark:text-gray-100">
-                        <div class="grow p-5 md:px-16 md:py-6" style="display: none;">
+                        <div class="grow p-5 md:px-16 md:py-6">
                             <form id="quoteForm" class="space-y-6 p-2 md:p-2">
                                 <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
                                 <input type="hidden" id="button_clicked" name="button_clicked" />
@@ -78,8 +78,9 @@
                                         class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                 </div>
                                 <div class="space-y-1">
-                                    <label for="message" class="font-medium">Message</label>
+                                    <label for="message" class="font-medium">Give us a few details about your event</label>
                                     <textarea id="message" name="message" rows="3"
+                                        placeholder="It's a networking event with 50 people for 4 hours..."
                                         class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary"></textarea>
                                 </div>
                                 <div class="space-y-1">
@@ -99,7 +100,7 @@
                                         <path
                                             d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" />
                                     </svg>
-                                    <span>Submit</span>
+                                    <span>Generate My Estimate</span>
                                 </button>
                             </form>
                         </div>
