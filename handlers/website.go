@@ -716,7 +716,7 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 
 	packagePrice := helpers.CalculatePackagePrice(form)
 
-	err = database.GenerateEstimate(form, packagePrice)
+	err = database.CreateEstimate(form, packagePrice)
 	if err != nil {
 		fmt.Printf("Error creating lead: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
