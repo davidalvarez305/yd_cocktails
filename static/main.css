@@ -880,6 +880,11 @@ select{
   margin-bottom: 2rem;
 }
 
+.mx-2{
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
 .-mr-20{
   margin-right: -5rem;
 }
