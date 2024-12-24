@@ -1,17 +1,14 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
 	"github.com/davidalvarez305/yd_cocktails/conversions"
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
-	"github.com/davidalvarez305/yd_cocktails/models"
 	"github.com/davidalvarez305/yd_cocktails/services"
 	"github.com/davidalvarez305/yd_cocktails/sessions"
 	"github.com/davidalvarez305/yd_cocktails/types"
@@ -65,11 +62,6 @@ func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		path := r.URL.Path
-		if strings.HasPrefix(path, "/quote/") {
-			GetQuoteDetail(w, r, ctx)
-			return
-		}
 		switch r.URL.Path {
 		case "/contact":
 			GetContactForm(w, r, ctx)
@@ -282,9 +274,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	form.IP = helpers.GetStringPointerFromForm(r, "ip")
 	form.Email = helpers.GetStringPointerFromForm(r, "email")
 	form.OptInTextMessaging = helpers.GetBoolPointerFromForm(r, "opt_in_text_messaging")
-
-	form.Estimate = helpers.GetFloat64PointerFromForm(r, "estimate")
-	form.PackageID = helpers.GetIntPointerFromForm(r, "package_id")
+	form.Guests = helpers.GetIntPointerFromForm(r, "guests")
 
 	form.FacebookClickID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_fbc", "facebook_click_id")
 	form.FacebookClientID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_fbp", "facebook_client_id")
@@ -359,10 +349,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			ClientIPAddress: helpers.SafeString(form.IP),
 			ClientUserAgent: helpers.SafeString(form.UserAgent),
 		},
-		CustomData: types.FacebookCustomData{
-			Value:    fmt.Sprint(helpers.SafeFloat64(form.Estimate)),
-			Currency: constants.DefaultCurrency,
-		},
 	}
 
 	metaPayload := types.FacebookPayload{
@@ -377,8 +363,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 				Name: constants.LeadGeneratedEventName,
 				Params: types.GoogleEventParamsLead{
 					GCLID:      helpers.SafeString(form.ClickID),
-					Value:      helpers.SafeFloat64(form.Estimate),
-					Currency:   constants.DefaultCurrency,
 					CampaignID: fmt.Sprint(helpers.SafeInt64(form.CampaignID)),
 					Campaign:   helpers.SafeString(form.AdCampaign),
 					Source:     helpers.SafeString(form.Source),
@@ -430,6 +414,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			"DateCreated":    utils.FormatTimestampEST(lead.CreatedAt),
 			"EventType":      lead.EventType,
 			"VenueType":      lead.VenueType,
+			"Guests":         lead.Guests,
 			"Message":        helpers.SafeString(form.Message),
 			"LeadDetailsURL": fmt.Sprintf("%s/crm/lead/%d", constants.RootDomain, leadID),
 			"Location":       "",
@@ -454,135 +439,16 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	err = database.AssignLeadToPackage(helpers.SafeInt(form.PackageID), lead.LeadID)
-	if err != nil {
-		fmt.Printf("Error creating invoice: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Internal server error while adding package to your account.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	stripeInvoice, err := services.CreateStripeInvoiceForNewCustomer(helpers.SafeString(form.Email), helpers.SafeString(form.FirstName), helpers.SafeString(form.LastName), helpers.SafeFloat64(form.Estimate))
-	if err != nil {
-		fmt.Printf("Error creating invoice: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Server error while creating invoice.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	err = database.AssignStripeCustomerToLead(stripeInvoice.Customer.ID, lead.LeadID)
-	if err != nil {
-		fmt.Printf("Error creating invoice: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Internal server error while adding package to your account.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	err = database.AssignStripeInvoiceToPackage(stripeInvoice.ID, helpers.SafeInt(form.PackageID))
-	if err != nil {
-		fmt.Printf("Error assigning invoice to pkg: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Internal server error while adding package to your account.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	var redirectUrl = fmt.Sprintf("%s/quote/%s", constants.RootDomain, stripeInvoice.ID)
-
-	go func() {
-		cleanedPhoneNumber := helpers.RemoveCountryCode(helpers.SafeString(form.PhoneNumber))
-
-		to := cleanedPhoneNumber
-		from := constants.CompanyPhoneNumber
-
-		textMessage := fmt.Sprintf(`Hey! This is YD Cocktails.
-
-		Your quote has been successfully generated.
-		
-		If you'd like to lock down a spot for your event, you can do so here:
-		
-		%s`, redirectUrl)
-
-		twilioMessage, err := services.SendTextMessage(to, from, textMessage)
-		if err != nil {
-			fmt.Printf("Error sending twilio message: %+v\n", err)
-			return
-		}
-
-		message := models.Message{
-			ExternalID:  helpers.SafeString(twilioMessage.Sid),
-			UserID:      constants.DavidUserID,
-			LeadID:      lead.LeadID,
-			Text:        helpers.SafeString(twilioMessage.Body),
-			TextFrom:    constants.CompanyPhoneNumber,
-			TextTo:      cleanedPhoneNumber,
-			IsInbound:   false,
-			DateCreated: time.Now().Local().Unix(),
-			Status:      helpers.SafeString(twilioMessage.Status),
-		}
-
-		if err := database.SaveSMS(message); err != nil {
-			fmt.Printf("Error saving SMS to database: %s", err)
-			return
-		}
-	}()
-
-	response := map[string]interface{}{
-		"data": map[string]string{
-			"redirect_url": redirectUrl,
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "modal",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
+		Data: map[string]any{
+			"AlertHeader":  "Awesome!",
+			"AlertMessage": "We received your request and will be right with you.",
 		},
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		fmt.Printf("Error marshaling JSON: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Server error while marshaling JSON.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	w.Write(jsonResponse)
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
 
 func GetContactForm(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
@@ -848,7 +714,7 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 
 	packagePrice := helpers.CalculatePackagePrice(form)
 
-	packageId, err := database.GeneratePackageEstimate(form, packagePrice)
+	err = database.GenerateEstimate(form, packagePrice)
 	if err != nil {
 		fmt.Printf("Error creating lead: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
@@ -864,66 +730,14 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := types.GenerateEstimateResponse{
-		Data: types.EstimateData{
-			PackageID: packageId,
-			Estimate:  packagePrice,
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "modal",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
+		Data: map[string]any{
+			"AlertHeader":  "Sent!",
+			"AlertMessage": "We've received your message and will be quick to respond.",
 		},
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		fmt.Printf("Error marshaling JSON: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Server error while marshaling JSON.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	w.Write(jsonResponse)
-}
-
-func GetQuoteDetail(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
-	fileName := "quote_detail.html"
-	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
-	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + fileName, quoteForm}
-	nonce, ok := r.Context().Value("nonce").(string)
-	if !ok {
-		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
-		return
-	}
-
-	csrfToken, ok := r.Context().Value("csrf_token").(string)
-	if !ok {
-		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
-		return
-	}
-
-	invoiceId := strings.TrimPrefix(r.URL.Path, "/quote/")
-
-	quoteDetails, err := database.GetQuoteDetailsByInvoiceID(invoiceId)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting quote details from DB.", http.StatusInternalServerError)
-		return
-	}
-
-	data := ctx
-	data.PageTitle = quoteDetails.FirstName + " " + quoteDetails.LastName + " Quote — " + constants.CompanyName
-	data.Nonce = nonce
-	data.CSRFToken = csrfToken
-	data.Quote = quoteDetails
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-	helpers.ServeContent(w, files, data)
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }

@@ -10,6 +10,7 @@ type EstimateForm struct {
 	CSRFToken *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
 	Guests    *int    `json:"guests" form:"guests" schema:"guests"`
 	Hours     *int    `json:"hours" form:"hours" schema:"hours"`
+	LeadID    *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
 
 	PackageTypeID    *int `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
 	AlcoholSegmentID *int `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
@@ -37,9 +38,7 @@ type QuoteForm struct {
 	Message            *string `json:"message" form:"message" schema:"message"`
 	Email              *string `json:"email" form:"email" schema:"email"`
 	OptInTextMessaging *bool   `json:"opt_in_text_messaging" form:"opt_in_text_messaging" schema:"opt_in_text_messaging"`
-
-	PackageID *int     `json:"package_id" form:"package_id" schema:"package_id"`
-	Estimate  *float64 `json:"estimate" form:"estimate" schema:"estimate"`
+	Guests             *int    `json:"guests" form:"guests" schema:"guests"`
 
 	Source        *string `json:"source" form:"source" schema:"source"`
 	Medium        *string `json:"medium" form:"medium" schema:"medium"`
@@ -94,6 +93,7 @@ type LeadDetails struct {
 	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	EventType   string `json:"event_type" form:"event_type" schema:"event_type"`
 	VenueType   string `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	Guests      int    `json:"guests" form:"guests" schema:"guests"`
 
 	CampaignName     string `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
 	CampaignID       int64  `json:"campaign_id" form:"campaign_id" schema:"campaign_id"`
@@ -126,6 +126,7 @@ type LeadList struct {
 	Language    string `json:"language" form:"language" schema:"language"`
 	EventTypeID int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
 	VenueTypeID int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	Guests      int    `json:"guests" form:"guests" schema:"guests"`
 	TotalRows   int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
 }
 
@@ -164,6 +165,7 @@ type UpdateLeadForm struct {
 	PhoneNumber *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	EventType   *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
 	VenueType   *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	Guests      *int    `json:"guests" form:"guests" schema:"guests"`
 }
 
 type UpdateLeadMarketingForm struct {
@@ -293,7 +295,6 @@ type WebsiteContext struct {
 	DefaultCurrency              string                  `json:"default_currency"`
 	YovaHeroImage                string                  `json:"yova_hero_image"`
 	YovaMidCTA                   string                  `json:"yova_mid_cta"`
-	Quote                        QuoteDetails            `json:"quote"`
 	PackageTypes                 []models.PackageType    `json:"package_types" form:"package_types"`
 	AlcoholSegments              []models.AlcoholSegment `json:"alcohol_segments" form:"alcohol_segments"`
 }
@@ -375,36 +376,5 @@ type ConversionLeadInfo struct {
 	EventType string `json:"event_type" form:"event_type" schema:"event_type"`
 	VenueType string `json:"venue_type" form:"venue_type" schema:"venue_type"`
 	CreatedAt int64  `json:"created_at" form:"created_at" schema:"created_at"`
-}
-
-type GenerateEstimateResponse struct {
-	Data EstimateData `json:"data" form:"data" schema:"data"`
-}
-
-type EstimateData struct {
-	PackageID int     `json:"package_id" form:"package_id" schema:"package_id"`
-	Estimate  float64 `json:"estimate" form:"estimate" schema:"estimate"`
-}
-
-type QuoteDetails struct {
-	FirstName string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName  string `json:"last_name" form:"last_name" schema:"last_name"`
-	EventType string `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType string `json:"venue_type" form:"venue_type" schema:"venue_type"`
-
-	BartendingRate  float64 `json:"bartending_rate" header:"Hourly Rate Per Bartender" description:"The hourly rate that we charge to hire a bartender."`
-	BartendingHours float64 `json:"bartending_hours" header:"Bartending Hours" description:"The total number of hours allotted for service."`
-	BarRentalCost   float64 `json:"bar_rental_cost" header:"Bar Rental Cost" description:"The cost for renting one of our bars for the night."`
-	BarSetupFee     float64 `json:"bar_setup_fee" header:"Setup & Breakdown Fee For Bar" description:"The logistical cost of transporting, setting up, and breaking down a bar for the event."`
-
-	SpiritsRate         float64 `json:"spirits_rate" header:"Spirits Rate" description:"This covers the cost of purchasing spirits such as whiskey, vodka, rum, and tequila."`
-	BeerAndWineRate     float64 `json:"beer_and_wine_rate" header:"Beer & Wine Rate" description:"This covers the cost of purchasing beer & alcohol."`
-	JuicesAndMixersRate float64 `json:"juices_and_mixes_rate" header:"Juices & Mixers Rate" description:"The cost of purchasing ingredients to craft & mix cocktails with."`
-	SoftDrinksRate      float64 `json:"soft_drinks_rate" header:"Soft Drinks Rate" description:"The cost of purchasing soft drink such as Coca Cola, Sprite, Soda Water, etc..."`
-
-	CupsRate float64 `json:"cups_rate" header:"Cups, Straws, And Napkins Rate" description:"The cost of purchasing cups, straws, and napkins for the event."`
-	IceRate  float64 `json:"ice_rate" header:"Ice Rate" description:"The cost of purchasing ice for the drinks."`
-
-	AlcoholSegmentRate float64 `json:"alcohol_segment_rate" header:"Alcohol Segment Rate Adjustment" description:"This adjusts the rate for the purchase of liquor depending on the quality of the liquor requested."`
-	GlasswareRate      float64 `json:"glassware_rate" header:"Glassware Rate Adjustment" description:"This fee covers the cost of renting glassware."`
+	Guests    int    `json:"guests" form:"guests" schema:"guests"`
 }

@@ -56,8 +56,8 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	defer tx.Rollback()
 
 	leadStmt, err := tx.Prepare(`
-		INSERT INTO lead (first_name, last_name, phone_number, created_at, event_type_id, venue_type_id, message, opt_in_text_messaging, email)
-		VALUES ($1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5, $6, $7, $8, $9)
+		INSERT INTO lead (first_name, last_name, phone_number, created_at, event_type_id, venue_type_id, message, opt_in_text_messaging, email, guests)
+		VALUES ($1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5, $6, $7, $8, $9, $10)
 		RETURNING lead_id
 	`)
 	if err != nil {
@@ -84,6 +84,7 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 		message,
 		utils.CreateNullBool(quoteForm.OptInTextMessaging),
 		utils.CreateNullString(quoteForm.Email),
+		utils.CreateNullInt(quoteForm.Guests),
 	).Scan(&leadID)
 	if err != nil {
 		return leadID, fmt.Errorf("error inserting lead: %w", err)
@@ -259,7 +260,7 @@ func GetLeadByStripeCustomerID(stripeCustomerID string) (int, error) {
 func GetConversionLeadInfo(leadId int) (types.ConversionLeadInfo, error) {
 	var leadConversionInfo types.ConversionLeadInfo
 
-	stmt, err := DB.Prepare(`SELECT l.lead_id, l.created_at, et.name, vt.name
+	stmt, err := DB.Prepare(`SELECT l.lead_id, l.created_at, et.name, vt.name, l.guests
 	FROM "lead" AS l
 	JOIN event_type  AS et ON et.event_type_id = l.event_type_id
 	JOIN venue_type AS vt ON vt.venue_type_id  = l.venue_type_id 
@@ -277,6 +278,7 @@ func GetConversionLeadInfo(leadId int) (types.ConversionLeadInfo, error) {
 		&createdAt,
 		&leadConversionInfo.EventType,
 		&leadConversionInfo.VenueType,
+		&leadConversionInfo.Guests,
 	)
 	if err != nil {
 		return leadConversionInfo, fmt.Errorf("error scanning row: %w", err)
@@ -398,7 +400,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
 	query := `SELECT l.lead_id, l.first_name, l.last_name, l.phone_number, 
-		l.created_at, et.name AS event_type, vt.name AS venue_type, lm.language, l.event_type_id, l.venue_type_id,
+		l.created_at, et.name AS event_type, vt.name AS venue_type, lm.language, l.event_type_id, l.venue_type_id, l.guests,
 		COUNT(*) OVER() AS total_rows
 		FROM lead AS l
 		JOIN event_type AS et ON et.event_type_id = l.event_type_id
@@ -432,7 +434,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		var lead types.LeadList
 		var createdAt time.Time
 		var eventType, venueType sql.NullString
-		var eventTypeId, venueTypeId sql.NullInt64
+		var eventTypeId, venueTypeId, guests sql.NullInt64
 
 		err := rows.Scan(&lead.LeadID,
 			&lead.FirstName,
@@ -444,6 +446,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 			&lead.Language,
 			&eventTypeId,
 			&venueTypeId,
+			&guests,
 			&totalRows)
 		if err != nil {
 			return nil, 0, fmt.Errorf("error scanning row: %w", err)
@@ -461,6 +464,9 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		}
 		if venueType.Valid {
 			lead.VenueType = venueType.String
+		}
+		if guests.Valid {
+			lead.Guests = int(guests.Int64)
 		}
 
 		leads = append(leads, lead)
@@ -498,7 +504,8 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	lm.click_id,
 	lm.google_client_id,
 	lm.button_clicked,
-	lm.campaign_id
+	lm.campaign_id,
+	l.guests
 	FROM lead l
 	JOIN event_type et ON l.event_type_id = et.event_type_id
 	JOIN venue_type vt ON l.venue_type_id = vt.venue_type_id
@@ -511,7 +518,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
 	var eventType, venueType, message, externalId, userAgent, clickId, googleClientId sql.NullString
-	var campaignId sql.NullInt64
+	var campaignId, guests sql.NullInt64
 
 	var buttonClicked sql.NullString
 
@@ -541,6 +548,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&googleClientId,
 		&buttonClicked,
 		&campaignId,
+		&guests,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -550,6 +558,9 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	}
 
 	// Map the nullable fields to your struct
+	if guests.Valid {
+		leadDetails.Guests = int(guests.Int64)
+	}
 	if buttonClicked.Valid {
 		leadDetails.ButtonClicked = buttonClicked.String
 	}
@@ -689,7 +700,8 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		    last_name = COALESCE($3, last_name), 
 		    phone_number = COALESCE($4, phone_number), 
 		    event_type_id = COALESCE($5, event_type_id), 
-		    venue_type_id = COALESCE($6, venue_type_id)
+		    venue_type_id = COALESCE($6, venue_type_id), 
+		    guests = COALESCE($7, guests)
 		WHERE lead_id = $1
 	`
 
@@ -700,6 +712,7 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		utils.CreateNullString(form.PhoneNumber),
 		utils.CreateNullInt(form.EventType),
 		utils.CreateNullInt(form.VenueType),
+		utils.CreateNullInt(form.Guests),
 	}
 
 	_, err := DB.Exec(query, args...)
@@ -979,31 +992,19 @@ func DeleteLead(id int) error {
 	return nil
 }
 
-func GeneratePackageEstimate(form types.EstimateForm, price float64) (int, error) {
-	var packageID int
-
-	tx, err := DB.Begin()
-	if err != nil {
-		return packageID, fmt.Errorf("error starting transaction: %w", err)
-	}
-	defer tx.Rollback()
-
-	packageStmt, err := tx.Prepare(`
-		INSERT INTO package (guests, hours, package_type_id, alcohol_segment_id, 
+func GenerateEstimate(form types.EstimateForm, price float64) error {
+	query := `
+		INSERT INTO estimate (guests, hours, package_type_id, alcohol_segment_id, 
                              will_provide_liquor, will_provide_beer_and_wine, 
                              will_provide_mixers, will_provide_juices, 
                              will_provide_soft_drinks, will_provide_cups, 
                              will_provide_ice, will_require_glassware, 
-                             will_require_bar, num_bars, price, date_created)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, to_timestamp($16)::timestamptz AT TIME ZONE 'America/New_York')
-		RETURNING package_id
-	`)
-	if err != nil {
-		return packageID, fmt.Errorf("error preparing package statement: %w", err)
-	}
-	defer packageStmt.Close()
+                             will_require_bar, num_bars, price, date_created, lead_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, to_timestamp($16)::timestamptz, $17)
+	`
 
-	err = packageStmt.QueryRow(
+	_, err := DB.Exec(
+		query,
 		utils.CreateNullInt(form.Guests),
 		utils.CreateNullInt(form.Hours),
 		utils.CreateNullInt(form.PackageTypeID),
@@ -1020,29 +1021,10 @@ func GeneratePackageEstimate(form types.EstimateForm, price float64) (int, error
 		utils.CreateNullInt(form.NumBars),
 		price,
 		time.Now().Unix(),
-	).Scan(&packageID)
+		utils.CreateNullInt(form.LeadID),
+	)
 	if err != nil {
-		return packageID, fmt.Errorf("error inserting package data: %w", err)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return packageID, fmt.Errorf("error committing transaction: %w", err)
-	}
-
-	return packageID, nil
-}
-
-func AssignLeadToPackage(packageId, leadId int) error {
-	stmt, err := DB.Prepare(`UPDATE package SET lead_id = $1 WHERE package_id = $2`)
-	if err != nil {
-		return fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(leadId, packageId)
-	if err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
+		return fmt.Errorf("error inserting estimate data: %w", err)
 	}
 
 	return nil
@@ -1063,49 +1045,19 @@ func AssignStripeCustomerToLead(stripeCustomerID string, leadId int) error {
 	return nil
 }
 
-func AssignStripeInvoiceToPackage(stripeInvoiceId string, packageId int) error {
-	stmt, err := DB.Prepare(`UPDATE package SET stripe_invoice_id = $1 WHERE package_id = $2`)
+func AssignStripeInvoiceToEstimate(stripeInvoiceId string, estimateId int) error {
+	stmt, err := DB.Prepare(`UPDATE estimate SET stripe_invoice_id = $1 WHERE estimate_id = $2`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(stripeInvoiceId, packageId)
+	_, err = stmt.Exec(stripeInvoiceId, estimateId)
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
 
 	return nil
-}
-
-func GetQuoteDetailsByInvoiceID(invoiceId string) (types.QuoteDetails, error) {
-	query := `SELECT l.first_name,
-	l.last_name,
-	et.name,
-	vt.name
-	FROM lead l
-	JOIN package p ON p.lead_id = p.lead_id AND p.stripe_invoice_id = $1
-	JOIN event_type et ON l.event_type_id = et.event_type_id
-	JOIN venue_type vt ON l.venue_type_id = vt.venue_type_id`
-
-	var quoteDetails types.QuoteDetails
-
-	row := DB.QueryRow(query, invoiceId)
-
-	err := row.Scan(
-		&quoteDetails.FirstName,
-		&quoteDetails.LastName,
-		&quoteDetails.EventType,
-		&quoteDetails.VenueType,
-	)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return quoteDetails, fmt.Errorf("no quote found with invoice id: %s", invoiceId)
-		}
-		return quoteDetails, fmt.Errorf("error scanning row: %w", err)
-	}
-
-	return quoteDetails, nil
 }
 
 func GetAlcoholSegments() ([]models.AlcoholSegment, error) {
