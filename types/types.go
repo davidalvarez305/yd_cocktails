@@ -379,3 +379,23 @@ type ConversionLeadInfo struct {
 	CreatedAt int64  `json:"created_at" form:"created_at" schema:"created_at"`
 	Guests    int    `json:"guests" form:"guests" schema:"guests"`
 }
+
+type BookingList struct {
+	BookingID int     `json:"booking_id" form:"booking_id" schema:"booking_id"`
+	LeadID    int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	Address   string  `json:"address" form:"address" schema:"address"`
+	StartTime string  `json:"start_time" form:"start_time" schema:"start_time"`
+	EndTime   string  `json:"end_time" form:"end_time" schema:"end_time"`
+	Bartender string  `json:"bartender" form:"bartender" schema:"bartender"`
+	Price     float64 `json:"price" form:"price" schema:"price"`
+}
+
+type EstimatesList struct {
+	LeadID          int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EstimateID      int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
+	Price           float64 `json:"price" form:"price" schema:"price"`
+	DateCreated     string  `json:"date_created" form:"date_created" schema:"date_created"`
+	Bartender       string  `json:"bartender" form:"bartender" schema:"bartender"`
+	StripeInvoiceID string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+	Status          string  `json:"status" form:"status" schema:"status"`
+}
