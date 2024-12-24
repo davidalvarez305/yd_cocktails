@@ -992,7 +992,7 @@ func DeleteLead(id int) error {
 	return nil
 }
 
-func GenerateEstimate(form types.EstimateForm, price float64) error {
+func CreateEstimate(form types.EstimateForm, price float64) error {
 	query := `
 		INSERT INTO estimate (guests, hours, package_type_id, alcohol_segment_id, 
                              will_provide_liquor, will_provide_beer_and_wine, 
@@ -1025,6 +1025,57 @@ func GenerateEstimate(form types.EstimateForm, price float64) error {
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting estimate data: %w", err)
+	}
+
+	return nil
+}
+
+func UpdateEstimate(form types.EstimateForm, price float64) error {
+	query := `
+		UPDATE estimate
+		SET 
+		    guests = COALESCE($2, guests),
+		    hours = COALESCE($3, hours),
+		    package_type_id = COALESCE($4, package_type_id),
+		    alcohol_segment_id = COALESCE($5, alcohol_segment_id),
+		    will_provide_liquor = COALESCE($6, will_provide_liquor),
+		    will_provide_beer_and_wine = COALESCE($7, will_provide_beer_and_wine),
+		    will_provide_mixers = COALESCE($8, will_provide_mixers),
+		    will_provide_juices = COALESCE($9, will_provide_juices),
+		    will_provide_soft_drinks = COALESCE($10, will_provide_soft_drinks),
+		    will_provide_cups = COALESCE($11, will_provide_cups),
+		    will_provide_ice = COALESCE($12, will_provide_ice),
+		    will_require_glassware = COALESCE($13, will_require_glassware),
+		    will_require_bar = COALESCE($14, will_require_bar),
+		    num_bars = COALESCE($15, num_bars),
+		    price = COALESCE($16, price),
+		    date_updated = COALESCE(to_timestamp($17)::timestamptz, date_updated),
+		    lead_id = COALESCE($18, lead_id)
+		WHERE estimate_id = $1
+	`
+	_, err := DB.Exec(
+		query,
+		utils.CreateNullInt(form.EstimateID),
+		utils.CreateNullInt(form.Guests),
+		utils.CreateNullInt(form.Hours),
+		utils.CreateNullInt(form.PackageTypeID),
+		utils.CreateNullInt(form.AlcoholSegmentID),
+		utils.CreateNullBool(form.WillProvideLiquor),
+		utils.CreateNullBool(form.WillProvideBeerAndWine),
+		utils.CreateNullBool(form.WillProvideMixers),
+		utils.CreateNullBool(form.WillProvideJuices),
+		utils.CreateNullBool(form.WillProvideSoftDrinks),
+		utils.CreateNullBool(form.WillProvideCups),
+		utils.CreateNullBool(form.WillProvideIce),
+		utils.CreateNullBool(form.WillRequireGlassware),
+		utils.CreateNullBool(form.WillRequireBar),
+		utils.CreateNullInt(form.NumBars),
+		price,
+		time.Now().Unix(),
+		utils.CreateNullInt(form.LeadID),
+	)
+	if err != nil {
+		return fmt.Errorf("error updating estimate data: %w", err)
 	}
 
 	return nil
@@ -1211,4 +1262,84 @@ func GetEstimateList(leadId int) ([]types.EstimatesList, error) {
 	}
 
 	return estimates, nil
+}
+
+func CreateBooking(form types.BookingForm) error {
+	stmt, err := DB.Prepare(`
+		INSERT INTO booking (
+			estimate_id,
+			street_address,
+			city,
+			state,
+			postal_code,
+			country,
+			start_time,
+			end_time,
+			bartender_id,
+			lead_id
+		) VALUES ($1, $2, $3, $4, $5, $6, to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York', to_timestamp($8)::timestamptz AT TIME ZONE 'America/New_York', $9, $10)
+	`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		utils.CreateNullInt(form.EstimateID),
+		utils.CreateNullString(form.StreetAddress),
+		utils.CreateNullString(form.City),
+		utils.CreateNullString(form.State),
+		utils.CreateNullString(form.PostalCode),
+		utils.CreateNullString(form.Country),
+		utils.CreateNullInt64(form.StartTime),
+		utils.CreateNullInt64(form.EndTime),
+		utils.CreateNullInt(form.BartenderID),
+		utils.CreateNullInt(form.LeadID),
+	)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
+func UpdateBooking(form types.BookingForm) error {
+	stmt, err := DB.Prepare(`
+		UPDATE booking
+		SET 
+			estimate_id = COALESCE($2, estimate_id),
+			street_address = COALESCE($3, street_address),
+			city = COALESCE($4, city),
+			state = COALESCE($5, state),
+			postal_code = COALESCE($6, postal_code),
+			country = COALESCE($7, country),
+			start_time = COALESCE(to_timestamp($8) AT TIME ZONE 'America/New_York', start_time),
+			end_time = COALESCE(to_timestamp($9) AT TIME ZONE 'America/New_York', end_time),
+			bartender_id = COALESCE($10, bartender_id),
+			lead_id = COALESCE($11, lead_id)
+		WHERE booking_id = $1;
+	`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		utils.CreateNullInt(form.BookingID),
+		utils.CreateNullInt(form.EstimateID),
+		utils.CreateNullString(form.StreetAddress),
+		utils.CreateNullString(form.City),
+		utils.CreateNullString(form.State),
+		utils.CreateNullString(form.PostalCode),
+		utils.CreateNullString(form.Country),
+		utils.CreateNullInt64(form.StartTime),
+		utils.CreateNullInt64(form.EndTime),
+		utils.CreateNullInt(form.BartenderID),
+		utils.CreateNullInt(form.LeadID),
+	)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
 }
