@@ -1109,3 +1109,106 @@ func GetPackageTypes() ([]models.PackageType, error) {
 
 	return packageTypes, nil
 }
+
+func GetBookingList(leadId int) ([]types.BookingList, error) {
+	var bookings []types.BookingList
+
+	rows, err := DB.Query(`
+		SELECT 
+			b.booking_id,
+			b.lead_id,
+			CONCAT(b.street_address, ', ', b.city, ', ', b.state, ', ', b.postal_code) AS address,
+			b.start_time,
+			b.end_time,
+			CONCAT(u.first_name, ' ', u.last_name) AS bartender,
+			e.price::NUMERIC
+		FROM booking AS b
+		JOIN estimate AS e ON e.estimate_id = b.estimate_id
+		JOIN "user" AS u ON u.user_id = b.bartender_id
+		WHERE b.lead_id = $1
+		ORDER BY b.start_time ASC;
+	`, leadId)
+	if err != nil {
+		return bookings, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var booking types.BookingList
+
+		var startTime, endTime time.Time
+
+		err := rows.Scan(
+			&booking.BookingID,
+			&booking.LeadID,
+			&booking.Address,
+			&booking.StartTime,
+			&booking.EndTime,
+			&booking.Bartender,
+			&booking.Price,
+		)
+		if err != nil {
+			return bookings, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		booking.StartTime = utils.FormatTimestamp(startTime.Unix())
+		booking.EndTime = utils.FormatTimestamp(endTime.Unix())
+
+		bookings = append(bookings, booking)
+	}
+
+	if err := rows.Err(); err != nil {
+		return bookings, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return bookings, nil
+}
+
+func GetEstimateList(leadId int) ([]types.EstimatesList, error) {
+	var estimates []types.EstimatesList
+
+	rows, err := DB.Query(`
+		SELECT 
+			e.estimate_id,
+			e.lead_id,
+			e.date_created,
+			e.price::NUMERIC,
+			e.stripe_invoice_id,
+			e.status
+		FROM estimate AS e
+		WHERE eb.lead_id = $1
+		ORDER BY e.date_created ASC;
+	`, leadId)
+	if err != nil {
+		return estimates, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var estimate types.EstimatesList
+
+		var dateCreated time.Time
+
+		err := rows.Scan(
+			&estimate.EstimateID,
+			&estimate.LeadID,
+			&dateCreated,
+			&estimate.Price,
+			&estimate.StripeInvoiceID,
+			&estimate.Status,
+		)
+		if err != nil {
+			return estimates, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		estimate.DateCreated = utils.FormatDateMMDDYYYY(dateCreated.Unix())
+
+		estimates = append(estimates, estimate)
+	}
+
+	if err := rows.Err(); err != nil {
+		return estimates, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return estimates, nil
+}

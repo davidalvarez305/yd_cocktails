@@ -145,7 +145,11 @@ func GetLeads(w http.ResponseWriter, r *http.Request, ctx map[string]interface{}
 
 func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	fileName := "lead_detail.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName}
+	bookingForm := constants.PARTIAL_TEMPLATES_DIR + "booking_form.html"
+	bookingTable := constants.PARTIAL_TEMPLATES_DIR + "bookings_table.html"
+	estimateForm := constants.PARTIAL_TEMPLATES_DIR + "estimate_form.html"
+	estimateTable := constants.PARTIAL_TEMPLATES_DIR + "estimates_table.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, bookingForm, bookingTable, estimateForm, estimateTable}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -195,6 +199,20 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	bookings, err := database.GetBookingList(leadDetails.LeadID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
+		return
+	}
+
+	estimates, err := database.GetEstimateList(leadDetails.LeadID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Lead Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
@@ -203,6 +221,8 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["CRMUserPhoneNumber"] = phoneNumber
 	data["EventTypes"] = eventTypes
 	data["VenueTypes"] = venueTypes
+	data["Bookings"] = bookings
+	data["Estimates"] = estimates
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
