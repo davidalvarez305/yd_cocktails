@@ -51,6 +51,7 @@ func createWebsiteContext() types.WebsiteContext {
 func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := createWebsiteContext()
 	ctx.PagePath = constants.RootDomain + r.URL.Path
+	ctx.IsMobile = helpers.IsMobileRequest(r)
 
 	externalId, ok := r.Context().Value("external_id").(string)
 	if !ok {
@@ -99,15 +100,16 @@ func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
-	isMobile := helpers.IsMobileRequest(r)
 	heroImagePath := "hero_image_desktop.html"
-	if isMobile {
+	headerPath := "header_desktop.html"
+	if ctx.IsMobile {
 		heroImagePath = "hero_image_mobile.html"
+		headerPath = "header_mobile.html"
 	}
 
 	fileName := "home.html"
 	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
-	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + heroImagePath, quoteForm, constants.WEBSITE_TEMPLATES_DIR + fileName}
+	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + headerPath, constants.WEBSITE_TEMPLATES_DIR + heroImagePath, quoteForm, constants.WEBSITE_TEMPLATES_DIR + fileName}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)

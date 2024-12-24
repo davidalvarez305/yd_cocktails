@@ -297,6 +297,7 @@ type WebsiteContext struct {
 	YovaMidCTA                   string                  `json:"yova_mid_cta"`
 	PackageTypes                 []models.PackageType    `json:"package_types" form:"package_types"`
 	AlcoholSegments              []models.AlcoholSegment `json:"alcohol_segments" form:"alcohol_segments"`
+	IsMobile                     bool                    `json:"is_bool"`
 }
 
 type FacebookUserData struct {
