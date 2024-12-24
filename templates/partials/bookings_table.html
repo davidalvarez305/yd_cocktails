@@ -9,19 +9,19 @@
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Name
+					Address
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Date Created
+					Event Time
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Phone Number
+					Bartender
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Event & Venue Types
+					Price
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
@@ -40,19 +40,16 @@
 					</a>
 				</td>
 				<td class="p-3 text-center">
-					<p class="font-medium">{{ .StartTime }} - {{ .EndTime }}</p>
+					<p class="font-medium">{{ .Address }}</p>
 				</td>
 				<td class="p-3 text-center">
-					<p class="font-medium">{{ .Address }}</p>
+					<p class="font-medium">{{ .StartTime }} - {{ .EndTime }}</p>
 				</td>
 				<td class="p-3 text-center">
 					<p class="font-medium">{{ .Bartender }}</p>
 				</td>
 				<td class="p-3 text-center">
-					<div
-						class="inline-flex rounded-full border border-transparent bg-emerald-100 px-2 py-1 text-xs font-semibold leading-4 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-700/10 dark:font-medium dark:text-emerald-200">
-						{{ .EventType }}, {{ .VenueType }}
-					</div>
+					<p class="font-medium">${{ .Price }}</p>
 				</td>
 				<td class="p-3 text-center">
                     <button data-booking-id="{{ .BookingID }}"
