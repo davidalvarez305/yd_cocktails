@@ -1343,3 +1343,27 @@ func UpdateBooking(form types.BookingForm) error {
 
 	return nil
 }
+
+func DeleteBooking(id int) error {
+	sqlStatement := `
+        DELETE FROM booking WHERE booking_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteEstimate(id int) error {
+	sqlStatement := `
+        DELETE FROM estimate WHERE estimate_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
