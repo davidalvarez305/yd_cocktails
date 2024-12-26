@@ -9,6 +9,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/constants"
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/services"
 	"github.com/davidalvarez305/yd_cocktails/sessions"
 	"github.com/davidalvarez305/yd_cocktails/types"
 )
@@ -36,9 +37,18 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
+		parts := strings.Split(path, "/")
 		if strings.HasPrefix(path, "/crm/lead/") {
 			if len(path) > len("/crm/lead/") && helpers.IsNumeric(path[len("/crm/lead/"):]) {
 				GetLeadDetail(w, r, ctx)
+				return
+			}
+			if len(parts) >= 5 && parts[4] == "booking" && helpers.IsNumeric(parts[3]) {
+				GetBookingDetail(w, r, ctx)
+				return
+			}
+			if len(parts) >= 5 && parts[4] == "estimate" && helpers.IsNumeric(parts[3]) {
+				GetEstimateDetail(w, r, ctx)
 				return
 			}
 			return
@@ -57,6 +67,14 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				PutLeadMarketing(w, r)
 				return
 			}
+			if len(parts) >= 5 && parts[4] == "booking" && helpers.IsNumeric(parts[3]) {
+				PutBooking(w, r)
+				return
+			}
+			if len(parts) >= 5 && parts[4] == "estimate" && helpers.IsNumeric(parts[3]) {
+				PutEstimate(w, r)
+				return
+			}
 			if len(path) > len("/crm/lead/") && helpers.IsNumeric(path[len("/crm/lead/"):]) {
 				PutLead(w, r)
 				return
@@ -68,8 +86,29 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodDelete:
 		if strings.HasPrefix(path, "/crm/lead/") {
+			parts := strings.Split(path, "/")
 			if len(path) > len("/crm/lead/") && helpers.IsNumeric(path[len("/crm/lead/"):]) {
 				DeleteLead(w, r)
+				return
+			}
+			if len(parts) >= 5 && parts[4] == "booking" && helpers.IsNumeric(parts[3]) {
+				DeleteBooking(w, r)
+				return
+			}
+			if len(parts) >= 5 && parts[4] == "estimate" && helpers.IsNumeric(parts[3]) {
+				DeleteEstimate(w, r)
+				return
+			}
+		}
+	case http.MethodPost:
+		if strings.HasPrefix(path, "/crm/lead/") {
+			parts := strings.Split(path, "/")
+			if len(parts) >= 5 && parts[4] == "booking" && helpers.IsNumeric(parts[3]) {
+				PostBooking(w, r)
+				return
+			}
+			if len(parts) >= 5 && parts[4] == "estimate" && helpers.IsNumeric(parts[3]) {
+				PostEstimate(w, r)
 				return
 			}
 		}
@@ -486,6 +525,84 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
 				"Message": "Server error while creating quote request.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	if form.LeadID == nil {
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Lead ID cannot be null.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	lead, err := database.GetLeadDetails(fmt.Sprint(helpers.SafeInt(form.LeadID)))
+	if err != nil {
+		fmt.Printf("Error querying lead details: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error querying lead details.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	stripeInvoice, err := services.CreateStripeInvoiceForNewCustomer(lead.Email, lead.FirstName, lead.LastName, packagePrice)
+	if err != nil {
+		fmt.Printf("Error creating invoice: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while creating invoice.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.AssignStripeCustomerToLead(stripeInvoice.Customer.ID, lead.LeadID)
+	if err != nil {
+		fmt.Printf("Error creating invoice: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Internal server error while adding package to your account.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.AssignStripeInvoiceToEstimate(stripeInvoice.ID, helpers.SafeInt(form.EstimateID))
+	if err != nil {
+		fmt.Printf("Error assigning invoice to pkg: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Internal server error while adding package to your account.",
 			},
 		}
 
