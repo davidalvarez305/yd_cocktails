@@ -182,7 +182,7 @@ func handleStripePaymentSuccessful(invoice stripe.Invoice) error {
 func handleStripeInvoiceUpdated(invoice stripe.Invoice) error {
 	err := database.UpdateEstimatePriceByStripeInvoiceID(invoice.ID, float64(invoice.TotalExcludingTax)/100)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error updating estimate price by stripe invocie id: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error updating estimate price by stripe invoice id: %v\n", err)
 		return err
 	}
 
