@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/conversions"
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
 	"github.com/davidalvarez305/yd_cocktails/services"
@@ -610,6 +611,67 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 		return
 	}
+
+	fbEvent := types.FacebookEventData{
+		EventName:      constants.EstimateEventName,
+		EventTime:      time.Now().UTC().Unix(),
+		ActionSource:   "website",
+		EventSourceURL: lead.LandingPage,
+		UserData: types.FacebookUserData{
+			Email:           helpers.HashString(lead.Email),
+			FirstName:       helpers.HashString(lead.FirstName),
+			LastName:        helpers.HashString(lead.LastName),
+			Phone:           helpers.HashString(lead.PhoneNumber),
+			FBC:             lead.FacebookClickID,
+			FBP:             lead.FacebookClientID,
+			ExternalID:      helpers.HashString(lead.ExternalID),
+			ClientIPAddress: lead.IP,
+			ClientUserAgent: lead.UserAgent,
+		},
+		CustomData: types.FacebookCustomData{
+			Currency: "USD",
+			Value:    fmt.Sprint(float64(stripeInvoice.AmountDue) / 100),
+		},
+		EventID: stripeInvoice.ID,
+	}
+
+	metaPayload := types.FacebookPayload{
+		Data: []types.FacebookEventData{fbEvent},
+	}
+
+	googlePayload := types.GooglePayload{
+		ClientID: lead.GoogleClientID,
+		UserId:   lead.ExternalID,
+		Events: []types.GoogleEventLead{
+			{
+				Name: constants.EstimateEventName,
+				Params: types.GoogleEventParamsLead{
+					GCLID:         lead.ClickID,
+					TransactionID: stripeInvoice.ID,
+					Value:         float64(stripeInvoice.AmountDue) / 100,
+					Currency:      constants.DefaultCurrency,
+					CampaignID:    fmt.Sprint(lead.CampaignID),
+					Campaign:      lead.CampaignName,
+					Source:        lead.Source,
+					Medium:        lead.Medium,
+					Term:          lead.Keyword,
+				},
+			},
+		},
+		UserData: types.GoogleUserData{
+			Sha256EmailAddress: []string{helpers.HashString(lead.Email)},
+			Sha256PhoneNumber:  []string{helpers.HashString(lead.PhoneNumber)},
+			Address: []types.GoogleUserAddress{
+				{
+					Sha256FirstName: helpers.HashString(lead.FirstName),
+					Sha256LastName:  helpers.HashString(lead.LastName),
+				},
+			},
+		},
+	}
+
+	go conversions.SendGoogleConversion(googlePayload)
+	go conversions.SendFacebookConversion(metaPayload)
 
 	tmplCtx := types.DynamicPartialTemplate{
 		TemplateName: "modal",

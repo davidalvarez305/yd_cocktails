@@ -13,6 +13,7 @@ const (
 
 	LeadGeneratedEventName string = "generate_lead"
 	BookingEventName       string = "booking"
+	EstimateEventName      string = "estimate"
 	LeadEventName          string = "Lead"
 
 	DefaultCurrency string = "USD"
