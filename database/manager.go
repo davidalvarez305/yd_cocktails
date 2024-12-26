@@ -1472,6 +1472,8 @@ func GetBookingDetails(bookingId string) (types.BookingDetails, error) {
 
 	var bookingDetails types.BookingDetails
 
+	var startTime, endTime time.Time
+
 	row := DB.QueryRow(query, bookingId)
 
 	err := row.Scan(
@@ -1484,8 +1486,8 @@ func GetBookingDetails(bookingId string) (types.BookingDetails, error) {
 		&bookingDetails.State,
 		&bookingDetails.PostalCode,
 		&bookingDetails.Country,
-		&bookingDetails.StartTime,
-		&bookingDetails.EndTime,
+		&startTime,
+		&endTime,
 	)
 
 	if err != nil {
@@ -1495,5 +1497,48 @@ func GetBookingDetails(bookingId string) (types.BookingDetails, error) {
 		return bookingDetails, fmt.Errorf("error scanning row: %w", err)
 	}
 
+	bookingDetails.StartTime = startTime.Unix()
+	bookingDetails.EndTime = endTime.Unix()
+
 	return bookingDetails, nil
+}
+
+func GetUsers() ([]models.User, error) {
+	var users []models.User
+
+	stmt, err := DB.Prepare(`SELECT user_id, username, phone_number, password, user_role_id, first_name, last_name FROM "user"`)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(
+			&user.UserID,
+			&user.Username,
+			&user.PhoneNumber,
+			&user.Password,
+			&user.UserRoleID,
+			&user.FirstName,
+			&user.LastName,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error with rows: %w", err)
+	}
+
+	return users, nil
 }

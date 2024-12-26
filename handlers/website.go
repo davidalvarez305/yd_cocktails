@@ -83,8 +83,6 @@ func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/quote":
 			PostQuote(w, r)
-		case "/estimate":
-			PostEstimate(w, r)
 		case "/contact":
 			PostContactForm(w, r)
 		case "/login":
@@ -679,67 +677,4 @@ func PostLogout(w http.ResponseWriter, r *http.Request) {
 	sessions.SetCookie(w, time.Now().Add(-1*time.Hour), "")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-func PostEstimate(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Invalid request.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	var form types.EstimateForm
-	form.Guests = helpers.GetIntPointerFromForm(r, "guests")
-	form.Hours = helpers.GetIntPointerFromForm(r, "hours")
-	form.PackageTypeID = helpers.GetIntPointerFromForm(r, "package_type_id")
-	form.AlcoholSegmentID = helpers.GetIntPointerFromForm(r, "alcohol_segment_id")
-	form.WillProvideLiquor = helpers.GetBoolPointerFromForm(r, "will_provide_liquor")
-	form.WillProvideBeerAndWine = helpers.GetBoolPointerFromForm(r, "will_provide_beer_and_wine")
-	form.WillProvideMixers = helpers.GetBoolPointerFromForm(r, "will_provide_mixers")
-	form.WillProvideJuices = helpers.GetBoolPointerFromForm(r, "will_provide_juices")
-	form.WillProvideSoftDrinks = helpers.GetBoolPointerFromForm(r, "will_provide_soft_drinks")
-	form.WillProvideCups = helpers.GetBoolPointerFromForm(r, "will_provide_cups")
-	form.WillProvideIce = helpers.GetBoolPointerFromForm(r, "will_provide_ice")
-	form.WillRequireGlassware = helpers.GetBoolPointerFromForm(r, "will_require_glassware")
-	form.WillRequireBar = helpers.GetBoolPointerFromForm(r, "will_require_bar")
-	form.NumBars = helpers.GetIntPointerFromForm(r, "num_bars")
-
-	packagePrice := helpers.CalculatePackagePrice(form)
-
-	err = database.CreateEstimate(form, packagePrice)
-	if err != nil {
-		fmt.Printf("Error creating lead: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Server error while creating quote request.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "modal",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
-		Data: map[string]any{
-			"AlertHeader":  "Sent!",
-			"AlertMessage": "We've received your message and will be quick to respond.",
-		},
-	}
-
-	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
