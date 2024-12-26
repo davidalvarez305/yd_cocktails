@@ -63,9 +63,6 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var invoiceAmount float64
-	var stripeCustomerID, stripeInvoiceID string
-
 	switch event.Type {
 	case "invoice.payment_succeeded":
 		var invoice stripe.Invoice
@@ -76,27 +73,46 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Extract the relevant data from the invoice
-		stripeInvoiceID = invoice.ID
-		stripeCustomerID = invoice.Customer.ID
-		invoiceAmount = float64(invoice.AmountPaid) / 100
+		err = handleStripePaymentSuccessful(invoice)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error handling payment succeded: %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	case "invoice.updated":
+		var invoice stripe.Invoice
+		err := json.Unmarshal(event.Data.Raw, &invoice)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		err = handleStripeInvoiceUpdated(invoice)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error handling payment succeded: %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
 	}
 
-	leadId, err := database.GetLeadByStripeCustomerID(stripeCustomerID)
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleStripePaymentSuccessful(invoice stripe.Invoice) error {
+	leadId, err := database.GetLeadByStripeCustomerID(invoice.Customer.ID)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error getting lead details by stripe customer ID: %v\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	lead, err := database.GetLeadDetails(fmt.Sprint(leadId))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error getting lead details: %v\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	fbEvent := types.FacebookEventData{
@@ -117,9 +133,9 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 		},
 		CustomData: types.FacebookCustomData{
 			Currency: "USD",
-			Value:    fmt.Sprint(invoiceAmount),
+			Value:    fmt.Sprint(float64(invoice.AmountPaid) / 100),
 		},
-		EventID: stripeInvoiceID,
+		EventID: invoice.ID,
 	}
 
 	metaPayload := types.FacebookPayload{
@@ -134,8 +150,8 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 				Name: constants.BookingEventName,
 				Params: types.GoogleEventParamsLead{
 					GCLID:         lead.ClickID,
-					TransactionID: stripeInvoiceID,
-					Value:         float64(invoiceAmount),
+					TransactionID: invoice.ID,
+					Value:         float64(invoice.AmountPaid) / 100,
 					Currency:      constants.DefaultCurrency,
 					CampaignID:    fmt.Sprint(lead.CampaignID),
 					Campaign:      lead.CampaignName,
@@ -160,5 +176,15 @@ func handleStripeInvoice(w http.ResponseWriter, r *http.Request) {
 	go conversions.SendGoogleConversion(googlePayload)
 	go conversions.SendFacebookConversion(metaPayload)
 
-	w.WriteHeader(http.StatusOK)
+	return nil
+}
+
+func handleStripeInvoiceUpdated(invoice stripe.Invoice) error {
+	err := database.UpdateEstimatePriceByStripeInvoiceID(invoice.ID, float64(invoice.TotalExcludingTax)/100)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error updating estimate price by stripe invocie id: %v\n", err)
+		return err
+	}
+
+	return nil
 }

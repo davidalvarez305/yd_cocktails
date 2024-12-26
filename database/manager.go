@@ -1542,3 +1542,24 @@ func GetUsers() ([]models.User, error) {
 
 	return users, nil
 }
+
+func UpdateEstimatePriceByStripeInvoiceID(stripeInvoiceID string, price float64) error {
+	query := `
+		UPDATE estimate
+		SET 
+		    price = COALESCE($1, price)
+			date_updated = COALESCE(to_timestamp($2), date_updated)
+		WHERE stripe_invoice_id = $3
+	`
+	_, err := DB.Exec(
+		query,
+		price,
+		time.Now().Unix(),
+		stripeInvoiceID,
+	)
+	if err != nil {
+		return fmt.Errorf("error updating estimate price: %w", err)
+	}
+
+	return nil
+}
