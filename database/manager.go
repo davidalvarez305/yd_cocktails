@@ -999,8 +999,8 @@ func CreateEstimate(form types.EstimateForm, price float64) error {
                              will_provide_mixers, will_provide_juices, 
                              will_provide_soft_drinks, will_provide_cups, 
                              will_provide_ice, will_require_glassware, 
-                             will_require_bar, num_bars, price, date_created, lead_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, to_timestamp($16)::timestamptz, $17)
+                             will_require_bar, num_bars, price, date_created, lead_id, stripe_invoice_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, to_timestamp($16)::timestamptz, $17, $18)
 	`
 
 	_, err := DB.Exec(
@@ -1022,6 +1022,7 @@ func CreateEstimate(form types.EstimateForm, price float64) error {
 		price,
 		time.Now().Unix(),
 		utils.CreateNullInt(form.LeadID),
+		utils.CreateNullString(form.StripeInvoiceID),
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting estimate data: %w", err)
@@ -1050,7 +1051,8 @@ func UpdateEstimate(form types.EstimateForm, price float64) error {
 		    num_bars = COALESCE($15, num_bars),
 		    price = COALESCE($16, price),
 		    date_updated = COALESCE(to_timestamp($17)::timestamptz, date_updated),
-		    lead_id = COALESCE($18, lead_id)
+		    lead_id = COALESCE($18, lead_id),
+		    stripe_invoice_id = COALESCE($19, stripe_invoice_id)
 		WHERE estimate_id = $1
 	`
 	_, err := DB.Exec(
@@ -1073,6 +1075,7 @@ func UpdateEstimate(form types.EstimateForm, price float64) error {
 		price,
 		time.Now().Unix(),
 		utils.CreateNullInt(form.LeadID),
+		utils.CreateNullString(form.StripeInvoiceID),
 	)
 	if err != nil {
 		return fmt.Errorf("error updating estimate data: %w", err)
@@ -1366,4 +1369,131 @@ func DeleteEstimate(id int) error {
 	}
 
 	return nil
+}
+
+func GetEstimateDetails(estimateId string) (types.EstimateDetails, error) {
+
+	query := `SELECT 
+		estimate_id, 
+		package_type_id, 
+		alcohol_segment_id, 
+		price, 
+		guests, 
+		hours, 
+		will_provide_liquor, 
+		will_provide_beer_and_wine, 
+		will_provide_mixers, 
+		will_provide_juices, 
+		will_provide_soft_drinks, 
+		will_provide_cups, 
+		will_provide_ice, 
+		will_require_glassware, 
+		will_require_bar, 
+		num_bars,
+		lead_id,
+		stripe_invoice_id
+	FROM estimate 
+	WHERE estimate_id = $1`
+
+	var estimateDetails types.EstimateDetails
+
+	var stripeInvoiceID sql.NullString
+	var numBars, packageTypeId, alcoholSegmentId sql.NullInt64
+	var price sql.NullFloat64
+
+	row := DB.QueryRow(query, estimateId)
+
+	err := row.Scan(
+		&estimateDetails.EstimateID,
+		&packageTypeId,
+		&alcoholSegmentId,
+		&price,
+		&estimateDetails.Guests,
+		&estimateDetails.Hours,
+		&estimateDetails.WillProvideLiquor,
+		&estimateDetails.WillProvideBeerAndWine,
+		&estimateDetails.WillProvideMixers,
+		&estimateDetails.WillProvideJuices,
+		&estimateDetails.WillProvideSoftDrinks,
+		&estimateDetails.WillProvideCups,
+		&estimateDetails.WillProvideIce,
+		&estimateDetails.WillRequireGlassware,
+		&estimateDetails.WillRequireBar,
+		&numBars,
+		&estimateDetails.LeadID,
+		&stripeInvoiceID,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return estimateDetails, fmt.Errorf("no estimate found with ID %s", estimateId)
+		}
+		return estimateDetails, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	if stripeInvoiceID.Valid {
+		estimateDetails.StripeInvoiceID = stripeInvoiceID.String
+	}
+
+	if numBars.Valid {
+		estimateDetails.NumBars = int(numBars.Int64)
+	}
+
+	if packageTypeId.Valid {
+		estimateDetails.PackageTypeID = int(packageTypeId.Int64)
+	}
+
+	if alcoholSegmentId.Valid {
+		estimateDetails.AlcoholSegmentID = int(alcoholSegmentId.Int64)
+	}
+
+	if price.Valid {
+		estimateDetails.Price = price.Float64
+	}
+
+	return estimateDetails, nil
+}
+
+func GetBookingDetails(bookingId string) (types.BookingDetails, error) {
+	query := `SELECT 
+		booking_id, 
+		estimate_id, 
+		bartender_id, 
+		lead_id, 
+		street_address, 
+		city, 
+		state, 
+		postal_code, 
+		country, 
+		start_time, 
+		end_time
+	FROM booking 
+	WHERE booking_id = $1`
+
+	var bookingDetails types.BookingDetails
+
+	row := DB.QueryRow(query, bookingId)
+
+	err := row.Scan(
+		&bookingDetails.BookingID,
+		&bookingDetails.EstimateID,
+		&bookingDetails.BartenderID,
+		&bookingDetails.LeadID,
+		&bookingDetails.StreetAddress,
+		&bookingDetails.City,
+		&bookingDetails.State,
+		&bookingDetails.PostalCode,
+		&bookingDetails.Country,
+		&bookingDetails.StartTime,
+		&bookingDetails.EndTime,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return bookingDetails, fmt.Errorf("no booking found with ID %s", bookingId)
+		}
+		return bookingDetails, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	return bookingDetails, nil
 }

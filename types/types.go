@@ -13,6 +13,8 @@ type EstimateForm struct {
 	Hours      *int    `json:"hours" form:"hours" schema:"hours"`
 	LeadID     *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
 
+	StripeInvoiceID *string `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+
 	PackageTypeID    *int `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
 	AlcoholSegmentID *int `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
 
@@ -413,4 +415,39 @@ type BookingForm struct {
 	EndTime       *int64  `json:"end_time" form:"end_time" schema:"end_time"`
 	BartenderID   *int    `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
 	LeadID        *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+}
+
+type EstimateDetails struct {
+	EstimateID             int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
+	PackageTypeID          int     `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
+	AlcoholSegmentID       int     `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
+	Price                  float64 `json:"price" form:"price" schema:"price"`
+	Guests                 int     `json:"guests" form:"guests" schema:"guests"`
+	Hours                  int     `json:"hours" form:"hours" schema:"hours"`
+	WillProvideLiquor      bool    `json:"will_provide_liquor" form:"will_provide_liquor" schema:"will_provide_liquor"`
+	WillProvideBeerAndWine bool    `json:"will_provide_beer_and_wine" form:"will_provide_beer_and_wine" schema:"will_provide_beer_and_wine"`
+	WillProvideMixers      bool    `json:"will_provide_mixers" form:"will_provide_mixers" schema:"will_provide_mixers"`
+	WillProvideJuices      bool    `json:"will_provide_juices" form:"will_provide_juices" schema:"will_provide_juices"`
+	WillProvideSoftDrinks  bool    `json:"will_provide_soft_drinks" form:"will_provide_soft_drinks" schema:"will_provide_soft_drinks"`
+	WillProvideCups        bool    `json:"will_provide_cups" form:"will_provide_cups" schema:"will_provide_cups"`
+	WillProvideIce         bool    `json:"will_provide_ice" form:"will_provide_ice" schema:"will_provide_ice"`
+	WillRequireGlassware   bool    `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
+	WillRequireBar         bool    `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
+	NumBars                int     `json:"num_bars" form:"num_bars" schema:"num_bars"`
+	LeadID                 int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	StripeInvoiceID        string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+}
+
+type BookingDetails struct {
+	BookingID     int    `json:"booking_id" form:"booking_id" schema:"booking_id"`
+	EstimateID    int    `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
+	BartenderID   int    `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
+	LeadID        int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	StreetAddress string `json:"street_address" form:"street_address" schema:"street_address"`
+	City          string `json:"city" form:"city" schema:"city"`
+	State         string `json:"state" form:"state" schema:"state"`
+	PostalCode    string `json:"postal_code" form:"postal_code" schema:"postal_code"`
+	Country       string `json:"country" form:"country" schema:"country"`
+	StartTime     int64  `json:"start_time" form:"start_time" schema:"start_time"`
+	EndTime       int64  `json:"end_time" form:"end_time" schema:"end_time"`
 }
