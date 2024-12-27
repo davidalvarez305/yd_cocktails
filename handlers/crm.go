@@ -235,21 +235,21 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	venueTypes, err := database.GetVenueTypes()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
+		http.Error(w, "Error getting venue types.", http.StatusInternalServerError)
 		return
 	}
 
 	bookings, err := database.GetBookingList(leadDetails.LeadID)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
+		http.Error(w, "Error getting bookings.", http.StatusInternalServerError)
 		return
 	}
 
 	estimates, err := database.GetEstimateList(leadDetails.LeadID)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
+		http.Error(w, "Error getting estimates.", http.StatusInternalServerError)
 		return
 	}
 
