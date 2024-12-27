@@ -192,7 +192,13 @@ func GetRobots(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext)
 func GetPrivacyPolicy(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 	fileName := "privacy.html"
 	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
-	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + fileName, quoteForm}
+
+	headerPath := "header_desktop.html"
+	if ctx.IsMobile {
+		headerPath = "header_mobile.html"
+	}
+
+	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + headerPath, quoteForm, constants.WEBSITE_TEMPLATES_DIR + fileName}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -211,7 +217,13 @@ func GetPrivacyPolicy(w http.ResponseWriter, r *http.Request, ctx types.WebsiteC
 func GetTermsAndConditions(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 	fileName := "terms.html"
 	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
-	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + fileName, quoteForm}
+
+	headerPath := "header_desktop.html"
+	if ctx.IsMobile {
+		headerPath = "header_mobile.html"
+	}
+
+	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + headerPath, quoteForm, constants.WEBSITE_TEMPLATES_DIR + fileName}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -450,7 +462,13 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 func GetContactForm(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 	fileName := "contact_form.html"
 	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
-	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + fileName, quoteForm}
+
+	headerPath := "header_desktop.html"
+	if ctx.IsMobile {
+		headerPath = "header_mobile.html"
+	}
+
+	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + headerPath, quoteForm, constants.WEBSITE_TEMPLATES_DIR + fileName}
 
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
@@ -566,7 +584,13 @@ func PostContactForm(w http.ResponseWriter, r *http.Request) {
 func GetLogin(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 	fileName := "login.html"
 	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
-	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + fileName, quoteForm}
+
+	headerPath := "header_desktop.html"
+	if ctx.IsMobile {
+		headerPath = "header_mobile.html"
+	}
+
+	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + headerPath, quoteForm, constants.WEBSITE_TEMPLATES_DIR + fileName}
 
 	csrfSecret, ok := r.Context().Value("csrf_secret").(string)
 	if !ok {
