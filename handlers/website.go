@@ -341,7 +341,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			FirstName:       helpers.HashString(helpers.SafeString(form.FirstName)),
 			LastName:        helpers.HashString(helpers.SafeString(form.LastName)),
 			Phone:           helpers.HashString(helpers.SafeString(form.PhoneNumber)),
-			Email:           helpers.HashString(helpers.SafeString(form.Email)),
 			FBC:             helpers.SafeString(form.FacebookClickID),
 			FBP:             helpers.SafeString(form.FacebookClientID),
 			State:           helpers.HashString("Florida"),
@@ -372,8 +371,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 		UserData: types.GoogleUserData{
-			Sha256PhoneNumber:  []string{helpers.HashString(utils.AddPhonePrefixIfNeeded(helpers.SafeString(form.PhoneNumber)))},
-			Sha256EmailAddress: []string{helpers.HashString(helpers.SafeString(form.Email))},
+			Sha256PhoneNumber: []string{helpers.HashString(utils.AddPhonePrefixIfNeeded(helpers.SafeString(form.PhoneNumber)))},
 			Address: []types.GoogleUserAddress{
 				{
 					Sha256FirstName: helpers.HashString(helpers.SafeString(form.FirstName)),
