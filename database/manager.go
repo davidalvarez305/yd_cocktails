@@ -872,7 +872,7 @@ func UpdatePhoneCall(phoneCall models.PhoneCall) error {
 
 	args := []interface{}{
 		phoneCall.UserID,
-		phoneCall.LeadID,
+		utils.CreateNullInt(&phoneCall.LeadID),
 		utils.CreateNullInt(&phoneCall.CallDuration),
 		phoneCall.DateCreated,
 		phoneCall.CallFrom,
@@ -1226,10 +1226,9 @@ func GetEstimateList(leadId int) ([]types.EstimatesList, error) {
 			e.lead_id,
 			e.date_created,
 			e.price::NUMERIC,
-			e.stripe_invoice_id,
-			e.status
+			e.stripe_invoice_id
 		FROM estimate AS e
-		WHERE eb.lead_id = $1
+		WHERE e.lead_id = $1
 		ORDER BY e.date_created ASC;
 	`, leadId)
 	if err != nil {
@@ -1248,7 +1247,6 @@ func GetEstimateList(leadId int) ([]types.EstimatesList, error) {
 			&dateCreated,
 			&estimate.Price,
 			&estimate.StripeInvoiceID,
-			&estimate.Status,
 		)
 		if err != nil {
 			return estimates, fmt.Errorf("error scanning row: %w", err)

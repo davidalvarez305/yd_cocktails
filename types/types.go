@@ -397,7 +397,6 @@ type EstimatesList struct {
 	Price           float64 `json:"price" form:"price" schema:"price"`
 	DateCreated     string  `json:"date_created" form:"date_created" schema:"date_created"`
 	StripeInvoiceID string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
-	Status          string  `json:"status" form:"status" schema:"status"`
 }
 
 type BookingForm struct {
