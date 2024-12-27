@@ -504,8 +504,8 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	lm.campaign_id,
 	l.guests
 	FROM lead l
-	JOIN event_type et ON l.event_type_id = et.event_type_id
-	JOIN venue_type vt ON l.venue_type_id = vt.venue_type_id
+	LEFT JOIN event_type et ON l.event_type_id = et.event_type_id
+	LEFT JOIN venue_type vt ON l.venue_type_id = vt.venue_type_id
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
 	WHERE l.lead_id = $1`
 
