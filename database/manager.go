@@ -260,10 +260,8 @@ func GetLeadByStripeCustomerID(stripeCustomerID string) (int, error) {
 func GetConversionLeadInfo(leadId int) (types.ConversionLeadInfo, error) {
 	var leadConversionInfo types.ConversionLeadInfo
 
-	stmt, err := DB.Prepare(`SELECT l.lead_id, l.created_at, et.name, vt.name, l.guests
+	stmt, err := DB.Prepare(`SELECT l.lead_id, l.created_at
 	FROM "lead" AS l
-	JOIN event_type  AS et ON et.event_type_id = l.event_type_id
-	JOIN venue_type AS vt ON vt.venue_type_id  = l.venue_type_id 
 	WHERE l.lead_id = $1;`)
 
 	if err != nil {
@@ -274,11 +272,10 @@ func GetConversionLeadInfo(leadId int) (types.ConversionLeadInfo, error) {
 	row := stmt.QueryRow(leadId)
 
 	var createdAt time.Time
-	err = row.Scan(&leadConversionInfo.LeadID,
+
+	err = row.Scan(
+		&leadConversionInfo.LeadID,
 		&createdAt,
-		&leadConversionInfo.EventType,
-		&leadConversionInfo.VenueType,
-		&leadConversionInfo.Guests,
 	)
 	if err != nil {
 		return leadConversionInfo, fmt.Errorf("error scanning row: %w", err)

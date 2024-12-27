@@ -376,11 +376,8 @@ type GoogleUserAddress struct {
 }
 
 type ConversionLeadInfo struct {
-	LeadID    int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	EventType string `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType string `json:"venue_type" form:"venue_type" schema:"venue_type"`
-	CreatedAt int64  `json:"created_at" form:"created_at" schema:"created_at"`
-	Guests    int    `json:"guests" form:"guests" schema:"guests"`
+	LeadID    int   `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	CreatedAt int64 `json:"created_at" form:"created_at" schema:"created_at"`
 }
 
 type BookingList struct {
