@@ -410,7 +410,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			"Name":           helpers.SafeString(form.FirstName) + " " + helpers.SafeString(form.LastName),
 			"PhoneNumber":    helpers.SafeString(form.PhoneNumber),
 			"DateCreated":    utils.FormatTimestampEST(lead.CreatedAt),
-			"Button Clicked": helpers.SafeString(form.ButtonClicked),
+			"ButtonClicked":  helpers.SafeString(form.ButtonClicked),
 			"Message":        helpers.SafeString(form.Message),
 			"LeadDetailsURL": fmt.Sprintf("%s/crm/lead/%d", constants.RootDomain, leadID),
 			"Location":       "",
