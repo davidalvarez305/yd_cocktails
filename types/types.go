@@ -89,14 +89,15 @@ type OutboundMessageForm struct {
 }
 
 type LeadDetails struct {
-	LeadID      int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FirstName   string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName    string `json:"last_name" form:"last_name" schema:"last_name"`
-	Email       string `json:"email" form:"email" schema:"email"`
-	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	EventType   string `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType   string `json:"venue_type" form:"venue_type" schema:"venue_type"`
-	Guests      int    `json:"guests" form:"guests" schema:"guests"`
+	LeadID           int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	FirstName        string `json:"first_name" form:"first_name" schema:"first_name"`
+	LastName         string `json:"last_name" form:"last_name" schema:"last_name"`
+	Email            string `json:"email" form:"email" schema:"email"`
+	PhoneNumber      string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	EventType        string `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType        string `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	Guests           int    `json:"guests" form:"guests" schema:"guests"`
+	StripeCustomerID string `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
 
 	CampaignName     string `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
 	CampaignID       int64  `json:"campaign_id" form:"campaign_id" schema:"campaign_id"`
@@ -160,16 +161,17 @@ type TwilioMessage struct {
 }
 
 type UpdateLeadForm struct {
-	Method      *string `json:"_method" form:"_method" schema:"_method"`
-	CSRFToken   *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	LeadID      *string `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FirstName   *string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName    *string `json:"last_name" form:"last_name" schema:"last_name"`
-	PhoneNumber *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	Email       *string `json:"email" form:"email" schema:"email"`
-	EventType   *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueType   *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	Guests      *int    `json:"guests" form:"guests" schema:"guests"`
+	Method           *string `json:"_method" form:"_method" schema:"_method"`
+	CSRFToken        *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	LeadID           *string `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	FirstName        *string `json:"first_name" form:"first_name" schema:"first_name"`
+	LastName         *string `json:"last_name" form:"last_name" schema:"last_name"`
+	PhoneNumber      *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	Email            *string `json:"email" form:"email" schema:"email"`
+	EventType        *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueType        *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	Guests           *int    `json:"guests" form:"guests" schema:"guests"`
+	StripeCustomerID *string `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
 }
 
 type UpdateLeadMarketingForm struct {

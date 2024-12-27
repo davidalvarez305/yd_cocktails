@@ -699,7 +699,8 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		    event_type_id = $5, 
 		    venue_type_id = $6, 
 		    guests = $7, 
-		    email = $8
+		    email = $8,
+			stripe_customer_id = $9
 		WHERE lead_id = $1
 	`
 
@@ -712,6 +713,7 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		utils.CreateNullInt(form.VenueType),
 		utils.CreateNullInt(form.Guests),
 		utils.CreateNullString(form.Email),
+		utils.CreateNullString(form.StripeCustomerID),
 	}
 
 	_, err := DB.Exec(query, args...)
