@@ -400,8 +400,8 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		l.created_at, et.name AS event_type, vt.name AS venue_type, lm.language, l.event_type_id, l.venue_type_id, l.guests,
 		COUNT(*) OVER() AS total_rows
 		FROM lead AS l
-		JOIN event_type AS et ON et.event_type_id = l.event_type_id
-		JOIN venue_type AS vt ON vt.venue_type_id = l.venue_type_id
+		LEFT JOIN event_type AS et ON et.event_type_id = l.event_type_id
+		LEFT JOIN venue_type AS vt ON vt.venue_type_id = l.venue_type_id
 		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
 		WHERE (et.event_type_id = $1 OR $1 IS NULL) 
 		AND (vt.venue_type_id = $2 OR $2 IS NULL)
@@ -696,9 +696,10 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		SET first_name = COALESCE($2, first_name), 
 		    last_name = COALESCE($3, last_name), 
 		    phone_number = COALESCE($4, phone_number), 
-		    event_type_id = COALESCE($5, event_type_id), 
-		    venue_type_id = COALESCE($6, venue_type_id), 
-		    guests = COALESCE($7, guests)
+		    event_type_id = $5, 
+		    venue_type_id = $6, 
+		    guests = $7, 
+		    email = $8
 		WHERE lead_id = $1
 	`
 
@@ -710,6 +711,7 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		utils.CreateNullInt(form.EventType),
 		utils.CreateNullInt(form.VenueType),
 		utils.CreateNullInt(form.Guests),
+		utils.CreateNullString(form.Email),
 	}
 
 	_, err := DB.Exec(query, args...)

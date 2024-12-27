@@ -166,6 +166,7 @@ type UpdateLeadForm struct {
 	FirstName   *string `json:"first_name" form:"first_name" schema:"first_name"`
 	LastName    *string `json:"last_name" form:"last_name" schema:"last_name"`
 	PhoneNumber *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	Email       *string `json:"email" form:"email" schema:"email"`
 	EventType   *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
 	VenueType   *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
 	Guests      *int    `json:"guests" form:"guests" schema:"guests"`
