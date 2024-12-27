@@ -173,18 +173,19 @@ type UpdateLeadForm struct {
 }
 
 type UpdateLeadMarketingForm struct {
-	Method       *string `json:"_method" form:"_method" schema:"_method"`
-	CSRFToken    *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	LeadID       *string `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	CampaignName *string `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
-	Medium       *string `json:"medium" form:"medium" schema:"medium"`
-	Source       *string `json:"source" form:"source" schema:"source"`
-	Referrer     *string `json:"referrer" form:"referrer" schema:"referrer"`
-	LandingPage  *string `json:"landing_page" form:"landing_page" schema:"landing_page"`
-	IP           *string `json:"ip" form:"ip" schema:"ip"`
-	Keyword      *string `json:"keyword" form:"keyword" schema:"keyword"`
-	Channel      *string `json:"channel" form:"channel" schema:"channel"`
-	Language     *string `json:"language" form:"language" schema:"language"`
+	Method        *string `json:"_method" form:"_method" schema:"_method"`
+	CSRFToken     *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	LeadID        *string `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	CampaignName  *string `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
+	Medium        *string `json:"medium" form:"medium" schema:"medium"`
+	Source        *string `json:"source" form:"source" schema:"source"`
+	Referrer      *string `json:"referrer" form:"referrer" schema:"referrer"`
+	LandingPage   *string `json:"landing_page" form:"landing_page" schema:"landing_page"`
+	IP            *string `json:"ip" form:"ip" schema:"ip"`
+	Keyword       *string `json:"keyword" form:"keyword" schema:"keyword"`
+	Channel       *string `json:"channel" form:"channel" schema:"channel"`
+	Language      *string `json:"language" form:"language" schema:"language"`
+	ButtonClicked *string `json:"button_clicked" form:"button_clicked" schema:"button_clicked"`
 }
 
 type TwilioSMSResponse struct {
