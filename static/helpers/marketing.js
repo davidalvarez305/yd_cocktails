@@ -156,11 +156,11 @@ export class MarketingHelper {
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                function (position) {
+                (position) => {
                     this.latitude = position.coords.latitude;
                     this.longitude = position.coords.longitude;
                 },
-                function (error) {
+                (error) => {
                     console.error("Error getting user location:", error.message);
                 },
                 options
