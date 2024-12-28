@@ -1,4 +1,4 @@
-{{ define "quote_form.html" }}
+{{ define "estimate_form.html" }}
 <!-- Modal Container -->
 <div id="estimateModalContainer" style="display: none;">
     <div>
@@ -11,7 +11,7 @@
                         <span>Generate An Estimate For {{ .Lead.FirstName }} {{ .Lead.LastName }}</span>
                     </h3>
                     <div class="-my-4">
-                        <button type="button" id="closeFormModal"
+                        <button type="button" id="closeEstimateFormModal"
                             class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                             <svg class="hi-solid hi-x -mx-1 inline-block size-4" fill="currentColor" viewBox="0 0 20 20"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -31,7 +31,7 @@
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
                                         <label for="guests" class="font-medium">Number of Guests Attending*</label>
-                                        <input type="number" id="guests" name="guests" value="{{ .Lead.LeadID }}" required
+                                        <input type="number" id="guests" name="guests" value="{{ .Lead.Guests }}" required
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                     </div>
                                     <div class="grow space-y-1">
@@ -175,7 +175,7 @@
                     </div>
                 </div>
                 <div class="space-x-1 bg-gray-50 px-5 py-4 text-right dark:bg-gray-700/50">
-                    <button type="button" id="cancelFormModal"
+                    <button type="button" id="cancelEstimateMFormModal"
                         class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                         Cancel
                     </button>
@@ -187,21 +187,21 @@
 <div id="alertModal"></div>
 
 <script nonce="{{ .Nonce }}">
-    const cancelFormModal = document.getElementById("cancelFormModal");
-    const closeFormModal = document.getElementById("closeFormModal");
+    const cancelEstimateMFormModal = document.getElementById("cancelEstimateMFormModal");
+    const closeEstimateFormModal = document.getElementById("closeEstimateFormModal");
 
-    function handleCloseFormModal() {
+    function handleCloseEstimateFormModal() {
         const modal = document.getElementById('estimateModalContainer');
         modal.style.display = 'none';
     }
 
-    closeFormModal.addEventListener("click", () => handleCloseFormModal());
-    cancelFormModal.addEventListener("click", () => handleCloseFormModal());
+    closeEstimateFormModal.addEventListener("click", () => handleCloseEstimateFormModal());
+    cancelEstimateMFormModal.addEventListener("click", () => handleCloseEstimateFormModal());
 
 </script>
 
 <script nonce="{{ .Nonce }}">
-    function handleCloseFormModal() {
+    function handleCloseEstimateFormModal() {
         const modal = document.getElementById('estimateModalContainer');
         modal.style.display = 'none';
     }
@@ -257,7 +257,7 @@
             .catch(err => {
                 alertModal.outerHTML = err.message;
                 handleCloseAlertModal();
-                handleCloseFormModal();
+                handleCloseEstimateFormModal();
             })
             .finally(() => {
                 form.reset();
