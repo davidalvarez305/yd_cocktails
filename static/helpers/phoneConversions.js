@@ -1,5 +1,3 @@
-const facebookLeadEventName = document.getElementById("facebookLeadEventName").textContent;
-
 const phoneNumbers = document.querySelectorAll(".phoneNumberCTA");
 
 phoneNumbers.forEach(phoneNumber => {
@@ -7,5 +5,6 @@ phoneNumbers.forEach(phoneNumber => {
 })
 
 function handlePhoneNumberClick() {
-    if (fbq) fbq("track", facebookLeadEventName);
+    if (fbq) fbq("track", "Lead");
+    if (gtag) fbq("event", "generated_lead");
 }
