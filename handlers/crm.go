@@ -501,26 +501,25 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var form types.EstimateForm
-	form.Guests = helpers.GetIntPointerFromForm(r, "guests")
-	form.Hours = helpers.GetIntPointerFromForm(r, "hours")
-	form.PackageTypeID = helpers.GetIntPointerFromForm(r, "package_type_id")
-	form.AlcoholSegmentID = helpers.GetIntPointerFromForm(r, "alcohol_segment_id")
-	form.WillProvideLiquor = helpers.GetBoolPointerFromForm(r, "will_provide_liquor")
-	form.WillProvideBeerAndWine = helpers.GetBoolPointerFromForm(r, "will_provide_beer_and_wine")
-	form.WillProvideMixers = helpers.GetBoolPointerFromForm(r, "will_provide_mixers")
-	form.WillProvideJuices = helpers.GetBoolPointerFromForm(r, "will_provide_juices")
-	form.WillProvideSoftDrinks = helpers.GetBoolPointerFromForm(r, "will_provide_soft_drinks")
-	form.WillProvideCups = helpers.GetBoolPointerFromForm(r, "will_provide_cups")
-	form.WillProvideIce = helpers.GetBoolPointerFromForm(r, "will_provide_ice")
-	form.WillRequireGlassware = helpers.GetBoolPointerFromForm(r, "will_require_glassware")
-	form.WillRequireBar = helpers.GetBoolPointerFromForm(r, "will_require_bar")
-	form.NumBars = helpers.GetIntPointerFromForm(r, "num_bars")
+	err = decoder.Decode(&form, r.PostForm)
 
-	packagePrice := helpers.CalculatePackagePrice(form)
-
-	err = database.CreateEstimate(form, packagePrice)
 	if err != nil {
-		fmt.Printf("Error creating lead: %+v\n", err)
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.CreateEstimate(form)
+	if err != nil {
+		fmt.Printf("Error creating estimate: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
@@ -564,7 +563,7 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stripeInvoice, err := services.CreateStripeInvoiceForNewCustomer(lead.Email, lead.FirstName, lead.LastName, packagePrice)
+	stripeInvoice, err := services.CreateStripeInvoiceForNewCustomer(lead.Email, lead.FirstName, lead.LastName, helpers.SafeFloat64(form.Price))
 	if err != nil {
 		fmt.Printf("Error creating invoice: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
@@ -703,17 +702,21 @@ func PostBooking(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var form types.BookingForm
-	form.BookingID = helpers.GetIntPointerFromForm(r, "booking_id")
-	form.EstimateID = helpers.GetIntPointerFromForm(r, "estimate_id")
-	form.StreetAddress = helpers.GetStringPointerFromForm(r, "street_address")
-	form.City = helpers.GetStringPointerFromForm(r, "city")
-	form.State = helpers.GetStringPointerFromForm(r, "state")
-	form.PostalCode = helpers.GetStringPointerFromForm(r, "postal_code")
-	form.Country = helpers.GetStringPointerFromForm(r, "country")
-	form.StartTime = helpers.GetInt64PointerFromForm(r, "start_time")
-	form.EndTime = helpers.GetInt64PointerFromForm(r, "end_time")
-	form.BartenderID = helpers.GetIntPointerFromForm(r, "bartender_id")
-	form.LeadID = helpers.GetIntPointerFromForm(r, "lead_id")
+	err = decoder.Decode(&form, r.PostForm)
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
 
 	err = database.CreateBooking(form)
 	if err != nil {
@@ -828,27 +831,11 @@ func GetEstimateDetail(w http.ResponseWriter, r *http.Request, ctx map[string]an
 		return
 	}
 
-	packageTypes, err := database.GetPackageTypes()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting package types from DB.", http.StatusInternalServerError)
-		return
-	}
-
-	alcoholSegments, err := database.GetAlcoholSegments()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting alcohol segments from DB.", http.StatusInternalServerError)
-		return
-	}
-
 	data := ctx
 	data["PageTitle"] = "Estimate Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["Estimate"] = estimateDetails
-	data["PackageTypes"] = packageTypes
-	data["AlcoholSegments"] = alcoholSegments
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -948,14 +935,14 @@ func PutEstimate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.UpdateEstimate(form, helpers.CalculatePackagePrice(form))
+	err = database.UpdateEstimate(form)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Error updating booking.",
+				"Message": "Error updating estimate.",
 			},
 		}
 		w.WriteHeader(http.StatusBadRequest)

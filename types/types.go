@@ -7,29 +7,14 @@ import (
 )
 
 type EstimateForm struct {
-	EstimateID *int    `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-	CSRFToken  *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	Guests     *int    `json:"guests" form:"guests" schema:"guests"`
-	Hours      *int    `json:"hours" form:"hours" schema:"hours"`
-	LeadID     *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-
-	StripeInvoiceID *string `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
-
-	PackageTypeID    *int `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
-	AlcoholSegmentID *int `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
-
-	WillProvideLiquor      *bool `json:"will_provide_liquor" form:"will_provide_liquor" schema:"will_provide_liquor"`
-	WillProvideBeerAndWine *bool `json:"will_provide_beer_and_wine" form:"will_provide_beer_and_wine" schema:"will_provide_beer_and_wine"`
-	WillProvideMixers      *bool `json:"will_provide_mixers" form:"will_provide_mixers" schema:"will_provide_mixers"`
-	WillProvideJuices      *bool `json:"will_provide_juices" form:"will_provide_juices" schema:"will_provide_juices"`
-	WillProvideSoftDrinks  *bool `json:"will_provide_soft_drinks" form:"will_provide_soft_drinks" schema:"will_provide_soft_drinks"`
-	WillProvideCups        *bool `json:"will_provide_cups" form:"will_provide_cups" schema:"will_provide_cups"`
-	WillProvideIce         *bool `json:"will_provide_ice" form:"will_provide_ice" schema:"will_provide_ice"`
-
-	WillRequireGlassware *bool `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
-
-	WillRequireBar *bool `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
-	NumBars        *int  `json:"num_bars" form:"num_bars" schema:"num_bars"`
+	CSRFToken       *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	EstimateID      *int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
+	LeadID          *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	StripeInvoiceID *string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+	Price           *float64 `json:"price" form:"price" schema:"price"`
+	Status          *string  `json:"status" form:"status" schema:"status"`
+	DateCreated     *int64   `json:"date_created" form:"date_created" schema:"date_created"`
+	DatePaid        *int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
 }
 
 type QuoteForm struct {
@@ -278,33 +263,31 @@ type IncomingPhoneCallDialStatus struct {
 }
 
 type WebsiteContext struct {
-	PageTitle                    string                  `json:"page_title" form:"page_title"`
-	MetaDescription              string                  `json:"meta_description" form:"meta_description"`
-	SiteName                     string                  `json:"site_name" form:"site_name"`
-	StaticPath                   string                  `json:"static_path" form:"static_path"`
-	MediaPath                    string                  `json:"media_path" form:"media_path"`
-	PhoneNumber                  string                  `json:"phone_number" form:"phone_number"`
-	CurrentYear                  int                     `json:"current_year" form:"current_year"`
-	GoogleAnalyticsID            string                  `json:"google_analytics_id" form:"google_analytics_id"`
-	FacebookDataSetID            string                  `json:"facebook_data_set_id" form:"facebook_data_set_id"`
-	CompanyName                  string                  `json:"company_name" form:"company_name"`
-	PagePath                     string                  `json:"page_path" form:"page_path"`
-	Nonce                        string                  `json:"nonce" form:"nonce"`
-	Features                     []string                `json:"features" form:"features"`
-	CSRFToken                    string                  `json:"csrf_token" form:"csrf_token"`
-	EventTypes                   []models.EventType      `json:"event_types" form:"event_types"`
-	VenueTypes                   []models.VenueType      `json:"venue_types" form:"venue_types"`
-	ExternalID                   string                  `json:"external_id" form:"external_id"`
-	GoogleAdsID                  string                  `json:"google_ads_id"`
-	GoogleAdsCallConversionLabel string                  `json:"google_ads_call_conversion_label"`
-	LeadEventName                string                  `json:"lead_event_name"`
-	LeadGeneratedEventName       string                  `json:"lead_generated_event_name"`
-	DefaultCurrency              string                  `json:"default_currency"`
-	YovaHeroImage                string                  `json:"yova_hero_image"`
-	YovaMidCTA                   string                  `json:"yova_mid_cta"`
-	PackageTypes                 []models.PackageType    `json:"package_types" form:"package_types"`
-	AlcoholSegments              []models.AlcoholSegment `json:"alcohol_segments" form:"alcohol_segments"`
-	IsMobile                     bool                    `json:"is_bool"`
+	PageTitle                    string             `json:"page_title" form:"page_title"`
+	MetaDescription              string             `json:"meta_description" form:"meta_description"`
+	SiteName                     string             `json:"site_name" form:"site_name"`
+	StaticPath                   string             `json:"static_path" form:"static_path"`
+	MediaPath                    string             `json:"media_path" form:"media_path"`
+	PhoneNumber                  string             `json:"phone_number" form:"phone_number"`
+	CurrentYear                  int                `json:"current_year" form:"current_year"`
+	GoogleAnalyticsID            string             `json:"google_analytics_id" form:"google_analytics_id"`
+	FacebookDataSetID            string             `json:"facebook_data_set_id" form:"facebook_data_set_id"`
+	CompanyName                  string             `json:"company_name" form:"company_name"`
+	PagePath                     string             `json:"page_path" form:"page_path"`
+	Nonce                        string             `json:"nonce" form:"nonce"`
+	Features                     []string           `json:"features" form:"features"`
+	CSRFToken                    string             `json:"csrf_token" form:"csrf_token"`
+	EventTypes                   []models.EventType `json:"event_types" form:"event_types"`
+	VenueTypes                   []models.VenueType `json:"venue_types" form:"venue_types"`
+	ExternalID                   string             `json:"external_id" form:"external_id"`
+	GoogleAdsID                  string             `json:"google_ads_id"`
+	GoogleAdsCallConversionLabel string             `json:"google_ads_call_conversion_label"`
+	LeadEventName                string             `json:"lead_event_name"`
+	LeadGeneratedEventName       string             `json:"lead_generated_event_name"`
+	DefaultCurrency              string             `json:"default_currency"`
+	YovaHeroImage                string             `json:"yova_hero_image"`
+	YovaMidCTA                   string             `json:"yova_mid_cta"`
+	IsMobile                     bool               `json:"is_bool"`
 }
 
 type FacebookUserData struct {
@@ -399,6 +382,7 @@ type EstimatesList struct {
 	EstimateID      int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
 	Price           float64 `json:"price" form:"price" schema:"price"`
 	DateCreated     string  `json:"date_created" form:"date_created" schema:"date_created"`
+	DatePaid        string  `json:"date_paid" form:"date_paid" schema:"date_paid"`
 	StripeInvoiceID string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
 }
 
@@ -418,24 +402,13 @@ type BookingForm struct {
 }
 
 type EstimateDetails struct {
-	EstimateID             int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-	PackageTypeID          int     `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
-	AlcoholSegmentID       int     `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
-	Price                  float64 `json:"price" form:"price" schema:"price"`
-	Guests                 int     `json:"guests" form:"guests" schema:"guests"`
-	Hours                  int     `json:"hours" form:"hours" schema:"hours"`
-	WillProvideLiquor      bool    `json:"will_provide_liquor" form:"will_provide_liquor" schema:"will_provide_liquor"`
-	WillProvideBeerAndWine bool    `json:"will_provide_beer_and_wine" form:"will_provide_beer_and_wine" schema:"will_provide_beer_and_wine"`
-	WillProvideMixers      bool    `json:"will_provide_mixers" form:"will_provide_mixers" schema:"will_provide_mixers"`
-	WillProvideJuices      bool    `json:"will_provide_juices" form:"will_provide_juices" schema:"will_provide_juices"`
-	WillProvideSoftDrinks  bool    `json:"will_provide_soft_drinks" form:"will_provide_soft_drinks" schema:"will_provide_soft_drinks"`
-	WillProvideCups        bool    `json:"will_provide_cups" form:"will_provide_cups" schema:"will_provide_cups"`
-	WillProvideIce         bool    `json:"will_provide_ice" form:"will_provide_ice" schema:"will_provide_ice"`
-	WillRequireGlassware   bool    `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
-	WillRequireBar         bool    `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
-	NumBars                int     `json:"num_bars" form:"num_bars" schema:"num_bars"`
-	LeadID                 int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	StripeInvoiceID        string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+	EstimateID      int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
+	LeadID          int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	StripeInvoiceID string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+	Price           float64 `json:"price" form:"price" schema:"price"`
+	Status          string  `json:"status" form:"status" schema:"status"`
+	DateCreated     string  `json:"date_created" form:"date_created" schema:"date_created"`
+	DatePaid        string  `json:"date_paid" form:"date_paid" schema:"date_paid"`
 }
 
 type BookingDetails struct {

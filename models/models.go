@@ -118,39 +118,13 @@ type UserRole struct {
 }
 
 type Estimate struct {
-	EstimateID             int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-	PackageTypeID          int     `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
-	AlcoholSegmentID       int     `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
-	LeadID                 int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	Price                  float64 `json:"price" form:"price" schema:"price"`
-	Guests                 int     `json:"guests" form:"guests" schema:"guests"`
-	Hours                  int     `json:"hours" form:"hours" schema:"hours"`
-	WillProvideLiquor      bool    `json:"will_provide_liquor" form:"will_provide_liquor" schema:"will_provide_liquor"`
-	WillProvideBeerAndWine bool    `json:"will_provide_beer_and_wine" form:"will_provide_beer_and_wine" schema:"will_provide_beer_and_wine"`
-	WillProvideMixers      bool    `json:"will_provide_mixers" form:"will_provide_mixers" schema:"will_provide_mixers"`
-	WillProvideJuices      bool    `json:"will_provide_juices" form:"will_provide_juices" schema:"will_provide_juices"`
-	WillProvideSoftDrinks  bool    `json:"will_provide_soft_drinks" form:"will_provide_soft_drinks" schema:"will_provide_soft_drinks"`
-	WillProvideCups        bool    `json:"will_provide_cups" form:"will_provide_cups" schema:"will_provide_cups"`
-	WillProvideIce         bool    `json:"will_provide_ice" form:"will_provide_ice" schema:"will_provide_ice"`
-	WillRequireGlassware   bool    `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
-	WillRequireBar         bool    `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
-	NumBars                int     `json:"num_bars" form:"num_bars" schema:"num_bars"`
-	DateCreated            int64   `json:"date_created" form:"date_created" schema:"date_created"`
-	DateUpdated            int64   `json:"date_updated" form:"date_updated" schema:"date_updated"`
-}
-
-// Full Open Bar, Partial Open Bar
-type PackageType struct {
-	PackageTypeID     int     `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
-	Name              string  `json:"name" form:"name" schema:"name"`
-	PriceModification float64 `json:"price_modification" form:"price_modification" schema:"price_modification"`
-}
-
-// Top Shelf, Premium, Standard
-type AlcoholSegment struct {
-	AlcoholSegmentID  int     `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
-	Name              string  `json:"name" form:"name" schema:"name"`
-	PriceModification float64 `json:"price_modification" form:"price_modification" schema:"price_modification"`
+	EstimateID      int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
+	LeadID          int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	StripeInvoiceID string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+	Price           float64 `json:"price" form:"price" schema:"price"`
+	Status          string  `json:"status" form:"status" schema:"status"`
+	DateCreated     int64   `json:"date_created" form:"date_created" schema:"date_created"`
+	DatePaid        int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
 }
 
 type Booking struct {

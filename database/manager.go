@@ -993,37 +993,19 @@ func DeleteLead(id int) error {
 	return nil
 }
 
-func CreateEstimate(form types.EstimateForm, price float64) error {
+func CreateEstimate(form types.EstimateForm) error {
 	query := `
-		INSERT INTO estimate (guests, hours, package_type_id, alcohol_segment_id, 
-                             will_provide_liquor, will_provide_beer_and_wine, 
-                             will_provide_mixers, will_provide_juices, 
-                             will_provide_soft_drinks, will_provide_cups, 
-                             will_provide_ice, will_require_glassware, 
-                             will_require_bar, num_bars, price, date_created, lead_id, stripe_invoice_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, to_timestamp($16)::timestamptz, $17, $18)
+		INSERT INTO estimate (price, date_created, lead_id, stripe_invoice_id, status)
+		VALUES ($1, to_timestamp($2)::timestamptz, $3, $4, $5)
 	`
 
 	_, err := DB.Exec(
 		query,
-		utils.CreateNullInt(form.Guests),
-		utils.CreateNullInt(form.Hours),
-		utils.CreateNullInt(form.PackageTypeID),
-		utils.CreateNullInt(form.AlcoholSegmentID),
-		utils.CreateNullBool(form.WillProvideLiquor),
-		utils.CreateNullBool(form.WillProvideBeerAndWine),
-		utils.CreateNullBool(form.WillProvideMixers),
-		utils.CreateNullBool(form.WillProvideJuices),
-		utils.CreateNullBool(form.WillProvideSoftDrinks),
-		utils.CreateNullBool(form.WillProvideCups),
-		utils.CreateNullBool(form.WillProvideIce),
-		utils.CreateNullBool(form.WillRequireGlassware),
-		utils.CreateNullBool(form.WillRequireBar),
-		utils.CreateNullInt(form.NumBars),
-		price,
-		time.Now().Unix(),
+		utils.CreateNullFloat64(form.Price),
+		utils.CreateNullInt64(form.DateCreated),
 		utils.CreateNullInt(form.LeadID),
 		utils.CreateNullString(form.StripeInvoiceID),
+		utils.CreateNullString(form.Status),
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting estimate data: %w", err)
@@ -1032,51 +1014,26 @@ func CreateEstimate(form types.EstimateForm, price float64) error {
 	return nil
 }
 
-func UpdateEstimate(form types.EstimateForm, price float64) error {
+func UpdateEstimate(form types.EstimateForm) error {
 	query := `
 		UPDATE estimate
 		SET 
-		    guests = COALESCE($2, guests),
-		    hours = COALESCE($3, hours),
-		    package_type_id = COALESCE($4, package_type_id),
-		    alcohol_segment_id = COALESCE($5, alcohol_segment_id),
-		    will_provide_liquor = COALESCE($6, will_provide_liquor),
-		    will_provide_beer_and_wine = COALESCE($7, will_provide_beer_and_wine),
-		    will_provide_mixers = COALESCE($8, will_provide_mixers),
-		    will_provide_juices = COALESCE($9, will_provide_juices),
-		    will_provide_soft_drinks = COALESCE($10, will_provide_soft_drinks),
-		    will_provide_cups = COALESCE($11, will_provide_cups),
-		    will_provide_ice = COALESCE($12, will_provide_ice),
-		    will_require_glassware = COALESCE($13, will_require_glassware),
-		    will_require_bar = COALESCE($14, will_require_bar),
-		    num_bars = COALESCE($15, num_bars),
-		    price = COALESCE($16, price),
-		    date_updated = COALESCE(to_timestamp($17)::timestamptz, date_updated),
-		    lead_id = COALESCE($18, lead_id),
-		    stripe_invoice_id = COALESCE($19, stripe_invoice_id)
+		    price = $2,
+		    date_paid = to_timestamp($3)::timestamptz,
+		    lead_id = COALESCE($4, lead_id),
+		    stripe_invoice_id = COALESCE($5, stripe_invoice_id),
+		    status = COALESCE($6, status)
 		WHERE estimate_id = $1
 	`
+
 	_, err := DB.Exec(
 		query,
 		utils.CreateNullInt(form.EstimateID),
-		utils.CreateNullInt(form.Guests),
-		utils.CreateNullInt(form.Hours),
-		utils.CreateNullInt(form.PackageTypeID),
-		utils.CreateNullInt(form.AlcoholSegmentID),
-		utils.CreateNullBool(form.WillProvideLiquor),
-		utils.CreateNullBool(form.WillProvideBeerAndWine),
-		utils.CreateNullBool(form.WillProvideMixers),
-		utils.CreateNullBool(form.WillProvideJuices),
-		utils.CreateNullBool(form.WillProvideSoftDrinks),
-		utils.CreateNullBool(form.WillProvideCups),
-		utils.CreateNullBool(form.WillProvideIce),
-		utils.CreateNullBool(form.WillRequireGlassware),
-		utils.CreateNullBool(form.WillRequireBar),
-		utils.CreateNullInt(form.NumBars),
-		price,
+		utils.CreateNullFloat64(form.Price),
 		time.Now().Unix(),
 		utils.CreateNullInt(form.LeadID),
 		utils.CreateNullString(form.StripeInvoiceID),
+		utils.CreateNullString(form.Status),
 	)
 	if err != nil {
 		return fmt.Errorf("error updating estimate data: %w", err)
@@ -1113,56 +1070,6 @@ func AssignStripeInvoiceToEstimate(stripeInvoiceId string, estimateId int) error
 	}
 
 	return nil
-}
-
-func GetAlcoholSegments() ([]models.AlcoholSegment, error) {
-	var alcoholSegments []models.AlcoholSegment
-
-	rows, err := DB.Query(`SELECT alcohol_segment_id, name, price_modification FROM "alcohol_segment"`)
-	if err != nil {
-		return alcoholSegments, fmt.Errorf("error executing query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var segment models.AlcoholSegment
-		err := rows.Scan(&segment.AlcoholSegmentID, &segment.Name, &segment.PriceModification)
-		if err != nil {
-			return alcoholSegments, fmt.Errorf("error scanning row: %w", err)
-		}
-		alcoholSegments = append(alcoholSegments, segment)
-	}
-
-	if err := rows.Err(); err != nil {
-		return alcoholSegments, fmt.Errorf("error iterating rows: %w", err)
-	}
-
-	return alcoholSegments, nil
-}
-
-func GetPackageTypes() ([]models.PackageType, error) {
-	var packageTypes []models.PackageType
-
-	rows, err := DB.Query(`SELECT package_type_id, name, price_modification FROM "package_type"`)
-	if err != nil {
-		return packageTypes, fmt.Errorf("error executing query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var pkg models.PackageType
-		err := rows.Scan(&pkg.PackageTypeID, &pkg.Name, &pkg.PriceModification)
-		if err != nil {
-			return packageTypes, fmt.Errorf("error scanning row: %w", err)
-		}
-		packageTypes = append(packageTypes, pkg)
-	}
-
-	if err := rows.Err(); err != nil {
-		return packageTypes, fmt.Errorf("error iterating rows: %w", err)
-	}
-
-	return packageTypes, nil
 }
 
 func GetBookingList(leadId int) ([]types.BookingList, error) {
@@ -1374,53 +1281,29 @@ func GetEstimateDetails(estimateId string) (types.EstimateDetails, error) {
 
 	query := `SELECT 
 		estimate_id, 
-		package_type_id, 
-		alcohol_segment_id, 
 		price, 
-		guests, 
-		hours, 
-		will_provide_liquor, 
-		will_provide_beer_and_wine, 
-		will_provide_mixers, 
-		will_provide_juices, 
-		will_provide_soft_drinks, 
-		will_provide_cups, 
-		will_provide_ice, 
-		will_require_glassware, 
-		will_require_bar, 
-		num_bars,
 		lead_id,
-		stripe_invoice_id
+		stripe_invoice_id,
+		date_created,
+		date_paid
 	FROM estimate 
 	WHERE estimate_id = $1`
 
 	var estimateDetails types.EstimateDetails
 
 	var stripeInvoiceID sql.NullString
-	var numBars, packageTypeId, alcoholSegmentId sql.NullInt64
 	var price sql.NullFloat64
+	var dateCreated, datePaid time.Time
 
 	row := DB.QueryRow(query, estimateId)
 
 	err := row.Scan(
 		&estimateDetails.EstimateID,
-		&packageTypeId,
-		&alcoholSegmentId,
 		&price,
-		&estimateDetails.Guests,
-		&estimateDetails.Hours,
-		&estimateDetails.WillProvideLiquor,
-		&estimateDetails.WillProvideBeerAndWine,
-		&estimateDetails.WillProvideMixers,
-		&estimateDetails.WillProvideJuices,
-		&estimateDetails.WillProvideSoftDrinks,
-		&estimateDetails.WillProvideCups,
-		&estimateDetails.WillProvideIce,
-		&estimateDetails.WillRequireGlassware,
-		&estimateDetails.WillRequireBar,
-		&numBars,
 		&estimateDetails.LeadID,
 		&stripeInvoiceID,
+		&dateCreated,
+		&datePaid,
 	)
 
 	if err != nil {
@@ -1434,21 +1317,12 @@ func GetEstimateDetails(estimateId string) (types.EstimateDetails, error) {
 		estimateDetails.StripeInvoiceID = stripeInvoiceID.String
 	}
 
-	if numBars.Valid {
-		estimateDetails.NumBars = int(numBars.Int64)
-	}
-
-	if packageTypeId.Valid {
-		estimateDetails.PackageTypeID = int(packageTypeId.Int64)
-	}
-
-	if alcoholSegmentId.Valid {
-		estimateDetails.AlcoholSegmentID = int(alcoholSegmentId.Int64)
-	}
-
 	if price.Valid {
 		estimateDetails.Price = price.Float64
 	}
+
+	estimateDetails.DateCreated = utils.FormatTimestamp(dateCreated.Unix())
+	estimateDetails.DatePaid = utils.FormatTimestamp(datePaid.Unix())
 
 	return estimateDetails, nil
 }
