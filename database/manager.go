@@ -1421,7 +1421,7 @@ func UpdateEstimatePriceByStripeInvoiceID(stripeInvoiceID string, price float64)
 		UPDATE estimate
 		SET 
 		    price = COALESCE($1, price)
-			date_updated = COALESCE(to_timestamp($2), date_updated)
+			date_paid = COALESCE(to_timestamp($2), date_paid)
 		WHERE stripe_invoice_id = $3
 	`
 	_, err := DB.Exec(
