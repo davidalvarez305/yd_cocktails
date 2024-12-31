@@ -18,8 +18,7 @@
                 </p>
             </div>
             <div class="md:w-2/3 md:pl-24">
-                <form id="estimateForm" class="space-y-6 xl:w-2/3"
-                    action="/crm/lead/{{ .Estimate.LeadID }}/estimate/{{ .Estimate.EstimateID }}">
+                <form id="estimateForm" class="space-y-6 xl:w-2/3" action="/crm/lead/{{ .Estimate.LeadID }}/estimate/{{ .Estimate.EstimateID }}">
                     <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
                     <input type="hidden" name="lead_id" value="{{ .Estimate.LeadID }}" />
                     <input type="hidden" name="estimate_id" value="{{ .Estimate.EstimateID }}" />
@@ -89,12 +88,22 @@
     function handleSaveEstimateChanges(e) {
         e.preventDefault();
 
-        var body = new FormData(e.target);
-        const endpoint = e.target.action;
-        const method = e.target.method === "get" ? body.get('_method') : e.target.method;
+        const data = new FormData(e.target);
+        const body = new FormData();
+        const alertModal = document.getElementById("alertModal");
 
-        fetch(endpoint, {
-            method: method,
+        for (const [key, value] of data.entries()) {
+            if (key.includes("date_") && value) {
+                const timestamp = new Date(value).getTime() / 1000;
+                body.set(key, timestamp);
+                continue;
+            }
+
+            if (value) body.append(key, value);
+        }
+
+        fetch("/crm/lead/{{ .Estimate.LeadID }}/estimate/{{ .Estimate.EstimateID }}", {
+            method: "PUT",
             credentials: "include",
             body: body,
         })
@@ -113,11 +122,12 @@
                 }
             })
             .then(html => {
-                const el = document.getElementById("alertModal");
-                el.outerHTML = html;
-                handleCloseAlertModal();
+                alertModal.outerHTML = html;
             })
-            .catch(console.error);
+            .catch(err => {
+                alertModal.outerHTML = err.message;
+            })
+            .finally(() => handleCloseAlertModal());
     }
 
     const estimateForm = document.getElementById("estimateForm");

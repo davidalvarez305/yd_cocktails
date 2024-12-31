@@ -1019,9 +1019,8 @@ func UpdateEstimate(form types.EstimateForm) error {
 		UPDATE estimate
 		SET 
 		    price = $2,
-		    date_paid = to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York',
-		    stripe_invoice_id = COALESCE($4, stripe_invoice_id),
-		    status = COALESCE($5, status)
+		    stripe_invoice_id = COALESCE($3, stripe_invoice_id),
+		    status = COALESCE($4, status)
 		WHERE estimate_id = $1
 	`
 
@@ -1029,7 +1028,6 @@ func UpdateEstimate(form types.EstimateForm) error {
 		query,
 		utils.CreateNullInt(form.EstimateID),
 		utils.CreateNullFloat64(form.Price),
-		time.Now().Unix(),
 		utils.CreateNullString(form.StripeInvoiceID),
 		utils.CreateNullString(form.Status),
 	)
@@ -1183,7 +1181,7 @@ func GetEstimateList(leadId int) ([]types.EstimatesList, error) {
 			return estimates, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		estimate.DateCreated = utils.FormatTimestamp(dateCreated.Unix())
+		estimate.DateCreated = utils.FormatTimestampEST(dateCreated.Unix())
 
 		estimates = append(estimates, estimate)
 	}
