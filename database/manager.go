@@ -1040,6 +1040,28 @@ func UpdateEstimate(form types.EstimateForm) error {
 	return nil
 }
 
+func UpdateEstimateByWebhook(stripeInvoiceId, stripeInvoiceStatus string, datePaid int64) error {
+	query := `
+		UPDATE estimate
+		SET 
+		    date_paid = to_timestamp($2)::timestamptz AT TIME ZONE 'America/New_York',
+		    status = COALESCE($3, status)
+		WHERE stripe_invoice_id = $1
+	`
+
+	_, err := DB.Exec(
+		query,
+		stripeInvoiceId,
+		datePaid,
+		stripeInvoiceStatus,
+	)
+	if err != nil {
+		return fmt.Errorf("error updating estimate data: %w", err)
+	}
+
+	return nil
+}
+
 func AssignStripeCustomerToLead(stripeCustomerID string, leadId int) error {
 	stmt, err := DB.Prepare(`UPDATE lead SET stripe_customer_id = $1 WHERE lead_id = $2`)
 	if err != nil {
@@ -1418,15 +1440,13 @@ func UpdateEstimatePriceByStripeInvoiceID(stripeInvoiceID string, price float64)
 	query := `
 		UPDATE estimate
 		SET 
-		    price = COALESCE($1, price)
-			date_paid = COALESCE(to_timestamp($2), date_paid)
-		WHERE stripe_invoice_id = $3
+		    price = COALESCE($2, price)
+		WHERE stripe_invoice_id = $1
 	`
 	_, err := DB.Exec(
 		query,
-		price,
-		time.Now().Unix(),
 		stripeInvoiceID,
+		price,
 	)
 	if err != nil {
 		return fmt.Errorf("error updating estimate price: %w", err)

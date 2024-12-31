@@ -115,6 +115,12 @@ func handleStripePaymentSuccessful(invoice stripe.Invoice) error {
 		return err
 	}
 
+	err = database.UpdateEstimateByWebhook(invoice.ID, string(invoice.Status), time.Now().Unix())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting updating estimate: %v\n", err)
+		return err
+	}
+
 	fbEvent := types.FacebookEventData{
 		EventName:      constants.InvoicePaidEventName,
 		EventTime:      time.Now().UTC().Unix(),
