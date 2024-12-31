@@ -1159,7 +1159,7 @@ func GetEstimateList(leadId int) ([]types.EstimatesList, error) {
 			return estimates, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		estimate.DateCreated = utils.FormatDateMMDDYYYY(dateCreated.Unix())
+		estimate.DateCreated = utils.FormatTimestamp(dateCreated.Unix())
 
 		estimates = append(estimates, estimate)
 	}
