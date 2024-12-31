@@ -1155,7 +1155,8 @@ func GetEstimateList(leadId int) ([]types.EstimatesList, error) {
 			e.lead_id,
 			e.date_created,
 			e.price::NUMERIC,
-			e.stripe_invoice_id
+			e.stripe_invoice_id,
+			e.status
 		FROM estimate AS e
 		WHERE e.lead_id = $1
 		ORDER BY e.date_created ASC;
@@ -1176,6 +1177,7 @@ func GetEstimateList(leadId int) ([]types.EstimatesList, error) {
 			&dateCreated,
 			&estimate.Price,
 			&estimate.StripeInvoiceID,
+			&estimate.Status,
 		)
 		if err != nil {
 			return estimates, fmt.Errorf("error scanning row: %w", err)

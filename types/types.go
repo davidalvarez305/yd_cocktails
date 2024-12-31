@@ -384,6 +384,7 @@ type EstimatesList struct {
 	DateCreated     string  `json:"date_created" form:"date_created" schema:"date_created"`
 	DatePaid        string  `json:"date_paid" form:"date_paid" schema:"date_paid"`
 	StripeInvoiceID string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+	Status          string  `json:"status" form:"status" schema:"status"`
 }
 
 type BookingForm struct {

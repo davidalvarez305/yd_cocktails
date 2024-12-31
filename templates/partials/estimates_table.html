@@ -102,7 +102,6 @@
             .then(html => {
                 const table = document.getElementById('estimatesTable');
                 table.outerHTML = html;
-                handleBindPagination();
 				handleBindEstimateTableActions();
             })
             .catch(err => {

@@ -623,12 +623,26 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 	go conversions.SendGoogleConversion(googlePayload)
 	go conversions.SendFacebookConversion(metaPayload)
 
+	estimates, err := database.GetEstimateList(helpers.SafeInt(form.LeadID))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting product slot assignments from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
 	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "modal",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
+		TemplateName: "estimates_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "estimates_table.html",
 		Data: map[string]any{
-			"AlertHeader":  "Sent!",
-			"AlertMessage": "We've received your message and will be quick to respond.",
+			"Estimates": estimates,
 		},
 	}
 
