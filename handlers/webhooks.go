@@ -116,7 +116,7 @@ func handleStripePaymentSuccessful(invoice stripe.Invoice) error {
 	}
 
 	fbEvent := types.FacebookEventData{
-		EventName:      constants.BookingEventName,
+		EventName:      constants.InvoicePaidEventName,
 		EventTime:      time.Now().UTC().Unix(),
 		ActionSource:   "website",
 		EventSourceURL: lead.LandingPage,
@@ -147,7 +147,7 @@ func handleStripePaymentSuccessful(invoice stripe.Invoice) error {
 		UserId:   lead.ExternalID,
 		Events: []types.GoogleEventLead{
 			{
-				Name: constants.BookingEventName,
+				Name: constants.InvoicePaidEventName,
 				Params: types.GoogleEventParamsLead{
 					GCLID:         lead.ClickID,
 					TransactionID: invoice.ID,

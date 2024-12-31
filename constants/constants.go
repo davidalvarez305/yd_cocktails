@@ -13,6 +13,7 @@ const (
 
 	LeadGeneratedEventName string = "generate_lead"
 	BookingEventName       string = "booking"
+	InvoicePaidEventName   string = "invoice_paid"
 	EstimateEventName      string = "estimate"
 	LeadEventName          string = "Lead"
 
