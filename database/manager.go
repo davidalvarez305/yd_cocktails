@@ -1122,8 +1122,8 @@ func GetBookingList(leadId int) ([]types.BookingList, error) {
 			&booking.BookingID,
 			&booking.LeadID,
 			&booking.Address,
-			&booking.StartTime,
-			&booking.EndTime,
+			&startTime,
+			&endTime,
 			&booking.Bartender,
 			&booking.Price,
 		)
@@ -1131,8 +1131,8 @@ func GetBookingList(leadId int) ([]types.BookingList, error) {
 			return bookings, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		booking.StartTime = utils.FormatTimestamp(startTime.Unix())
-		booking.EndTime = utils.FormatTimestamp(endTime.Unix())
+		booking.StartTime = utils.FormatTimestampEST(startTime.Unix())
+		booking.EndTime = utils.FormatTimestampEST(endTime.Unix())
 
 		bookings = append(bookings, booking)
 	}
