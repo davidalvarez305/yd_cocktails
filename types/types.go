@@ -323,8 +323,8 @@ type FacebookPayload struct {
 }
 
 type GoogleEventParamsLead struct {
-	GCLID         string  `json:"gclid" form:"gclid" schema:"gclid"`
-	TransactionID string  `json:"transaction_id" form:"transaction_id" schema:"transaction_id"`
+	GCLID         string  `json:"gclid,omitempty" form:"gclid" schema:"gclid"`
+	TransactionID string  `json:"transaction_id,omitempty" form:"transaction_id" schema:"transaction_id"`
 	Value         float64 `json:"value,omitempty" form:"value" schema:"value"`
 	Currency      string  `json:"currency,omitempty" form:"currency" schema:"currency"`
 	CampaignID    string  `json:"campaign_id,omitempty" form:"campaign_id" schema:"campaign_id"`
@@ -335,15 +335,15 @@ type GoogleEventParamsLead struct {
 }
 
 type GoogleEventLead struct {
-	Name   string                `json:"name" form:"name" schema:"name"`
-	Params GoogleEventParamsLead `json:"params" form:"params" schema:"params"`
+	Name   string                `json:"name,omitempty" form:"name" schema:"name"`
+	Params GoogleEventParamsLead `json:"params,omitempty" form:"params" schema:"params"`
 }
 
 type GooglePayload struct {
-	ClientID string            `json:"client_id" form:"client_id" schema:"client_id"`
-	UserId   string            `json:"userId" form:"userId" schema:"userId"`
-	Events   []GoogleEventLead `json:"events" form:"events" schema:"events"`
-	UserData GoogleUserData    `json:"user_data" form:"user_data" schema:"user_data"`
+	ClientID string            `json:"client_id,omitempty" form:"client_id" schema:"client_id"`
+	UserId   string            `json:"userId,omitempty" form:"userId" schema:"userId"`
+	Events   []GoogleEventLead `json:"events,omitempty" form:"events" schema:"events"`
+	UserData GoogleUserData    `json:"user_data,omitempty" form:"user_data" schema:"user_data"`
 }
 
 type GoogleUserData struct {
@@ -388,18 +388,20 @@ type EstimatesList struct {
 }
 
 type BookingForm struct {
-	CSRFToken     *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	BookingID     *int    `json:"booking_id" form:"booking_id" schema:"booking_id"`
-	EstimateID    *int    `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
+	CSRFToken *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	BookingID *int    `json:"booking_id" form:"booking_id" schema:"booking_id"`
+	LeadID    *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+
+	EstimateID *int `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
+
 	StreetAddress *string `json:"street_address" form:"street_address" schema:"street_address"`
 	City          *string `json:"city" form:"city" schema:"city"`
-	State         *string `json:"state" form:"state" schema:"state"`
 	PostalCode    *string `json:"postal_code" form:"postal_code" schema:"postal_code"`
+	State         *string `json:"state" form:"state" schema:"state"`
 	Country       *string `json:"country" form:"country" schema:"country"`
 	StartTime     *int64  `json:"start_time" form:"start_time" schema:"start_time"`
 	EndTime       *int64  `json:"end_time" form:"end_time" schema:"end_time"`
 	BartenderID   *int    `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
-	LeadID        *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
 }
 
 type EstimateDetails struct {
