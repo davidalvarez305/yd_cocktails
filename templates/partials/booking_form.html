@@ -215,11 +215,14 @@
         const data = new FormData();
 
         new FormData(form).forEach((value, key) => {
-            if (value) data.set(key, value);
+            if (key.includes("date_")) {
+                if (value) data.set(key, new Date(value).getTime() / 1000);
+            } else if (value) {
+                data.set(key, value);
+            }
         });
 
-
-        fetch(`/crm/lead/{{ .Lead.LeadID }}/booking`, {
+        fetch("/crm/lead/{{ .Lead.LeadID }}/booking", {
             method: "POST",
             credentials: "include",
             body: data,
@@ -239,14 +242,16 @@
                 }
             })
             .then(html => {
-                alertModal.outerHTML = html;
+                const table = document.getElementById('bookingsTable');
+                table.outerHTML = html;
+				handleBindBookingTableActions();
+                handleCloseBookingFormModal();
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
-                handleCloseAlertModal();
-                handleCloseBookingFormModal();
             })
             .finally(() => {
+                handleCloseAlertModal();
                 form.reset();
             });
     }
