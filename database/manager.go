@@ -1300,22 +1300,22 @@ func DeleteEstimate(id int) error {
 }
 
 func GetEstimateDetails(estimateId string) (types.EstimateDetails, error) {
-
 	query := `SELECT 
 		estimate_id, 
 		price, 
 		lead_id,
 		stripe_invoice_id,
 		date_created,
-		date_paid
+		date_paid,
+		status
 	FROM estimate 
 	WHERE estimate_id = $1`
 
 	var estimateDetails types.EstimateDetails
 
-	var stripeInvoiceID sql.NullString
+	var stripeInvoiceID, status sql.NullString
 	var price sql.NullFloat64
-	var dateCreated, datePaid time.Time
+	var dateCreated, datePaid sql.NullTime
 
 	row := DB.QueryRow(query, estimateId)
 
@@ -1326,6 +1326,7 @@ func GetEstimateDetails(estimateId string) (types.EstimateDetails, error) {
 		&stripeInvoiceID,
 		&dateCreated,
 		&datePaid,
+		&status,
 	)
 
 	if err != nil {
@@ -1339,12 +1340,21 @@ func GetEstimateDetails(estimateId string) (types.EstimateDetails, error) {
 		estimateDetails.StripeInvoiceID = stripeInvoiceID.String
 	}
 
+	if status.Valid {
+		estimateDetails.Status = status.String
+	}
+
 	if price.Valid {
 		estimateDetails.Price = price.Float64
 	}
 
-	estimateDetails.DateCreated = utils.FormatTimestamp(dateCreated.Unix())
-	estimateDetails.DatePaid = utils.FormatTimestamp(datePaid.Unix())
+	if dateCreated.Valid {
+		estimateDetails.DateCreated = dateCreated.Time.Unix()
+	}
+
+	if datePaid.Valid {
+		estimateDetails.DatePaid = datePaid.Time.Unix()
+	}
 
 	return estimateDetails, nil
 }

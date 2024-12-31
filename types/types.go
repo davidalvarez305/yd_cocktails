@@ -408,8 +408,8 @@ type EstimateDetails struct {
 	StripeInvoiceID string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
 	Price           float64 `json:"price" form:"price" schema:"price"`
 	Status          string  `json:"status" form:"status" schema:"status"`
-	DateCreated     string  `json:"date_created" form:"date_created" schema:"date_created"`
-	DatePaid        string  `json:"date_paid" form:"date_paid" schema:"date_paid"`
+	DateCreated     int64   `json:"date_created" form:"date_created" schema:"date_created"`
+	DatePaid        int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
 }
 
 type BookingDetails struct {
