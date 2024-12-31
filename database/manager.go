@@ -996,7 +996,7 @@ func DeleteLead(id int) error {
 func CreateEstimate(form types.EstimateForm) error {
 	query := `
 		INSERT INTO estimate (price, date_created, lead_id, stripe_invoice_id, status)
-		VALUES ($1, to_timestamp($2)::timestamptz, $3, $4, $5)
+		VALUES ($1, to_timestamp($2)::timestamptz AT TIME ZONE 'America/New_York', $3, $4, $5)
 	`
 
 	_, err := DB.Exec(
@@ -1019,10 +1019,9 @@ func UpdateEstimate(form types.EstimateForm) error {
 		UPDATE estimate
 		SET 
 		    price = $2,
-		    date_paid = to_timestamp($3)::timestamptz,
-		    lead_id = COALESCE($4, lead_id),
-		    stripe_invoice_id = COALESCE($5, stripe_invoice_id),
-		    status = COALESCE($6, status)
+		    date_paid = to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York',
+		    stripe_invoice_id = COALESCE($4, stripe_invoice_id),
+		    status = COALESCE($5, status)
 		WHERE estimate_id = $1
 	`
 
@@ -1031,7 +1030,6 @@ func UpdateEstimate(form types.EstimateForm) error {
 		utils.CreateNullInt(form.EstimateID),
 		utils.CreateNullFloat64(form.Price),
 		time.Now().Unix(),
-		utils.CreateNullInt(form.LeadID),
 		utils.CreateNullString(form.StripeInvoiceID),
 		utils.CreateNullString(form.Status),
 	)

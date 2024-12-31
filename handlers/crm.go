@@ -10,7 +10,6 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/conversions"
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
-	"github.com/davidalvarez305/yd_cocktails/services"
 	"github.com/davidalvarez305/yd_cocktails/sessions"
 	"github.com/davidalvarez305/yd_cocktails/types"
 )
@@ -524,7 +523,7 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Server error while creating quote request.",
+				"Message": "Server error while creating estimate.",
 			},
 		}
 
@@ -563,54 +562,6 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stripeInvoice, err := services.CreateStripeInvoiceForNewCustomer(lead.Email, lead.FirstName, lead.LastName, helpers.SafeFloat64(form.Price))
-	if err != nil {
-		fmt.Printf("Error creating invoice: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Server error while creating invoice.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	err = database.AssignStripeCustomerToLead(stripeInvoice.Customer.ID, lead.LeadID)
-	if err != nil {
-		fmt.Printf("Error creating invoice: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Internal server error while adding package to your account.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	err = database.AssignStripeInvoiceToEstimate(stripeInvoice.ID, helpers.SafeInt(form.EstimateID))
-	if err != nil {
-		fmt.Printf("Error assigning invoice to pkg: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Internal server error while adding package to your account.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
 	fbEvent := types.FacebookEventData{
 		EventName:      constants.EstimateEventName,
 		EventTime:      time.Now().UTC().Unix(),
@@ -629,9 +580,9 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 		},
 		CustomData: types.FacebookCustomData{
 			Currency: "USD",
-			Value:    fmt.Sprint(float64(stripeInvoice.AmountDue) / 100),
+			Value:    fmt.Sprint(helpers.SafeFloat64(form.Price)),
 		},
-		EventID: stripeInvoice.ID,
+		EventID: helpers.SafeString(form.StripeInvoiceID),
 	}
 
 	metaPayload := types.FacebookPayload{
@@ -646,8 +597,8 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 				Name: constants.EstimateEventName,
 				Params: types.GoogleEventParamsLead{
 					GCLID:         lead.ClickID,
-					TransactionID: stripeInvoice.ID,
-					Value:         float64(stripeInvoice.AmountDue) / 100,
+					TransactionID: helpers.SafeString(form.StripeInvoiceID),
+					Value:         helpers.SafeFloat64(form.Price),
 					Currency:      constants.DefaultCurrency,
 					CampaignID:    fmt.Sprint(lead.CampaignID),
 					Campaign:      lead.CampaignName,
