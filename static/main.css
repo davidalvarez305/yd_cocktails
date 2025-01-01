@@ -884,6 +884,11 @@ select{
   margin-bottom: 2rem;
 }
 
+.my-24{
+  margin-top: 6rem;
+  margin-bottom: 6rem;
+}
+
 .-mr-20{
   margin-right: -5rem;
 }
@@ -1670,6 +1675,11 @@ select{
 .py-8{
   padding-top: 2rem;
   padding-bottom: 2rem;
+}
+
+.py-24{
+  padding-top: 6rem;
+  padding-bottom: 6rem;
 }
 
 .pb-1{
