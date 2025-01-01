@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const scrollPercentage = (scrollTop / pageHeight) * 100;
 
-        if (scrollPercentage > 5) {
+        if (scrollPercentage > 5 && floatingHeader) {
             floatingHeader.style.display = "";
         } else {
             floatingHeader.style.display = "none";

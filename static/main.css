@@ -1338,6 +1338,10 @@ select{
   border-width: 1px;
 }
 
+.border-2{
+  border-width: 2px;
+}
+
 .border-b{
   border-bottom-width: 1px;
 }
@@ -1406,6 +1410,11 @@ select{
 
 .border-transparent{
   border-color: transparent;
+}
+
+.border-gray-300{
+  --tw-border-opacity: 1;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity));
 }
 
 .bg-emerald-100{
@@ -1680,6 +1689,11 @@ select{
 .py-24{
   padding-top: 6rem;
   padding-bottom: 6rem;
+}
+
+.py-32{
+  padding-top: 8rem;
+  padding-bottom: 8rem;
 }
 
 .pb-1{
@@ -2973,6 +2987,11 @@ select{
   border-color: rgb(225 29 72 / var(--tw-border-opacity));
 }
 
+.hover\:border-gray-800:hover{
+  --tw-border-opacity: 1;
+  border-color: rgb(31 41 55 / var(--tw-border-opacity));
+}
+
 .hover\:bg-gray-50:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity));
@@ -3001,6 +3020,11 @@ select{
 .hover\:bg-rose-600:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(225 29 72 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-gray-800:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity));
 }
 
 .hover\:text-\[\#1877f2\]:hover{
@@ -3133,6 +3157,10 @@ select{
 
 .focus\:ring-rose-400\/50:focus{
   --tw-ring-color: rgb(251 113 133 / 0.5);
+}
+
+.focus\:ring-primary-400\/90:focus{
+  --tw-ring-color: rgb(188 40 125 / 0.9);
 }
 
 .focus\:ring-opacity-25:focus{
@@ -3478,6 +3506,12 @@ select{
   color: rgb(156 163 175 / var(--tw-placeholder-opacity));
 }
 
+.dark\:shadow-lg:is(.dark *){
+  --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
 .dark\:hover\:border-gray-600:hover:is(.dark *){
   --tw-border-opacity: 1;
   border-color: rgb(75 85 99 / var(--tw-border-opacity));
@@ -3630,6 +3664,10 @@ select{
     width: 9rem;
   }
 
+  .sm\:w-auto{
+    width: auto;
+  }
+
   .sm\:flex-none{
     flex: none;
   }
@@ -3650,6 +3688,10 @@ select{
     justify-content: flex-start;
   }
 
+  .sm\:justify-end{
+    justify-content: flex-end;
+  }
+
   .sm\:justify-center{
     justify-content: center;
   }
@@ -3666,6 +3708,10 @@ select{
     gap: 0.75rem;
   }
 
+  .sm\:gap-8{
+    gap: 2rem;
+  }
+
   .sm\:space-x-4 > :not([hidden]) ~ :not([hidden]){
     --tw-space-x-reverse: 0;
     margin-right: calc(1rem * var(--tw-space-x-reverse));
@@ -3678,9 +3724,23 @@ select{
     margin-bottom: calc(0px * var(--tw-space-y-reverse));
   }
 
+  .sm\:p-4{
+    padding: 1rem;
+  }
+
   .sm\:px-4{
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+
+  .sm\:px-6{
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .sm\:py-5{
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
   }
 
   .sm\:text-left{
@@ -3957,6 +4017,10 @@ select{
 
   .xl\:max-w-7xl{
     max-width: 80rem;
+  }
+
+  .xl\:max-w-4xl{
+    max-width: 56rem;
   }
 }
 
