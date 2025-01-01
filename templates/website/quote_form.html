@@ -191,7 +191,10 @@
                     }
                 });
 
-                gtag("event", "{{ .LeadGeneratedEventName }}");
+                gtag("event", "{{ .LeadGeneratedEventName }}", {
+                    currency: "{{ .DefaultCurrency }}",
+                    value: parseFloat("{{ .DefaultLeadValue }}"),
+                });
 
                 // Report FB Conversion
                 fbq("track", "{{ .LeadEventName }}", {

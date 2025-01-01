@@ -6,5 +6,5 @@ phoneNumbers.forEach(phoneNumber => {
 
 function handlePhoneNumberClick() {
     if (fbq) fbq("track", "Lead");
-    if (gtag) gtag("event", "generated_lead");
+    if (gtag) gtag("event", "generate_lead");
 }

@@ -288,6 +288,7 @@ type WebsiteContext struct {
 	YovaHeroImage                string             `json:"yova_hero_image"`
 	YovaMidCTA                   string             `json:"yova_mid_cta"`
 	IsMobile                     bool               `json:"is_bool"`
+	DefaultLeadValue             float64            `json:"default_lead_value"`
 }
 
 type FacebookUserData struct {

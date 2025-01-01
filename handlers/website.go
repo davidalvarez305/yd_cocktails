@@ -43,6 +43,7 @@ func createWebsiteContext() types.WebsiteContext {
 		LeadEventName:                constants.LeadEventName,
 		LeadGeneratedEventName:       constants.LeadGeneratedEventName,
 		DefaultCurrency:              constants.DefaultCurrency,
+		DefaultLeadValue:             constants.DefaultLeadValue,
 		YovaHeroImage:                YovaHeroImage,
 		YovaMidCTA:                   YovaMidCTA,
 	}
@@ -363,6 +364,8 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 					Source:     helpers.SafeString(form.Source),
 					Medium:     helpers.SafeString(form.Medium),
 					Term:       helpers.SafeString(form.Keyword),
+					Value:      constants.DefaultLeadValue,
+					Currency:   constants.DefaultCurrency,
 				},
 			},
 		},
