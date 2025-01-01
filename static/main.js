@@ -61,10 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	// Show floating header After 25% scroll
 	const floatingHeader = document.getElementById("floatingHeader");
 
-	if (!floatingHeader) return;
-
-    floatingHeader.style.display = "none";
-
     function handleScroll() {
         const scrollTop = window.scrollY || document.documentElement.scrollTop;
         const pageHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
