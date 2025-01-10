@@ -17,8 +17,10 @@ import (
 )
 
 const (
-	YovaHeroImage string = "https://ydcocktails.s3.us-east-1.amazonaws.com/media/yova_hero.jpeg"
-	YovaMidCTA    string = "https://ydcocktails.s3.us-east-1.amazonaws.com/media/yova_mid_cta.png"
+	YovaHeroImage          string = "https://ydcocktails.s3.us-east-1.amazonaws.com/media/yova_hero.jpeg"
+	YovaMostPopularPackage string = "https://ydcocktails.s3.us-east-1.amazonaws.com/media/yova_mid_cta.png"
+	YovaBasicPackage       string = "https://ydcocktails.s3.us-east-1.amazonaws.com/media/yova_basic_package.jpeg"
+	YovaOpenBarPackage     string = "https://ydcocktails.s3.us-east-1.amazonaws.com/media/yova_open_bar_package.jpeg"
 )
 
 var decoder = schema.NewDecoder()
@@ -45,7 +47,9 @@ func createWebsiteContext() types.WebsiteContext {
 		DefaultCurrency:              constants.DefaultCurrency,
 		DefaultLeadValue:             constants.DefaultLeadValue,
 		YovaHeroImage:                YovaHeroImage,
-		YovaMidCTA:                   YovaMidCTA,
+		YovaMostPopularPackage:       YovaMostPopularPackage,
+		YovaBasicPackage:             YovaBasicPackage,
+		YovaOpenBarPackage:           YovaOpenBarPackage,
 	}
 }
 

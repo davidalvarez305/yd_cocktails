@@ -286,7 +286,9 @@ type WebsiteContext struct {
 	LeadGeneratedEventName       string             `json:"lead_generated_event_name"`
 	DefaultCurrency              string             `json:"default_currency"`
 	YovaHeroImage                string             `json:"yova_hero_image"`
-	YovaMidCTA                   string             `json:"yova_mid_cta"`
+	YovaMostPopularPackage       string             `json:"yova_most_popular_package"`
+	YovaBasicPackage             string             `json:"yova_basic_package"`
+	YovaOpenBarPackage           string             `json:"yova_open_bar_package"`
 	IsMobile                     bool               `json:"is_bool"`
 	DefaultLeadValue             float64            `json:"default_lead_value"`
 }
