@@ -4,42 +4,26 @@
 {{ template "hero_image.html" . }}
 <!-- END Hero -->
 
-<!-- Packages Section -->
+<!-- CTA Section -->
 <div class="bg-white dark:bg-gray-900 dark:text-gray-100">
-    <div class="container mx-auto space-y-10 px-4 py-4 lg:px-4 lg:py-8 xl:max-w-7xl">
-        <!-- Heading -->
-        <div class="text-center">
-            <div class="mb-1 text-sm font-bold uppercase tracking-wider text-primary-600 dark:text-primary-500">
-                Averages for 50-person, 4-hour events
-            </div>
-            <h2 class="mb-4 text-4xl font-black text-black dark:text-white">
-                Choose From Our Most Popular Packages
-            </h2>
-            <h3 class="mx-auto text-xl font-medium leading-relaxed text-gray-700 lg:w-2/3 dark:text-gray-300">
-                See if our most common offerings fit your needs. If not, we'll be happy to work out a custom solution over the phone.
-            </h3>
-        </div>
-        <!-- END Heading -->
-
-        <!-- Packages -->
-        <div class="mx-auto grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8 2xl:w-5/6">
-            <!-- Basic Package -->
-            <div
-                class="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition hover:border-gray-400 dark:border-gray-700/75 dark:bg-gray-900 dark:hover:border-gray-600">
-                <div class="grow p-6 text-center">
-                    <span
-                        class="mb-4 inline-block rounded-full bg-primary-100/75 px-3 py-1 text-sm font-semibold text-primary-700 dark:bg-primary-900/50 dark:text-primary-200">
-                        BASIC PACKAGE
-                    </span>
-                    <div class="mb-1">
-                        <span class="text-4xl font-extrabold">$70 / Hour</span>
-                    </div>
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Just The Bartender
-                    </p>
+    <div class="container mx-auto grid grid-cols-1 gap-16 px-4 py-8 lg:grid-cols-2 lg:px-8 lg:py-8 xl:max-w-7xl">
+        <div class="flex items-center text-center lg:text-left">
+            <div class="space-y-8">
+                <div>
+                    <h2 class="mb-4 text-4xl font-black text-black dark:text-white">
+                        Basic Package aka...<br>
+                        <span class="underline text-center decoration-primary-500 decoration-4 underline-offset-4 dark:decoration-primary-400">
+                            Just The Bartender(s)
+                        </span>
+                    </h2>
+                    <h3 class="text-xl font-medium leading-relaxed text-gray-700 dark:text-gray-300">
+                        This package is best for those that already have everything set up & just need
+                        a pro to whip up some delicious cocktails for their guests.
+                    </h3>
                 </div>
-                <div class="flex justify-center bg-gray-50 p-6 dark:bg-gray-700/25">
-                    <ul class="space-y-4 text-sm lg:text-base">
+
+                <div class="flex justify-center text-left lg:justify-start">
+                    <ul class="space-y-5">
                         <li class="flex items-center gap-2">
                             <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -47,7 +31,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span><strong>1x</strong> Bartender</span>
+                            <span><strong>One (1) Bartender Per 60 Guests</strong> to make sure your invitees are getting only the most delicious drinks (which can't be rushed!)</span>
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
@@ -56,7 +40,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span><strong>60 Guests</strong> Per Bartender</span>
+                            <span><strong>Six (6)</strong> cocktail selections to give you enough room to accomodate various tastes in the menu</span>
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
@@ -65,7 +49,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span><strong>6</strong> Cocktail Selections</span>
+                            <span><strong>One (1)</strong> sleek & presentable portable bar which can be rented, if necessary</span>
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
@@ -74,187 +58,36 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span><strong>Full</strong> Bartending Kit</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>1X</strong> 100-QT Cooler</span>
+                            <span><strong>One (1)</strong> 100-QT Cooler & One (1) 60-QT Cooler to make sure the ice stays nice & cold throughout the entire service</span>
                         </li>
                     </ul>
                 </div>
-                <div class="p-6">
+
+                <div class="flex flex-col gap-4 items-center sm:items-center sm:justify-center sm:gap-3">
                     <button name="basicPackageCTA"
-                        class="quoteButton w-full flex items-center justify-center gap-2 rounded-lg border border-gray-700 bg-gray-700 px-6 py-3 font-semibold leading-6 text-white hover:border-gray-600 hover:bg-gray-600 hover:text-white focus:ring focus:ring-gray-400/50 active:border-gray-700 active:bg-gray-700 dark:focus:ring-gray-400/90">
-                        Hire A Bartender
-                </button>
-                </div>
-            </div>
-            <!-- END Basic Package -->
-
-            <!-- Most Popular -->
-            <div
-                class="relative flex flex-col overflow-hidden rounded-lg border border-primary-300 bg-white transition hover:border-primary-500 dark:border-primary-700/75 dark:bg-gray-900 dark:hover:border-primary-600">
-                <div class="absolute right-0 top-0 flex size-12 items-center justify-center text-primary-600">
-                    <svg class="hi-solid hi-bookmark inline-block size-5" xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                            d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.583A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <div class="grow p-6 text-center">
-                    <span
-                        class="mb-4 inline-block rounded-full bg-primary-100/75 px-3 py-1 text-sm font-semibold text-primary-700 dark:bg-primary-900/50 dark:text-primary-200">
-                        MOST POPULAR
-                    </span>
-                    <div class="mb-1">
-                        <span class="text-4xl font-extrabold">$20 / Person</span>
-                    </div>
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Bartender + Portable Bar + Everything Except Alcohol
-                    </p>
-                </div>
-                <div
-                    class="flex justify-center bg-primary-50 p-6 text-primary-950 dark:bg-primary-900/25 dark:text-primary-50">
-                    <ul class="space-y-4 text-sm lg:text-base">
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>INCLUDES</strong> Basic Pkg</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>1X</strong> Professional Bar</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>Soft Drinks</strong>, Juices & Mixers</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>Cups</strong>, Straws, & Napkins</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>Ice</strong>, Garnishes (Fruits)</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="p-6">
-                    <button name="mostPopularCTA"
-                        class="quoteButton w-full flex items-center justify-center gap-2 rounded-lg border border-primary-700 bg-primary-700 px-6 py-3 font-semibold leading-6 text-white hover:border-primary-600 hover:bg-primary-600 hover:text-white focus:ring focus:ring-primary-400/50 active:border-primary-700 active:bg-primary-700 dark:focus:ring-primary-400/90">
-                        I Want THIS!
+                        class="quoteButton w-full md:w-3/4 inline-flex items-center justify-center gap-2 rounded-lg border border-primary-700 bg-primary-700 px-6 py-3 font-semibold leading-6 text-white hover:border-primary-600 hover:bg-primary-600 hover:text-white focus:ring focus:ring-primary-400/50 active:border-primary-700 active:bg-primary-700 dark:focus:ring-primary-400/90">
+                        <span>Get Pricing!</span>
                     </button>
-                </div>
-            </div>
-            <!-- END Most Popular -->
-
-            <!-- Full Open Bar Package -->
-            <div
-                class="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition hover:border-gray-400 dark:border-gray-700/75 dark:bg-gray-900 dark:hover:border-gray-600">
-                <div class="grow p-6 text-center">
-                    <span
-                        class="mb-4 inline-block rounded-full bg-primary-100/75 px-3 py-1 text-sm font-semibold text-primary-700 dark:bg-primary-900/50 dark:text-primary-200">
-                        FULL OPEN BAR
-                    </span>
-                    <div class="mb-1">
-                        <span class="text-4xl font-extrabold">$30 / Person</span>
+                    <div class="flex">
+                        <svg class="hi-solid hi-lock-closed inline-block size-5" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <p>We'll never share your data.</p>
                     </div>
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        AVG. FOR 50 Person & 4 Hours
-                    </p>
-                </div>
-                <div class="flex justify-center bg-gray-50 p-6 dark:bg-gray-700/25">
-                    <ul class="space-y-4 text-sm lg:text-base">
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>Basic</strong> + Most Popular</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>Done-For-You</strong> Shopping</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>5</strong> Premium Spirits</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>(OPTIONAL)</strong> Beer & Wine</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span><strong>+2</strong> Extra Cocktails</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="p-6">
-                    <button name="fullOpenBarCTA"
-                        class="quoteButton w-full flex items-center justify-center gap-2 rounded-lg border border-gray-700 bg-gray-700 px-6 py-3 font-semibold leading-6 text-white hover:border-gray-600 hover:bg-gray-600 hover:text-white focus:ring focus:ring-gray-400/50 active:border-gray-700 active:bg-gray-700 dark:focus:ring-gray-400/90">
-                        Get Open Bar Service
-                    </button>
                 </div>
             </div>
-            <!-- END Full Open Bar Package -->
         </div>
-        <!-- END Packages -->
+        <div class="flex items-center lg:justify-end">
+            <div class="aspect-h-3 aspect-w-4 grow overflow-hidden rounded-lg bg-primary-100 dark:bg-primary-950">
+                <img src="{{ .YovaMidCTA }}" loading="lazy" alt="Yova mid CTA" />
+            </div>
+        </div>
     </div>
 </div>
-<!-- END Packages Section -->
+<!-- END CTA Section -->
 
 <!-- CTA Section -->
 <div class="bg-white dark:bg-gray-900 dark:text-gray-100">
@@ -263,57 +96,163 @@
             <div class="space-y-8">
                 <div>
                     <h2 class="mb-4 text-4xl font-black text-black dark:text-white">
-                        Work with a local company
-                        <span
-                            class="underline decoration-primary-500 decoration-4 underline-offset-4 dark:decoration-primary-400">that
-                            actually cares.</span>
+                        Most Popular Package aka...<br>
+                        <span class="underline text-center decoration-primary-500 decoration-4 underline-offset-4 dark:decoration-primary-400">
+                            Everything But The Alcohol
+                        </span>
                     </h2>
                     <h3 class="text-xl font-medium leading-relaxed text-gray-700 dark:text-gray-300">
-                        That means we'll always be on time, well prepared, and enthused to deliver the best damn service
-                        in town.
+                        This package is for those that want to buy the stuff they prefer but want to leave the cocktail making ingredients up to the pros...here's what it includes:
                     </h3>
                 </div>
-
                 <div class="flex justify-center text-left lg:justify-start">
                     <ul class="space-y-5">
-                        <li class="flex items-center gap-3">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 flex-none text-primary-600 dark:text-primary-400"
+                        <li class="flex items-center gap-2">
+                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <h4 class="font-medium">We maintain a high standard of professionalism and treat your guests
-                                with respect.</h4>
+                            <span><strong>Soft Drinks, Juices, Fruits, Garnishes & Mixers</strong> these are the primary ingredients that give flavor & life to your cocktails</span>
                         </li>
-                        <li class="flex items-center gap-3">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 flex-none text-primary-600 dark:text-primary-400"
+                        <li class="flex items-center gap-2">
+                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <h4 class="font-medium">We'll change our menu depending on your favorite cocktails & drinks.
-                            </h4>
+                            <span><strong>Cups, Napkins, Straws, & Decorations</strong> to serve & faciliate the enjoyment of the beverages</span>
                         </li>
-                        <li class="flex items-center gap-3">
-                            <svg class="hi-outline hi-check-circle inline-block size-6 flex-none text-primary-600 dark:text-primary-400"
+                        <li class="flex items-center gap-2">
+                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <h4 class="font-medium">We'll adjust our service to meet your specific event themes, if
-                                needed.</h4>
+                            <span><strong>One (1)</strong> sleek & presentable portable bar (which is included for $0!)</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Ice, Ice Baby</strong> to keep your drinks cold & your glasses chilled</span>
                         </li>
                     </ul>
                 </div>
 
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
-                    <button name="homePageYovaMidCTA"
+                <div class="flex flex-col gap-4 items-center sm:items-center sm:justify-center sm:gap-3">
+                    <button name="mostPopularCTA"
                         class="quoteButton w-full md:w-3/4 inline-flex items-center justify-center gap-2 rounded-lg border border-primary-700 bg-primary-700 px-6 py-3 font-semibold leading-6 text-white hover:border-primary-600 hover:bg-primary-600 hover:text-white focus:ring focus:ring-primary-400/50 active:border-primary-700 active:bg-primary-700 dark:focus:ring-primary-400/90">
-                        <span>Get The Package That Works Best For You</span>
+                        <span>Show Me Prices For This One!</span>
                     </button>
+                    <div class="flex">
+                        <svg class="hi-solid hi-lock-closed inline-block size-5" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <p>Your privacy is very important to us.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center lg:justify-end">
+            <div class="aspect-h-3 aspect-w-4 grow overflow-hidden rounded-lg bg-primary-100 dark:bg-primary-950">
+                <img src="{{ .YovaMidCTA }}" loading="lazy" alt="Yova mid CTA" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END CTA Section -->
+
+
+<!-- CTA Section -->
+<div class="bg-white dark:bg-gray-900 dark:text-gray-100">
+    <div class="container mx-auto grid grid-cols-1 gap-16 px-4 py-8 lg:grid-cols-2 lg:px-8 lg:py-8 xl:max-w-7xl">
+        <div class="flex items-center text-center lg:text-left">
+            <div class="space-y-8">
+                <div>
+                    <h2 class="mb-4 text-4xl font-black text-black dark:text-white">
+                        Full Open Bar Service aka...<br>
+                        <span class="underline text-center decoration-primary-500 decoration-4 underline-offset-4 dark:decoration-primary-400">
+                            All Done For You
+                        </span>
+                    </h2>
+                    <h3 class="text-xl font-medium leading-relaxed text-gray-700 dark:text-gray-300">
+                        This is the go to package for those that want the pros to handle everything down to the last detail so that their cocktails come out exceptional
+                    </h3>
+                </div>
+                <div class="flex justify-center text-left lg:justify-start">
+                    <ul class="space-y-5">
+                        <li class="flex items-center gap-2">
+                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>EVERYTHING</strong> in the previous two packages plus...</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Five (5) Spirits</strong> which can include things like vodka, tequila, rum, whiskey, gin, and/or any other spirit of your choice.</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>One (1)</strong> choice of beer and one (1) choice of wine or prosecco.</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Up to 8</strong> cocktail selections (that's two more!!)</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="hi-outline hi-check-circle inline-block size-6 text-primary-600 dark:text-primary-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>The benefit</strong> of having us take care of everything & having one less than on your mind.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="flex flex-col gap-4 items-center sm:items-center sm:justify-center sm:gap-3">
+                    <button name="fullOpenBarCTA"
+                        class="quoteButton w-full md:w-3/4 inline-flex items-center justify-center gap-2 rounded-lg border border-primary-700 bg-primary-700 px-6 py-3 font-semibold leading-6 text-white hover:border-primary-600 hover:bg-primary-600 hover:text-white focus:ring focus:ring-primary-400/50 active:border-primary-700 active:bg-primary-700 dark:focus:ring-primary-400/90">
+                        <span>Get Prices for Open Bar Service</span>
+                    </button>
+                    <div class="flex">
+                        <svg class="hi-solid hi-lock-closed inline-block size-5" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <p>We promise to never spam you.</p>
+                    </div>
                 </div>
             </div>
         </div>
