@@ -3928,6 +3928,10 @@ select{
   .xl\:max-w-7xl{
     max-width: 80rem;
   }
+
+  .xl\:max-w-5xl{
+    max-width: 64rem;
+  }
 }
 
 .\[\&\:\:-webkit-details-marker\]\:hidden::-webkit-details-marker{
