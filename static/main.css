@@ -985,11 +985,6 @@ select{
   height: 1.5rem;
 }
 
-.size-16{
-  width: 4rem;
-  height: 4rem;
-}
-
 .h-0{
   height: 0px;
 }
@@ -3904,12 +3899,6 @@ select{
     font-size: 1.25rem;
     line-height: 1.625;
   }
-
-  @media (min-width: 1280px){
-    .lg\:xl\:max-w-6xl{
-      max-width: 72rem;
-    }
-  }
 }
 
 @media (min-width: 1280px){
@@ -3927,10 +3916,6 @@ select{
 
   .xl\:max-w-7xl{
     max-width: 80rem;
-  }
-
-  .xl\:max-w-5xl{
-    max-width: 64rem;
   }
 }
 
