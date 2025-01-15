@@ -57,6 +57,20 @@ export default {
 				  900: '#3E061F',
 				  950: '#240312'
 				},
+        cta: {
+          DEFAULT: '#FFDD34',
+				  50: '#FFDD34',
+				  100: '#FFDD34',
+				  200: '#FFDD34',
+				  300: '#FFDD34',
+				  400: '#FFDD34',
+				  500: '#FFDD34',
+				  600: '#FFDD34',
+				  700: '#FFDD34',
+				  800: '#FFDD34',
+				  900: '#FFDD34',
+				  950: '#FFDD34'
+        }
       },
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
