@@ -407,26 +407,19 @@ type BookingForm struct {
 	BartenderID   *int    `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
 }
 
-type EstimateDetails struct {
-	EstimateID      int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-	LeadID          int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	StripeInvoiceID string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
-	Price           float64 `json:"price" form:"price" schema:"price"`
-	Status          string  `json:"status" form:"status" schema:"status"`
-	DateCreated     int64   `json:"date_created" form:"date_created" schema:"date_created"`
-	DatePaid        int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
-}
-
-type BookingDetails struct {
-	BookingID     int    `json:"booking_id" form:"booking_id" schema:"booking_id"`
-	EstimateID    int    `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-	BartenderID   int    `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
-	LeadID        int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	StreetAddress string `json:"street_address" form:"street_address" schema:"street_address"`
-	City          string `json:"city" form:"city" schema:"city"`
-	State         string `json:"state" form:"state" schema:"state"`
-	PostalCode    string `json:"postal_code" form:"postal_code" schema:"postal_code"`
-	Country       string `json:"country" form:"country" schema:"country"`
-	StartTime     int64  `json:"start_time" form:"start_time" schema:"start_time"`
-	EndTime       int64  `json:"end_time" form:"end_time" schema:"end_time"`
+type EventDetails struct {
+	EventID       int     `json:"event_id" form:"event_id" schema:"event_id"`
+	EstimateID    int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
+	BartenderID   int     `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
+	LeadID        int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	StreetAddress string  `json:"street_address" form:"street_address" schema:"street_address"`
+	City          string  `json:"city" form:"city" schema:"city"`
+	State         string  `json:"state" form:"state" schema:"state"`
+	PostalCode    string  `json:"postal_code" form:"postal_code" schema:"postal_code"`
+	Country       string  `json:"country" form:"country" schema:"country"`
+	StartTime     int64   `json:"start_time" form:"start_time" schema:"start_time"`
+	EndTime       int64   `json:"end_time" form:"end_time" schema:"end_time"`
+	DateCreated   int64   `json:"date_created" form:"date_created" schema:"date_created"`
+	DatePaid      int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
+	Price         float64 `json:"price" form:"price" schema:"price"`
 }

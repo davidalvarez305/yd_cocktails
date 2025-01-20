@@ -127,16 +127,48 @@ type Estimate struct {
 	DatePaid        int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
 }
 
-type Booking struct {
-	BookingID     int    `json:"booking_id" form:"booking_id" schema:"booking_id"`
-	EstimateID    int    `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-	StreetAddress string `json:"street_address" form:"street_address" schema:"street_address"`
-	City          string `json:"city" form:"city" schema:"city"`
-	State         string `json:"state" form:"state" schema:"state"`
-	PostalCode    string `json:"postal_code" form:"postal_code" schema:"postal_code"`
-	Country       string `json:"country" form:"country" schema:"country"`
-	StartTime     int64  `json:"start_time" form:"start_time" schema:"start_time"`
-	EndTime       int64  `json:"end_time" form:"end_time" schema:"end_time"`
-	BartenderID   int    `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
-	LeadID        int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+type Event struct {
+	EventID       int     `json:"event_id" form:"event_id" schema:"event_id"`
+	StreetAddress string  `json:"street_address" form:"street_address" schema:"street_address"`
+	City          string  `json:"city" form:"city" schema:"city"`
+	State         string  `json:"state" form:"state" schema:"state"`
+	PostalCode    string  `json:"postal_code" form:"postal_code" schema:"postal_code"`
+	StartTime     int64   `json:"start_time" form:"start_time" schema:"start_time"`
+	EndTime       int64   `json:"end_time" form:"end_time" schema:"end_time"`
+	BartenderID   int     `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
+	LeadID        int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	DateCreated   int64   `json:"date_created" form:"date_created" schema:"date_created"`
+	DatePaid      int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
+	Price         float64 `json:"price" form:"price" schema:"price"`
+}
+
+type EventCocktail struct{}
+type EventExpense struct{}
+type EventExpenseType struct{}
+
+type Cocktail struct {
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	Instructions string `json:"instructions"`
+	GlassType    string `json:"glass_type"`
+}
+
+type Ingredient struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Category string `json:"category"` // e.g., Liquor, Mixer, Garnish
+}
+
+type Unit struct {
+	ID           int    `json:"id"`
+	Name         string `json:"name"`         // e.g., Ounce, Teaspoon
+	Abbreviation string `json:"abbreviation"` // e.g., oz, tsp
+}
+
+type CocktailIngredient struct {
+	CocktailID   int     `json:"cocktail_id"`
+	IngredientID int     `json:"ingredient_id"`
+	Amount       float64 `json:"amount"`       // Amount of the ingredient
+	UnitID       int     `json:"unit_id"`      // Unit of measurement (references the Unit table)
+	MeasureType  string  `json:"measure_type"` // Optional (e.g., "part", "dash", "splash")
 }
