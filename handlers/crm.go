@@ -43,12 +43,8 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				GetLeadDetail(w, r, ctx)
 				return
 			}
-			if len(parts) >= 5 && parts[4] == "booking" && helpers.IsNumeric(parts[3]) {
-				GetBookingDetail(w, r, ctx)
-				return
-			}
-			if len(parts) >= 5 && parts[4] == "estimate" && helpers.IsNumeric(parts[3]) {
-				GetEstimateDetail(w, r, ctx)
+			if len(parts) >= 5 && parts[4] == "event" && helpers.IsNumeric(parts[3]) {
+				GetEventDetail(w, r, ctx)
 				return
 			}
 			return
@@ -67,12 +63,8 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				PutLeadMarketing(w, r)
 				return
 			}
-			if len(parts) >= 5 && parts[4] == "booking" && helpers.IsNumeric(parts[3]) {
-				PutBooking(w, r)
-				return
-			}
-			if len(parts) >= 5 && parts[4] == "estimate" && helpers.IsNumeric(parts[3]) {
-				PutEstimate(w, r)
+			if len(parts) >= 5 && parts[4] == "event" && helpers.IsNumeric(parts[3]) {
+				PutEvent(w, r)
 				return
 			}
 			if len(path) > len("/crm/lead/") && helpers.IsNumeric(path[len("/crm/lead/"):]) {
@@ -91,24 +83,16 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				DeleteLead(w, r)
 				return
 			}
-			if len(parts) >= 5 && parts[4] == "booking" && helpers.IsNumeric(parts[3]) {
-				DeleteBooking(w, r)
-				return
-			}
-			if len(parts) >= 5 && parts[4] == "estimate" && helpers.IsNumeric(parts[3]) {
-				DeleteEstimate(w, r)
+			if len(parts) >= 5 && parts[4] == "event" && helpers.IsNumeric(parts[3]) {
+				DeleteEvent(w, r)
 				return
 			}
 		}
 	case http.MethodPost:
 		if strings.HasPrefix(path, "/crm/lead/") {
 			parts := strings.Split(path, "/")
-			if len(parts) >= 5 && parts[4] == "booking" && helpers.IsNumeric(parts[3]) {
-				PostBooking(w, r)
-				return
-			}
-			if len(parts) >= 5 && parts[4] == "estimate" && helpers.IsNumeric(parts[3]) {
-				PostEstimate(w, r)
+			if len(parts) >= 5 && parts[4] == "event" && helpers.IsNumeric(parts[3]) {
+				PostEvent(w, r)
 				return
 			}
 		}
@@ -186,9 +170,9 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	fileName := "lead_detail.html"
 	bookingForm := constants.PARTIAL_TEMPLATES_DIR + "booking_form.html"
 	bookingTable := constants.PARTIAL_TEMPLATES_DIR + "bookings_table.html"
-	estimateForm := constants.PARTIAL_TEMPLATES_DIR + "estimate_form.html"
-	estimateTable := constants.PARTIAL_TEMPLATES_DIR + "estimates_table.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, bookingForm, bookingTable, estimateForm, estimateTable}
+	eventForm := constants.PARTIAL_TEMPLATES_DIR + "event_form.html"
+	eventTable := constants.PARTIAL_TEMPLATES_DIR + "events_table.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, bookingForm, bookingTable, eventForm, eventTable}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -238,17 +222,10 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	bookings, err := database.GetBookingList(leadDetails.LeadID)
+	events, err := database.GetEventList(leadDetails.LeadID)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting bookings.", http.StatusInternalServerError)
-		return
-	}
-
-	estimates, err := database.GetEstimateList(leadDetails.LeadID)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting estimates.", http.StatusInternalServerError)
+		http.Error(w, "Error getting events.", http.StatusInternalServerError)
 		return
 	}
 
@@ -260,8 +237,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["CRMUserPhoneNumber"] = phoneNumber
 	data["EventTypes"] = eventTypes
 	data["VenueTypes"] = venueTypes
-	data["Bookings"] = bookings
-	data["Estimates"] = estimates
+	data["Events"] = events
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -482,7 +458,7 @@ func DeleteLead(w http.ResponseWriter, r *http.Request) {
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
 
-func PostEstimate(w http.ResponseWriter, r *http.Request) {
+func PostEvent(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -499,7 +475,7 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var form types.EstimateForm
+	var form types.EventForm
 	err = decoder.Decode(&form, r.PostForm)
 
 	if err != nil {
@@ -516,14 +492,14 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.CreateEstimate(form)
+	err = database.CreateEvent(form)
 	if err != nil {
-		fmt.Printf("Error creating estimate: %+v\n", err)
+		fmt.Printf("Error creating event: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Server error while creating estimate.",
+				"Message": "Server error while creating event.",
 			},
 		}
 
@@ -562,8 +538,10 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	eventId := fmt.Sprint(helpers.SafeInt(form.EventID))
+
 	fbEvent := types.FacebookEventData{
-		EventName:      constants.EstimateEventName,
+		EventName:      constants.EventConversionEventName,
 		EventTime:      time.Now().UTC().Unix(),
 		ActionSource:   "website",
 		EventSourceURL: lead.LandingPage,
@@ -580,9 +558,9 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 		},
 		CustomData: types.FacebookCustomData{
 			Currency: "USD",
-			Value:    fmt.Sprint(helpers.SafeFloat64(form.Price)),
+			Value:    fmt.Sprint(helpers.SafeFloat64(form.Amount)),
 		},
-		EventID: helpers.SafeString(form.StripeInvoiceID),
+		EventID: eventId,
 	}
 
 	metaPayload := types.FacebookPayload{
@@ -594,11 +572,11 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 		UserId:   lead.ExternalID,
 		Events: []types.GoogleEventLead{
 			{
-				Name: constants.EstimateEventName,
+				Name: constants.EventConversionEventName,
 				Params: types.GoogleEventParamsLead{
 					GCLID:         lead.ClickID,
-					TransactionID: helpers.SafeString(form.StripeInvoiceID),
-					Value:         helpers.SafeFloat64(form.Price),
+					TransactionID: eventId,
+					Value:         helpers.SafeFloat64(form.Amount),
 					Currency:      constants.DefaultCurrency,
 					CampaignID:    fmt.Sprint(lead.CampaignID),
 					Campaign:      lead.CampaignName,
@@ -623,7 +601,7 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 	go conversions.SendGoogleConversion(googlePayload)
 	go conversions.SendFacebookConversion(metaPayload)
 
-	estimates, err := database.GetEstimateList(helpers.SafeInt(form.LeadID))
+	events, err := database.GetEventList(helpers.SafeInt(form.LeadID))
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
@@ -639,80 +617,18 @@ func PostEstimate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "estimates_table.html",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "estimates_table.html",
+		TemplateName: "events_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "events_table.html",
 		Data: map[string]any{
-			"Estimates": estimates,
+			"Events": events,
 		},
 	}
 
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
 
-func PostBooking(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Invalid request.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	var form types.BookingForm
-	err = decoder.Decode(&form, r.PostForm)
-
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error decoding form data.",
-			},
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	err = database.CreateBooking(form)
-	if err != nil {
-		fmt.Printf("Error creating booking: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Server error while creating booking.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "modal",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
-		Data: map[string]any{
-			"AlertHeader":  "Success!",
-			"AlertMessage": "Booking has been created.",
-		},
-	}
-
-	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-}
-
-func GetBookingDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
-	fileName := "booking_detail.html"
+func GetEventDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
+	fileName := "event_detail.html"
 	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
@@ -726,88 +642,32 @@ func GetBookingDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any
 		return
 	}
 
-	bookingId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
+	eventId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting booking id from path.", http.StatusInternalServerError)
+		http.Error(w, "Error getting event id from path.", http.StatusInternalServerError)
 		return
 	}
 
-	bookingDetails, err := database.GetBookingDetails(fmt.Sprint(bookingId))
+	eventDetails, err := database.GetEventDetails(fmt.Sprint(eventId))
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting booking details from DB.", http.StatusInternalServerError)
-		return
-	}
-
-	bartenders, err := database.GetUsers()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting users from DB.", http.StatusInternalServerError)
-		return
-	}
-
-	estimates, err := database.GetEstimateList(bookingDetails.LeadID)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting users from DB.", http.StatusInternalServerError)
+		http.Error(w, "Error getting event details from DB.", http.StatusInternalServerError)
 		return
 	}
 
 	data := ctx
-	data["PageTitle"] = "Booking Detail — " + constants.CompanyName
+	data["PageTitle"] = "Event Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
-	data["Booking"] = bookingDetails
-	data["Bartenders"] = bartenders
-	data["Estimates"] = estimates
+	data["Event"] = eventDetails
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	helpers.ServeContent(w, files, data)
 }
 
-func GetEstimateDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
-	fileName := "estimate_detail.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName}
-	nonce, ok := r.Context().Value("nonce").(string)
-	if !ok {
-		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
-		return
-	}
-
-	csrfToken, ok := r.Context().Value("csrf_token").(string)
-	if !ok {
-		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
-		return
-	}
-
-	estimateId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting estimate id from path.", http.StatusInternalServerError)
-		return
-	}
-
-	estimateDetails, err := database.GetEstimateDetails(fmt.Sprint(estimateId))
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting estimate details from DB.", http.StatusInternalServerError)
-		return
-	}
-
-	data := ctx
-	data["PageTitle"] = "Estimate Detail — " + constants.CompanyName
-	data["Nonce"] = nonce
-	data["CSRFToken"] = csrfToken
-	data["Estimate"] = estimateDetails
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-	helpers.ServeContent(w, files, data)
-}
-
-func PutBooking(w http.ResponseWriter, r *http.Request) {
+func PutEvent(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -823,7 +683,7 @@ func PutBooking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var form types.BookingForm
+	var form types.EventForm
 	err = decoder.Decode(&form, r.PostForm)
 
 	if err != nil {
@@ -840,14 +700,14 @@ func PutBooking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.UpdateBooking(form)
+	err = database.UpdateEvent(form)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Error updating booking.",
+				"Message": "Error updating event.",
 			},
 		}
 		w.WriteHeader(http.StatusBadRequest)
@@ -860,74 +720,14 @@ func PutBooking(w http.ResponseWriter, r *http.Request) {
 		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
 		Data: map[string]any{
 			"AlertHeader":  "Success!",
-			"AlertMessage": "Booking has been successfully updated.",
+			"AlertMessage": "Event has been successfully updated.",
 		},
 	}
 
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
 
-func PutEstimate(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Failed to parse form data.",
-			},
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	var form types.EstimateForm
-	err = decoder.Decode(&form, r.PostForm)
-
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error decoding form data.",
-			},
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	err = database.UpdateEstimate(form)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error updating estimate.",
-			},
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "modal",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
-		Data: map[string]any{
-			"AlertHeader":  "Success!",
-			"AlertMessage": "Estimate has been successfully updated.",
-		},
-	}
-
-	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-}
-
-func DeleteBooking(w http.ResponseWriter, r *http.Request) {
+func DeleteEvent(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		fmt.Printf("Error parsing form: %+v\n", err)
@@ -949,20 +749,20 @@ func DeleteBooking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookingId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
+	eventId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = database.DeleteBooking(bookingId)
+	err = database.DeleteEvent(eventId)
 	if err != nil {
-		fmt.Printf("Error deleting booking: %+v\n", err)
+		fmt.Printf("Error deleting event: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Failed to delete booking.",
+				"Message": "Failed to delete event.",
 			},
 		}
 		w.WriteHeader(http.StatusInternalServerError)
@@ -970,14 +770,14 @@ func DeleteBooking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookings, err := database.GetBookingList(leadId)
+	events, err := database.GetEventList(leadId)
 	if err != nil {
-		fmt.Printf("Error querying bookings after deletion: %+v\n", err)
+		fmt.Printf("Error querying events after deletion: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Failed to query bookings after deletion.",
+				"Message": "Failed to query events after deletion.",
 			},
 		}
 		w.WriteHeader(http.StatusInternalServerError)
@@ -986,79 +786,10 @@ func DeleteBooking(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "bookings_table.html",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "bookings_table.html",
+		TemplateName: "events_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "events_table.html",
 		Data: map[string]any{
-			"Bookings": bookings,
-		},
-	}
-
-	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-}
-
-func DeleteEstimate(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		fmt.Printf("Error parsing form: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Invalid request.",
-			},
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	leadId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/lead/")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	estimateId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = database.DeleteEstimate(estimateId)
-	if err != nil {
-		fmt.Printf("Error deleting estimate: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Failed to delete estimate.",
-			},
-		}
-		w.WriteHeader(http.StatusInternalServerError)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	estimates, err := database.GetEstimateList(leadId)
-	if err != nil {
-		fmt.Printf("Error querying estimates after deletion: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Failed to query estimates after deletion.",
-			},
-		}
-		w.WriteHeader(http.StatusInternalServerError)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "estimates_table.html",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "estimates_table.html",
-		Data: map[string]any{
-			"Estimates": estimates,
+			"Events": events,
 		},
 	}
 

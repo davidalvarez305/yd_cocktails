@@ -11,11 +11,9 @@ const (
 
 	TimeZone string = "America/New_York"
 
-	LeadGeneratedEventName string = "generate_lead"
-	BookingEventName       string = "booking"
-	InvoicePaidEventName   string = "invoice_paid"
-	EstimateEventName      string = "estimate"
-	LeadEventName          string = "Lead"
+	LeadGeneratedEventName   string = "generate_lead"
+	EventConversionEventName string = "event"
+	LeadEventName            string = "Lead"
 
 	DefaultCurrency  string  = "USD"
 	DefaultLeadValue float64 = 150.00
