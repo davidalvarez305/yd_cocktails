@@ -1234,3 +1234,9 @@ func GetUsers() ([]models.User, error) {
 
 	return users, nil
 }
+
+func IsPhoneNumberInDB(phoneNumber string) (bool, error) {
+	var exists bool
+	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM lead WHERE phone_number = ?)", phoneNumber).Scan(&exists)
+	return exists, err
+}

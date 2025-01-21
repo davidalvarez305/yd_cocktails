@@ -15,6 +15,7 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
 	"google.golang.org/api/option"
+	"google.golang.org/api/sheets/v4"
 )
 
 func refreshAuthToken(config *oauth2.Config) (oauth2.Token, error) {
@@ -103,4 +104,52 @@ func SendGmail(recipients []string, subject, sender, body string) error {
 	}
 
 	return nil
+}
+
+func GetDataFromSheets(spreadsheetId, spreadsheetRange string) (*sheets.ValueRange, error) {
+	var values sheets.ValueRange
+
+	client, err := initializeGoogleClient(sheets.SpreadsheetsScope)
+	if err != nil {
+		fmt.Printf("Unable to initialize Sheets client: %v", err)
+		return &values, nil
+	}
+
+	srv, err := sheets.NewService(context.Background(), option.WithHTTPClient(client))
+	if err != nil {
+		fmt.Printf("Unable to retrieve Sheets client: %v", err)
+		return &values, nil
+	}
+
+	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, spreadsheetRange).Do()
+	if err != nil {
+		fmt.Printf("Unable to retrieve data from sheet: %v", err)
+		return &values, nil
+	}
+
+	values = *resp
+
+	return &values, nil
+}
+
+func OverwriteSheetsData(spreadsheetId, spreadsheetRange string, values *sheets.ValueRange) error {
+	client, err := initializeGoogleClient(sheets.SpreadsheetsScope)
+	if err != nil {
+		fmt.Printf("Unable to initialize Sheets client: %v", err)
+		return err
+	}
+
+	srv, err := sheets.NewService(context.Background(), option.WithHTTPClient(client))
+	if err != nil {
+		fmt.Printf("Unable to retrieve Sheets client: %v", err)
+		return err
+	}
+
+	_, err = srv.Spreadsheets.Values.Update(spreadsheetId, spreadsheetRange, values).Do()
+	if err != nil {
+		fmt.Printf("Unable to update data on sheet: %v", err)
+		return err
+	}
+
+	return err
 }

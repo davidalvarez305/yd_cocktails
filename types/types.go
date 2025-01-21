@@ -394,3 +394,25 @@ type EventForm struct {
 	Tip           *float64 `json:"tip" form:"tip" schema:"tip"`
 	Guests        *int     `json:"guests" form:"guests" schema:"guests"`
 }
+
+type FacebookInstantFormLead struct {
+	ID               string `json:"id"`
+	CreatedTime      string `json:"created_time"`
+	AdID             string `json:"ad_id"`
+	AdName           string `json:"ad_name"`
+	AdsetID          string `json:"adset_id"`
+	AdsetName        string `json:"adset_name"`
+	CampaignID       string `json:"campaign_id"`
+	CampaignName     string `json:"campaign_name"`
+	FormID           string `json:"form_id"`
+	FormName         string `json:"form_name"`
+	IsOrganic        string `json:"is_organic"`
+	Platform         string `json:"platform"`
+	FullName         string `json:"whats_your_full_name"`
+	PhoneNumber      string `json:"whats_the_best_phone_number_to_reach_you_at"`
+	EventDescription string `json:"give_us_a_brief_description_of_your_event"`
+	Email            string `json:"email"`
+	IsQualified      string `json:"is_qualified"`
+	IsQuality        string `json:"is_quality"`
+	IsConverted      string `json:"is_converted"`
+}

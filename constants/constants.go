@@ -19,6 +19,9 @@ const (
 	DefaultLeadValue float64 = 150.00
 
 	CallConversionDuration int = 15
+
+	SocialMediaAdsMedium  = "paid"
+	SocialMediaAdsChannel = "social"
 )
 
 var (
@@ -66,6 +69,7 @@ var (
 	MaxIdleConnections           string
 	MaxConnectionLifetime        string
 	CompanyEmail                 string
+	NotificationSubscribers      []string
 )
 
 func Init() {
@@ -113,6 +117,8 @@ func Init() {
 	GoogleAdsID = os.Getenv("GOOGLE_ADS_ID")
 	GoogleAdsCallConversionLabel = os.Getenv("GOOGLE_ADS_CALL_CONVERSION_LABEL")
 	StrikeAPIKey = os.Getenv("STRIPE_API_KEY")
+
+	NotificationSubscribers = []string{DavidPhoneNumber, YovaPhoneNumber}
 }
 
 var TEMPLATES_DIR = "./templates/"

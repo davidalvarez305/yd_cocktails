@@ -1,0 +1,129 @@
+package services
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/conversions"
+	"github.com/davidalvarez305/yd_cocktails/database"
+	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/types"
+	"github.com/davidalvarez305/yd_cocktails/utils"
+)
+
+func checkSpreadsheets() {
+	resp, err := GetDataFromSheets(constants.FacebookLeadsSpreadsheetID, constants.FacebookLeadsSpreadsheetRange)
+	if err != nil {
+		fmt.Printf("Unable to retrieve data from sheet: %v", err)
+		return
+	}
+
+	var leads []types.FacebookInstantFormLead
+
+	if len(resp.Values) > 0 {
+		// Skip headers [1:]
+		for _, row := range resp.Values[1:] {
+
+			if len(row) < 15 {
+				continue
+			}
+
+			lead := types.FacebookInstantFormLead{
+				ID:               fmt.Sprintf("%v", row[0]),
+				CreatedTime:      fmt.Sprintf("%v", row[1]),
+				AdID:             fmt.Sprintf("%v", row[2]),
+				AdName:           fmt.Sprintf("%v", row[3]),
+				AdsetID:          fmt.Sprintf("%v", row[4]),
+				AdsetName:        fmt.Sprintf("%v", row[5]),
+				CampaignID:       fmt.Sprintf("%v", row[6]),
+				CampaignName:     fmt.Sprintf("%v", row[7]),
+				FormID:           fmt.Sprintf("%v", row[8]),
+				FormName:         fmt.Sprintf("%v", row[9]),
+				IsOrganic:        fmt.Sprintf("%v", row[10]),
+				Platform:         fmt.Sprintf("%v", row[11]),
+				FullName:         fmt.Sprintf("%v", row[12]),
+				PhoneNumber:      fmt.Sprintf("%v", row[13]),
+				EventDescription: fmt.Sprintf("%v", row[14]),
+				Email:            fmt.Sprintf("%v", row[15]),
+				IsQualified:      fmt.Sprintf("%v", row[16]),
+				IsQuality:        fmt.Sprintf("%v", row[17]),
+				IsConverted:      fmt.Sprintf("%v", row[18]),
+			}
+
+			leads = append(leads, lead)
+		}
+	}
+
+	for _, lead := range leads {
+		form := helpers.MapInstantFormToQuoteForm(lead)
+
+		exists, err := database.IsPhoneNumberInDB(helpers.SafeString(form.PhoneNumber))
+
+		// Skip if lead has already been saved before
+		if exists || err != nil {
+			continue
+		}
+
+		_, err = database.CreateLeadAndMarketing(form)
+
+		if err != nil {
+			continue
+		}
+
+		payload := types.GooglePayload{
+			ClientID: helpers.SafeString(form.GoogleClientID),
+			UserId:   helpers.SafeString(form.ExternalID),
+			Events: []types.GoogleEventLead{
+				{
+					Name: constants.LeadGeneratedEventName,
+					Params: types.GoogleEventParamsLead{
+						GCLID:      helpers.SafeString(form.ClickID),
+						CampaignID: fmt.Sprint(helpers.SafeInt64(form.CampaignID)),
+						Campaign:   helpers.SafeString(form.AdCampaign),
+						Source:     helpers.SafeString(form.Source),
+						Medium:     helpers.SafeString(form.Medium),
+						Term:       helpers.SafeString(form.Keyword),
+						Value:      constants.DefaultLeadValue,
+						Currency:   constants.DefaultCurrency,
+					},
+				},
+			},
+			UserData: types.GoogleUserData{
+				Sha256PhoneNumber: []string{helpers.HashString(utils.AddPhonePrefixIfNeeded(helpers.SafeString(form.PhoneNumber)))},
+				Address: []types.GoogleUserAddress{
+					{
+						Sha256FirstName: helpers.HashString(helpers.SafeString(form.FirstName)),
+						Sha256LastName:  helpers.HashString(helpers.SafeString(form.LastName)),
+					},
+				},
+			},
+		}
+
+		go conversions.SendGoogleConversion(payload)
+
+		for _, phoneNumber := range constants.NotificationSubscribers {
+
+			var textMessageTemplateNotification = fmt.Sprintf(
+				`NEW FACEBOOK LEAD:
+
+				Phone: %s,
+				Full Name: %s,
+				Message: %s
+			`, lead.PhoneNumber, lead.FullName, lead.EventDescription)
+
+			_, err = SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+		}
+	}
+}
+
+func StartLeadChecker() {
+	go func() {
+		for {
+			checkSpreadsheets()
+
+			// Sleep for one minute before the next run
+			time.Sleep(1 * time.Minute)
+		}
+	}()
+}
