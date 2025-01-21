@@ -10,12 +10,9 @@ type QuoteForm struct {
 	FirstName          *string `json:"first_name" form:"first_name" schema:"first_name"`
 	LastName           *string `json:"last_name" form:"last_name" schema:"last_name"`
 	PhoneNumber        *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	VenueType          *int    `json:"venue_type" form:"venue_type" schema:"venue_type"`
-	EventType          *int    `json:"event_type" form:"event_type" schema:"event_type"`
 	Message            *string `json:"message" form:"message" schema:"message"`
 	Email              *string `json:"email" form:"email" schema:"email"`
 	OptInTextMessaging *bool   `json:"opt_in_text_messaging" form:"opt_in_text_messaging" schema:"opt_in_text_messaging"`
-	Guests             *int    `json:"guests" form:"guests" schema:"guests"`
 
 	Source        *string `json:"source" form:"source" schema:"source"`
 	Medium        *string `json:"medium" form:"medium" schema:"medium"`
@@ -96,19 +93,12 @@ type LeadList struct {
 	LastName    string `json:"last_name" form:"last_name" schema:"last_name"`
 	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	CreatedAt   string `json:"created_at" form:"created_at" schema:"created_at"`
-	EventType   string `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType   string `json:"venue_type" form:"venue_type" schema:"venue_type"`
 	Language    string `json:"language" form:"language" schema:"language"`
-	EventTypeID int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	Guests      int    `json:"guests" form:"guests" schema:"guests"`
 	TotalRows   int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
 }
 
 type GetLeadsParams struct {
-	EventType *string `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType *string `json:"venue_type" form:"venue_type" schema:"venue_type"`
-	PageNum   *string `json:"page_num" form:"page_num" schema:"page_num"`
+	PageNum *string `json:"page_num" form:"page_num" schema:"page_num"`
 }
 
 type DynamicPartialTemplate struct {
@@ -139,9 +129,6 @@ type UpdateLeadForm struct {
 	LastName         *string `json:"last_name" form:"last_name" schema:"last_name"`
 	PhoneNumber      *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Email            *string `json:"email" form:"email" schema:"email"`
-	EventType        *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueType        *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	Guests           *int    `json:"guests" form:"guests" schema:"guests"`
 	StripeCustomerID *string `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
 }
 

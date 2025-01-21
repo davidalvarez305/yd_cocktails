@@ -56,8 +56,8 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	defer tx.Rollback()
 
 	leadStmt, err := tx.Prepare(`
-		INSERT INTO lead (first_name, last_name, phone_number, created_at, event_type_id, venue_type_id, message, opt_in_text_messaging, email, guests)
-		VALUES ($1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5, $6, $7, $8, $9, $10)
+		INSERT INTO lead (first_name, last_name, phone_number, created_at, message, opt_in_text_messaging, email)
+		VALUES ($1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5, $6, $7)
 		RETURNING lead_id
 	`)
 	if err != nil {
@@ -71,20 +71,15 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	}
 
 	message := utils.CreateNullString(quoteForm.Message)
-	eventTypeId := utils.CreateNullInt(quoteForm.EventType)
-	venueTypeId := utils.CreateNullInt(quoteForm.VenueType)
 
 	err = leadStmt.QueryRow(
 		utils.CreateNullString(quoteForm.FirstName),
 		utils.CreateNullString(quoteForm.LastName),
 		utils.CreateNullString(quoteForm.PhoneNumber),
 		createdAt,
-		eventTypeId,
-		venueTypeId,
 		message,
 		utils.CreateNullBool(quoteForm.OptInTextMessaging),
 		utils.CreateNullString(quoteForm.Email),
-		utils.CreateNullInt(quoteForm.Guests),
 	).Scan(&leadID)
 	if err != nil {
 		return leadID, fmt.Errorf("error inserting lead: %w", err)
@@ -397,17 +392,12 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
 	query := `SELECT l.lead_id, l.first_name, l.last_name, l.phone_number, 
-		l.created_at, et.name AS event_type, vt.name AS venue_type, lm.language, l.event_type_id, l.venue_type_id, l.guests,
-		COUNT(*) OVER() AS total_rows
+		l.created_at, lm.language, COUNT(*) OVER() AS total_rows
 		FROM lead AS l
-		LEFT JOIN event_type AS et ON et.event_type_id = l.event_type_id
-		LEFT JOIN venue_type AS vt ON vt.venue_type_id = l.venue_type_id
 		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
-		WHERE (et.event_type_id = $1 OR $1 IS NULL) 
-		AND (vt.venue_type_id = $2 OR $2 IS NULL)
 		ORDER BY l.created_at ASC
-		LIMIT $3
-		OFFSET $4`
+		LIMIT $1
+		OFFSET $2`
 
 	var offset int
 
@@ -420,7 +410,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		offset = (pageNum - 1) * int(constants.LeadsPerPage)
 	}
 
-	rows, err := DB.Query(query, params.EventType, params.VenueType, constants.LeadsPerPage, offset)
+	rows, err := DB.Query(query, constants.LeadsPerPage, offset)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error executing query: %w", err)
 	}
@@ -430,41 +420,18 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	for rows.Next() {
 		var lead types.LeadList
 		var createdAt time.Time
-		var eventType, venueType sql.NullString
-		var eventTypeId, venueTypeId, guests sql.NullInt64
 
 		err := rows.Scan(&lead.LeadID,
 			&lead.FirstName,
 			&lead.LastName,
 			&lead.PhoneNumber,
 			&createdAt,
-			&eventType,
-			&venueType,
 			&lead.Language,
-			&eventTypeId,
-			&venueTypeId,
-			&guests,
 			&totalRows)
 		if err != nil {
 			return nil, 0, fmt.Errorf("error scanning row: %w", err)
 		}
 		lead.CreatedAt = utils.FormatTimestampEST(createdAt.Unix())
-
-		if eventTypeId.Valid {
-			lead.EventTypeID = int(eventTypeId.Int64)
-		}
-		if venueTypeId.Valid {
-			lead.VenueTypeID = int(venueTypeId.Int64)
-		}
-		if eventType.Valid {
-			lead.EventType = eventType.String
-		}
-		if venueType.Valid {
-			lead.VenueType = venueType.String
-		}
-		if guests.Valid {
-			lead.Guests = int(guests.Int64)
-		}
 
 		leads = append(leads, lead)
 	}
@@ -677,11 +644,8 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		SET first_name = COALESCE($2, first_name), 
 		    last_name = COALESCE($3, last_name), 
 		    phone_number = COALESCE($4, phone_number), 
-		    event_type_id = $5, 
-		    venue_type_id = $6, 
-		    guests = $7, 
-		    email = $8,
-			stripe_customer_id = $9
+		    email = $5,
+			stripe_customer_id = $6
 		WHERE lead_id = $1
 	`
 
@@ -690,9 +654,6 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		utils.CreateNullString(form.FirstName),
 		utils.CreateNullString(form.LastName),
 		utils.CreateNullString(form.PhoneNumber),
-		utils.CreateNullInt(form.EventType),
-		utils.CreateNullInt(form.VenueType),
-		utils.CreateNullInt(form.Guests),
 		utils.CreateNullString(form.Email),
 		utils.CreateNullString(form.StripeCustomerID),
 	}
