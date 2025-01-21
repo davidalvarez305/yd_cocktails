@@ -6,17 +6,6 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/models"
 )
 
-type EstimateForm struct {
-	CSRFToken       *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	EstimateID      *int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-	LeadID          *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	StripeInvoiceID *string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
-	Price           *float64 `json:"price" form:"price" schema:"price"`
-	Status          *string  `json:"status" form:"status" schema:"status"`
-	DateCreated     *int64   `json:"date_created" form:"date_created" schema:"date_created"`
-	DatePaid        *int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
-}
-
 type QuoteForm struct {
 	FirstName          *string `json:"first_name" form:"first_name" schema:"first_name"`
 	LastName           *string `json:"last_name" form:"last_name" schema:"last_name"`
@@ -79,9 +68,6 @@ type LeadDetails struct {
 	LastName         string `json:"last_name" form:"last_name" schema:"last_name"`
 	Email            string `json:"email" form:"email" schema:"email"`
 	PhoneNumber      string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	EventType        string `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType        string `json:"venue_type" form:"venue_type" schema:"venue_type"`
-	Guests           int    `json:"guests" form:"guests" schema:"guests"`
 	StripeCustomerID string `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
 
 	CampaignName     string `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
@@ -370,56 +356,53 @@ type ConversionLeadInfo struct {
 	CreatedAt int64 `json:"created_at" form:"created_at" schema:"created_at"`
 }
 
-type BookingList struct {
-	BookingID int     `json:"booking_id" form:"booking_id" schema:"booking_id"`
+type EventList struct {
 	LeadID    int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	Address   string  `json:"address" form:"address" schema:"address"`
-	StartTime string  `json:"start_time" form:"start_time" schema:"start_time"`
-	EndTime   string  `json:"end_time" form:"end_time" schema:"end_time"`
+	EventID   int     `json:"event_id" form:"event_id" schema:"event_id"`
+	Amount    float64 `json:"amount" form:"amount" schema:"amount"`
+	EventTime string  `json:"event_time" form:"event_time" schema:"event_time"`
+	LeadName  string  `json:"lead_name" form:"lead_name" schema:"lead_name"`
 	Bartender string  `json:"bartender" form:"bartender" schema:"bartender"`
-	Price     float64 `json:"price" form:"price" schema:"price"`
-}
-
-type EstimatesList struct {
-	LeadID          int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	EstimateID      int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-	Price           float64 `json:"price" form:"price" schema:"price"`
-	DateCreated     string  `json:"date_created" form:"date_created" schema:"date_created"`
-	DatePaid        string  `json:"date_paid" form:"date_paid" schema:"date_paid"`
-	StripeInvoiceID string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
-	Status          string  `json:"status" form:"status" schema:"status"`
-}
-
-type BookingForm struct {
-	CSRFToken *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	BookingID *int    `json:"booking_id" form:"booking_id" schema:"booking_id"`
-	LeadID    *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-
-	EstimateID *int `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-
-	StreetAddress *string `json:"street_address" form:"street_address" schema:"street_address"`
-	City          *string `json:"city" form:"city" schema:"city"`
-	PostalCode    *string `json:"postal_code" form:"postal_code" schema:"postal_code"`
-	State         *string `json:"state" form:"state" schema:"state"`
-	Country       *string `json:"country" form:"country" schema:"country"`
-	StartTime     *int64  `json:"start_time" form:"start_time" schema:"start_time"`
-	EndTime       *int64  `json:"end_time" form:"end_time" schema:"end_time"`
-	BartenderID   *int    `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
+	EventType string  `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	Guests    int     `json:"guests" form:"guests" schema:"guests"`
 }
 
 type EventDetails struct {
-	EventID       int     `json:"event_id" form:"event_id" schema:"event_id"`
-	EstimateID    int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-	BartenderID   int     `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
-	LeadID        int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventID     int `json:"event_id" form:"event_id" schema:"event_id"`
+	BartenderID int `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
+	LeadID      int `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventTypeID int `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueTypeID int `json:"venue_type" form:"venue_type" schema:"venue_type"`
+
 	StreetAddress string  `json:"street_address" form:"street_address" schema:"street_address"`
 	City          string  `json:"city" form:"city" schema:"city"`
-	State         string  `json:"state" form:"state" schema:"state"`
-	PostalCode    string  `json:"postal_code" form:"postal_code" schema:"postal_code"`
-	Country       string  `json:"country" form:"country" schema:"country"`
+	ZipCode       string  `json:"zip_code" form:"zip_code" schema:"zip_code"`
 	StartTime     int64   `json:"start_time" form:"start_time" schema:"start_time"`
 	EndTime       int64   `json:"end_time" form:"end_time" schema:"end_time"`
 	DateCreated   int64   `json:"date_created" form:"date_created" schema:"date_created"`
 	DatePaid      int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
-	Price         float64 `json:"price" form:"price" schema:"price"`
+	Amount        float64 `json:"amount" form:"amount" schema:"amount"`
+	Guests        int     `json:"guests" form:"guests" schema:"guests"`
+}
+
+type EventForm struct {
+	CSRFToken   *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	EventID     *int    `json:"event_id" form:"event_id" schema:"event_id"`
+	BartenderID *int    `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
+	LeadID      *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventTypeID *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+
+	StreetAddress *string  `json:"street_address" form:"street_address" schema:"street_address"`
+	City          *string  `json:"city" form:"city" schema:"city"`
+	State         *string  `json:"state" form:"state" schema:"state"`
+	ZipCode       *string  `json:"zip_code" form:"zip_code" schema:"zip_code"`
+	StartTime     *int64   `json:"start_time" form:"start_time" schema:"start_time"`
+	EndTime       *int64   `json:"end_time" form:"end_time" schema:"end_time"`
+	DateCreated   *int64   `json:"date_created" form:"date_created" schema:"date_created"`
+	DatePaid      *int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
+	Amount        *float64 `json:"amount" form:"amount" schema:"amount"`
+	Tip           *float64 `json:"tip" form:"tip" schema:"tip"`
+	Guests        *int     `json:"guests" form:"guests" schema:"guests"`
 }

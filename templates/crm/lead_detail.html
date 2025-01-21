@@ -221,63 +221,30 @@
     </h3>
     <!-- END Divider: With Heading -->
 
-    <!-- Estimates -->
+    <!-- Events -->
     <div class="flex flex-col my-6 overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800 dark:text-gray-100">
         <div
             class="flex flex-col gap-3 bg-gray-50 px-5 py-4 text-center dark:bg-gray-700/50 sm:flex-row sm:items-center sm:justify-between sm:text-left">
-            <button id="addEstimate" type="button"
+            <button id="addEvent" type="button"
                 class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
-                Add Estimate
+                Add Event
             </button>
         </div>
     </div>
 
-    {{ template "estimates_table.html" . }}
+    {{ template "events_table.html" . }}
 
-    {{ template "estimate_form.html" . }}
-
-    <script nonce="{{ .Nonce }}">
-        const addEstimateButton = document.getElementById('addEstimate');
-
-        addEstimateButton.addEventListener('click', () => {
-            const estimateModalContainer = document.getElementById('estimateModalContainer');
-            estimateModalContainer.style.display = '';
-        });
-    </script>
-    <!-- END Estimates -->
-
-    <!-- Divider: With Heading -->
-    <h3 class="my-8 flex items-center">
-        <span aria-hidden="true" class="h-0.5 grow rounded bg-gray-200 dark:bg-gray-700/75"></span>
-        <span class="mx-3 text-lg font-medium">Bookings</span>
-        <span aria-hidden="true" class="h-0.5 grow rounded bg-gray-200 dark:bg-gray-700/75"></span>
-    </h3>
-    <!-- END Divider: With Heading -->
-
-    <!-- Bookings -->
-    <div class="flex flex-col my-6 overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800 dark:text-gray-100">
-        <div
-            class="flex flex-col gap-3 bg-gray-50 px-5 py-4 text-center dark:bg-gray-700/50 sm:flex-row sm:items-center sm:justify-between sm:text-left">
-            <button id="addBooking" type="button"
-                class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
-                Add Booking
-            </button>
-        </div>
-    </div>
-
-    {{ template "bookings_table.html" . }}
-
-    {{ template "booking_form.html" . }}
+    {{ template "event_form.html" . }}
 
     <script nonce="{{ .Nonce }}">
-        const addBookingButton = document.getElementById('addBooking');
+        const addEventButton = document.getElementById('addEvent');
 
-        addBookingButton.addEventListener('click', () => {
-            const bookingModalContainer = document.getElementById('bookingModalContainer');
-            bookingModalContainer.style.display = '';
+        addEventButton.addEventListener('click', () => {
+            const eventModalContainer = document.getElementById('eventModalContainer');
+            eventModalContainer.style.display = '';
         });
     </script>
-    <!-- END Bookings -->
+    <!-- END Events -->
 </div>
 
 <div id="alertModal"></div>

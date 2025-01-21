@@ -481,8 +481,6 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	l.first_name,
 	l.last_name,
 	l.phone_number,
-	et.name,
-	vt.name,
 	lm.ad_campaign,
 	lm.medium,
 	lm.source,
@@ -501,11 +499,8 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	lm.click_id,
 	lm.google_client_id,
 	lm.button_clicked,
-	lm.campaign_id,
-	l.guests
+	lm.campaign_id
 	FROM lead l
-	LEFT JOIN event_type et ON l.event_type_id = et.event_type_id
-	LEFT JOIN venue_type vt ON l.venue_type_id = vt.venue_type_id
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
 	WHERE l.lead_id = $1`
 
@@ -514,8 +509,8 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	row := DB.QueryRow(query, leadID)
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
-	var eventType, venueType, message, externalId, userAgent, clickId, googleClientId sql.NullString
-	var campaignId, guests sql.NullInt64
+	var message, externalId, userAgent, clickId, googleClientId sql.NullString
+	var campaignId sql.NullInt64
 
 	var buttonClicked sql.NullString
 
@@ -524,8 +519,6 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&leadDetails.FirstName,
 		&leadDetails.LastName,
 		&leadDetails.PhoneNumber,
-		&eventType,
-		&venueType,
 		&adCampaign,
 		&medium,
 		&source,
@@ -545,7 +538,6 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&googleClientId,
 		&buttonClicked,
 		&campaignId,
-		&guests,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -555,9 +547,6 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	}
 
 	// Map the nullable fields to your struct
-	if guests.Valid {
-		leadDetails.Guests = int(guests.Int64)
-	}
 	if buttonClicked.Valid {
 		leadDetails.ButtonClicked = buttonClicked.String
 	}
@@ -588,14 +577,6 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	if email.Valid {
 		leadDetails.Email = email.String
-	}
-
-	if eventType.Valid {
-		leadDetails.EventType = eventType.String
-	}
-
-	if venueType.Valid {
-		leadDetails.VenueType = venueType.String
 	}
 
 	if adCampaign.Valid {
@@ -993,417 +974,264 @@ func DeleteLead(id int) error {
 	return nil
 }
 
-func CreateEstimate(form types.EstimateForm) error {
+func CreateEvent(form types.EventForm) error {
 	query := `
-		INSERT INTO estimate (price, date_created, lead_id, stripe_invoice_id, status)
-		VALUES ($1, to_timestamp($2)::timestamptz AT TIME ZONE 'America/New_York', $3, $4, $5)
-	`
-
-	_, err := DB.Exec(
-		query,
-		utils.CreateNullFloat64(form.Price),
-		utils.CreateNullInt64(form.DateCreated),
-		utils.CreateNullInt(form.LeadID),
-		utils.CreateNullString(form.StripeInvoiceID),
-		utils.CreateNullString(form.Status),
-	)
-	if err != nil {
-		return fmt.Errorf("error inserting estimate data: %w", err)
-	}
-
-	return nil
-}
-
-func UpdateEstimate(form types.EstimateForm) error {
-	query := `
-		UPDATE estimate
-		SET 
-		    price = $2,
-		    stripe_invoice_id = COALESCE($3, stripe_invoice_id),
-		    status = COALESCE($4, status)
-		WHERE estimate_id = $1
-	`
-
-	_, err := DB.Exec(
-		query,
-		utils.CreateNullInt(form.EstimateID),
-		utils.CreateNullFloat64(form.Price),
-		utils.CreateNullString(form.StripeInvoiceID),
-		utils.CreateNullString(form.Status),
-	)
-	if err != nil {
-		return fmt.Errorf("error updating estimate data: %w", err)
-	}
-
-	return nil
-}
-
-func UpdateEstimateByWebhook(stripeInvoiceId, stripeInvoiceStatus string, datePaid int64) error {
-	query := `
-		UPDATE estimate
-		SET 
-		    date_paid = to_timestamp($2)::timestamptz AT TIME ZONE 'America/New_York',
-		    status = COALESCE($3, status)
-		WHERE stripe_invoice_id = $1
-	`
-
-	_, err := DB.Exec(
-		query,
-		stripeInvoiceId,
-		datePaid,
-		stripeInvoiceStatus,
-	)
-	if err != nil {
-		return fmt.Errorf("error updating estimate data: %w", err)
-	}
-
-	return nil
-}
-
-func AssignStripeCustomerToLead(stripeCustomerID string, leadId int) error {
-	stmt, err := DB.Prepare(`UPDATE lead SET stripe_customer_id = $1 WHERE lead_id = $2`)
-	if err != nil {
-		return fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(stripeCustomerID, leadId)
-	if err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
-	}
-
-	return nil
-}
-
-func AssignStripeInvoiceToEstimate(stripeInvoiceId string, estimateId int) error {
-	stmt, err := DB.Prepare(`UPDATE estimate SET stripe_invoice_id = $1 WHERE estimate_id = $2`)
-	if err != nil {
-		return fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(stripeInvoiceId, estimateId)
-	if err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
-	}
-
-	return nil
-}
-
-func GetBookingList(leadId int) ([]types.BookingList, error) {
-	var bookings []types.BookingList
-
-	rows, err := DB.Query(`
-		SELECT 
-			b.booking_id,
-			b.lead_id,
-			CONCAT(b.street_address, ', ', b.city, ', ', b.state, ', ', b.postal_code) AS address,
-			b.start_time,
-			b.end_time,
-			CONCAT(u.first_name, ' ', u.last_name) AS bartender,
-			e.price::NUMERIC
-		FROM booking AS b
-		JOIN estimate AS e ON e.estimate_id = b.estimate_id
-		JOIN "user" AS u ON u.user_id = b.bartender_id
-		WHERE b.lead_id = $1
-		ORDER BY b.start_time ASC;
-	`, leadId)
-	if err != nil {
-		return bookings, fmt.Errorf("error executing query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var booking types.BookingList
-
-		var startTime, endTime time.Time
-
-		err := rows.Scan(
-			&booking.BookingID,
-			&booking.LeadID,
-			&booking.Address,
-			&startTime,
-			&endTime,
-			&booking.Bartender,
-			&booking.Price,
+		INSERT INTO event (
+			bartender_id, lead_id, event_type_id, venue_type_id, street_address, city, state, zip_code,
+			start_time, end_time, date_created, date_paid, amount, tip, guests
 		)
-		if err != nil {
-			return bookings, fmt.Errorf("error scanning row: %w", err)
-		}
+		VALUES (
+			$1, $2, $3, $4, $5, $6, $7, $8,
+			to_timestamp($9)::timestamptz AT TIME ZONE 'America/New_York',
+			to_timestamp($10)::timestamptz AT TIME ZONE 'America/New_York',
+			to_timestamp($11)::timestamptz AT TIME ZONE 'America/New_York',
+			to_timestamp($12)::timestamptz AT TIME ZONE 'America/New_York',
+			$13, $14, $15
+		)
+	`
 
-		booking.StartTime = utils.FormatTimestampEST(startTime.Unix())
-		booking.EndTime = utils.FormatTimestampEST(endTime.Unix())
-
-		bookings = append(bookings, booking)
+	_, err := DB.Exec(
+		query,
+		utils.CreateNullInt(form.BartenderID),
+		utils.CreateNullInt(form.LeadID),
+		utils.CreateNullInt(form.EventTypeID),
+		utils.CreateNullInt(form.VenueTypeID),
+		utils.CreateNullString(form.StreetAddress),
+		utils.CreateNullString(form.City),
+		utils.CreateNullString(form.State),
+		utils.CreateNullString(form.ZipCode),
+		utils.CreateNullInt64(form.StartTime),
+		utils.CreateNullInt64(form.EndTime),
+		utils.CreateNullInt64(form.DateCreated),
+		utils.CreateNullInt64(form.DatePaid),
+		utils.CreateNullFloat64(form.Amount),
+		utils.CreateNullFloat64(form.Tip),
+		utils.CreateNullInt(form.Guests),
+	)
+	if err != nil {
+		return fmt.Errorf("error inserting event data: %w", err)
 	}
 
-	if err := rows.Err(); err != nil {
-		return bookings, fmt.Errorf("error iterating rows: %w", err)
-	}
-
-	return bookings, nil
+	return nil
 }
 
-func GetEstimateList(leadId int) ([]types.EstimatesList, error) {
-	var estimates []types.EstimatesList
+func UpdateEvent(form types.EventForm) error {
+	query := `
+		UPDATE event
+		SET 
+			bartender_id = COALESCE($2, bartender_id),
+			event_type_id = COALESCE($3, event_type_id),
+			venue_type_id = COALESCE($4, venue_type_id),
+			street_address = COALESCE($5, street_address),
+			city = COALESCE($6, city),
+			state = COALESCE($7, state),
+			zip_code = COALESCE($8, zip_code),
+			start_time = COALESCE(to_timestamp($9)::timestamptz AT TIME ZONE 'America/New_York', start_time),
+			end_time = COALESCE(to_timestamp($10)::timestamptz AT TIME ZONE 'America/New_York', end_time),
+			date_paid = to_timestamp($11)::timestamptz AT TIME ZONE 'America/New_York',
+			amount = $12,
+			tip = $13,
+			guests = $14
+		WHERE event_id = $1
+	`
+
+	_, err := DB.Exec(
+		query,
+		utils.CreateNullInt(form.EventID),
+		utils.CreateNullInt(form.BartenderID),
+		utils.CreateNullInt(form.EventTypeID),
+		utils.CreateNullInt(form.VenueTypeID),
+		utils.CreateNullString(form.StreetAddress),
+		utils.CreateNullString(form.City),
+		utils.CreateNullString(form.State),
+		utils.CreateNullString(form.ZipCode),
+		utils.CreateNullInt64(form.StartTime),
+		utils.CreateNullInt64(form.EndTime),
+		utils.CreateNullInt64(form.DatePaid),
+		utils.CreateNullFloat64(form.Amount),
+		utils.CreateNullFloat64(form.Tip),
+		utils.CreateNullInt(form.Guests),
+	)
+	if err != nil {
+		return fmt.Errorf("error updating event data: %w", err)
+	}
+
+	return nil
+}
+
+func DeleteEvent(id int) error {
+	sqlStatement := `
+        DELETE FROM event WHERE event_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetEventList(leadId int) ([]types.EventList, error) {
+	var events []types.EventList
 
 	rows, err := DB.Query(`
 		SELECT 
-			e.estimate_id,
+			e.event_id,
 			e.lead_id,
-			e.date_created,
-			e.price::NUMERIC,
-			e.stripe_invoice_id,
-			e.status
-		FROM estimate AS e
+			e.amount::NUMERIC,
+			CONCAT(l.first_name, ' ', l.last_name),
+			CONCAT(b.first_name, ' ', b.last_name),
+			et.type,
+			vt.type,
+			e.guests
+		FROM event AS e
+		JOIN lead AS l ON l.lead_id = e.lead_id
+		JOIN "user" AS b ON b.user_id = e.bartender_id
+		JOIN event_type AS et ON et.event_type_id = e.event_type_id
+		JOIN venue_type AS vt ON vt.venue_type_id = e.venue_type_id
 		WHERE e.lead_id = $1
 		ORDER BY e.date_created ASC;
 	`, leadId)
 	if err != nil {
-		return estimates, fmt.Errorf("error executing query: %w", err)
+		return events, fmt.Errorf("error executing query: %w", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var estimate types.EstimatesList
+		var event types.EventList
 
-		var dateCreated time.Time
+		var eventStart, eventEnd time.Time
 
 		err := rows.Scan(
-			&estimate.EstimateID,
-			&estimate.LeadID,
-			&dateCreated,
-			&estimate.Price,
-			&estimate.StripeInvoiceID,
-			&estimate.Status,
+			&event.EventID,
+			&event.LeadID,
+			&event.Amount,
+			&event.LeadName,
+			&event.Bartender,
+			&event.EventType,
+			&event.VenueType,
+			&event.Guests,
+			&eventStart,
+			&eventEnd,
 		)
 		if err != nil {
-			return estimates, fmt.Errorf("error scanning row: %w", err)
+			return events, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		estimate.DateCreated = utils.FormatTimestampEST(dateCreated.Unix())
+		event.EventTime = fmt.Sprintf("%s - %s", utils.FormatTimestampEST(eventStart.Unix()), utils.FormatTimestampEST(eventEnd.Unix()))
 
-		estimates = append(estimates, estimate)
+		events = append(events, event)
 	}
 
 	if err := rows.Err(); err != nil {
-		return estimates, fmt.Errorf("error iterating rows: %w", err)
+		return events, fmt.Errorf("error iterating rows: %w", err)
 	}
 
-	return estimates, nil
+	return events, nil
 }
 
-func CreateBooking(form types.BookingForm) error {
-	stmt, err := DB.Prepare(`
-		INSERT INTO booking (
-			estimate_id,
-			street_address,
-			city,
-			state,
-			postal_code,
-			country,
-			start_time,
-			end_time,
-			bartender_id,
-			lead_id
-		) VALUES ($1, $2, $3, $4, $5, $6, to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York', to_timestamp($8)::timestamptz AT TIME ZONE 'America/New_York', $9, $10)
-	`)
-	if err != nil {
-		return fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(
-		utils.CreateNullInt(form.EstimateID),
-		utils.CreateNullString(form.StreetAddress),
-		utils.CreateNullString(form.City),
-		utils.CreateNullString(form.State),
-		utils.CreateNullString(form.PostalCode),
-		utils.CreateNullString(form.Country),
-		utils.CreateNullInt64(form.StartTime),
-		utils.CreateNullInt64(form.EndTime),
-		utils.CreateNullInt(form.BartenderID),
-		utils.CreateNullInt(form.LeadID),
-	)
-	if err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
-	}
-
-	return nil
-}
-
-func UpdateBooking(form types.BookingForm) error {
-	stmt, err := DB.Prepare(`
-		UPDATE booking
-		SET 
-			estimate_id = COALESCE($2, estimate_id),
-			street_address = COALESCE($3, street_address),
-			city = COALESCE($4, city),
-			state = COALESCE($5, state),
-			postal_code = COALESCE($6, postal_code),
-			country = COALESCE($7, country),
-			start_time = COALESCE(to_timestamp($8) AT TIME ZONE 'America/New_York', start_time),
-			end_time = COALESCE(to_timestamp($9) AT TIME ZONE 'America/New_York', end_time),
-			bartender_id = COALESCE($10, bartender_id),
-			lead_id = COALESCE($11, lead_id)
-		WHERE booking_id = $1;
-	`)
-	if err != nil {
-		return fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(
-		utils.CreateNullInt(form.BookingID),
-		utils.CreateNullInt(form.EstimateID),
-		utils.CreateNullString(form.StreetAddress),
-		utils.CreateNullString(form.City),
-		utils.CreateNullString(form.State),
-		utils.CreateNullString(form.PostalCode),
-		utils.CreateNullString(form.Country),
-		utils.CreateNullInt64(form.StartTime),
-		utils.CreateNullInt64(form.EndTime),
-		utils.CreateNullInt(form.BartenderID),
-		utils.CreateNullInt(form.LeadID),
-	)
-	if err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
-	}
-
-	return nil
-}
-
-func DeleteBooking(id int) error {
-	sqlStatement := `
-        DELETE FROM booking WHERE booking_id = $1
-    `
-	_, err := DB.Exec(sqlStatement, id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func DeleteEstimate(id int) error {
-	sqlStatement := `
-        DELETE FROM estimate WHERE estimate_id = $1
-    `
-	_, err := DB.Exec(sqlStatement, id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func GetEstimateDetails(estimateId string) (types.EstimateDetails, error) {
+func GetEventDetails(eventId string) (models.Event, error) {
 	query := `SELECT 
-		estimate_id, 
-		price, 
+		event_id, 
+		bartender_id, 
 		lead_id,
-		stripe_invoice_id,
+		street_address,
+		city,
+		state,
+		zip_code,
+		start_time,
+		end_time,
 		date_created,
 		date_paid,
-		status
-	FROM estimate 
-	WHERE estimate_id = $1`
+		amount,
+		tip,
+		event_type_id,
+		venue_type_id,
+		guests
+	FROM event 
+	WHERE event_id = $1`
 
-	var estimateDetails types.EstimateDetails
+	var eventDetails models.Event
 
-	var stripeInvoiceID, status sql.NullString
-	var price sql.NullFloat64
-	var dateCreated, datePaid sql.NullTime
+	// Declare nullable SQL variables for fields that might be NULL in the database
+	var streetAddress, city, state, zipCode sql.NullString
+	var startTime, endTime, dateCreated, datePaid sql.NullTime
+	var amount, tip sql.NullFloat64
+	var bartenderID, eventTypeID, venueTypeID, guests sql.NullInt64
 
-	row := DB.QueryRow(query, estimateId)
-
-	err := row.Scan(
-		&estimateDetails.EstimateID,
-		&price,
-		&estimateDetails.LeadID,
-		&stripeInvoiceID,
-		&dateCreated,
-		&datePaid,
-		&status,
-	)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return estimateDetails, fmt.Errorf("no estimate found with ID %s", estimateId)
-		}
-		return estimateDetails, fmt.Errorf("error scanning row: %w", err)
-	}
-
-	if stripeInvoiceID.Valid {
-		estimateDetails.StripeInvoiceID = stripeInvoiceID.String
-	}
-
-	if status.Valid {
-		estimateDetails.Status = status.String
-	}
-
-	if price.Valid {
-		estimateDetails.Price = price.Float64
-	}
-
-	if dateCreated.Valid {
-		estimateDetails.DateCreated = dateCreated.Time.Unix()
-	}
-
-	if datePaid.Valid {
-		estimateDetails.DatePaid = datePaid.Time.Unix()
-	}
-
-	return estimateDetails, nil
-}
-
-func GetBookingDetails(bookingId string) (types.BookingDetails, error) {
-	query := `SELECT 
-		booking_id, 
-		estimate_id, 
-		bartender_id, 
-		lead_id, 
-		street_address, 
-		city, 
-		state, 
-		postal_code, 
-		country, 
-		start_time, 
-		end_time
-	FROM booking 
-	WHERE booking_id = $1`
-
-	var bookingDetails types.BookingDetails
-
-	var startTime, endTime time.Time
-
-	row := DB.QueryRow(query, bookingId)
+	row := DB.QueryRow(query, eventId)
 
 	err := row.Scan(
-		&bookingDetails.BookingID,
-		&bookingDetails.EstimateID,
-		&bookingDetails.BartenderID,
-		&bookingDetails.LeadID,
-		&bookingDetails.StreetAddress,
-		&bookingDetails.City,
-		&bookingDetails.State,
-		&bookingDetails.PostalCode,
-		&bookingDetails.Country,
+		&eventDetails.EventID,
+		&bartenderID,
+		&eventDetails.LeadID,
+		&streetAddress,
+		&city,
+		&state,
+		&zipCode,
 		&startTime,
 		&endTime,
+		&dateCreated,
+		&datePaid,
+		&amount,
+		&tip,
+		&eventTypeID,
+		&venueTypeID,
+		&guests,
 	)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return bookingDetails, fmt.Errorf("no booking found with ID %s", bookingId)
+			return eventDetails, fmt.Errorf("no event found with ID %s", eventId)
 		}
-		return bookingDetails, fmt.Errorf("error scanning row: %w", err)
+		return eventDetails, fmt.Errorf("error scanning row: %w", err)
 	}
 
-	bookingDetails.StartTime = startTime.Unix()
-	bookingDetails.EndTime = endTime.Unix()
+	// Map nullable SQL variables to the Event struct
+	if streetAddress.Valid {
+		eventDetails.StreetAddress = streetAddress.String
+	}
+	if city.Valid {
+		eventDetails.City = city.String
+	}
+	if state.Valid {
+		eventDetails.State = state.String
+	}
+	if zipCode.Valid {
+		eventDetails.ZipCode = zipCode.String
+	}
+	if startTime.Valid {
+		eventDetails.StartTime = startTime.Time.Unix()
+	}
+	if endTime.Valid {
+		eventDetails.EndTime = endTime.Time.Unix()
+	}
+	if dateCreated.Valid {
+		eventDetails.DateCreated = dateCreated.Time.Unix()
+	}
+	if datePaid.Valid {
+		eventDetails.DatePaid = datePaid.Time.Unix()
+	}
+	if amount.Valid {
+		eventDetails.Amount = amount.Float64
+	}
+	if tip.Valid {
+		eventDetails.Tip = tip.Float64
+	}
+	if bartenderID.Valid {
+		eventDetails.BartenderID = int(bartenderID.Int64)
+	}
+	if eventTypeID.Valid {
+		eventDetails.EventTypeID = int(eventTypeID.Int64)
+	}
+	if venueTypeID.Valid {
+		eventDetails.VenueTypeID = int(venueTypeID.Int64)
+	}
+	if guests.Valid {
+		eventDetails.Guests = int(guests.Int64)
+	}
 
-	return bookingDetails, nil
+	return eventDetails, nil
 }
 
 func GetUsers() ([]models.User, error) {
@@ -1444,23 +1272,4 @@ func GetUsers() ([]models.User, error) {
 	}
 
 	return users, nil
-}
-
-func UpdateEstimatePriceByStripeInvoiceID(stripeInvoiceID string, price float64) error {
-	query := `
-		UPDATE estimate
-		SET 
-		    price = COALESCE($2, price)
-		WHERE stripe_invoice_id = $1
-	`
-	_, err := DB.Exec(
-		query,
-		stripeInvoiceID,
-		price,
-	)
-	if err != nil {
-		return fmt.Errorf("error updating estimate price: %w", err)
-	}
-
-	return nil
 }

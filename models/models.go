@@ -29,11 +29,8 @@ type Lead struct {
 	CreatedAt          int64  `json:"created_at" form:"created_at" schema:"created_at"`
 
 	// Nullable
-	Email       string `json:"email" form:"email" schema:"email"`
-	EventTypeID int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	Guests      int    `json:"guests" form:"guests" schema:"guests"`
-	Message     string `json:"message" form:"message" schema:"message"`
+	Email   string `json:"email" form:"email" schema:"email"`
+	Message string `json:"message" form:"message" schema:"message"`
 }
 
 type LeadMarketing struct {
@@ -117,58 +114,65 @@ type UserRole struct {
 	Role   string `json:"role" form:"role" schema:"role"`
 }
 
-type Estimate struct {
-	EstimateID      int     `json:"estimate_id" form:"estimate_id" schema:"estimate_id"`
-	LeadID          int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	StripeInvoiceID string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
-	Price           float64 `json:"price" form:"price" schema:"price"`
-	Status          string  `json:"status" form:"status" schema:"status"`
-	DateCreated     int64   `json:"date_created" form:"date_created" schema:"date_created"`
-	DatePaid        int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
-}
-
 type Event struct {
 	EventID       int     `json:"event_id" form:"event_id" schema:"event_id"`
+	BartenderID   int     `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
+	LeadID        int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
 	StreetAddress string  `json:"street_address" form:"street_address" schema:"street_address"`
 	City          string  `json:"city" form:"city" schema:"city"`
 	State         string  `json:"state" form:"state" schema:"state"`
-	PostalCode    string  `json:"postal_code" form:"postal_code" schema:"postal_code"`
+	ZipCode       string  `json:"zip_code" form:"zip_code" schema:"zip_code"`
 	StartTime     int64   `json:"start_time" form:"start_time" schema:"start_time"`
 	EndTime       int64   `json:"end_time" form:"end_time" schema:"end_time"`
-	BartenderID   int     `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
-	LeadID        int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
 	DateCreated   int64   `json:"date_created" form:"date_created" schema:"date_created"`
 	DatePaid      int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
-	Price         float64 `json:"price" form:"price" schema:"price"`
+	Amount        float64 `json:"amount" form:"amount" schema:"amount"`
+	Tip           float64 `json:"tip" form:"tip" schema:"tip"`
+	EventTypeID   int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID   int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	Guests        int     `json:"guests" form:"guests" schema:"guests"`
 }
 
-type EventCocktail struct{}
-type EventExpense struct{}
-type EventExpenseType struct{}
+type EventCocktail struct {
+	EventCocktailID int `json:"event_cocktail_id" form:"event_cocktail_id" schema:"event_cocktail_id"`
+	CocktailID      int `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
+	EventID         int `json:"event_id" form:"event_id" schema:"event_id"`
+}
+
+type EventExpense struct {
+	EventExpenseID     int     `json:"event_expense_id" form:"event_expense_id" schema:"event_expense_id"`
+	EventExpenseTypeID int     `json:"event_expense_type_id" form:"event_expense_type_id" schema:"event_expense_type_id"`
+	Name               string  `json:"name" form:"name" schema:"name"`
+	Amount             float64 `json:"amount" form:"amount" schema:"amount"`
+}
+
+type EventExpenseType struct {
+	EventExpenseTypeID int    `json:"event_expense_type_id" form:"event_expense_type_id" schema:"event_expense_type_id"`
+	Type               string `json:"type" form:"type" schema:"type"`
+}
 
 type Cocktail struct {
-	ID           int    `json:"id"`
-	Name         string `json:"name"`
-	Instructions string `json:"instructions"`
-	GlassType    string `json:"glass_type"`
+	CocktailID   int    `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
+	Name         string `json:"name" form:"name" schema:"name"`
+	Instructions string `json:"instructions" form:"instructions" schema:"instructions"`
+	GlassType    string `json:"glass_type" form:"glass_type" schema:"glass_type"`
 }
 
 type Ingredient struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Category string `json:"category"` // e.g., Liquor, Mixer, Garnish
+	IngredientID int    `json:"ingredient_id" form:"ingredient_id" schema:"ingredient_id"`
+	Name         string `json:"name" form:"name" schema:"name"`
+	Category     string `json:"category" form:"category" schema:"category"` // e.g., Liquor, Mixer, Garnish
 }
 
 type Unit struct {
-	ID           int    `json:"id"`
-	Name         string `json:"name"`         // e.g., Ounce, Teaspoon
-	Abbreviation string `json:"abbreviation"` // e.g., oz, tsp
+	UnitID       int    `json:"unit_id" form:"unit_id" schema:"unit_id"`
+	Name         string `json:"name" form:"name" schema:"name"`                         // e.g., Ounce, Teaspoon
+	Abbreviation string `json:"abbreviation" form:"abbreviation" schema:"abbreviation"` // e.g., oz, tsp, part, dash, splash
 }
 
 type CocktailIngredient struct {
-	CocktailID   int     `json:"cocktail_id"`
-	IngredientID int     `json:"ingredient_id"`
-	Amount       float64 `json:"amount"`       // Amount of the ingredient
-	UnitID       int     `json:"unit_id"`      // Unit of measurement (references the Unit table)
-	MeasureType  string  `json:"measure_type"` // Optional (e.g., "part", "dash", "splash")
+	CocktailID   int     `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
+	IngredientID int     `json:"ingredient_id" form:"ingredient_id" schema:"ingredient_id"`
+	UnitID       int     `json:"unit_id" form:"unit_id" schema:"unit_id"`
+	Amount       float64 `json:"amount" form:"amount" schema:"amount"` // Amount of the ingredient
 }
