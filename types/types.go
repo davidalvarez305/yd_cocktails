@@ -387,12 +387,13 @@ type EventDetails struct {
 }
 
 type EventForm struct {
-	CSRFToken   *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	EventID     *int    `json:"event_id" form:"event_id" schema:"event_id"`
-	BartenderID *int    `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
-	LeadID      *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	EventTypeID *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	CSRFToken *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	EventID   *int    `json:"event_id" form:"event_id" schema:"event_id"`
+	LeadID    *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+
+	BartenderID *int `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
+	EventTypeID *int `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID *int `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
 
 	StreetAddress *string  `json:"street_address" form:"street_address" schema:"street_address"`
 	City          *string  `json:"city" form:"city" schema:"city"`
