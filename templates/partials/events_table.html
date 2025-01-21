@@ -9,7 +9,19 @@
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Price
+					Lead
+				</th>
+				<th
+					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
+					Start & End Time
+				</th>
+				<th
+					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
+					Guests
+				</th>
+				<th
+					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
+					Revenue
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
@@ -18,10 +30,6 @@
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
 					Event & Venue
-				</th>
-				<th
-					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Guests
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
@@ -40,16 +48,22 @@
 					</a>
 				</td>
 				<td class="p-3 text-center">
-					<p class="font-medium">${{ .Price }}</p>
+					<p class="font-medium">${{ .LeadName }}</p>
+				</td>
+				<td class="p-3 text-center">
+					<p class="font-medium">${{ .EventTime }}</p>
+				</td>
+				<td class="p-3 text-center">
+					<p class="font-medium">{{ .Guests }}</p>
+				</td>
+				<td class="p-3 text-center">
+					<p class="font-medium">${{ .Amount }}</p>
 				</td>
 				<td class="p-3 text-center">
 					<p class="font-medium">{{ .Bartender }}</p>
 				</td>
 				<td class="p-3 text-center">
 					<p class="font-medium">{{ .EventType }}, {{ .VenueType }}</p>
-				</td>
-				<td class="p-3 text-center">
-					<p class="font-medium">{{ .Guests }}</p>
 				</td>
 				<td class="p-3 text-center">
                     <button data-event-id="{{ .EventID }}"
