@@ -5,11 +5,9 @@ import (
 	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
-	"github.com/davidalvarez305/yd_cocktails/conversions"
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
 	"github.com/davidalvarez305/yd_cocktails/types"
-	"github.com/davidalvarez305/yd_cocktails/utils"
 )
 
 func checkSpreadsheets() {
@@ -71,37 +69,6 @@ func checkSpreadsheets() {
 			continue
 		}
 
-		payload := types.GooglePayload{
-			ClientID: helpers.SafeString(form.GoogleClientID),
-			UserId:   helpers.SafeString(form.ExternalID),
-			Events: []types.GoogleEventLead{
-				{
-					Name: constants.LeadGeneratedEventName,
-					Params: types.GoogleEventParamsLead{
-						GCLID:      helpers.SafeString(form.ClickID),
-						CampaignID: fmt.Sprint(helpers.SafeInt64(form.CampaignID)),
-						Campaign:   helpers.SafeString(form.AdCampaign),
-						Source:     helpers.SafeString(form.Source),
-						Medium:     helpers.SafeString(form.Medium),
-						Term:       helpers.SafeString(form.Keyword),
-						Value:      constants.DefaultLeadValue,
-						Currency:   constants.DefaultCurrency,
-					},
-				},
-			},
-			UserData: types.GoogleUserData{
-				Sha256PhoneNumber: []string{helpers.HashString(utils.AddPhonePrefixIfNeeded(helpers.SafeString(form.PhoneNumber)))},
-				Address: []types.GoogleUserAddress{
-					{
-						Sha256FirstName: helpers.HashString(helpers.SafeString(form.FirstName)),
-						Sha256LastName:  helpers.HashString(helpers.SafeString(form.LastName)),
-					},
-				},
-			},
-		}
-
-		go conversions.SendGoogleConversion(payload)
-
 		for _, phoneNumber := range constants.NotificationSubscribers {
 
 			var textMessageTemplateNotification = fmt.Sprintf(
@@ -112,7 +79,9 @@ func checkSpreadsheets() {
 				Message: %s
 			`, lead.PhoneNumber, lead.FullName, lead.EventDescription)
 
-			_, err = SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+			_, err := SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+
+			fmt.Printf("ERROR SENDING FB LEAD AD NOTIFICATION MSG: %+v\n", err)
 		}
 	}
 }

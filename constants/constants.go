@@ -25,51 +25,53 @@ const (
 )
 
 var (
-	StrikeAPIKey                 string
-	FacebookAccessToken          string
-	FacebookDatasetID            string
-	GoogleAnalyticsID            string
-	GoogleAdsID                  string
-	GoogleAdsCallConversionLabel string
-	GoogleAnalyticsAPISecretKey  string
-	GoogleRefreshToken           string
-	GoogleJSONPath               string
-	PostgresHost                 string
-	PostgresPort                 string
-	PostgresUser                 string
-	PostgresPassword             string
-	PostgresDBName               string
-	DavidPhoneNumber             string
-	DavidEmail                   string
-	YovaEmail                    string
-	YovaPhoneNumber              string
-	ServerPort                   string
-	RootDomain                   string
-	AWSStorageBucket             string
-	AWSS3BucketName              string
-	AWSRegion                    string
-	CookieName                   string
-	DomainHost                   string
-	SecretAESKey                 string
-	AuthSecretKey                string
-	EncSecretKey                 string
-	TwilioAccountSID             string
-	TwilioAuthToken              string
-	TwilioCallbackWebhook        string
-	CompanyName                  string
-	SiteName                     string
-	SessionName                  string
-	LeadsPerPage                 int
-	CompanyPhoneNumber           string
-	SessionLength                int
-	CSRFTokenLength              int
-	StaticPath                   string
-	MediaPath                    string
-	MaxOpenConnections           string
-	MaxIdleConnections           string
-	MaxConnectionLifetime        string
-	CompanyEmail                 string
-	NotificationSubscribers      []string
+	StrikeAPIKey                  string
+	FacebookAccessToken           string
+	FacebookDatasetID             string
+	GoogleAnalyticsID             string
+	GoogleAdsID                   string
+	GoogleAdsCallConversionLabel  string
+	GoogleAnalyticsAPISecretKey   string
+	GoogleRefreshToken            string
+	GoogleJSONPath                string
+	PostgresHost                  string
+	PostgresPort                  string
+	PostgresUser                  string
+	PostgresPassword              string
+	PostgresDBName                string
+	DavidPhoneNumber              string
+	DavidEmail                    string
+	YovaEmail                     string
+	YovaPhoneNumber               string
+	ServerPort                    string
+	RootDomain                    string
+	AWSStorageBucket              string
+	AWSS3BucketName               string
+	AWSRegion                     string
+	CookieName                    string
+	DomainHost                    string
+	SecretAESKey                  string
+	AuthSecretKey                 string
+	EncSecretKey                  string
+	TwilioAccountSID              string
+	TwilioAuthToken               string
+	TwilioCallbackWebhook         string
+	CompanyName                   string
+	SiteName                      string
+	SessionName                   string
+	LeadsPerPage                  int
+	CompanyPhoneNumber            string
+	SessionLength                 int
+	CSRFTokenLength               int
+	StaticPath                    string
+	MediaPath                     string
+	MaxOpenConnections            string
+	MaxIdleConnections            string
+	MaxConnectionLifetime         string
+	CompanyEmail                  string
+	NotificationSubscribers       []string
+	FacebookLeadsSpreadsheetID    string
+	FacebookLeadsSpreadsheetRange string
 )
 
 func Init() {
@@ -117,6 +119,8 @@ func Init() {
 	GoogleAdsID = os.Getenv("GOOGLE_ADS_ID")
 	GoogleAdsCallConversionLabel = os.Getenv("GOOGLE_ADS_CALL_CONVERSION_LABEL")
 	StrikeAPIKey = os.Getenv("STRIPE_API_KEY")
+	FacebookLeadsSpreadsheetID = os.Getenv("FACEBOOK_LEADS_SPREADSHEET_ID")
+	FacebookLeadsSpreadsheetRange = os.Getenv("FACEBOOK_LEADS_SPREADSHEET_RANGE")
 
 	NotificationSubscribers = []string{DavidPhoneNumber, YovaPhoneNumber}
 }
