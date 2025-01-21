@@ -23,21 +23,71 @@
                     <input type="hidden" name="lead_id" value="{{ .Event.LeadID }}" />
                     <input type="hidden" name="event_id" value="{{ .Event.EventID }}" />
                     <div class="space-y-1">
-                        <label for="stripe_invoice_id" class="font-medium">Stripe Invoice ID*</label>
-                        <input type="text" id="stripe_invoice_id" name="stripe_invoice_id"
-                            value="{{ .Event.StripeInvoiceID }}" required
+                        <label for="street_address" class="font-medium">Street Address*</label>
+                        <input type="text" id="street_address" name="street_address"
+                            value="{{ .Event.StreetAddress }}" required
                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                     </div>
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div class="grow space-y-1">
-                            <label for="price" class="font-medium">Price</label>
-                            <input type="number" id="price" name="price" value="{{ .Event.Price }}"
+                            <label for="city" class="font-medium">City*</label>
+                            <input type="text" id="city" name="city" value="{{ .Event.City }}" required
                                 class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                         </div>
                         <div class="grow space-y-1">
-                            <label for="status" class="font-medium">Status</label>
-                            <input type="text" id="status" name="status" value="{{ .Event.Status }}"
+                            <label for="zip_code" class="font-medium">Zip Code*</label>
+                            <input type="text" id="zip_code" name="zip_code" value="{{ .Event.ZipCode }}" required
                                 class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div class="grow space-y-1">
+                            <label for="start_time" class="font-medium">Start Time*</label>
+                            <input type="datetime-local" id="start_time" name="start_time" value="{{ .Event.StartTime }}" required
+                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                        </div>
+                        <div class="grow space-y-1">
+                            <label for="end_time" class="font-medium">End Time*</label>
+                            <input type="datetime-local" id="end_time" name="end_time" value="{{ .Event.EndTime }}" required
+                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div class="grow space-y-1">
+                            <label for="amount" class="font-medium">Amount Paid</label>
+                            <input type="number" id="amount" name="amount" value="{{ .Event.Amount }}" required
+                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                        </div>
+                        <div class="grow space-y-1">
+                            <label for="guests" class="font-medium">Guests</label>
+                            <input type="number" id="guests" name="guests" value="{{ .Event.Guests }}" required
+                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div class="grow space-y-1">
+                            <label for="event_type_id" class="font-medium">Event Type*</label>
+                            <select id="event_type_id" name="event_type_id" required
+                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                                <option></option>
+                                {{ range .EventTypes }}
+                                <option value="{{ .EventTypeID }}" {{ if eq .EventTypeID $.Event.EventTypeID }}selected{{ end }}>
+                                    {{ .Type }}
+                                </option>
+                                {{ end }}
+                            </select>
+                        </div>
+                        <div class="grow space-y-1">
+                            <label for="venue_type_id" class="font-medium">Venue Type*</label>
+                            <select id="venue_type_id" name="venue_type_id" required
+                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                                <option></option>
+                                {{ range .VenueTypes }}
+                                <option value="{{ .VenueTypeID }}" {{ if eq .VenueTypeID $.Venue.VenueTypeID }}selected{{ end }}>
+                                    {{ .Type }}
+                                </option>
+                                {{ end }}
+                            </select>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">

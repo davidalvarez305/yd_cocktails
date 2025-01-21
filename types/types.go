@@ -370,8 +370,8 @@ type EventList struct {
 
 type EventDetails struct {
 	EventID     int `json:"event_id" form:"event_id" schema:"event_id"`
-	BartenderID int `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
 	LeadID      int `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	BartenderID int `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
 	EventTypeID int `json:"event_type" form:"event_type" schema:"event_type"`
 	VenueTypeID int `json:"venue_type" form:"venue_type" schema:"venue_type"`
 
