@@ -121,8 +121,6 @@ func GetLeads(w http.ResponseWriter, r *http.Request, ctx map[string]interface{}
 	}
 
 	var params types.GetLeadsParams
-	params.EventType = helpers.SafeStringToPointer(r.URL.Query().Get("event_type"))
-	params.VenueType = helpers.SafeStringToPointer(r.URL.Query().Get("venue_type"))
 	params.PageNum = helpers.SafeStringToPointer(r.URL.Query().Get("page_num"))
 
 	leads, totalRows, err := database.GetLeadList(params)
@@ -420,8 +418,6 @@ func DeleteLead(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var params types.GetLeadsParams
-	params.EventType = helpers.SafeStringToPointer(r.URL.Query().Get("event_type"))
-	params.VenueType = helpers.SafeStringToPointer(r.URL.Query().Get("venue_type"))
 	params.PageNum = helpers.SafeStringToPointer(r.URL.Query().Get("page_num"))
 
 	leads, totalRows, err := database.GetLeadList(params)

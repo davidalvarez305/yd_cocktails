@@ -249,8 +249,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	form.FirstName = helpers.GetStringPointerFromForm(r, "first_name")
 	form.LastName = helpers.GetStringPointerFromForm(r, "last_name")
 	form.PhoneNumber = helpers.GetStringPointerFromForm(r, "phone_number")
-	form.EventType = helpers.GetIntPointerFromForm(r, "event_type")
-	form.VenueType = helpers.GetIntPointerFromForm(r, "venue_type")
 	form.Message = helpers.GetStringPointerFromForm(r, "message")
 	form.Source = helpers.GetStringPointerFromForm(r, "source")
 	form.Medium = helpers.GetStringPointerFromForm(r, "medium")
@@ -275,7 +273,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	form.IP = helpers.GetStringPointerFromForm(r, "ip")
 	form.Email = helpers.GetStringPointerFromForm(r, "email")
 	form.OptInTextMessaging = helpers.GetBoolPointerFromForm(r, "opt_in_text_messaging")
-	form.Guests = helpers.GetIntPointerFromForm(r, "guests")
 
 	form.FacebookClickID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_fbc", "facebook_click_id")
 	form.FacebookClientID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_fbp", "facebook_client_id")
