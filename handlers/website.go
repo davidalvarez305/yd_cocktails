@@ -418,60 +418,60 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !constants.Production {
-		return
-	}
+	if constants.Production {
 
-	go func() {
-		subject := "YD Cocktails: New Lead"
-		recipients := []string{constants.CompanyEmail}
-		templateFile := constants.PARTIAL_TEMPLATES_DIR + "new_lead_notification_email.html"
+		go func() {
+			subject := "YD Cocktails: New Lead"
+			recipients := []string{constants.CompanyEmail}
+			templateFile := constants.PARTIAL_TEMPLATES_DIR + "new_lead_notification_email.html"
 
-		var notificationTemplateData = map[string]any{
-			"Name":           helpers.SafeString(form.FirstName) + " " + helpers.SafeString(form.LastName),
-			"PhoneNumber":    helpers.SafeString(form.PhoneNumber),
-			"DateCreated":    utils.FormatTimestampEST(lead.CreatedAt),
-			"ButtonClicked":  helpers.SafeString(form.ButtonClicked),
-			"Message":        helpers.SafeString(form.Message),
-			"LeadDetailsURL": fmt.Sprintf("%s/crm/lead/%d", constants.RootDomain, leadID),
-			"Location":       "",
-		}
+			var notificationTemplateData = map[string]any{
+				"Name":           helpers.SafeString(form.FirstName) + " " + helpers.SafeString(form.LastName),
+				"PhoneNumber":    helpers.SafeString(form.PhoneNumber),
+				"DateCreated":    utils.FormatTimestampEST(lead.CreatedAt),
+				"ButtonClicked":  helpers.SafeString(form.ButtonClicked),
+				"Message":        helpers.SafeString(form.Message),
+				"LeadDetailsURL": fmt.Sprintf("%s/crm/lead/%d", constants.RootDomain, leadID),
+				"Location":       "",
+			}
 
-		if helpers.SafeString(form.Longitude) != "0.0" && len(helpers.SafeString(form.Longitude)) > 0 || helpers.SafeString(form.Latitude) != "0.0" && len(helpers.SafeString(form.Latitude)) > 0 {
-			notificationTemplateData["Location"] = fmt.Sprintf("https://www.google.com/maps?q=%s,%s", helpers.SafeString(form.Latitude), helpers.SafeString(form.Longitude))
-		}
+			if helpers.SafeString(form.Longitude) != "0.0" && len(helpers.SafeString(form.Longitude)) > 0 || helpers.SafeString(form.Latitude) != "0.0" && len(helpers.SafeString(form.Latitude)) > 0 {
+				notificationTemplateData["Location"] = fmt.Sprintf("https://www.google.com/maps?q=%s,%s", helpers.SafeString(form.Latitude), helpers.SafeString(form.Longitude))
+			}
 
-		template, err := helpers.BuildStringFromTemplate(templateFile, "email", notificationTemplateData)
+			template, err := helpers.BuildStringFromTemplate(templateFile, "email", notificationTemplateData)
 
-		if err != nil {
-			fmt.Printf("ERROR BUILDING LEAD NOTIFICATION TEMPLATE: %+v\n", err)
-			return
-		}
+			if err != nil {
+				fmt.Printf("ERROR BUILDING LEAD NOTIFICATION TEMPLATE: %+v\n", err)
+				return
+			}
 
-		body := fmt.Sprintf("Content-Type: text/html; charset=UTF-8\r\n%s", template)
-		err = services.SendGmail(recipients, subject, constants.CompanyEmail, body)
-		if err != nil {
-			fmt.Printf("ERROR SENDING LEAD NOTIFICATION EMAIL: %+v\n", err)
-			return
-		}
+			body := fmt.Sprintf("Content-Type: text/html; charset=UTF-8\r\n%s", template)
+			err = services.SendGmail(recipients, subject, constants.CompanyEmail, body)
+			if err != nil {
+				fmt.Printf("ERROR SENDING LEAD NOTIFICATION EMAIL: %+v\n", err)
+				return
+			}
 
-		for _, phoneNumber := range constants.NotificationSubscribers {
+			for _, phoneNumber := range constants.NotificationSubscribers {
 
-			var textMessageTemplateNotification = fmt.Sprintf(
-				`NEW LEAD:
+				var textMessageTemplateNotification = fmt.Sprintf(
+					`NEW LEAD:
 
 				Phone: %s,
 				Full Name: %s,
 				Message: %s
 			`, helpers.SafeString(form.PhoneNumber), helpers.SafeString(form.FirstName)+" "+helpers.SafeString(form.LastName), helpers.SafeString(form.Message))
 
-			_, err := services.SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+				_, err := services.SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
 
-			if err != nil {
-				fmt.Printf("ERROR SENDING FB LEAD AD NOTIFICATION MSG: %+v\n", err)
+				if err != nil {
+					fmt.Printf("ERROR SENDING FB LEAD AD NOTIFICATION MSG: %+v\n", err)
+				}
 			}
-		}
-	}()
+		}()
+		return
+	}
 
 	tmplCtx := types.DynamicPartialTemplate{
 		TemplateName: "modal",
