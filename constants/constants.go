@@ -26,6 +26,7 @@ const (
 )
 
 var (
+	Production                    bool
 	StrikeAPIKey                  string
 	FacebookAccessToken           string
 	FacebookDatasetID             string
@@ -76,6 +77,7 @@ var (
 )
 
 func Init() {
+	Production = os.Getenv("PRODUCTION") == "1"
 	FacebookAccessToken = os.Getenv("FACEBOOK_ACCESS_TOKEN")
 	FacebookDatasetID = os.Getenv("FACEBOOK_DATASET_ID")
 	GoogleAnalyticsID = os.Getenv("GOOGLE_ANALYTICS_ID")

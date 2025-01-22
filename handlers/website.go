@@ -418,6 +418,10 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if constants.Production != true {
+		return
+	}
+
 	go func() {
 		subject := "YD Cocktails: New Lead"
 		recipients := []string{constants.CompanyEmail}
@@ -449,6 +453,23 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Printf("ERROR SENDING LEAD NOTIFICATION EMAIL: %+v\n", err)
 			return
+		}
+
+		for _, phoneNumber := range constants.NotificationSubscribers {
+
+			var textMessageTemplateNotification = fmt.Sprintf(
+				`NEW LEAD:
+
+				Phone: %s,
+				Full Name: %s,
+				Message: %s
+			`, helpers.SafeString(form.PhoneNumber), helpers.SafeString(form.FirstName)+" "+helpers.SafeString(form.LastName), helpers.SafeString(form.Message))
+
+			_, err := services.SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+
+			if err != nil {
+				fmt.Printf("ERROR SENDING FB LEAD AD NOTIFICATION MSG: %+v\n", err)
+			}
 		}
 	}()
 
