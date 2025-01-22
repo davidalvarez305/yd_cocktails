@@ -776,13 +776,13 @@ func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 	defer stmt.Close()
 
 	var leadID, callDuration sql.NullInt64
-	var recordingUrl sql.NullString
+	var recordingUrl, externalId sql.NullString
 
 	row := stmt.QueryRow(sid)
 
 	err = row.Scan(
 		&phoneCall.PhoneCallID,
-		&phoneCall.ExternalID,
+		&externalId,
 		&phoneCall.UserID,
 		&leadID,
 		&callDuration,
@@ -807,6 +807,10 @@ func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 
 	if recordingUrl.Valid {
 		phoneCall.RecordingURL = recordingUrl.String
+	}
+
+	if externalId.Valid {
+		phoneCall.ExternalID = externalId.String
 	}
 
 	return phoneCall, nil
@@ -858,12 +862,13 @@ func GetSession(userKey string) (models.Session, error) {
 
 	var dateCreated, dateExpires time.Time
 	var userID sql.NullInt32
+	var csrfSecret, externalId sql.NullString
 
 	err := row.Scan(
 		&session.SessionID,
 		&userID,
-		&session.CSRFSecret,
-		&session.ExternalID,
+		&csrfSecret,
+		&externalId,
 		&dateCreated,
 		&dateExpires,
 	)
@@ -873,6 +878,14 @@ func GetSession(userKey string) (models.Session, error) {
 
 	if userID.Valid {
 		session.UserID = int(userID.Int32)
+	}
+
+	if csrfSecret.Valid {
+		session.CSRFSecret = csrfSecret.String
+	}
+
+	if externalId.Valid {
+		session.ExternalID = externalId.String
 	}
 
 	session.DateCreated = dateCreated.Unix()
@@ -904,7 +917,7 @@ func CreateSession(session models.Session) error {
 func UpdateSession(session models.Session) error {
 	sqlStatement := `
         UPDATE sessions
-        SET external_id = COALESCE($1, external_id),
+        SET external_id = $1,
             user_id = COALESCE($2, user_id)
         WHERE csrf_secret = $3
     `
