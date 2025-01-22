@@ -418,7 +418,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if constants.Production != true {
+	if !constants.Production {
 		return
 	}
 
