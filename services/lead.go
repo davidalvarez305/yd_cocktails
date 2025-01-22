@@ -70,7 +70,7 @@ func checkSpreadsheets() {
 			continue
 		}
 
-		/* if !constants.Production {
+		if !constants.Production {
 			continue
 		}
 
@@ -87,7 +87,7 @@ func checkSpreadsheets() {
 			_, err := SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
 
 			fmt.Printf("ERROR SENDING FB LEAD AD NOTIFICATION MSG: %+v\n", err)
-		} */
+		}
 	}
 }
 
