@@ -7,8 +7,7 @@ import (
 )
 
 type QuoteForm struct {
-	FirstName          *string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName           *string `json:"last_name" form:"last_name" schema:"last_name"`
+	FullName           *string `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber        *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Message            *string `json:"message" form:"message" schema:"message"`
 	Email              *string `json:"email" form:"email" schema:"email"`
@@ -51,7 +50,7 @@ type QuoteForm struct {
 
 type ContactForm struct {
 	CSRFToken string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	FirstName string `json:"first_name" form:"first_name" schema:"first_name"`
+	FullName  string `json:"full_name" form:"full_name" schema:"full_name"`
 	LastName  string `json:"last_name" form:"last_name" schema:"last_name"`
 	Email     string `json:"email" form:"email" schema:"email"`
 	Message   string `json:"message" form:"message" schema:"message"`
@@ -66,8 +65,7 @@ type OutboundMessageForm struct {
 
 type LeadDetails struct {
 	LeadID           int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FirstName        string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName         string `json:"last_name" form:"last_name" schema:"last_name"`
+	FullName         string `json:"full_name" form:"full_name" schema:"full_name"`
 	Email            string `json:"email" form:"email" schema:"email"`
 	PhoneNumber      string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	StripeCustomerID string `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
@@ -98,8 +96,7 @@ type LeadDetails struct {
 
 type LeadList struct {
 	LeadID      int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FirstName   string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName    string `json:"last_name" form:"last_name" schema:"last_name"`
+	FullName    string `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	CreatedAt   string `json:"created_at" form:"created_at" schema:"created_at"`
 	Language    string `json:"language" form:"language" schema:"language"`
@@ -134,8 +131,7 @@ type UpdateLeadForm struct {
 	Method           *string `json:"_method" form:"_method" schema:"_method"`
 	CSRFToken        *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
 	LeadID           *string `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FirstName        *string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName         *string `json:"last_name" form:"last_name" schema:"last_name"`
+	FullName         *string `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber      *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Email            *string `json:"email" form:"email" schema:"email"`
 	StripeCustomerID *string `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
@@ -277,14 +273,11 @@ type WebsiteContext struct {
 
 type FacebookUserData struct {
 	Phone           string `json:"ph,omitempty" form:"ph,omitempty" schema:"ph,omitempty"`
-	FirstName       string `json:"fn,omitempty" form:"fn,omitempty" schema:"fn,omitempty"`
-	LastName        string `json:"ln,omitempty" form:"ln,omitempty" schema:"ln,omitempty"`
 	Email           string `json:"em,omitempty" form:"em,omitempty" schema:"em,omitempty"`
 	ClientIPAddress string `json:"client_ip_address,omitempty" form:"client_ip_address,omitempty" schema:"client_ip_address,omitempty"`
 	ClientUserAgent string `json:"client_user_agent,omitempty" form:"client_user_agent,omitempty" schema:"client_user_agent,omitempty"`
 	FBC             string `json:"fbc,omitempty" form:"fbc,omitempty" schema:"fbc,omitempty"`
 	FBP             string `json:"fbp,omitempty" form:"fbp,omitempty" schema:"fbp,omitempty"`
-	State           string `json:"st,omitempty" form:"st,omitempty" schema:"st,omitempty"`
 	ExternalID      string `json:"external_id,omitempty" form:"external_id,omitempty" schema:"external_id,omitempty"`
 	LeadID          int64  `json:"lead_id,omitempty" form:"lead_id,omitempty" schema:"lead_id,omitempty"`
 }
@@ -341,13 +334,12 @@ type GoogleUserData struct {
 }
 
 type GoogleUserAddress struct {
-	Sha256FirstName string `json:"sha256_first_name,omitempty" form:"sha256_first_name,omitempty" schema:"sha256_first_name,omitempty"`
-	Sha256LastName  string `json:"sha256_last_name,omitempty" form:"sha256_last_name,omitempty" schema:"sha256_last_name,omitempty"`
-	Sha256Street    string `json:"sha256_street,omitempty" form:"sha256_street,omitempty" schema:"sha256_street,omitempty"`
-	City            string `json:"city,omitempty" form:"city,omitempty" schema:"city,omitempty"`
-	Region          string `json:"region,omitempty" form:"region,omitempty" schema:"region,omitempty"`
-	PostalCode      string `json:"postal_code,omitempty" form:"postal_code,omitempty" schema:"postal_code,omitempty"`
-	Country         string `json:"country,omitempty" form:"country,omitempty" schema:"country,omitempty"`
+	Sha256FullName string `json:"sha256_full_name,omitempty" form:"sha256_full_name,omitempty" schema:"sha256_full_name,omitempty"`
+	Sha256Street   string `json:"sha256_street,omitempty" form:"sha256_street,omitempty" schema:"sha256_street,omitempty"`
+	City           string `json:"city,omitempty" form:"city,omitempty" schema:"city,omitempty"`
+	Region         string `json:"region,omitempty" form:"region,omitempty" schema:"region,omitempty"`
+	PostalCode     string `json:"postal_code,omitempty" form:"postal_code,omitempty" schema:"postal_code,omitempty"`
+	Country        string `json:"country,omitempty" form:"country,omitempty" schema:"country,omitempty"`
 }
 
 type ConversionLeadInfo struct {

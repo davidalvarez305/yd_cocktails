@@ -22,8 +22,7 @@ type User struct {
 
 type Lead struct {
 	LeadID             int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FirstName          string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName           string `json:"last_name" form:"last_name" schema:"last_name"`
+	FullName           string `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber        string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	OptInTextMessaging bool   `json:"opt_in_text_messaging" form:"opt_in_text_messaging" schema:"opt_in_text_messaging"`
 	CreatedAt          int64  `json:"created_at" form:"created_at" schema:"created_at"`

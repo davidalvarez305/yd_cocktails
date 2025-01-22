@@ -56,8 +56,8 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	defer tx.Rollback()
 
 	leadStmt, err := tx.Prepare(`
-		INSERT INTO lead (first_name, last_name, phone_number, created_at, message, opt_in_text_messaging, email)
-		VALUES ($1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5, $6, $7)
+		INSERT INTO lead (full_name, phone_number, created_at, message, opt_in_text_messaging, email)
+		VALUES ($1, $2, to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York', $4, $5, $6)
 		RETURNING lead_id
 	`)
 	if err != nil {
@@ -68,8 +68,7 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	message := utils.CreateNullString(quoteForm.Message)
 
 	err = leadStmt.QueryRow(
-		utils.CreateNullString(quoteForm.FirstName),
-		utils.CreateNullString(quoteForm.LastName),
+		utils.CreateNullString(quoteForm.FullName),
 		utils.CreateNullString(quoteForm.PhoneNumber),
 		utils.CreateNullInt64(quoteForm.CreatedAt),
 		message,
@@ -389,7 +388,7 @@ func GetVenueTypes() ([]models.VenueType, error) {
 func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
-	query := `SELECT l.lead_id, l.first_name, l.last_name, l.phone_number, 
+	query := `SELECT l.lead_id, l.full_name, l.phone_number, 
 		l.created_at, lm.language, COUNT(*) OVER() AS total_rows
 		FROM lead AS l
 		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
@@ -418,11 +417,10 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	for rows.Next() {
 		var lead types.LeadList
 		var createdAt time.Time
-		var lastName, language sql.NullString
+		var language sql.NullString
 
 		err := rows.Scan(&lead.LeadID,
-			&lead.FirstName,
-			&lastName,
+			&lead.FullName,
 			&lead.PhoneNumber,
 			&createdAt,
 			&language,
@@ -432,11 +430,8 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		}
 		lead.CreatedAt = utils.FormatTimestampEST(createdAt.Unix())
 
-		if lastName.Valid {
-			lead.LastName = lastName.String
-		}
 		if language.Valid {
-			lead.Language = lastName.String
+			lead.Language = language.String
 		}
 
 		leads = append(leads, lead)
@@ -451,8 +446,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 
 func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	query := `SELECT l.lead_id,
-	l.first_name,
-	l.last_name,
+	l.full_name,
 	l.phone_number,
 	lm.ad_campaign,
 	lm.medium,
@@ -485,15 +479,14 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	row := DB.QueryRow(query, leadID)
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
-	var message, externalId, userAgent, clickId, googleClientId, lastName sql.NullString
+	var message, externalId, userAgent, clickId, googleClientId sql.NullString
 	var campaignId, instantFormleadId, instantFormId sql.NullInt64
 
 	var buttonClicked, instantFormName sql.NullString
 
 	err := row.Scan(
 		&leadDetails.LeadID,
-		&leadDetails.FirstName,
-		&lastName,
+		&leadDetails.FullName,
 		&leadDetails.PhoneNumber,
 		&adCampaign,
 		&medium,
@@ -610,10 +603,6 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		leadDetails.Message = message.String
 	}
 
-	if lastName.Valid {
-		leadDetails.LastName = lastName.String
-	}
-
 	return leadDetails, nil
 }
 
@@ -666,18 +655,16 @@ func UpdateLead(form types.UpdateLeadForm) error {
 
 	query := `
 		UPDATE lead
-		SET first_name = COALESCE($2, first_name), 
-		    last_name = COALESCE($3, last_name), 
-		    phone_number = COALESCE($4, phone_number), 
-		    email = $5,
-			stripe_customer_id = $6
+		SET full_name = COALESCE($2, full_name), 
+		    phone_number = COALESCE($3, phone_number), 
+		    email = $4,
+			stripe_customer_id = $5
 		WHERE lead_id = $1
 	`
 
 	args := []interface{}{
 		*form.LeadID,
-		utils.CreateNullString(form.FirstName),
-		utils.CreateNullString(form.LastName),
+		utils.CreateNullString(form.FullName),
 		utils.CreateNullString(form.PhoneNumber),
 		utils.CreateNullString(form.Email),
 		utils.CreateNullString(form.StripeCustomerID),

@@ -246,8 +246,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var form types.QuoteForm
-	form.FirstName = helpers.GetStringPointerFromForm(r, "first_name")
-	form.LastName = helpers.GetStringPointerFromForm(r, "last_name")
+	form.FullName = helpers.GetStringPointerFromForm(r, "full_name")
 	form.PhoneNumber = helpers.GetStringPointerFromForm(r, "phone_number")
 	form.Message = helpers.GetStringPointerFromForm(r, "message")
 	form.Source = helpers.GetStringPointerFromForm(r, "source")
@@ -353,12 +352,9 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		ActionSource:   "website",
 		EventSourceURL: helpers.SafeString(form.LandingPage),
 		UserData: types.FacebookUserData{
-			FirstName:       helpers.HashString(helpers.SafeString(form.FirstName)),
-			LastName:        helpers.HashString(helpers.SafeString(form.LastName)),
 			Phone:           helpers.HashString(helpers.SafeString(form.PhoneNumber)),
 			FBC:             helpers.SafeString(form.FacebookClickID),
 			FBP:             helpers.SafeString(form.FacebookClientID),
-			State:           helpers.HashString("Florida"),
 			ExternalID:      helpers.HashString(helpers.SafeString(form.ExternalID)),
 			ClientIPAddress: helpers.SafeString(form.IP),
 			ClientUserAgent: helpers.SafeString(form.UserAgent),
@@ -389,12 +385,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		},
 		UserData: types.GoogleUserData{
 			Sha256PhoneNumber: []string{helpers.HashString(utils.AddPhonePrefixIfNeeded(helpers.SafeString(form.PhoneNumber)))},
-			Address: []types.GoogleUserAddress{
-				{
-					Sha256FirstName: helpers.HashString(helpers.SafeString(form.FirstName)),
-					Sha256LastName:  helpers.HashString(helpers.SafeString(form.LastName)),
-				},
-			},
 		},
 	}
 
@@ -426,7 +416,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			templateFile := constants.PARTIAL_TEMPLATES_DIR + "new_lead_notification_email.html"
 
 			var notificationTemplateData = map[string]any{
-				"Name":           helpers.SafeString(form.FirstName) + " " + helpers.SafeString(form.LastName),
+				"Name":           helpers.SafeString(form.FullName),
 				"PhoneNumber":    helpers.SafeString(form.PhoneNumber),
 				"DateCreated":    utils.FormatTimestampEST(lead.CreatedAt),
 				"ButtonClicked":  helpers.SafeString(form.ButtonClicked),
@@ -461,7 +451,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 				Phone: %s,
 				Full Name: %s,
 				Message: %s
-			`, helpers.SafeString(form.PhoneNumber), helpers.SafeString(form.FirstName)+" "+helpers.SafeString(form.LastName), helpers.SafeString(form.Message))
+			`, helpers.SafeString(form.PhoneNumber), helpers.SafeString(form.FullName), helpers.SafeString(form.Message))
 
 				_, err := services.SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
 

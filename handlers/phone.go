@@ -138,7 +138,6 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 			EventSourceURL: constants.RootDomain,
 			UserData: types.FacebookUserData{
 				Phone: helpers.HashString(phoneCall.CallFrom),
-				State: helpers.HashString("Florida"),
 			},
 		}
 

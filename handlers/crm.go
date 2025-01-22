@@ -543,8 +543,6 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 			EventSourceURL: lead.LandingPage,
 			UserData: types.FacebookUserData{
 				Email:           helpers.HashString(lead.Email),
-				FirstName:       helpers.HashString(lead.FirstName),
-				LastName:        helpers.HashString(lead.LastName),
 				Phone:           helpers.HashString(lead.PhoneNumber),
 				FBC:             lead.FacebookClickID,
 				FBP:             lead.FacebookClientID,
@@ -593,12 +591,6 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 			UserData: types.GoogleUserData{
 				Sha256EmailAddress: []string{helpers.HashString(lead.Email)},
 				Sha256PhoneNumber:  []string{helpers.HashString(lead.PhoneNumber)},
-				Address: []types.GoogleUserAddress{
-					{
-						Sha256FirstName: helpers.HashString(lead.FirstName),
-						Sha256LastName:  helpers.HashString(lead.LastName),
-					},
-				},
 			},
 		}
 

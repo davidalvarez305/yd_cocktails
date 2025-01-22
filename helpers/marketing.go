@@ -76,7 +76,7 @@ func GetFacebookClientIDFromRequest(r *http.Request) (string, error) {
 func MapInstantFormToQuoteForm(lead types.FacebookInstantFormLead) (types.QuoteForm, error) {
 	var quoteForm types.QuoteForm
 
-	firstName, lastName := SplitFullName(lead.FullName)
+	fullName := lead.FullName
 	phoneNumber := ExtractPhoneNumber(lead.PhoneNumber)
 	message := lead.EventDescription
 	email := lead.Email
@@ -109,8 +109,7 @@ func MapInstantFormToQuoteForm(lead types.FacebookInstantFormLead) (types.QuoteF
 	}
 
 	quoteForm = types.QuoteForm{
-		FirstName:          &firstName,
-		LastName:           &lastName,
+		FullName:           &fullName,
 		PhoneNumber:        &phoneNumber,
 		Message:            &message,
 		Email:              &email,
@@ -163,16 +162,6 @@ func ExtractPhoneNumber(input string) string {
 	}
 
 	return phoneNumber
-}
-
-func SplitFullName(fullName string) (string, string) {
-	parts := strings.Fields(fullName)
-
-	if len(parts) > 1 {
-		return parts[0], strings.Join(parts[1:], " ")
-	}
-
-	return fullName, ""
 }
 
 func ExtractMarketingID(input string) *int64 {
