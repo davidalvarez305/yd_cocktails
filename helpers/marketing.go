@@ -10,8 +10,10 @@ import (
 	"strings"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/csrf"
 	"github.com/davidalvarez305/yd_cocktails/types"
 	"github.com/davidalvarez305/yd_cocktails/utils"
+	"github.com/google/uuid"
 )
 
 func HashString(input string) string {
@@ -90,6 +92,7 @@ func MapInstantFormToQuoteForm(lead types.FacebookInstantFormLead) (types.QuoteF
 	adSetName := lead.AdsetName
 	adID := ExtractMarketingID(lead.AdID)
 	adHeadline := ExtractMarketingID(lead.AdName)
+	externalId := uuid.New().String()
 
 	instantFormLeadId := ExtractMarketingID(lead.ID)
 	formId := ExtractMarketingID(lead.FormID)
@@ -98,6 +101,11 @@ func MapInstantFormToQuoteForm(lead types.FacebookInstantFormLead) (types.QuoteF
 	createdAt, err := utils.GetDateFromInstantForm(lead.CreatedTime)
 	if err != nil {
 		return quoteForm, fmt.Errorf("invalid date")
+	}
+
+	csrfSecret, err := csrf.GenerateCSRFSecret()
+	if err != nil {
+		return quoteForm, err
 	}
 
 	quoteForm = types.QuoteForm{
@@ -130,11 +138,11 @@ func MapInstantFormToQuoteForm(lead types.FacebookInstantFormLead) (types.QuoteF
 		IP:            nil,
 
 		CSRFToken:        nil,
-		ExternalID:       nil,
+		ExternalID:       &externalId,
 		GoogleClientID:   nil,
 		FacebookClickID:  nil,
 		FacebookClientID: nil,
-		CSRFSecret:       nil,
+		CSRFSecret:       &csrfSecret,
 
 		InstantFormLeadID: instantFormLeadId,
 		InstantFormID:     formId,

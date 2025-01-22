@@ -12,6 +12,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/middleware"
 	"github.com/davidalvarez305/yd_cocktails/router"
+	"github.com/davidalvarez305/yd_cocktails/services"
 )
 
 func init() {
@@ -30,6 +31,9 @@ func init() {
 		log.Fatalf("ERROR CONNECTING TO DB: %+v\n", err)
 	}
 	fmt.Println("Database connected.")
+
+	services.StartLeadChecker()
+	fmt.Println("Lead checker started.")
 }
 
 func main() {

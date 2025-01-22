@@ -418,18 +418,26 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	for rows.Next() {
 		var lead types.LeadList
 		var createdAt time.Time
+		var lastName, language sql.NullString
 
 		err := rows.Scan(&lead.LeadID,
 			&lead.FirstName,
-			&lead.LastName,
+			&lastName,
 			&lead.PhoneNumber,
 			&createdAt,
-			&lead.Language,
+			&language,
 			&totalRows)
 		if err != nil {
 			return nil, 0, fmt.Errorf("error scanning row: %w", err)
 		}
 		lead.CreatedAt = utils.FormatTimestampEST(createdAt.Unix())
+
+		if lastName.Valid {
+			lead.LastName = lastName.String
+		}
+		if language.Valid {
+			lead.Language = lastName.String
+		}
 
 		leads = append(leads, lead)
 	}
@@ -477,7 +485,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	row := DB.QueryRow(query, leadID)
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
-	var message, externalId, userAgent, clickId, googleClientId sql.NullString
+	var message, externalId, userAgent, clickId, googleClientId, lastName sql.NullString
 	var campaignId, instantFormleadId, instantFormId sql.NullInt64
 
 	var buttonClicked, instantFormName sql.NullString
@@ -485,7 +493,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	err := row.Scan(
 		&leadDetails.LeadID,
 		&leadDetails.FirstName,
-		&leadDetails.LastName,
+		&lastName,
 		&leadDetails.PhoneNumber,
 		&adCampaign,
 		&medium,
@@ -600,6 +608,10 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	if message.Valid {
 		leadDetails.Message = message.String
+	}
+
+	if lastName.Valid {
+		leadDetails.LastName = lastName.String
 	}
 
 	return leadDetails, nil
@@ -1250,6 +1262,6 @@ func GetUsers() ([]models.User, error) {
 
 func IsPhoneNumberInDB(phoneNumber string) (bool, error) {
 	var exists bool
-	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM lead WHERE phone_number = ?)", phoneNumber).Scan(&exists)
+	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM lead WHERE phone_number = $1)", phoneNumber).Scan(&exists)
 	return exists, err
 }

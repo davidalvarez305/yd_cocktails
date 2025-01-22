@@ -23,7 +23,7 @@ func checkSpreadsheets() {
 		// Skip headers [1:]
 		for _, row := range resp.Values[1:] {
 
-			if len(row) < 15 {
+			if len(row) < 16 {
 				continue
 			}
 
@@ -44,9 +44,6 @@ func checkSpreadsheets() {
 				PhoneNumber:      fmt.Sprintf("%v", row[13]),
 				EventDescription: fmt.Sprintf("%v", row[14]),
 				Email:            fmt.Sprintf("%v", row[15]),
-				IsQualified:      fmt.Sprintf("%v", row[16]),
-				IsQuality:        fmt.Sprintf("%v", row[17]),
-				IsConverted:      fmt.Sprintf("%v", row[18]),
 			}
 
 			leads = append(leads, lead)
@@ -69,6 +66,11 @@ func checkSpreadsheets() {
 		_, err = database.CreateLeadAndMarketing(form)
 
 		if err != nil {
+			fmt.Printf("ERROR CREATING FB LEAD: %+v\n", err)
+			continue
+		}
+
+		/* if !constants.Production {
 			continue
 		}
 
@@ -85,7 +87,7 @@ func checkSpreadsheets() {
 			_, err := SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
 
 			fmt.Printf("ERROR SENDING FB LEAD AD NOTIFICATION MSG: %+v\n", err)
-		}
+		} */
 	}
 }
 
