@@ -11,6 +11,7 @@ import (
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
 	"github.com/davidalvarez305/yd_cocktails/types"
+	"github.com/davidalvarez305/yd_cocktails/utils"
 )
 
 func HashString(input string) string {
@@ -70,14 +71,14 @@ func GetFacebookClientIDFromRequest(r *http.Request) (string, error) {
 	return fbpCookie.Value, nil
 }
 
-func MapInstantFormToQuoteForm(lead types.FacebookInstantFormLead) types.QuoteForm {
+func MapInstantFormToQuoteForm(lead types.FacebookInstantFormLead) (types.QuoteForm, error) {
+	var quoteForm types.QuoteForm
+
 	firstName, lastName := SplitFullName(lead.FullName)
 	phoneNumber := ExtractPhoneNumber(lead.PhoneNumber)
 	message := lead.EventDescription
 	email := lead.Email
 	optInTextMessaging := true
-	leadId := ExtractMarketingID(lead.ID)
-	externalId := fmt.Sprint(SafeInt64(leadId))
 
 	source := lead.Platform
 	medium := constants.SocialMediaAdsMedium
@@ -90,13 +91,23 @@ func MapInstantFormToQuoteForm(lead types.FacebookInstantFormLead) types.QuoteFo
 	adID := ExtractMarketingID(lead.AdID)
 	adHeadline := ExtractMarketingID(lead.AdName)
 
-	quoteForm := types.QuoteForm{
+	instantFormLeadId := ExtractMarketingID(lead.ID)
+	formId := ExtractMarketingID(lead.FormID)
+	formName := lead.FormName
+
+	createdAt, err := utils.GetDateFromInstantForm(lead.CreatedTime)
+	if err != nil {
+		return quoteForm, fmt.Errorf("invalid date")
+	}
+
+	quoteForm = types.QuoteForm{
 		FirstName:          &firstName,
 		LastName:           &lastName,
 		PhoneNumber:        &phoneNumber,
 		Message:            &message,
 		Email:              &email,
 		OptInTextMessaging: &optInTextMessaging,
+		CreatedAt:          &createdAt,
 
 		Source:        &source,
 		Medium:        &medium,
@@ -119,14 +130,18 @@ func MapInstantFormToQuoteForm(lead types.FacebookInstantFormLead) types.QuoteFo
 		IP:            nil,
 
 		CSRFToken:        nil,
-		ExternalID:       &externalId,
+		ExternalID:       nil,
 		GoogleClientID:   nil,
 		FacebookClickID:  nil,
 		FacebookClientID: nil,
 		CSRFSecret:       nil,
+
+		InstantFormLeadID: instantFormLeadId,
+		InstantFormID:     formId,
+		InstantFormName:   &formName,
 	}
 
-	return quoteForm
+	return quoteForm, nil
 }
 
 func ExtractPhoneNumber(input string) string {

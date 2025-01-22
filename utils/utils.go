@@ -33,6 +33,22 @@ func GetCurrentTimeInEST() (int64, error) {
 	return est, nil
 }
 
+func GetDateFromInstantForm(dateString string) (int64, error) {
+	parsedTime, err := time.Parse(time.RFC3339, dateString)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse date string: %w", err)
+	}
+
+	loc, err := time.LoadLocation(constants.TimeZone)
+	if err != nil {
+		return 0, fmt.Errorf("failed to load EST location: %w", err)
+	}
+
+	estTime := parsedTime.In(loc)
+
+	return estTime.Unix(), nil
+}
+
 func ConvertTimestampToESTDateTime(timestamp int64) (time.Time, error) {
 	t := time.Unix(timestamp, 0)
 

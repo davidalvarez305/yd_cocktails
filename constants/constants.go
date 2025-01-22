@@ -14,6 +14,7 @@ const (
 	LeadGeneratedEventName   string = "generate_lead"
 	EventConversionEventName string = "event"
 	LeadEventName            string = "Lead"
+	EventSourceCRM           string = "crm"
 
 	DefaultCurrency  string  = "USD"
 	DefaultLeadValue float64 = 150.00

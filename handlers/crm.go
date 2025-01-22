@@ -535,11 +535,12 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	eventId := fmt.Sprint(helpers.SafeInt(form.EventID))
+	eventRevenue := helpers.SafeFloat64(form.Amount) + helpers.SafeFloat64(form.Tip)
 
 	fbEvent := types.FacebookEventData{
 		EventName:      constants.EventConversionEventName,
-		EventTime:      time.Now().UTC().Unix(),
-		ActionSource:   "website",
+		EventTime:      helpers.SafeInt64(form.DatePaid),
+		ActionSource:   "phone_call",
 		EventSourceURL: lead.LandingPage,
 		UserData: types.FacebookUserData{
 			Email:           helpers.HashString(lead.Email),
@@ -553,10 +554,18 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 			ClientUserAgent: lead.UserAgent,
 		},
 		CustomData: types.FacebookCustomData{
-			Currency: "USD",
-			Value:    fmt.Sprint(helpers.SafeFloat64(form.Amount)),
+			Currency: constants.DefaultCurrency,
+			Value:    fmt.Sprint(eventRevenue),
 		},
 		EventID: eventId,
+	}
+
+	if lead.InstantFormLeadID != 0 {
+		fbEvent.UserData.LeadID = lead.InstantFormLeadID
+		fbEvent.EventSourceURL = ""
+
+		fbEvent.CustomData.EventSource = constants.EventSourceCRM
+		fbEvent.CustomData.LeadEventSource = constants.CompanyName
 	}
 
 	metaPayload := types.FacebookPayload{

@@ -13,6 +13,7 @@ type QuoteForm struct {
 	Message            *string `json:"message" form:"message" schema:"message"`
 	Email              *string `json:"email" form:"email" schema:"email"`
 	OptInTextMessaging *bool   `json:"opt_in_text_messaging" form:"opt_in_text_messaging" schema:"opt_in_text_messaging"`
+	CreatedAt          *int64  `json:"created_at" form:"created_at" schema:"created_at"`
 
 	Source        *string `json:"source" form:"source" schema:"source"`
 	Medium        *string `json:"medium" form:"medium" schema:"medium"`
@@ -42,6 +43,10 @@ type QuoteForm struct {
 	FacebookClickID  *string `json:"facebook_click_id" form:"facebook_click_id" schema:"facebook_click_id"`
 	FacebookClientID *string `json:"facebook_client_id" form:"facebook_client_id" schema:"facebook_client_id"`
 	CSRFSecret       *string `json:"csrf_secret" form:"csrf_secret"`
+
+	InstantFormLeadID *int64  `json:"instant_form_lead_id" form:"instant_form_lead_id" schema:"instant_form_lead_id"`
+	InstantFormID     *int64  `json:"instant_form_id" form:"instant_form_id" schema:"instant_form_id"`
+	InstantFormName   *string `json:"instant_form_name" form:"instant_form_name" schema:"instant_form_name"`
 }
 
 type ContactForm struct {
@@ -85,6 +90,10 @@ type LeadDetails struct {
 	ClickID          string `json:"click_id" form:"click_id" schema:"click_id"`
 	GoogleClientID   string `json:"google_client_id" form:"google_client_id" schema:"google_client_id"`
 	ButtonClicked    string `json:"button_clicked" form:"button_clicked" schema:"button_clicked"`
+
+	InstantFormLeadID int64  `json:"instant_form_lead_id" form:"instant_form_lead_id" schema:"instant_form_lead_id"`
+	InstantFormID     int64  `json:"instant_form_id" form:"instant_form_id" schema:"instant_form_id"`
+	InstantFormName   string `json:"instant_form_name" form:"instant_form_name" schema:"instant_form_name"`
 }
 
 type LeadList struct {
@@ -277,11 +286,14 @@ type FacebookUserData struct {
 	FBP             string `json:"fbp,omitempty" form:"fbp,omitempty" schema:"fbp,omitempty"`
 	State           string `json:"st,omitempty" form:"st,omitempty" schema:"st,omitempty"`
 	ExternalID      string `json:"external_id,omitempty" form:"external_id,omitempty" schema:"external_id,omitempty"`
+	LeadID          int64  `json:"lead_id,omitempty" form:"lead_id,omitempty" schema:"lead_id,omitempty"`
 }
 
 type FacebookCustomData struct {
-	Value    string `json:"value,omitempty" form:"value,omitempty" schema:"value,omitempty"`
-	Currency string `json:"currency,omitempty" form:"currency,omitempty" schema:"currency,omitempty"`
+	Value           string `json:"value,omitempty" form:"value,omitempty" schema:"value,omitempty"`
+	Currency        string `json:"currency,omitempty" form:"currency,omitempty" schema:"currency,omitempty"`
+	EventSource     string `json:"event_source,omitempty" form:"event_source,omitempty" schema:"event_source,omitempty"`
+	LeadEventSource string `json:"lead_event_source,omitempty" form:"lead_event_source,omitempty" schema:"lead_event_source,omitempty"`
 }
 
 type FacebookEventData struct {

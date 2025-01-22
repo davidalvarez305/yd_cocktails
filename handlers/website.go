@@ -278,6 +278,23 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	form.FacebookClientID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_fbp", "facebook_client_id")
 	form.GoogleClientID = helpers.GetMarketingCookiesFromRequestOrForm(r, "_ga", "google_client_id")
 
+	createdAt, err := utils.GetCurrentTimeInEST()
+	if err != nil {
+		fmt.Printf("Error creating lead: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while creating quote request.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+	form.CreatedAt = &createdAt
+
 	session, err := sessions.Get(r)
 	if err != nil {
 		fmt.Printf("%+v\n", err)

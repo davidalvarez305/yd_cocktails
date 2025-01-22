@@ -65,18 +65,13 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	}
 	defer leadStmt.Close()
 
-	createdAt, err := utils.GetCurrentTimeInEST()
-	if err != nil {
-		return leadID, fmt.Errorf("error getting time as EST: %w", err)
-	}
-
 	message := utils.CreateNullString(quoteForm.Message)
 
 	err = leadStmt.QueryRow(
 		utils.CreateNullString(quoteForm.FirstName),
 		utils.CreateNullString(quoteForm.LastName),
 		utils.CreateNullString(quoteForm.PhoneNumber),
-		createdAt,
+		utils.CreateNullInt64(quoteForm.CreatedAt),
 		message,
 		utils.CreateNullBool(quoteForm.OptInTextMessaging),
 		utils.CreateNullString(quoteForm.Email),
@@ -86,8 +81,8 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	}
 
 	marketingStmt, err := tx.Prepare(`
-		INSERT INTO lead_marketing (lead_id, source, medium, channel, landing_page, keyword, referrer, click_id, campaign_id, ad_campaign, ad_group_id, ad_group_name, ad_set_id, ad_set_name, ad_id, ad_headline, language, user_agent, button_clicked, ip, external_id, google_client_id, csrf_secret, facebook_click_id, facebook_client_id, longitude, latitude)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
+		INSERT INTO lead_marketing (lead_id, source, medium, channel, landing_page, keyword, referrer, click_id, campaign_id, ad_campaign, ad_group_id, ad_group_name, ad_set_id, ad_set_name, ad_id, ad_headline, language, user_agent, button_clicked, ip, external_id, google_client_id, csrf_secret, facebook_click_id, facebook_client_id, longitude, latitude, instant_form_lead_id, instant_form_id, instant_form_name)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30)
 	`)
 	if err != nil {
 		return leadID, fmt.Errorf("error preparing marketing statement: %w", err)
@@ -122,6 +117,9 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 		utils.CreateNullString(quoteForm.FacebookClientID),
 		utils.CreateNullString(quoteForm.Longitude),
 		utils.CreateNullString(quoteForm.Latitude),
+		utils.CreateNullInt64(quoteForm.InstantFormLeadID),
+		utils.CreateNullInt64(quoteForm.InstantFormID),
+		utils.CreateNullString(quoteForm.InstantFormName),
 	)
 	if err != nil {
 		return leadID, fmt.Errorf("error inserting marketing data: %w", err)
@@ -466,7 +464,10 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	lm.click_id,
 	lm.google_client_id,
 	lm.button_clicked,
-	lm.campaign_id
+	lm.campaign_id,
+	lm.instant_form_lead_id,
+	lm.instant_form_id,
+	lm.instant_form_name
 	FROM lead l
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
 	WHERE l.lead_id = $1`
@@ -477,9 +478,9 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
 	var message, externalId, userAgent, clickId, googleClientId sql.NullString
-	var campaignId sql.NullInt64
+	var campaignId, instantFormleadId, instantFormId sql.NullInt64
 
-	var buttonClicked sql.NullString
+	var buttonClicked, instantFormName sql.NullString
 
 	err := row.Scan(
 		&leadDetails.LeadID,
@@ -505,6 +506,9 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&googleClientId,
 		&buttonClicked,
 		&campaignId,
+		&instantFormleadId,
+		&instantFormId,
+		&instantFormName,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -516,6 +520,15 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	// Map the nullable fields to your struct
 	if buttonClicked.Valid {
 		leadDetails.ButtonClicked = buttonClicked.String
+	}
+	if instantFormleadId.Valid {
+		leadDetails.InstantFormLeadID = instantFormleadId.Int64
+	}
+	if instantFormId.Valid {
+		leadDetails.InstantFormID = instantFormId.Int64
+	}
+	if instantFormName.Valid {
+		leadDetails.InstantFormName = instantFormName.String
 	}
 
 	if clickId.Valid {

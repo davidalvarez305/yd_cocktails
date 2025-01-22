@@ -54,7 +54,10 @@ func checkSpreadsheets() {
 	}
 
 	for _, lead := range leads {
-		form := helpers.MapInstantFormToQuoteForm(lead)
+		form, err := helpers.MapInstantFormToQuoteForm(lead)
+		if err != nil {
+			continue
+		}
 
 		exists, err := database.IsPhoneNumberInDB(helpers.SafeString(form.PhoneNumber))
 
