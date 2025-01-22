@@ -1055,8 +1055,8 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 			e.amount::NUMERIC,
 			CONCAT(l.first_name, ' ', l.last_name),
 			CONCAT(b.first_name, ' ', b.last_name),
-			et.type,
-			vt.type,
+			et.name,
+			vt.name,
 			e.guests
 		FROM event AS e
 		JOIN lead AS l ON l.lead_id = e.lead_id

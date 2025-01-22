@@ -166,11 +166,9 @@ func GetLeads(w http.ResponseWriter, r *http.Request, ctx map[string]interface{}
 
 func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	fileName := "lead_detail.html"
-	bookingForm := constants.PARTIAL_TEMPLATES_DIR + "booking_form.html"
-	bookingTable := constants.PARTIAL_TEMPLATES_DIR + "bookings_table.html"
 	eventForm := constants.PARTIAL_TEMPLATES_DIR + "event_form.html"
 	eventTable := constants.PARTIAL_TEMPLATES_DIR + "events_table.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, bookingForm, bookingTable, eventForm, eventTable}
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, eventForm, eventTable}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -518,93 +516,95 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lead, err := database.GetLeadDetails(fmt.Sprint(helpers.SafeInt(form.LeadID)))
-	if err != nil {
-		fmt.Printf("Error querying lead details: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error querying lead details.",
+	if constants.Production {
+		lead, err := database.GetLeadDetails(fmt.Sprint(helpers.SafeInt(form.LeadID)))
+		if err != nil {
+			fmt.Printf("Error querying lead details: %+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Error querying lead details.",
+				},
+			}
+
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
+		}
+
+		eventId := fmt.Sprint(helpers.SafeInt(form.EventID))
+		eventRevenue := helpers.SafeFloat64(form.Amount) + helpers.SafeFloat64(form.Tip)
+
+		fbEvent := types.FacebookEventData{
+			EventName:      constants.EventConversionEventName,
+			EventTime:      helpers.SafeInt64(form.DatePaid),
+			ActionSource:   "phone_call",
+			EventSourceURL: lead.LandingPage,
+			UserData: types.FacebookUserData{
+				Email:           helpers.HashString(lead.Email),
+				FirstName:       helpers.HashString(lead.FirstName),
+				LastName:        helpers.HashString(lead.LastName),
+				Phone:           helpers.HashString(lead.PhoneNumber),
+				FBC:             lead.FacebookClickID,
+				FBP:             lead.FacebookClientID,
+				ExternalID:      helpers.HashString(lead.ExternalID),
+				ClientIPAddress: lead.IP,
+				ClientUserAgent: lead.UserAgent,
+			},
+			CustomData: types.FacebookCustomData{
+				Currency: constants.DefaultCurrency,
+				Value:    fmt.Sprint(eventRevenue),
+			},
+			EventID: eventId,
+		}
+
+		if lead.InstantFormLeadID != 0 {
+			fbEvent.UserData.LeadID = lead.InstantFormLeadID
+			fbEvent.EventSourceURL = ""
+
+			fbEvent.CustomData.EventSource = constants.EventSourceCRM
+			fbEvent.CustomData.LeadEventSource = constants.CompanyName
+		}
+
+		metaPayload := types.FacebookPayload{
+			Data: []types.FacebookEventData{fbEvent},
+		}
+
+		googlePayload := types.GooglePayload{
+			ClientID: lead.GoogleClientID,
+			UserId:   lead.ExternalID,
+			Events: []types.GoogleEventLead{
+				{
+					Name: constants.EventConversionEventName,
+					Params: types.GoogleEventParamsLead{
+						GCLID:         lead.ClickID,
+						TransactionID: eventId,
+						Value:         helpers.SafeFloat64(form.Amount),
+						Currency:      constants.DefaultCurrency,
+						CampaignID:    fmt.Sprint(lead.CampaignID),
+						Campaign:      lead.CampaignName,
+						Source:        lead.Source,
+						Medium:        lead.Medium,
+						Term:          lead.Keyword,
+					},
+				},
+			},
+			UserData: types.GoogleUserData{
+				Sha256EmailAddress: []string{helpers.HashString(lead.Email)},
+				Sha256PhoneNumber:  []string{helpers.HashString(lead.PhoneNumber)},
+				Address: []types.GoogleUserAddress{
+					{
+						Sha256FirstName: helpers.HashString(lead.FirstName),
+						Sha256LastName:  helpers.HashString(lead.LastName),
+					},
+				},
 			},
 		}
 
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
+		go conversions.SendGoogleConversion(googlePayload)
+		go conversions.SendFacebookConversion(metaPayload)
 	}
-
-	eventId := fmt.Sprint(helpers.SafeInt(form.EventID))
-	eventRevenue := helpers.SafeFloat64(form.Amount) + helpers.SafeFloat64(form.Tip)
-
-	fbEvent := types.FacebookEventData{
-		EventName:      constants.EventConversionEventName,
-		EventTime:      helpers.SafeInt64(form.DatePaid),
-		ActionSource:   "phone_call",
-		EventSourceURL: lead.LandingPage,
-		UserData: types.FacebookUserData{
-			Email:           helpers.HashString(lead.Email),
-			FirstName:       helpers.HashString(lead.FirstName),
-			LastName:        helpers.HashString(lead.LastName),
-			Phone:           helpers.HashString(lead.PhoneNumber),
-			FBC:             lead.FacebookClickID,
-			FBP:             lead.FacebookClientID,
-			ExternalID:      helpers.HashString(lead.ExternalID),
-			ClientIPAddress: lead.IP,
-			ClientUserAgent: lead.UserAgent,
-		},
-		CustomData: types.FacebookCustomData{
-			Currency: constants.DefaultCurrency,
-			Value:    fmt.Sprint(eventRevenue),
-		},
-		EventID: eventId,
-	}
-
-	if lead.InstantFormLeadID != 0 {
-		fbEvent.UserData.LeadID = lead.InstantFormLeadID
-		fbEvent.EventSourceURL = ""
-
-		fbEvent.CustomData.EventSource = constants.EventSourceCRM
-		fbEvent.CustomData.LeadEventSource = constants.CompanyName
-	}
-
-	metaPayload := types.FacebookPayload{
-		Data: []types.FacebookEventData{fbEvent},
-	}
-
-	googlePayload := types.GooglePayload{
-		ClientID: lead.GoogleClientID,
-		UserId:   lead.ExternalID,
-		Events: []types.GoogleEventLead{
-			{
-				Name: constants.EventConversionEventName,
-				Params: types.GoogleEventParamsLead{
-					GCLID:         lead.ClickID,
-					TransactionID: eventId,
-					Value:         helpers.SafeFloat64(form.Amount),
-					Currency:      constants.DefaultCurrency,
-					CampaignID:    fmt.Sprint(lead.CampaignID),
-					Campaign:      lead.CampaignName,
-					Source:        lead.Source,
-					Medium:        lead.Medium,
-					Term:          lead.Keyword,
-				},
-			},
-		},
-		UserData: types.GoogleUserData{
-			Sha256EmailAddress: []string{helpers.HashString(lead.Email)},
-			Sha256PhoneNumber:  []string{helpers.HashString(lead.PhoneNumber)},
-			Address: []types.GoogleUserAddress{
-				{
-					Sha256FirstName: helpers.HashString(lead.FirstName),
-					Sha256LastName:  helpers.HashString(lead.LastName),
-				},
-			},
-		},
-	}
-
-	go conversions.SendGoogleConversion(googlePayload)
-	go conversions.SendFacebookConversion(metaPayload)
 
 	events, err := database.GetEventList(helpers.SafeInt(form.LeadID))
 	if err != nil {

@@ -72,7 +72,7 @@
                                 <option></option>
                                 {{ range .EventTypes }}
                                 <option value="{{ .EventTypeID }}" {{ if eq .EventTypeID $.Event.EventTypeID }}selected{{ end }}>
-                                    {{ .Type }}
+                                    {{ .Name }}
                                 </option>
                                 {{ end }}
                             </select>
@@ -84,7 +84,7 @@
                                 <option></option>
                                 {{ range .VenueTypes }}
                                 <option value="{{ .VenueTypeID }}" {{ if eq .VenueTypeID $.Venue.VenueTypeID }}selected{{ end }}>
-                                    {{ .Type }}
+                                    {{ .Name }}
                                 </option>
                                 {{ end }}
                             </select>
