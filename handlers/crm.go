@@ -225,6 +225,13 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	bartenders, err := database.GetUsers()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bartenders.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Lead Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
@@ -234,6 +241,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["EventTypes"] = eventTypes
 	data["VenueTypes"] = venueTypes
 	data["Events"] = events
+	data["Bartenders"] = bartenders
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -653,11 +661,35 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) 
 		return
 	}
 
+	bartenders, err := database.GetUsers()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bartenders.", http.StatusInternalServerError)
+		return
+	}
+
+	eventTypes, err := database.GetEventTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting event types.", http.StatusInternalServerError)
+		return
+	}
+
+	venueTypes, err := database.GetVenueTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting venue types.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Event Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["Event"] = eventDetails
+	data["Bartenders"] = bartenders
+	data["EventTypes"] = eventTypes
+	data["VenueTypes"] = venueTypes
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
