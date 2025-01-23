@@ -578,7 +578,7 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 					Params: types.GoogleEventParamsLead{
 						GCLID:         lead.ClickID,
 						TransactionID: eventId,
-						Value:         helpers.SafeFloat64(form.Amount),
+						Value:         helpers.SafeFloat64(form.Amount) + helpers.SafeFloat64(form.Tip),
 						Currency:      constants.DefaultCurrency,
 						CampaignID:    fmt.Sprint(lead.CampaignID),
 						Campaign:      lead.CampaignName,
