@@ -8,7 +8,7 @@
                 class="mx-auto flex w-full sm:w-1/2 flex-col overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800 dark:text-gray-100">
                 <div class="flex items-center justify-between bg-gray-50 px-5 py-4 dark:bg-gray-700/50">
                     <h3 class="flex items-center gap-2 font-medium">
-                        <span>Create Event For {{ .Lead.FirstName }} {{ .Lead.LastName }}</span>
+                        <span>Create Event For {{ .Lead.FullName }}</span>
                     </h3>
                     <div class="-my-4">
                         <button type="button" id="closeEventFormModal"
@@ -70,6 +70,18 @@
                                             {{ end }}
                                         </select>
                                     </div>
+                                </div>
+                                <div class="grow space-y-1">
+                                    <label for="bartender_id" class="font-medium">Bartender*</label>
+                                    <select id="bartender_id" name="bartender_id" required
+                                        class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                                        <option></option>
+                                        {{ range .Bartenders }}
+                                        <option value="{{ .BartenderID }}">
+                                            {{ .FirstName }} {{ .LastName }}
+                                        </option>
+                                        {{ end }}
+                                    </select>
                                 </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
@@ -167,7 +179,7 @@
         const data = new FormData();
 
         new FormData(form).forEach((value, key) => {
-            if (key.includes("date_")) {
+            if (key.includes("date_") || key.includes("_time")) {
                 if (value) data.set(key, new Date(value).getTime() / 1000);
             } else if (value) {
                 data.set(key, value);

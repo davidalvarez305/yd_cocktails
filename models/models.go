@@ -122,7 +122,6 @@ type Event struct {
 	LeadID        int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
 	StreetAddress string  `json:"street_address" form:"street_address" schema:"street_address"`
 	City          string  `json:"city" form:"city" schema:"city"`
-	State         string  `json:"state" form:"state" schema:"state"`
 	ZipCode       string  `json:"zip_code" form:"zip_code" schema:"zip_code"`
 	StartTime     int64   `json:"start_time" form:"start_time" schema:"start_time"`
 	EndTime       int64   `json:"end_time" form:"end_time" schema:"end_time"`

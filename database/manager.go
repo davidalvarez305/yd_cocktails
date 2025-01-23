@@ -963,16 +963,16 @@ func DeleteLead(id int) error {
 func CreateEvent(form types.EventForm) error {
 	query := `
 		INSERT INTO event (
-			bartender_id, lead_id, event_type_id, venue_type_id, street_address, city, state, zip_code,
+			bartender_id, lead_id, event_type_id, venue_type_id, street_address, city, zip_code,
 			start_time, end_time, date_created, date_paid, amount, tip, guests
 		)
 		VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8,
+			$1, $2, $3, $4, $5, $6, $7,
+			to_timestamp($8)::timestamptz AT TIME ZONE 'America/New_York',
 			to_timestamp($9)::timestamptz AT TIME ZONE 'America/New_York',
 			to_timestamp($10)::timestamptz AT TIME ZONE 'America/New_York',
 			to_timestamp($11)::timestamptz AT TIME ZONE 'America/New_York',
-			to_timestamp($12)::timestamptz AT TIME ZONE 'America/New_York',
-			$13, $14, $15
+			$12, $13, $14
 		)
 	`
 
@@ -984,7 +984,6 @@ func CreateEvent(form types.EventForm) error {
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullString(form.StreetAddress),
 		utils.CreateNullString(form.City),
-		utils.CreateNullString(form.State),
 		utils.CreateNullString(form.ZipCode),
 		utils.CreateNullInt64(form.StartTime),
 		utils.CreateNullInt64(form.EndTime),
@@ -1010,14 +1009,13 @@ func UpdateEvent(form types.EventForm) error {
 			venue_type_id = COALESCE($4, venue_type_id),
 			street_address = COALESCE($5, street_address),
 			city = COALESCE($6, city),
-			state = COALESCE($7, state),
-			zip_code = COALESCE($8, zip_code),
-			start_time = COALESCE(to_timestamp($9)::timestamptz AT TIME ZONE 'America/New_York', start_time),
-			end_time = COALESCE(to_timestamp($10)::timestamptz AT TIME ZONE 'America/New_York', end_time),
-			date_paid = to_timestamp($11)::timestamptz AT TIME ZONE 'America/New_York',
-			amount = $12,
-			tip = $13,
-			guests = $14
+			zip_code = COALESCE($7, zip_code),
+			start_time = COALESCE(to_timestamp($8)::timestamptz AT TIME ZONE 'America/New_York', start_time),
+			end_time = COALESCE(to_timestamp($9)::timestamptz AT TIME ZONE 'America/New_York', end_time),
+			date_paid = to_timestamp($10)::timestamptz AT TIME ZONE 'America/New_York',
+			amount = $11,
+			tip = $12,
+			guests = $13
 		WHERE event_id = $1
 	`
 
@@ -1029,7 +1027,6 @@ func UpdateEvent(form types.EventForm) error {
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullString(form.StreetAddress),
 		utils.CreateNullString(form.City),
-		utils.CreateNullString(form.State),
 		utils.CreateNullString(form.ZipCode),
 		utils.CreateNullInt64(form.StartTime),
 		utils.CreateNullInt64(form.EndTime),
@@ -1065,14 +1062,16 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 			e.event_id,
 			e.lead_id,
 			e.amount::NUMERIC,
-			CONCAT(l.first_name, ' ', l.last_name),
+			l.full_name,
 			CONCAT(b.first_name, ' ', b.last_name),
 			et.name,
 			vt.name,
-			e.guests
+			e.guests,
+			e.start_time,
+			e.end_time
 		FROM event AS e
 		JOIN lead AS l ON l.lead_id = e.lead_id
-		JOIN "user" AS b ON b.user_id = e.bartender_id
+		LEFT JOIN "user" AS b ON b.user_id = e.bartender_id
 		JOIN event_type AS et ON et.event_type_id = e.event_type_id
 		JOIN venue_type AS vt ON vt.venue_type_id = e.venue_type_id
 		WHERE e.lead_id = $1
@@ -1085,7 +1084,6 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 
 	for rows.Next() {
 		var event types.EventList
-
 		var eventStart, eventEnd time.Time
 
 		err := rows.Scan(
@@ -1104,7 +1102,11 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 			return events, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		event.EventTime = fmt.Sprintf("%s - %s", utils.FormatTimestampEST(eventStart.Unix()), utils.FormatTimestampEST(eventEnd.Unix()))
+		event.EventTime = fmt.Sprintf(
+			"%s - %s",
+			utils.FormatTimestampEST(eventStart.Unix()),
+			utils.FormatTimestampEST(eventEnd.Unix()),
+		)
 
 		events = append(events, event)
 	}
@@ -1123,14 +1125,13 @@ func GetEventDetails(eventId string) (models.Event, error) {
 		lead_id,
 		street_address,
 		city,
-		state,
 		zip_code,
 		start_time,
 		end_time,
 		date_created,
 		date_paid,
-		amount,
-		tip,
+		amount::NUMERIC,
+		tip::NUMERIC,
 		event_type_id,
 		venue_type_id,
 		guests
@@ -1140,7 +1141,7 @@ func GetEventDetails(eventId string) (models.Event, error) {
 	var eventDetails models.Event
 
 	// Declare nullable SQL variables for fields that might be NULL in the database
-	var streetAddress, city, state, zipCode sql.NullString
+	var streetAddress, city, zipCode sql.NullString
 	var startTime, endTime, dateCreated, datePaid sql.NullTime
 	var amount, tip sql.NullFloat64
 	var bartenderID, eventTypeID, venueTypeID, guests sql.NullInt64
@@ -1153,7 +1154,6 @@ func GetEventDetails(eventId string) (models.Event, error) {
 		&eventDetails.LeadID,
 		&streetAddress,
 		&city,
-		&state,
 		&zipCode,
 		&startTime,
 		&endTime,
@@ -1179,9 +1179,6 @@ func GetEventDetails(eventId string) (models.Event, error) {
 	}
 	if city.Valid {
 		eventDetails.City = city.String
-	}
-	if state.Valid {
-		eventDetails.State = state.String
 	}
 	if zipCode.Valid {
 		eventDetails.ZipCode = zipCode.String
