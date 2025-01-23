@@ -131,7 +131,7 @@
         const alertModal = document.getElementById("alertModal");
 
         for (const [key, value] of data.entries()) {
-            if (key.includes("date_") && value) {
+            if ((key.includes("date_") || key.includes("_time")) && value) {
                 const timestamp = new Date(value).getTime() / 1000;
                 body.set(key, timestamp);
                 continue;
