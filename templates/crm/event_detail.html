@@ -43,13 +43,13 @@
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div class="grow space-y-1">
                             <label for="start_time" class="font-medium">Start Time*</label>
-                            <input type="datetime-local" id="start_time" name="start_time" value="{{ .Event.StartTime }}" required
-                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                            <input type="datetime-local" id="start_time" name="start_time" data-timestamp="{{ .Event.StartTime }}" required
+                                class="dateField block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                         </div>
                         <div class="grow space-y-1">
                             <label for="end_time" class="font-medium">End Time*</label>
-                            <input type="datetime-local" id="end_time" name="end_time" value="{{ .Event.EndTime }}" required
-                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                            <input type="datetime-local" id="end_time" name="end_time" data-timestamp="{{ .Event.EndTime }}" required
+                                class="dateField block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                         </div>
                     </div>
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -93,15 +93,13 @@
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div class="grow space-y-1">
                             <label for="date_created" class="font-medium">Date Created</label>
-                            <input type="datetime-local" id="date_created" name="date_created"
-                                value="{{ .Event.DateCreated }}" required
-                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                            <input type="datetime-local" id="date_created" name="date_created" data-timestamp="{{ .Event.DateCreated }}" required
+                                class="dateField block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                         </div>
                         <div class="grow space-y-1">
                             <label for="date_paid" class="font-medium">Date Paid</label>
-                            <input type="datetime-local" id="date_paid" name="date_paid"
-                                value="{{ .Event.DatePaid }}"
-                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                            <input type="datetime-local" id="date_paid" name="date_paid" data-timestamp="{{ .Event.DatePaid }}"
+                                class="dateField block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                         </div>
                     </div>
                     <button type="submit"
@@ -118,22 +116,12 @@
 <div id="alertModal"></div>
 
 <script nonce="{{ .Nonce }}">
-    const dateCreatedInput = document.getElementById('date_created');
+    const dateFields = document.querySelectorAll('.dateField');
 
-    const dateCreated = `{{ .Event.DateCreated }}`;
-
-    if (dateCreated) {
-        const date = new Date(dateCreated * 1000);
-        dateCreatedInput.value = date.toISOString().slice(0, 16);
-    }
-    const datePaidInput = document.getElementById('date_paid');
-
-    const datePaid = `{{ .Event.DatePaid }}`;
-
-    if (datePaid > 0) {
-        const date = new Date(datePaid * 1000);
-        datePaidInput.value = date.toISOString().slice(0, 16);
-    }
+    dateFields.forEach(field => {
+        const date = new Date(field.dataset.timestamp * 1000);
+        field.value = date.toISOString().slice(0, 16);
+    });
 
     function handleSaveEventChanges(e) {
         e.preventDefault();
