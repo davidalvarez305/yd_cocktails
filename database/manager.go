@@ -1065,7 +1065,7 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 			e.event_id,
 			e.lead_id,
 			e.amount::NUMERIC,
-			CONCAT(l.first_name, ' ', l.last_name),
+			l.full_name,
 			CONCAT(b.first_name, ' ', b.last_name),
 			et.name,
 			vt.name,
