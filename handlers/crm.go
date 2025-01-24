@@ -775,6 +775,7 @@ func PutEvent(w http.ResponseWriter, r *http.Request) {
 				FBC:             lead.FacebookClickID,
 				FBP:             lead.FacebookClientID,
 				ExternalID:      helpers.HashString(lead.ExternalID),
+				LeadID:          lead.InstantFormLeadID,
 				ClientIPAddress: lead.IP,
 				ClientUserAgent: lead.UserAgent,
 			},
@@ -786,9 +787,7 @@ func PutEvent(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if lead.InstantFormLeadID != 0 {
-			fbEvent.UserData.LeadID = lead.InstantFormLeadID
 			fbEvent.EventSourceURL = ""
-
 			fbEvent.CustomData.EventSource = constants.EventSourceCRM
 			fbEvent.CustomData.LeadEventSource = constants.CompanyName
 		}
