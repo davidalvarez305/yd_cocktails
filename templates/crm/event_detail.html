@@ -76,7 +76,7 @@
                                 class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
                                 <option></option>
                                 {{ range .Bartenders }}
-                                <option value="{{ .UserID }}">
+                                <option value="{{ .UserID }}" {{ if eq .UserID $.Event.BartenderID }}selected{{ end }}>
                                     {{ .FirstName }} {{ .LastName }}
                                 </option>
                                 {{ end }}
@@ -102,7 +102,7 @@
                                 class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
                                 <option></option>
                                 {{ range .VenueTypes }}
-                                <option value="{{ .VenueTypeID }}" {{ if eq .VenueTypeID $.Venue.VenueTypeID }}selected{{ end }}>
+                                <option value="{{ .VenueTypeID }}" {{ if eq .VenueTypeID $.Event.VenueTypeID }}selected{{ end }}>
                                     {{ .Name }}
                                 </option>
                                 {{ end }}
