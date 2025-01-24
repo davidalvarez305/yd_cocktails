@@ -66,6 +66,7 @@ type LeadMarketing struct {
 	InstantFormLeadID int64  `json:"instant_form_lead_id" form:"instant_form_lead_id" schema:"instant_form_lead_id"`
 	InstantFormID     int64  `json:"instant_form_id" form:"instant_form_id" schema:"instant_form_id"`
 	InstantFormName   string `json:"instant_form_name" form:"instant_form_name" schema:"instant_form_name"`
+	ReferralLeadID    int    `json:"referral_lead_id" form:"referral_lead_id" schema:"referral_lead_id"`
 }
 
 type CSRFToken struct {

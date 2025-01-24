@@ -232,6 +232,16 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	var params types.GetLeadsParams
+	params.PageNum = helpers.SafeStringToPointer(r.URL.Query().Get("page_num"))
+
+	referrals, err := database.GetReferrals()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting referrals.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Lead Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
@@ -242,6 +252,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["VenueTypes"] = venueTypes
 	data["Events"] = events
 	data["Bartenders"] = bartenders
+	data["Referrals"] = referrals
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 

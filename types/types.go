@@ -46,6 +46,7 @@ type QuoteForm struct {
 	InstantFormLeadID *int64  `json:"instant_form_lead_id" form:"instant_form_lead_id" schema:"instant_form_lead_id"`
 	InstantFormID     *int64  `json:"instant_form_id" form:"instant_form_id" schema:"instant_form_id"`
 	InstantFormName   *string `json:"instant_form_name" form:"instant_form_name" schema:"instant_form_name"`
+	ReferralLeadID    *int    `json:"referral_lead_id" form:"referral_lead_id" schema:"referral_lead_id"`
 }
 
 type ContactForm struct {
@@ -88,6 +89,7 @@ type LeadDetails struct {
 	ClickID          string `json:"click_id" form:"click_id" schema:"click_id"`
 	GoogleClientID   string `json:"google_client_id" form:"google_client_id" schema:"google_client_id"`
 	ButtonClicked    string `json:"button_clicked" form:"button_clicked" schema:"button_clicked"`
+	ReferralLeadID   int    `json:"referral_lead_id" form:"referral_lead_id" schema:"referral_lead_id"`
 
 	InstantFormLeadID int64  `json:"instant_form_lead_id" form:"instant_form_lead_id" schema:"instant_form_lead_id"`
 	InstantFormID     int64  `json:"instant_form_id" form:"instant_form_id" schema:"instant_form_id"`
@@ -101,6 +103,11 @@ type LeadList struct {
 	CreatedAt   string `json:"created_at" form:"created_at" schema:"created_at"`
 	Language    string `json:"language" form:"language" schema:"language"`
 	TotalRows   int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
+}
+
+type Referral struct {
+	LeadID   int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	FullName string `json:"full_name" form:"full_name" schema:"full_name"`
 }
 
 type GetLeadsParams struct {
@@ -138,19 +145,20 @@ type UpdateLeadForm struct {
 }
 
 type UpdateLeadMarketingForm struct {
-	Method        *string `json:"_method" form:"_method" schema:"_method"`
-	CSRFToken     *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	LeadID        *string `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	CampaignName  *string `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
-	Medium        *string `json:"medium" form:"medium" schema:"medium"`
-	Source        *string `json:"source" form:"source" schema:"source"`
-	Referrer      *string `json:"referrer" form:"referrer" schema:"referrer"`
-	LandingPage   *string `json:"landing_page" form:"landing_page" schema:"landing_page"`
-	IP            *string `json:"ip" form:"ip" schema:"ip"`
-	Keyword       *string `json:"keyword" form:"keyword" schema:"keyword"`
-	Channel       *string `json:"channel" form:"channel" schema:"channel"`
-	Language      *string `json:"language" form:"language" schema:"language"`
-	ButtonClicked *string `json:"button_clicked" form:"button_clicked" schema:"button_clicked"`
+	Method         *string `json:"_method" form:"_method" schema:"_method"`
+	CSRFToken      *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	LeadID         *string `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	CampaignName   *string `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
+	Medium         *string `json:"medium" form:"medium" schema:"medium"`
+	Source         *string `json:"source" form:"source" schema:"source"`
+	Referrer       *string `json:"referrer" form:"referrer" schema:"referrer"`
+	LandingPage    *string `json:"landing_page" form:"landing_page" schema:"landing_page"`
+	IP             *string `json:"ip" form:"ip" schema:"ip"`
+	Keyword        *string `json:"keyword" form:"keyword" schema:"keyword"`
+	Channel        *string `json:"channel" form:"channel" schema:"channel"`
+	Language       *string `json:"language" form:"language" schema:"language"`
+	ButtonClicked  *string `json:"button_clicked" form:"button_clicked" schema:"button_clicked"`
+	ReferralLeadID *int    `json:"referral_lead_id" form:"referral_lead_id" schema:"referral_lead_id"`
 }
 
 type TwilioSMSResponse struct {
@@ -340,11 +348,6 @@ type GoogleUserAddress struct {
 	Region         string `json:"region,omitempty" form:"region,omitempty" schema:"region,omitempty"`
 	PostalCode     string `json:"postal_code,omitempty" form:"postal_code,omitempty" schema:"postal_code,omitempty"`
 	Country        string `json:"country,omitempty" form:"country,omitempty" schema:"country,omitempty"`
-}
-
-type ConversionLeadInfo struct {
-	LeadID    int   `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	CreatedAt int64 `json:"created_at" form:"created_at" schema:"created_at"`
 }
 
 type EventList struct {

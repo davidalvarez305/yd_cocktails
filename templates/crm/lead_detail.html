@@ -114,6 +114,18 @@
                     <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
                     <input type="hidden" id="lead_id" name="lead_id" value="{{ .Lead.LeadID }}" />
                     <input type="hidden" name="_method" value="PUT" />
+                    <div class="grow space-y-1">
+                        <label for="referral_lead_id" class="font-medium">Referral</label>
+                        <select id="referral_lead_id" name="referral_lead_id" required
+                            class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                            <option></option>
+                            {{ range .Referrals }}
+                            <option value="{{ .LeadID }}" {{ if eq .LeadID $.Lead.ReferralLeadID }}selected{{ end }}>
+                                {{ .FirstName }} {{ .LastName }}
+                            </option>
+                            {{ end }}
+                        </select>
+                    </div>
                     <div class="space-y-1">
                         <label for="campaign_name" class="font-medium">Campaign Name</label>
                         <input type="text" id="campaign_name" name="campaign_name" value="{{ .Lead.CampaignName }}"

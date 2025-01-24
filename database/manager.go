@@ -249,35 +249,6 @@ func GetLeadByStripeCustomerID(stripeCustomerID string) (int, error) {
 	return userId, nil
 }
 
-func GetConversionLeadInfo(leadId int) (types.ConversionLeadInfo, error) {
-	var leadConversionInfo types.ConversionLeadInfo
-
-	stmt, err := DB.Prepare(`SELECT l.lead_id, l.created_at
-	FROM "lead" AS l
-	WHERE l.lead_id = $1;`)
-
-	if err != nil {
-		return leadConversionInfo, fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close()
-
-	row := stmt.QueryRow(leadId)
-
-	var createdAt time.Time
-
-	err = row.Scan(
-		&leadConversionInfo.LeadID,
-		&createdAt,
-	)
-	if err != nil {
-		return leadConversionInfo, fmt.Errorf("error scanning row: %w", err)
-	}
-
-	leadConversionInfo.CreatedAt = createdAt.Unix()
-
-	return leadConversionInfo, nil
-}
-
 func GetPhoneNumberFromUserID(userID int) (string, error) {
 	var phoneNumber string
 
@@ -444,6 +415,37 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	return leads, totalRows, nil
 }
 
+func GetReferrals() ([]types.Referral, error) {
+	var referrals []types.Referral
+
+	query := `SELECT l.lead_id, l.full_name
+		FROM lead AS l
+		ORDER BY l.created_at ASC`
+
+	rows, err := DB.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var referral types.Referral
+
+		err := rows.Scan(&referral.LeadID, &referral.FullName)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		referrals = append(referrals, referral)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return referrals, nil
+}
+
 func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	query := `SELECT l.lead_id,
 	l.full_name,
@@ -469,7 +471,8 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	lm.campaign_id,
 	lm.instant_form_lead_id,
 	lm.instant_form_id,
-	lm.instant_form_name
+	lm.instant_form_name,
+	lm.referral_lead_id
 	FROM lead l
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
 	WHERE l.lead_id = $1`
@@ -480,7 +483,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
 	var message, externalId, userAgent, clickId, googleClientId sql.NullString
-	var campaignId, instantFormleadId, instantFormId sql.NullInt64
+	var campaignId, instantFormleadId, instantFormId, referralLeadId sql.NullInt64
 
 	var buttonClicked, instantFormName sql.NullString
 
@@ -510,6 +513,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&instantFormleadId,
 		&instantFormId,
 		&instantFormName,
+		&referralLeadId,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -519,6 +523,9 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	}
 
 	// Map the nullable fields to your struct
+	if referralLeadId.Valid {
+		leadDetails.ReferralLeadID = int(referralLeadId.Int64)
+	}
 	if buttonClicked.Valid {
 		leadDetails.ButtonClicked = buttonClicked.String
 	}
@@ -601,6 +608,115 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	if message.Valid {
 		leadDetails.Message = message.String
+	}
+
+	return leadDetails, nil
+}
+
+func GetConversionReporting(leadID string) (types.LeadDetails, error) {
+	query := `SELECT 
+		COALESCE(referral_lead.lead_id, l.lead_id) AS lead_id,
+		COALESCE(referral_lead.phone_number, l.phone_number) AS phone_number,
+		COALESCE(referral_lead_marketing.ad_campaign, lm.ad_campaign) AS ad_campaign,
+		COALESCE(referral_lead_marketing.landing_page, lm.landing_page) AS landing_page,
+		COALESCE(referral_lead_marketing.ip, lm.ip) AS ip,
+		COALESCE(referral_lead.email, l.email) AS email,
+		COALESCE(referral_lead_marketing.facebook_click_id, lm.facebook_click_id) AS facebook_click_id,
+		COALESCE(referral_lead_marketing.facebook_client_id, lm.facebook_client_id) AS facebook_client_id,
+		COALESCE(referral_lead_marketing.external_id, lm.external_id) AS external_id,
+		COALESCE(referral_lead_marketing.user_agent, lm.user_agent) AS user_agent,
+		COALESCE(referral_lead_marketing.click_id, lm.click_id) AS click_id,
+		COALESCE(referral_lead_marketing.google_client_id, lm.google_client_id) AS google_client_id,
+		COALESCE(referral_lead_marketing.campaign_id, lm.campaign_id) AS campaign_id,
+		COALESCE(referral_lead_marketing.instant_form_lead_id, lm.instant_form_lead_id) AS instant_form_lead_id,
+		(
+			SELECT SUM(e.amount::NUMERIC + e.tip::NUMERIC) 
+			FROM event e
+			JOIN lead_marketing AS lm ON e.lead_id = lm.lead_id
+			WHERE e.lead_id = l.lead_id OR e.lead_id = lm.referral_lead_id
+		) AS revenue
+	FROM lead l
+	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
+	JOIN lead AS referral_lead ON lm.referral_lead_id = referral_lead.lead_id
+	JOIN lead_marketing AS referral_lead_marketing ON referral_lead_marketing.lead_id = lm.referral_lead_id
+	WHERE l.lead_id = $1;`
+
+	var leadDetails types.LeadDetails
+
+	row := DB.QueryRow(query, leadID)
+
+	var adCampaign, landingPage, ip, email, facebookClickId, facebookClientId sql.NullString
+	var externalId, userAgent, clickId, googleClientId sql.NullString
+	var campaignId, instantFormleadId sql.NullInt64
+
+	err := row.Scan(
+		&leadDetails.LeadID,
+		&leadDetails.PhoneNumber,
+		&adCampaign,
+		&landingPage,
+		&ip,
+		&email,
+		&facebookClickId,
+		&facebookClientId,
+		&externalId,
+		&userAgent,
+		&clickId,
+		&googleClientId,
+		&campaignId,
+		&instantFormleadId,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return leadDetails, fmt.Errorf("no lead found with ID %s", leadID)
+		}
+		return leadDetails, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	if instantFormleadId.Valid {
+		leadDetails.InstantFormLeadID = instantFormleadId.Int64
+	}
+
+	if clickId.Valid {
+		leadDetails.ClickID = clickId.String
+	}
+
+	if googleClientId.Valid {
+		leadDetails.GoogleClientID = googleClientId.String
+	}
+
+	if externalId.Valid {
+		leadDetails.ExternalID = externalId.String
+	}
+
+	if userAgent.Valid {
+		leadDetails.UserAgent = userAgent.String
+	}
+
+	if facebookClickId.Valid {
+		leadDetails.FacebookClickID = facebookClickId.String
+	}
+
+	if facebookClientId.Valid {
+		leadDetails.FacebookClientID = facebookClientId.String
+	}
+
+	if email.Valid {
+		leadDetails.Email = email.String
+	}
+
+	if adCampaign.Valid {
+		leadDetails.CampaignName = adCampaign.String
+	}
+	if campaignId.Valid {
+		leadDetails.CampaignID = campaignId.Int64
+	}
+
+	if landingPage.Valid {
+		leadDetails.LandingPage = landingPage.String
+	}
+
+	if ip.Valid {
+		leadDetails.IP = ip.String
 	}
 
 	return leadDetails, nil
@@ -693,7 +809,8 @@ func UpdateLeadMarketing(form types.UpdateLeadMarketingForm) error {
 		    ip = $7, 
 		    keyword = $8, 
 		    channel = $9, 
-		    language = $10
+		    language = $10,
+			referral_lead_id = $11
 		WHERE lead_id = $1
 	`
 
@@ -708,6 +825,7 @@ func UpdateLeadMarketing(form types.UpdateLeadMarketingForm) error {
 		utils.CreateNullString(form.Keyword),
 		utils.CreateNullString(form.Channel),
 		utils.CreateNullString(form.Language),
+		utils.CreateNullInt(form.ReferralLeadID),
 	}
 
 	_, err := DB.Exec(query, args...)
