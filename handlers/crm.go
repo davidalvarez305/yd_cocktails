@@ -787,7 +787,6 @@ func PutEvent(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if lead.InstantFormLeadID != 0 {
-			fbEvent.EventSourceURL = ""
 			fbEvent.CustomData.EventSource = constants.EventSourceCRM
 			fbEvent.CustomData.LeadEventSource = constants.CompanyName
 		}
