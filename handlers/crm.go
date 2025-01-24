@@ -764,35 +764,55 @@ func PutEvent(w http.ResponseWriter, r *http.Request) {
 		eventId := fmt.Sprint(helpers.SafeInt(form.EventID))
 		eventRevenue := helpers.SafeFloat64(form.Amount) + helpers.SafeFloat64(form.Tip)
 
-		fbEvent := types.FacebookEventData{
-			EventName:      constants.EventConversionEventName,
-			EventTime:      helpers.SafeInt64(form.DatePaid),
-			ActionSource:   "phone_call",
-			EventSourceURL: lead.LandingPage,
-			UserData: types.FacebookUserData{
-				Email:           helpers.HashString(lead.Email),
-				Phone:           helpers.HashString(lead.PhoneNumber),
-				FBC:             lead.FacebookClickID,
-				FBP:             lead.FacebookClientID,
-				ExternalID:      helpers.HashString(lead.ExternalID),
-				LeadID:          lead.InstantFormLeadID,
-				ClientIPAddress: lead.IP,
-				ClientUserAgent: lead.UserAgent,
-			},
-			CustomData: types.FacebookCustomData{
-				Currency: constants.DefaultCurrency,
-				Value:    fmt.Sprint(eventRevenue),
-			},
-			EventID: eventId,
-		}
+		if lead.FacebookClickID != "" {
+			fbEvent := types.FacebookEventData{
+				EventName:      constants.EventConversionEventName,
+				EventTime:      helpers.SafeInt64(form.DatePaid),
+				ActionSource:   "phone_call",
+				EventSourceURL: lead.LandingPage,
+				UserData: types.FacebookUserData{
+					Email:           helpers.HashString(lead.Email),
+					Phone:           helpers.HashString(lead.PhoneNumber),
+					FBC:             lead.FacebookClickID,
+					FBP:             lead.FacebookClientID,
+					ExternalID:      helpers.HashString(lead.ExternalID),
+					ClientIPAddress: lead.IP,
+					ClientUserAgent: lead.UserAgent,
+				},
+				CustomData: types.FacebookCustomData{
+					Currency: constants.DefaultCurrency,
+					Value:    fmt.Sprint(eventRevenue),
+				},
+				EventID: eventId,
+			}
 
-		if lead.InstantFormLeadID != 0 {
-			fbEvent.CustomData.EventSource = constants.EventSourceCRM
-			fbEvent.CustomData.LeadEventSource = constants.CompanyName
-		}
+			metaPayload := types.FacebookPayload{
+				Data: []types.FacebookEventData{fbEvent},
+			}
 
-		metaPayload := types.FacebookPayload{
-			Data: []types.FacebookEventData{fbEvent},
+			go conversions.SendFacebookConversion(metaPayload)
+		} else {
+			fbLeadAdEvent := types.FacebookEventData{
+				EventName:    constants.EventConversionEventName,
+				EventTime:    helpers.SafeInt64(form.DatePaid),
+				ActionSource: "phone_call",
+				UserData: types.FacebookUserData{
+					LeadID: lead.InstantFormLeadID,
+				},
+				CustomData: types.FacebookCustomData{
+					Currency:        constants.DefaultCurrency,
+					Value:           fmt.Sprint(eventRevenue),
+					EventSource:     constants.EventSourceCRM,
+					LeadEventSource: constants.CompanyName,
+				},
+				EventID: eventId,
+			}
+
+			metaLeadAdPayload := types.FacebookPayload{
+				Data: []types.FacebookEventData{fbLeadAdEvent},
+			}
+
+			go conversions.SendFacebookConversion(metaLeadAdPayload)
 		}
 
 		googlePayload := types.GooglePayload{
@@ -821,7 +841,6 @@ func PutEvent(w http.ResponseWriter, r *http.Request) {
 		}
 
 		go conversions.SendGoogleConversion(googlePayload)
-		go conversions.SendFacebookConversion(metaPayload)
 	}
 
 	tmplCtx := types.DynamicPartialTemplate{
