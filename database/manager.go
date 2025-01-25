@@ -629,7 +629,7 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 		COALESCE(referral_lead_marketing.google_client_id, lm.google_client_id) AS google_client_id,
 		COALESCE(referral_lead_marketing.campaign_id, lm.campaign_id) AS campaign_id,
 		COALESCE(referral_lead_marketing.instant_form_lead_id, lm.instant_form_lead_id) AS instant_form_lead_id,
-		COALESCE(referral_lead_marketing.event_id, lm.event_id) AS event_id,
+		e.event_id,
 		(
 			WITH referral_lead AS (
 		    SELECT referral_lead_id
