@@ -121,7 +121,7 @@
                             <option></option>
                             {{ range .Referrals }}
                             <option value="{{ .LeadID }}" {{ if eq .LeadID $.Lead.ReferralLeadID }}selected{{ end }}>
-                                {{ .FirstName }} {{ .LastName }}
+                                {{ .FullName }}
                             </option>
                             {{ end }}
                         </select>
