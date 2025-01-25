@@ -536,14 +536,14 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if constants.Production {
-		lead, err := database.GetLeadDetails(fmt.Sprint(helpers.SafeInt(form.LeadID)))
+		lead, err := database.GetConversionReporting(int(helpers.SafeInt(form.LeadID)))
 		if err != nil {
-			fmt.Printf("Error querying lead details: %+v\n", err)
+			fmt.Printf("Error getting conversion: %+v\n", err)
 			tmplCtx := types.DynamicPartialTemplate{
 				TemplateName: "error",
 				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 				Data: map[string]any{
-					"Message": "Error querying lead details.",
+					"Message": "Internal error reporting conversions to Google.",
 				},
 			}
 
@@ -551,9 +551,6 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 			return
 		}
-
-		eventId := fmt.Sprint(helpers.SafeInt(form.EventID))
-		eventRevenue := helpers.SafeFloat64(form.Amount) + helpers.SafeFloat64(form.Tip)
 
 		if lead.FacebookClickID != "" {
 			fbEvent := types.FacebookEventData{
@@ -572,9 +569,9 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 				},
 				CustomData: types.FacebookCustomData{
 					Currency: constants.DefaultCurrency,
-					Value:    fmt.Sprint(eventRevenue),
+					Value:    fmt.Sprint(lead.Revenue),
 				},
-				EventID: eventId,
+				EventID: fmt.Sprint(lead.EventID),
 			}
 
 			metaPayload := types.FacebookPayload{
@@ -592,11 +589,11 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 				},
 				CustomData: types.FacebookCustomData{
 					Currency:        constants.DefaultCurrency,
-					Value:           fmt.Sprint(eventRevenue),
+					Value:           fmt.Sprint(lead.Revenue),
 					EventSource:     constants.EventSourceCRM,
 					LeadEventSource: constants.CompanyName,
 				},
-				EventID: eventId,
+				EventID: fmt.Sprint(lead.EventID),
 			}
 
 			metaLeadAdPayload := types.FacebookPayload{
@@ -614,14 +611,11 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 					Name: constants.EventConversionEventName,
 					Params: types.GoogleEventParamsLead{
 						GCLID:         lead.ClickID,
-						TransactionID: eventId,
-						Value:         eventRevenue,
+						TransactionID: fmt.Sprint(lead.EventID),
+						Value:         lead.Revenue,
 						Currency:      constants.DefaultCurrency,
 						CampaignID:    fmt.Sprint(lead.CampaignID),
 						Campaign:      lead.CampaignName,
-						Source:        lead.Source,
-						Medium:        lead.Medium,
-						Term:          lead.Keyword,
 					},
 				},
 			},
@@ -773,14 +767,14 @@ func PutEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if constants.Production {
-		lead, err := database.GetLeadDetails(fmt.Sprint(helpers.SafeInt(form.LeadID)))
+		lead, err := database.GetConversionReporting(int(helpers.SafeInt(form.LeadID)))
 		if err != nil {
-			fmt.Printf("Error querying lead details: %+v\n", err)
+			fmt.Printf("Error getting conversion: %+v\n", err)
 			tmplCtx := types.DynamicPartialTemplate{
 				TemplateName: "error",
 				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 				Data: map[string]any{
-					"Message": "Error querying lead details.",
+					"Message": "Internal error reporting conversions to Google.",
 				},
 			}
 
@@ -788,9 +782,6 @@ func PutEvent(w http.ResponseWriter, r *http.Request) {
 			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 			return
 		}
-
-		eventId := fmt.Sprint(helpers.SafeInt(form.EventID))
-		eventRevenue := helpers.SafeFloat64(form.Amount) + helpers.SafeFloat64(form.Tip)
 
 		if lead.FacebookClickID != "" {
 			fbEvent := types.FacebookEventData{
@@ -809,9 +800,9 @@ func PutEvent(w http.ResponseWriter, r *http.Request) {
 				},
 				CustomData: types.FacebookCustomData{
 					Currency: constants.DefaultCurrency,
-					Value:    fmt.Sprint(eventRevenue),
+					Value:    fmt.Sprint(lead.Revenue),
 				},
-				EventID: eventId,
+				EventID: fmt.Sprint(lead.EventID),
 			}
 
 			metaPayload := types.FacebookPayload{
@@ -829,11 +820,11 @@ func PutEvent(w http.ResponseWriter, r *http.Request) {
 				},
 				CustomData: types.FacebookCustomData{
 					Currency:        constants.DefaultCurrency,
-					Value:           fmt.Sprint(eventRevenue),
+					Value:           fmt.Sprint(lead.Revenue),
 					EventSource:     constants.EventSourceCRM,
 					LeadEventSource: constants.CompanyName,
 				},
-				EventID: eventId,
+				EventID: fmt.Sprint(lead.EventID),
 			}
 
 			metaLeadAdPayload := types.FacebookPayload{
@@ -851,14 +842,11 @@ func PutEvent(w http.ResponseWriter, r *http.Request) {
 					Name: constants.EventConversionEventName,
 					Params: types.GoogleEventParamsLead{
 						GCLID:         lead.ClickID,
-						TransactionID: eventId,
-						Value:         eventRevenue,
+						TransactionID: fmt.Sprint(lead.EventID),
+						Value:         lead.Revenue,
 						Currency:      constants.DefaultCurrency,
 						CampaignID:    fmt.Sprint(lead.CampaignID),
 						Campaign:      lead.CampaignName,
-						Source:        lead.Source,
-						Medium:        lead.Medium,
-						Term:          lead.Keyword,
 					},
 				},
 			},

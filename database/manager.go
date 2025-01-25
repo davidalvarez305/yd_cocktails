@@ -613,7 +613,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	return leadDetails, nil
 }
 
-func GetConversionReporting(leadID string) (types.LeadDetails, error) {
+func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 	query := `SELECT 
 		COALESCE(referral_lead.lead_id, l.lead_id) AS lead_id,
 		COALESCE(referral_lead.phone_number, l.phone_number) AS phone_number,
@@ -629,6 +629,7 @@ func GetConversionReporting(leadID string) (types.LeadDetails, error) {
 		COALESCE(referral_lead_marketing.google_client_id, lm.google_client_id) AS google_client_id,
 		COALESCE(referral_lead_marketing.campaign_id, lm.campaign_id) AS campaign_id,
 		COALESCE(referral_lead_marketing.instant_form_lead_id, lm.instant_form_lead_id) AS instant_form_lead_id,
+		COALESCE(referral_lead_marketing.event_id, lm.event_id) AS event_id,
 		(
 			WITH referral_lead AS (
 		    SELECT referral_lead_id
@@ -651,17 +652,18 @@ func GetConversionReporting(leadID string) (types.LeadDetails, error) {
 	JOIN lead_marketing AS referral_lead_marketing ON referral_lead_marketing.lead_id = lm.referral_lead_id
 	WHERE l.lead_id = $1;`
 
-	var leadDetails types.LeadDetails
+	var conversionReporting types.ConversionReporting
 
 	row := DB.QueryRow(query, leadID)
 
 	var adCampaign, landingPage, ip, email, facebookClickId, facebookClientId sql.NullString
 	var externalId, userAgent, clickId, googleClientId sql.NullString
-	var campaignId, instantFormleadId sql.NullInt64
+	var campaignId, instantFormleadId, eventId sql.NullInt64
+	var revenue sql.NullFloat64
 
 	err := row.Scan(
-		&leadDetails.LeadID,
-		&leadDetails.PhoneNumber,
+		&conversionReporting.LeadID,
+		&conversionReporting.PhoneNumber,
 		&adCampaign,
 		&landingPage,
 		&ip,
@@ -674,62 +676,71 @@ func GetConversionReporting(leadID string) (types.LeadDetails, error) {
 		&googleClientId,
 		&campaignId,
 		&instantFormleadId,
+		&eventId,
+		&revenue,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return leadDetails, fmt.Errorf("no lead found with ID %s", leadID)
+			return conversionReporting, fmt.Errorf("no lead found with ID %v", leadID)
 		}
-		return leadDetails, fmt.Errorf("error scanning row: %w", err)
+		return conversionReporting, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	if revenue.Valid {
+		conversionReporting.Revenue = revenue.Float64
 	}
 
 	if instantFormleadId.Valid {
-		leadDetails.InstantFormLeadID = instantFormleadId.Int64
+		conversionReporting.InstantFormLeadID = instantFormleadId.Int64
 	}
 
 	if clickId.Valid {
-		leadDetails.ClickID = clickId.String
+		conversionReporting.ClickID = clickId.String
 	}
 
 	if googleClientId.Valid {
-		leadDetails.GoogleClientID = googleClientId.String
+		conversionReporting.GoogleClientID = googleClientId.String
 	}
 
 	if externalId.Valid {
-		leadDetails.ExternalID = externalId.String
+		conversionReporting.ExternalID = externalId.String
 	}
 
 	if userAgent.Valid {
-		leadDetails.UserAgent = userAgent.String
+		conversionReporting.UserAgent = userAgent.String
 	}
 
 	if facebookClickId.Valid {
-		leadDetails.FacebookClickID = facebookClickId.String
+		conversionReporting.FacebookClickID = facebookClickId.String
 	}
 
 	if facebookClientId.Valid {
-		leadDetails.FacebookClientID = facebookClientId.String
+		conversionReporting.FacebookClientID = facebookClientId.String
 	}
 
 	if email.Valid {
-		leadDetails.Email = email.String
+		conversionReporting.Email = email.String
 	}
 
 	if adCampaign.Valid {
-		leadDetails.CampaignName = adCampaign.String
+		conversionReporting.CampaignName = adCampaign.String
 	}
 	if campaignId.Valid {
-		leadDetails.CampaignID = campaignId.Int64
+		conversionReporting.CampaignID = campaignId.Int64
+	}
+	if eventId.Valid {
+		conversionReporting.EventID = int(eventId.Int64)
 	}
 
 	if landingPage.Valid {
-		leadDetails.LandingPage = landingPage.String
+		conversionReporting.LandingPage = landingPage.String
 	}
 
 	if ip.Valid {
-		leadDetails.IP = ip.String
+		conversionReporting.IP = ip.String
 	}
 
-	return leadDetails, nil
+	return conversionReporting, nil
 }
 
 func GetLeadIDFromPhoneNumber(from string) (int, error) {

@@ -84,7 +84,7 @@ type LeadDetails struct {
 	Message          string `json:"message" form:"message" schema:"message"`
 	FacebookClickID  string `json:"facebook_click_id" form:"facebook_click_id" schema:"facebook_click_id"`
 	FacebookClientID string `json:"facebook_client_id" form:"facebook_client_id" schema:"facebook_client_id"`
-	UserAgent        string `json:"user_agent" form:"user_agent" schema:"facebook_click_id"`
+	UserAgent        string `json:"user_agent" form:"user_agent" schema:"user_agent"`
 	ExternalID       string `json:"external_id" form:"external_id" schema:"external_id"`
 	ClickID          string `json:"click_id" form:"click_id" schema:"click_id"`
 	GoogleClientID   string `json:"google_client_id" form:"google_client_id" schema:"google_client_id"`
@@ -421,4 +421,24 @@ type FacebookInstantFormLead struct {
 	IsQualified      string `json:"is_qualified"`
 	IsQuality        string `json:"is_quality"`
 	IsConverted      string `json:"is_converted"`
+}
+
+type ConversionReporting struct {
+	LeadID            int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	Email             string  `json:"email" form:"email" schema:"email"`
+	PhoneNumber       string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	CampaignName      string  `json:"campaign_name" form:"campaign_name" schema:"campaign_name"`
+	CampaignID        int64   `json:"campaign_id" form:"campaign_id" schema:"campaign_id"`
+	LandingPage       string  `json:"landing_page" form:"landing_page" schema:"landing_page"`
+	IP                string  `json:"ip" form:"ip" schema:"ip"`
+	FacebookClickID   string  `json:"facebook_click_id" form:"facebook_click_id" schema:"facebook_click_id"`
+	FacebookClientID  string  `json:"facebook_client_id" form:"facebook_client_id" schema:"facebook_client_id"`
+	UserAgent         string  `json:"user_agent" form:"user_agent" schema:"user_agent"`
+	ExternalID        string  `json:"external_id" form:"external_id" schema:"external_id"`
+	ClickID           string  `json:"click_id" form:"click_id" schema:"click_id"`
+	GoogleClientID    string  `json:"google_client_id" form:"google_client_id" schema:"google_client_id"`
+	ReferralLeadID    int     `json:"referral_lead_id" form:"referral_lead_id" schema:"referral_lead_id"`
+	InstantFormLeadID int64   `json:"instant_form_lead_id" form:"instant_form_lead_id" schema:"instant_form_lead_id"`
+	EventID           int     `json:"event_id" form:"event_id" schema:"event_id"`
+	Revenue           float64 `json:"revenue" form:"revenue" schema:"revenue"`
 }

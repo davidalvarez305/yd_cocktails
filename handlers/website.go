@@ -392,22 +392,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 	go conversions.SendGoogleConversion(payload)
 	go conversions.SendFacebookConversion(metaPayload)
 
-	lead, err := database.GetConversionLeadInfo(leadID)
-	if err != nil {
-		fmt.Printf("Error getting conversion: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Internal error reporting conversions to Google.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
 	if constants.Production {
 
 		go func() {
@@ -418,7 +402,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			var notificationTemplateData = map[string]any{
 				"Name":           helpers.SafeString(form.FullName),
 				"PhoneNumber":    helpers.SafeString(form.PhoneNumber),
-				"DateCreated":    utils.FormatTimestampEST(lead.CreatedAt),
+				"DateCreated":    utils.FormatTimestampEST(createdAt),
 				"ButtonClicked":  helpers.SafeString(form.ButtonClicked),
 				"Message":        helpers.SafeString(form.Message),
 				"LeadDetailsURL": fmt.Sprintf("%s/crm/lead/%d", constants.RootDomain, leadID),
