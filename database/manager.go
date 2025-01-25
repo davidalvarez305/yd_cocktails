@@ -630,10 +630,20 @@ func GetConversionReporting(leadID string) (types.LeadDetails, error) {
 		COALESCE(referral_lead_marketing.campaign_id, lm.campaign_id) AS campaign_id,
 		COALESCE(referral_lead_marketing.instant_form_lead_id, lm.instant_form_lead_id) AS instant_form_lead_id,
 		(
-			SELECT SUM(e.amount::NUMERIC + e.tip::NUMERIC) 
-			FROM event e
-			JOIN lead_marketing AS lm ON e.lead_id = lm.lead_id
-			WHERE e.lead_id = l.lead_id OR e.lead_id = lm.referral_lead_id
+			WITH referral_lead AS (
+		    SELECT referral_lead_id
+		    FROM lead_marketing
+		    WHERE lead_id = $1
+		)
+		SELECT SUM(e.amount::NUMERIC + e.tip::NUMERIC)
+		FROM event AS e
+		WHERE e.lead_id = $1
+		   OR e.lead_id IN (
+		       SELECT lm1.lead_id
+		       FROM lead_marketing lm1
+		       WHERE lm1.referral_lead_id IN (SELECT referral_lead_id FROM referral_lead)
+		          OR lm1.lead_id IN (SELECT referral_lead_id FROM referral_lead)
+		   )
 		) AS revenue
 	FROM lead l
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
