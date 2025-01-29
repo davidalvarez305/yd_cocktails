@@ -33,36 +33,36 @@ type Lead struct {
 }
 
 type LeadMarketing struct {
-	LeadMarketingID   int64  `json:"lead_marketing_id"`
-	LeadID            int64  `json:"lead_id"`
-	Source            string `json:"source"`
-	Medium            string `json:"medium"`
-	Channel           string `json:"channel"`
-	LandingPage       string `json:"landing_page"`
+	LeadMarketingID   int64  `json:"lead_marketing_id" form:"lead_marketing_id" schema:"lead_marketing_id"`
+	LeadID            int64  `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	Source            string `json:"source" form:"source" schema:"source"`
+	Medium            string `json:"medium" form:"medium" schema:"medium"`
+	Channel           string `json:"channel" form:"channel" schema:"channel"`
+	LandingPage       string `json:"landing_page" form:"landing_page" schema:"landing_page"`
 	Longitude         string `json:"longitude" form:"longitude" schema:"longitude"`
 	Latitude          string `json:"latitude" form:"latitude" schema:"latitude"`
-	Keyword           string `json:"keyword"`
-	Referrer          string `json:"referrer"`
-	ClickID           string `json:"click_id"`
-	CampaignID        int64  `json:"campaign_id"`
-	AdCampaign        string `json:"ad_campaign"`
-	AdGroupID         int64  `json:"ad_group_id"`
-	AdGroupName       string `json:"ad_group_name"`
-	AdSetID           int64  `json:"ad_set_id"`
-	AdSetName         string `json:"ad_set_name"`
-	AdID              int64  `json:"ad_id"`
-	AdHeadline        int64  `json:"ad_headline"`
-	Language          string `json:"language"`
-	OS                string `json:"os"`
-	UserAgent         string `json:"user_agent"`
-	ButtonClicked     string `json:"button_clicked"`
-	DeviceType        string `json:"device_type"`
-	IP                string `json:"ip"`
-	ExternalID        string `json:"external_id"`
-	GoogleClientID    string `json:"google_client_id"`
-	FacebookClickID   string `json:"facebook_click_id"`
-	FacebookClientID  string `json:"facebook_client_id"`
-	CSRFSecret        string `json:"csrf_secret"`
+	Keyword           string `json:"keyword" form:"keyword" schema:"keyword"`
+	Referrer          string `json:"referrer" form:"referrer" schema:"referrer"`
+	ClickID           string `json:"click_id" form:"click_id" schema:"click_id"`
+	CampaignID        int64  `json:"campaign_id" form:"campaign_id" schema:"campaign_id"`
+	AdCampaign        string `json:"ad_campaign" form:"ad_campaign" schema:"ad_campaign"`
+	AdGroupID         int64  `json:"ad_group_id" form:"ad_group_id" schema:"ad_group_id"`
+	AdGroupName       string `json:"ad_group_name" form:"ad_group_name" schema:"ad_group_name"`
+	AdSetID           int64  `json:"ad_set_id" form:"ad_set_id" schema:"ad_set_id"`
+	AdSetName         string `json:"ad_set_name" form:"ad_set_name" schema:"ad_set_name"`
+	AdID              int64  `json:"ad_id" form:"ad_id" schema:"ad_id"`
+	AdHeadline        int64  `json:"ad_headline" form:"ad_headline" schema:"ad_headline"`
+	Language          string `json:"language" form:"language" schema:"language"`
+	OS                string `json:"os" form:"os" schema:"os"`
+	UserAgent         string `json:"user_agent" form:"user_agent" schema:"user_agent"`
+	ButtonClicked     string `json:"button_clicked" form:"button_clicked" schema:"button_clicked"`
+	DeviceType        string `json:"device_type" form:"device_type" schema:"device_type"`
+	IP                string `json:"ip" form:"ip" schema:"ip"`
+	ExternalID        string `json:"external_id" form:"external_id" schema:"external_id"`
+	GoogleClientID    string `json:"google_client_id" form:"google_client_id" schema:"google_client_id"`
+	FacebookClickID   string `json:"facebook_click_id" form:"facebook_click_id" schema:"facebook_click_id"`
+	FacebookClientID  string `json:"facebook_client_id" form:"facebook_client_id" schema:"facebook_client_id"`
+	CSRFSecret        string `json:"csrf_secret" form:"csrf_secret" schema:"csrf_secret"`
 	InstantFormLeadID int64  `json:"instant_form_lead_id" form:"instant_form_lead_id" schema:"instant_form_lead_id"`
 	InstantFormID     int64  `json:"instant_form_id" form:"instant_form_id" schema:"instant_form_id"`
 	InstantFormName   string `json:"instant_form_name" form:"instant_form_name" schema:"instant_form_name"`
@@ -177,4 +177,31 @@ type CocktailIngredient struct {
 	IngredientID int     `json:"ingredient_id" form:"ingredient_id" schema:"ingredient_id"`
 	UnitID       int     `json:"unit_id" form:"unit_id" schema:"unit_id"`
 	Amount       float64 `json:"amount" form:"amount" schema:"amount"` // Amount of the ingredient
+}
+
+type Quote struct {
+	QuoteID         int    `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	LeadID          int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	ReferenceNumber string `json:"reference_number" form:"reference_number" schema:"reference_number"`
+
+	EventTypeID        int `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID        int `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	Guests             int `json:"guests" form:"guests" schema:"guests"`
+	NumberOfBartenders int `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+
+	EventDate int64 `json:"event_date" form:"event_date" schema:"event_date"`
+
+	WillRequireBar bool `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
+	BarType        int  `json:"bar_type" form:"bar_type" schema:"bar_type"`
+
+	WillProvideAlcohol bool `json:"will_provide_alcohol" form:"will_provide_alcohol" schema:"will_provide_alcohol"`
+	AlcoholQuality     int  `json:"alcohol_quality" form:"alcohol_quality" schema:"alcohol_quality"`
+
+	WillRequireIce               bool `json:"will_require_ice" form:"will_require_ice" schema:"will_require_ice"`
+	WillRequireSoftDrinks        bool `json:"will_require_soft_drinks" form:"will_require_soft_drinks" schema:"will_require_soft_drinks"`
+	WillRequireJuiceAndMixers    bool `json:"will_require_juice_and_mixers" form:"will_require_juice_and_mixers" schema:"will_require_juice_and_mixers"`
+	WillRequireGarnish           bool `json:"will_require_garnish" form:"will_require_garnish" schema:"will_require_garnish"`
+	WillRequireCupsStrawsNapkins bool `json:"will_require_cups_straws_napkins" form:"will_require_cups_straws_napkins" schema:"will_require_cups_straws_napkins"`
+
+	WillRequireGlassware bool `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
 }
