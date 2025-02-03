@@ -1,6 +1,6 @@
-{{ define "quote_form.html" }}
+{{ define "lead_quote_form.html" }}
 <!-- Modal Container -->
-<div id="quoteModalContainer" style="display: none;">
+<div id="leadQuoteModalContainer" style="display: none;">
     <div>
         <div tabindex="-1" role="dialog"
             class="fixed inset-0 z-90 overflow-y-auto overflow-x-hidden bg-gray-900/75 p-4 backdrop-blur-sm lg:p-8">
@@ -180,31 +180,29 @@
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                        <div class="grow space-y-1">
-                                            <label for="event_type_id" class="font-medium">Event Type*</label>
-                                            <select id="event_type_id" name="event_type_id" required
-                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                                                <option></option>
-                                                {{ range .EventTypes }}
-                                                <option value="{{ .EventTypeID }}">
-                                                    {{ .Name }}
-                                                </option>
-                                                {{ end }}
-                                            </select>
-                                        </div>
-                                        <div class="grow space-y-1">
-                                            <label for="venue_type_id" class="font-medium">Venue Type*</label>
-                                            <select id="venue_type_id" name="venue_type_id" required
-                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                                                <option></option>
-                                                {{ range .VenueTypes }}
-                                                <option value="{{ .VenueTypeID }}">
-                                                    {{ .Name }}
-                                                </option>
-                                                {{ end }}
-                                            </select>
-                                        </div>
+                                    <div class="grow space-y-1">
+                                        <label for="event_type_id" class="font-medium">Event Type*</label>
+                                        <select id="event_type_id" name="event_type_id" required
+                                            class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                                            <option></option>
+                                            {{ range .EventTypes }}
+                                            <option value="{{ .EventTypeID }}">
+                                                {{ .Name }}
+                                            </option>
+                                            {{ end }}
+                                        </select>
+                                    </div>
+                                    <div class="grow space-y-1">
+                                        <label for="venue_type_id" class="font-medium">Venue Type*</label>
+                                        <select id="venue_type_id" name="venue_type_id" required
+                                            class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                                            <option></option>
+                                            {{ range .VenueTypes }}
+                                            <option value="{{ .VenueTypeID }}">
+                                                {{ .Name }}
+                                            </option>
+                                            {{ end }}
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="grow space-y-1">

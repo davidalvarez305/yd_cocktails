@@ -1,5 +1,5 @@
-{{ define "quotes_table.html" }}
-<div id="quotesTable" class="min-w-full overflow-x-auto rounded border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+{{ define "lead_quotes_table.html" }}
+<div id="leadQuotesTable" class="min-w-full overflow-x-auto rounded border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
 	<table class="min-w-full whitespace-nowrap align-middle text-sm">
 		<thead>
 			<tr>
@@ -25,10 +25,6 @@
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Bartender
-				</th>
-				<th
-					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
 					Event & Venue
 				</th>
 				<th
@@ -39,7 +35,7 @@
 		</thead>
 
 		<tbody>
-			{{ range .Quotes }}
+			{{ range .LeadQuotes }}
 			<tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
 				<td class="p-3 text-center">
 					<a href="/crm/lead/{{ .LeadID }}/quote/{{ .QuoteID }}" target="_blank"
@@ -111,7 +107,7 @@
                 }
             })
             .then(html => {
-                const table = document.getElementById('quotesTable');
+                const table = document.getElementById('leadQuotesTable');
                 table.outerHTML = html;
 				handleBindQuoteTableActions();
             })

@@ -1457,10 +1457,11 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 	var leads []types.LeadQuoteList
 
-	query := `SELECT q.quote_id, e.type, v.type, q.event_date, v.guests, q.amount
+	query := `SELECT q.quote_id, e.name, v.name, q.event_date, q.guests, q.amount
+		FROM quote AS q
 		LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
 		LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
-		FROM quote AS q
+		WHERE q.lead_id = $1
 		ORDER BY q.event_date ASC;`
 
 	rows, err := DB.Query(query, leadId)

@@ -168,7 +168,9 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	fileName := "lead_detail.html"
 	eventForm := constants.PARTIAL_TEMPLATES_DIR + "event_form.html"
 	eventTable := constants.PARTIAL_TEMPLATES_DIR + "events_table.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, eventForm, eventTable}
+	leadQuoteForm := constants.PARTIAL_TEMPLATES_DIR + "lead_quote_form.html"
+	leadQuoteTable := constants.PARTIAL_TEMPLATES_DIR + "lead_quotes_table.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, eventForm, eventTable, leadQuoteForm, leadQuoteTable}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -225,6 +227,13 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	leadQuotes, err := database.GetLeadQuotes(leadDetails.LeadID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting lead quotes.", http.StatusInternalServerError)
+		return
+	}
+
 	bartenders, err := database.GetUsers()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -253,6 +262,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["Events"] = events
 	data["Bartenders"] = bartenders
 	data["Referrals"] = referrals
+	data["LeadQuotes"] = leadQuotes
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
