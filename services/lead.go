@@ -66,7 +66,7 @@ func checkSpreadsheets() {
 		_, err = database.CreateLeadAndMarketing(form)
 
 		if err != nil {
-			fmt.Printf("ERROR CREATING FB LEAD: %+v\n", err)
+			fmt.Printf("ERROR CREATING FB LEAD FOR: %+v. MESSAGE: %+v\n", lead, err)
 			continue
 		}
 
