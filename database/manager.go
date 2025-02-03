@@ -1401,3 +1401,108 @@ func IsPhoneNumberInDB(phoneNumber string) (bool, error) {
 	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM lead WHERE phone_number = $1)", phoneNumber).Scan(&exists)
 	return exists, err
 }
+
+func CreateLeadQuote(form types.LeadQuoteForm) error {
+	query := `
+		INSERT INTO lead_quote (
+			csrf_token, quote_id, lead_id, number_of_bartenders, guests, hours, 
+			will_require_bar, num_bars, will_provide_alcohol, alcohol_segment_id, 
+			package_type_id, event_type_id, venue_type_id, event_date, 
+			will_require_ice, will_require_soft_drinks, will_require_juice, 
+			will_require_mixers, will_require_garnish, will_require_beer, 
+			will_require_wine, will_require_cups, will_require_glassware
+		)
+		VALUES (
+			$1, $2, $3, $4, $5, $6, 
+			$7, $8, $9, $10, 
+			$11, $12, $13, to_timestamp($14)::timestamptz AT TIME ZONE 'America/New_York', 
+			$15, $16, $17, $18, $19, $20, 
+			$21, $22, $23
+		)
+	`
+
+	_, err := DB.Exec(
+		query,
+		utils.CreateNullString(form.CSRFToken),
+		utils.CreateNullInt(form.QuoteID),
+		utils.CreateNullInt(form.LeadID),
+		utils.CreateNullInt(form.NumberOfBartenders),
+		utils.CreateNullInt(form.Guests),
+		utils.CreateNullInt(form.Hours),
+		utils.CreateNullBool(form.WillRequireBar),
+		utils.CreateNullInt(form.NumBars),
+		utils.CreateNullBool(form.WillProvideAlcohol),
+		utils.CreateNullInt(form.AlcoholSegment),
+		utils.CreateNullInt(form.PackageTypeID),
+		utils.CreateNullInt(form.EventTypeID),
+		utils.CreateNullInt(form.VenueTypeID),
+		utils.CreateNullInt64(form.EventDate),
+		utils.CreateNullBool(form.WillRequireIce),
+		utils.CreateNullBool(form.WillRequireSoftDrinks),
+		utils.CreateNullBool(form.WillRequireJuice),
+		utils.CreateNullBool(form.WillRequireMixers),
+		utils.CreateNullBool(form.WillRequireGarnish),
+		utils.CreateNullBool(form.WillRequireBeer),
+		utils.CreateNullBool(form.WillRequireWine),
+		utils.CreateNullBool(form.WillRequireCupsStrawsNapkins),
+		utils.CreateNullBool(form.WillRequireGlassware),
+	)
+	if err != nil {
+		return fmt.Errorf("error inserting lead quote data: %w", err)
+	}
+
+	return nil
+}
+
+func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
+	var leads []types.LeadQuoteList
+
+	query := `SELECT q.quote_id, e.type, v.type, q.event_date, v.guests
+		LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
+		LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
+		FROM quote AS q
+		ORDER BY q.event_date ASC;`
+
+	rows, err := DB.Query(query, leadId)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var lead types.LeadQuoteList
+		var eventDate time.Time
+		var venueType, eventType sql.NullString
+		var guests sql.NullInt64
+
+		err := rows.Scan(&lead.QuoteID,
+			&venueType,
+			&eventType,
+			&eventDate,
+			&guests)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+		lead.EventDate = utils.FormatTimestampEST(eventDate.Unix())
+
+		if venueType.Valid {
+			lead.VenueType = venueType.String
+		}
+
+		if eventType.Valid {
+			lead.EventType = eventType.String
+		}
+
+		if guests.Valid {
+			lead.Guests = int(guests.Int64)
+		}
+
+		leads = append(leads, lead)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return leads, nil
+}
