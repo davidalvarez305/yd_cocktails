@@ -1457,7 +1457,7 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 	var leads []types.LeadQuoteList
 
-	query := `SELECT q.quote_id, e.type, v.type, q.event_date, v.guests
+	query := `SELECT q.quote_id, e.type, v.type, q.event_date, v.guests, q.amount
 		LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
 		LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
 		FROM quote AS q
@@ -1474,12 +1474,14 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 		var eventDate time.Time
 		var venueType, eventType sql.NullString
 		var guests sql.NullInt64
+		var amount sql.NullFloat64
 
 		err := rows.Scan(&lead.QuoteID,
 			&venueType,
 			&eventType,
 			&eventDate,
-			&guests)
+			&guests,
+			&amount)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
@@ -1495,6 +1497,10 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 
 		if guests.Valid {
 			lead.Guests = int(guests.Int64)
+		}
+
+		if amount.Valid {
+			lead.Amount = amount.Float64
 		}
 
 		leads = append(leads, lead)

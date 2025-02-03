@@ -180,16 +180,16 @@ type CocktailIngredient struct {
 }
 
 type Quote struct {
-	QuoteID         int    `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	LeadID          int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	ReferenceNumber string `json:"reference_number" form:"reference_number" schema:"reference_number"`
+	QuoteID         int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	LeadID          int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	ReferenceNumber string  `json:"reference_number" form:"reference_number" schema:"reference_number"`
+	Amount          float64 `json:"amount" form:"amount" schema:"amount"`
 
-	EventTypeID        int `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID        int `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	Guests             int `json:"guests" form:"guests" schema:"guests"`
-	NumberOfBartenders int `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
-
-	EventDate int64 `json:"event_date" form:"event_date" schema:"event_date"`
+	EventTypeID        int   `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID        int   `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	Guests             int   `json:"guests" form:"guests" schema:"guests"`
+	NumberOfBartenders int   `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+	EventDate          int64 `json:"event_date" form:"event_date" schema:"event_date"`
 
 	WillRequireBar bool `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
 	BarType        int  `json:"bar_type" form:"bar_type" schema:"bar_type"`
