@@ -36,3 +36,10 @@ func CreateNullBool(ptr *bool) sql.NullBool {
 	}
 	return sql.NullBool{Bool: *ptr, Valid: true}
 }
+
+func CreateNullBoolDefaultFalse(ptr *bool) sql.NullBool {
+	if ptr == nil {
+		return sql.NullBool{Bool: false, Valid: true}
+	}
+	return sql.NullBool{Bool: *ptr, Valid: true}
+}

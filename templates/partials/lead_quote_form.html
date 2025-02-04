@@ -51,7 +51,7 @@
                                         <input type="checkbox" class="peer sr-only" id="will_require_bar" name="will_require_bar" />
                                         <span
                                             class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                        <span class="font-medium">Will require bar(s)?</span>
+                                        <span class="font-medium">Do we need to bring a bar?</span>
                                     </label>
                                 </div>
                                 <div id="numberOfBars" class="grow space-y-1" style="display: none;">
@@ -60,113 +60,101 @@
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                 </div>
                                 <div class="space-y-1">
-                                    <label for="will_provide_alcohol"
+                                    <label for="we_will_provide_alcohol"
                                         class="group relative inline-flex items-center gap-3">
-                                        <input type="checkbox" class="peer sr-only" id="will_provide_alcohol" name="will_provide_alcohol" checked required />
+                                        <input type="checkbox" class="peer sr-only" id="we_will_provide_alcohol" name="we_will_provide_alcohol" required />
                                         <span
                                             class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                        <span class="font-medium">Will client be providing the alcohol?</span>
+                                        <span class="font-medium">Will we be providing the alcohol?</span>
                                     </label>
                                 </div>
-                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2" id="alcoholPackages" style="display: none;">
-                                    <div class="grow space-y-1">
-                                        <label for="alcohol_segment_id" class="font-medium">Alcohol Quality</label>
-                                        <select id="alcohol_segment_id" name="alcohol_segment_id"
-                                            class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                                            <option></option>
-                                            {{ range .AlcoholSegments }}
-                                            <option value="{{ .AlcoholSegmentID }}">{{ .Name }}</option>
-                                            {{ end }}
-                                        </select>
-                                    </div>
-                                    <div class="grow space-y-1">
-                                        <label for="package_type_id" class="font-medium">Package Type</label>
-                                        <select id="package_type_id" name="package_type_id"
-                                            class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                                            <option></option>
-                                            {{ range .PackageTypes }}
-                                            <option value="{{ .PackageTypeID }}">{{ .Name }}</option>
-                                            {{ end }}
-                                        </select>
-                                    </div>
+                                <div class="grow space-y-1" id="alcoholPackages" style="display: none;">
+                                    <label for="alcohol_segment_id" class="font-medium">Alcohol Quality</label>
+                                    <select id="alcohol_segment_id" name="alcohol_segment_id"
+                                        class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                                        <option></option>
+                                        {{ range .AlcoholSegments }}
+                                        <option value="{{ .AlcoholSegmentID }}">{{ .Name }}</option>
+                                        {{ end }}
+                                    </select>
                                 </div>
-                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2" id="alcoholPackages" style="display: none;">
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="space-y-1">
-                                        <label for="will_provide_beer"
+                                        <label for="we_will_provide_beer"
                                             class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_beer" name="will_provide_beer" />
+                                            <input type="checkbox" class="peer sr-only" id="we_will_provide_beer" name="we_will_provide_beer" />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will client require beer?</span>
+                                            <span class="font-medium">Will we require beer?</span>
                                         </label>
                                     </div>
                                     <div class="space-y-1">
-                                        <label for="will_provide_wine"
+                                        <label for="we_will_provide_wine"
                                             class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_wine" name="will_provide_wine" />
+                                            <input type="checkbox" class="peer sr-only" id="we_will_provide_wine" name="we_will_provide_wine" />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will client require wine?</span>
+                                            <span class="font-medium">Will we require wine?</span>
                                         </label>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="space-y-1">
-                                        <label for="will_provide_mixers"
+                                        <label for="we_will_provide_mixers"
                                             class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_mixers" name="will_provide_mixers" required />
+                                            <input type="checkbox" class="peer sr-only" id="we_will_provide_mixers" name="we_will_provide_mixers" required />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will client be providing mixers?</span>
+                                            <span class="font-medium">Will we be providing mixers?</span>
                                         </label>
                                     </div>
                                     <div class="space-y-1">
-                                        <label for="will_provide_garnish"
+                                        <label for="we_will_provide_garnish"
                                             class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_garnish" name="will_provide_garnish" required />
+                                            <input type="checkbox" class="peer sr-only" id="we_will_provide_garnish" name="we_will_provide_garnish" required />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will client be providing garnish?</span>
+                                            <span class="font-medium">Will we be providing garnish?</span>
                                         </label>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="space-y-1">
-                                        <label for="will_provide_soft_drinks"
+                                        <label for="we_will_provide_soft_drinks"
                                             class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_soft_drinks" name="will_provide_soft_drinks" required />
+                                            <input type="checkbox" class="peer sr-only" id="we_will_provide_soft_drinks" name="we_will_provide_soft_drinks" required />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will client be providing soft drinks?</span>
+                                            <span class="font-medium">Will we be providing soft drinks?</span>
                                         </label>
                                     </div>
                                     <div class="space-y-1">
-                                        <label for="will_provide_juice"
+                                        <label for="we_will_provide_juice"
                                             class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_juice" name="will_provide_juice" required />
+                                            <input type="checkbox" class="peer sr-only" id="we_will_provide_juice" name="we_will_provide_juice" required />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will client be providing juice?</span>
+                                            <span class="font-medium">Will we be providing juice?</span>
                                         </label>
                                     </div>
                                 </div>
                                 <div class="space-y-1">
-                                    <label for="will_provide_ice"
+                                    <label for="we_will_provide_ice"
                                         class="group relative inline-flex items-center gap-3">
-                                        <input type="checkbox" class="peer sr-only" id="will_provide_ice" name="will_provide_ice" required />
+                                        <input type="checkbox" class="peer sr-only" id="we_will_provide_ice" name="we_will_provide_ice" required />
                                         <span
                                             class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                        <span class="font-medium">Will client be providing ice?</span>
+                                        <span class="font-medium">Will we be providing ice?</span>
                                     </label>
                                 </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="space-y-1">
-                                        <label for="will_provide_cups"
+                                        <label for="we_will_provide_cups"
                                             class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" id="will_provide_cups" name="will_provide_cups" required />
+                                            <input type="checkbox" class="peer sr-only" id="we_will_provide_cups" name="we_will_provide_cups" required />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will client be providing cups, straws, & napkins?</span>
+                                            <span class="font-medium">Will we be providing cups, straws, & napkins?</span>
                                         </label>
                                     </div>
                                     <div class="space-y-1">
@@ -175,7 +163,7 @@
                                             <input type="checkbox" class="peer sr-only" id="will_require_glassware" name="will_require_glassware" required />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Will you require glassware?</span>
+                                            <span class="font-medium">Does client want glassware?</span>
                                         </label>
                                     </div>
                                 </div>
@@ -241,7 +229,7 @@
     const closeQuoteFormModal = document.getElementById("closeQuoteFormModal");
 
     function handleCloseQuoteFormModal() {
-        const modal = document.getElementById('quoteModalContainer');
+        const modal = document.getElementById('leadQuoteModalContainer');
         modal.style.display = 'none';
     }
 
@@ -252,7 +240,7 @@
 
 <script nonce="{{ .Nonce }}">
     function handleCloseQuoteFormModal() {
-        const modal = document.getElementById('quoteModalContainer');
+        const modal = document.getElementById('leadQuoteModalContainer');
         modal.style.display = 'none';
     }
 
@@ -265,7 +253,7 @@
         const data = new FormData();
 
         new FormData(form).forEach((value, key) => {
-            if (key.includes("date_")) {
+            if (key.includes("_date")) {
                 if (value) data.set(key, new Date(value).getTime() / 1000);
             } else if (value) {
                 data.set(key, value);
@@ -292,15 +280,15 @@
                 }
             })
             .then(html => {
-                const table = document.getElementById('quotesTable');
+                const table = document.getElementById('leadQuotesTable');
                 table.outerHTML = html;
 				handleBindQuoteTableActions();
-                handleCloseQuoteFormModal();
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
             })
             .finally(() => {
+                handleCloseQuoteFormModal();
                 handleCloseAlertModal();
                 form.reset();
             });
@@ -309,11 +297,11 @@
     submitQuoteForm.addEventListener("click", () => handleSubmitQuoteForm());
 
     const alcoholPackages = document.getElementById("alcoholPackages");
-    const willProvideAlcohol = document.getElementById("will_provide_alcohol");
+    const willProvideAlcohol = document.getElementById("we_will_provide_alcohol");
 
-    willProvideAlcohol.addEventListener("change", (e) => shouldShowElement(alcoholPackages, !e.target.checked));
+    willProvideAlcohol.addEventListener("change", (e) => shouldShowElement(alcoholPackages, e.target.checked));
 
-    const willProvideCups = document.getElementById("will_provide_cups");
+    const willProvideCups = document.getElementById("we_will_provide_cups");
     const willProvideGlassware = document.getElementById("will_require_glassware");
 
     willProvideCups.addEventListener("change", (e) => shouldShowElement(willProvideGlassware, e.target.checked));

@@ -95,6 +95,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				PostEvent(w, r)
 				return
 			}
+			if len(parts) >= 5 && parts[4] == "quote" && helpers.IsNumeric(parts[3]) {
+				PostLeadQuote(w, r)
+				return
+			}
 		}
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -983,6 +987,9 @@ func PostLeadQuote(w http.ResponseWriter, r *http.Request) {
 		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 		return
 	}
+
+	quote := helpers.CalculatePackageQuote(form)
+	form.Amount = &quote
 
 	err = database.CreateLeadQuote(form)
 	if err != nil {

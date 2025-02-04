@@ -21,6 +21,20 @@ const (
 
 	CallConversionDuration int = 15
 
+	PerGuestBartendingRatio       float64 = 70.00
+	BartendingRate                float64 = 70.00
+	BarRentalCost                 float64 = 200.00
+	PerPersonAlcoholFee           float64 = 10.00
+	PerPersonWineFee              float64 = 2.00
+	PerPersonBeerFee              float64 = 3.00
+	PerPersonMixersFee            float64 = 3.00
+	PerPersonJuicesFee            float64 = 1.00
+	PerPersonSoftDrinksFee        float64 = 2.00
+	PerPersonCupsStrawsNapkinsFee float64 = 2.00
+	PerPersonIceFee               float64 = 2.00
+	PerPersonGlasswareFee         float64 = 3.00
+	DepositPercentageAmount       float64 = 0.25
+
 	SocialMediaAdsMedium  = "paid"
 	SocialMediaAdsChannel = "social"
 )

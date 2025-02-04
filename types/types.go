@@ -444,6 +444,7 @@ type ConversionReporting struct {
 }
 
 type LeadQuoteList struct {
+	LeadID    int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
 	QuoteID   int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
 	EventType string  `json:"event_type" form:"event_type" schema:"event_type"`
 	VenueType string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
@@ -453,30 +454,32 @@ type LeadQuoteList struct {
 }
 
 type LeadQuoteForm struct {
-	CSRFToken          *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	QuoteID            *int    `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	LeadID             *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	NumberOfBartenders *int    `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
-	Guests             *int    `json:"guests" form:"guests" schema:"guests"`
-	Hours              *int    `json:"hours" form:"hours" schema:"hours"`
-	PackageTypeID      *int    `json:"package_type_id" form:"package_type_id" schema:"package_type_id"`
-	EventTypeID        *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID        *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	EventDate          *int64  `json:"event_date" form:"event_date" schema:"event_date"`
+	CSRFToken          *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	QuoteID            *int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	LeadID             *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	NumberOfBartenders *int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+	Guests             *int     `json:"guests" form:"guests" schema:"guests"`
+	Hours              *int     `json:"hours" form:"hours" schema:"hours"`
+	EventTypeID        *int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID        *int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	EventDate          *int64   `json:"event_date" form:"event_date" schema:"event_date"`
+	Amount             *float64 `json:"amount" form:"amount" schema:"amount"`
 
-	WillProvideAlcohol *bool `json:"will_provide_alcohol" form:"will_provide_alcohol" schema:"will_provide_alcohol"`
-	AlcoholSegment     *int  `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
+	WeWillProvideAlcohol *bool `json:"we_will_provide_alcohol" form:"we_will_provide_alcohol" schema:"we_will_provide_alcohol"`
+	AlcoholSegment       *int  `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
 
-	WillRequireBar *bool `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
-	NumBars        *int  `json:"num_bars" form:"num_bars" schema:"num_bars"`
+	WeWillProvideIce               *bool `json:"we_will_provide_ice" form:"we_will_provide_ice" schema:"we_will_provide_ice"`
+	WeWillProvideSoftDrinks        *bool `json:"we_will_provide_soft_drinks" form:"we_will_provide_soft_drinks" schema:"we_will_provide_soft_drinks"`
+	WeWillProvideJuice             *bool `json:"we_will_provide_juice" form:"we_will_provide_juice" schema:"we_will_provide_juice"`
+	WeWillProvideMixers            *bool `json:"we_will_provide_mixers" form:"we_will_provide_mixers" schema:"we_will_provide_mixers"`
+	WeWillProvideGarnish           *bool `json:"we_will_provide_garnish" form:"we_will_provide_garnish" schema:"we_will_provide_garnish"`
+	WeWillProvideBeer              *bool `json:"we_will_provide_beer" form:"we_will_provide_beer" schema:"we_will_provide_beer"`
+	WeWillProvideWine              *bool `json:"we_will_provide_wine" form:"we_will_provide_wine" schema:"we_will_provide_wine"`
+	WeWillProvideCupsStrawsNapkins *bool `json:"we_will_provide_cups" form:"we_will_provide_cups" schema:"we_will_provide_cups"`
 
-	WillRequireIce               *bool `json:"will_require_ice" form:"will_require_ice" schema:"will_require_ice"`
-	WillRequireSoftDrinks        *bool `json:"will_require_soft_drinks" form:"will_require_soft_drinks" schema:"will_require_soft_drinks"`
-	WillRequireJuice             *bool `json:"will_require_juice" form:"will_require_juice" schema:"will_require_juice"`
-	WillRequireMixers            *bool `json:"will_require_mixers" form:"will_require_mixers" schema:"will_require_mixers"`
-	WillRequireGarnish           *bool `json:"will_require_garnish" form:"will_require_garnish" schema:"will_require_garnish"`
-	WillRequireBeer              *bool `json:"will_require_beer" form:"will_require_beer" schema:"will_require_beer"`
-	WillRequireWine              *bool `json:"will_require_wine" form:"will_require_wine" schema:"will_require_wine"`
-	WillRequireCupsStrawsNapkins *bool `json:"will_require_cups" form:"will_require_cups" schema:"will_require_cups"`
-	WillRequireGlassware         *bool `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
+	WillRequireGlassware *bool `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
+
+	WillRequireBar *bool   `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
+	NumBars        *int    `json:"num_bars" form:"num_bars" schema:"num_bars"`
+	BarType        *string `json:"bar_type" form:"bar_type" schema:"bar_type"`
 }

@@ -1404,48 +1404,47 @@ func IsPhoneNumberInDB(phoneNumber string) (bool, error) {
 
 func CreateLeadQuote(form types.LeadQuoteForm) error {
 	query := `
-		INSERT INTO lead_quote (
-			csrf_token, quote_id, lead_id, number_of_bartenders, guests, hours, 
-			will_require_bar, num_bars, will_provide_alcohol, alcohol_segment_id, 
-			package_type_id, event_type_id, venue_type_id, event_date, 
-			will_require_ice, will_require_soft_drinks, will_require_juice, 
-			will_require_mixers, will_require_garnish, will_require_beer, 
-			will_require_wine, will_require_cups, will_require_glassware
+		INSERT INTO quote (
+			lead_id, number_of_bartenders, guests, hours, 
+			will_require_bar, num_bars, bar_type, we_will_provide_alcohol, alcohol_segment_id, 
+			event_type_id, venue_type_id, event_date, 
+			we_will_provide_ice, we_will_provide_soft_drinks, we_will_provide_juice, 
+			we_will_provide_mixers, we_will_provide_garnish, we_will_provide_beer, 
+			we_will_provide_wine, we_will_provide_cups_straws_napkins, will_require_glassware, amount
 		)
 		VALUES (
-			$1, $2, $3, $4, $5, $6, 
-			$7, $8, $9, $10, 
-			$11, $12, $13, to_timestamp($14)::timestamptz AT TIME ZONE 'America/New_York', 
-			$15, $16, $17, $18, $19, $20, 
-			$21, $22, $23
-		)
+			$1, $2, $3, $4, 
+			$5, $6, $7, $8, $9, 
+			$10, $11, to_timestamp($12)::timestamptz AT TIME ZONE 'America/New_York', 
+			$13, $14, $15, $16, $17, $18, 
+			$19, $20, $21, $22
+		);
 	`
 
 	_, err := DB.Exec(
 		query,
-		utils.CreateNullString(form.CSRFToken),
-		utils.CreateNullInt(form.QuoteID),
 		utils.CreateNullInt(form.LeadID),
 		utils.CreateNullInt(form.NumberOfBartenders),
 		utils.CreateNullInt(form.Guests),
 		utils.CreateNullInt(form.Hours),
-		utils.CreateNullBool(form.WillRequireBar),
+		utils.CreateNullBoolDefaultFalse(form.WillRequireBar),
 		utils.CreateNullInt(form.NumBars),
-		utils.CreateNullBool(form.WillProvideAlcohol),
+		utils.CreateNullString(form.BarType),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideAlcohol),
 		utils.CreateNullInt(form.AlcoholSegment),
-		utils.CreateNullInt(form.PackageTypeID),
 		utils.CreateNullInt(form.EventTypeID),
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),
-		utils.CreateNullBool(form.WillRequireIce),
-		utils.CreateNullBool(form.WillRequireSoftDrinks),
-		utils.CreateNullBool(form.WillRequireJuice),
-		utils.CreateNullBool(form.WillRequireMixers),
-		utils.CreateNullBool(form.WillRequireGarnish),
-		utils.CreateNullBool(form.WillRequireBeer),
-		utils.CreateNullBool(form.WillRequireWine),
-		utils.CreateNullBool(form.WillRequireCupsStrawsNapkins),
-		utils.CreateNullBool(form.WillRequireGlassware),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideIce),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideSoftDrinks),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideJuice),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideMixers),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideGarnish),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideBeer),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideWine),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideCupsStrawsNapkins),
+		utils.CreateNullBoolDefaultFalse(form.WillRequireGlassware),
+		utils.CreateNullFloat64(form.Amount),
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting lead quote data: %w", err)
@@ -1457,7 +1456,7 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 	var leads []types.LeadQuoteList
 
-	query := `SELECT q.quote_id, e.name, v.name, q.event_date, q.guests, q.amount
+	query := `SELECT q.quote_id, e.name, v.name, q.event_date, q.guests, q.amount::NUMERIC, q.lead_id
 		FROM quote AS q
 		LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
 		LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
@@ -1482,7 +1481,8 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 			&eventType,
 			&eventDate,
 			&guests,
-			&amount)
+			&amount,
+			&lead.LeadID)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %w", err)
 		}

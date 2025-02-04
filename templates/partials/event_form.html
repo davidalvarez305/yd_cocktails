@@ -209,13 +209,13 @@
                 const table = document.getElementById('eventsTable');
                 table.outerHTML = html;
 				handleBindEventTableActions();
-                handleCloseEventFormModal();
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
             })
             .finally(() => {
                 handleCloseAlertModal();
+                handleCloseEventFormModal();
                 form.reset();
             });
     }
