@@ -1110,3 +1110,63 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
+
+func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to parse form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var form types.LeadQuoteForm
+	err = decoder.Decode(&form, r.PostForm)
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.UpdateLeadQuote(form)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error updating quote.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "modal",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
+		Data: map[string]any{
+			"AlertHeader":  "Success!",
+			"AlertMessage": "Quote has been successfully updated.",
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
