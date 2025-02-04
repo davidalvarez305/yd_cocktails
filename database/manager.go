@@ -1513,3 +1513,127 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 
 	return leads, nil
 }
+
+func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
+	query := `SELECT 
+		lead_id,
+		bartenders,
+		guests,
+		hours,
+		event_type_id,
+		venue_type_id,
+		start_time,
+		amount::NUMERIC,
+		we_will_provide_alcohol,
+		alcohol_segment_id,
+		we_will_provide_ice,
+		we_will_provide_soft_drinks,
+		we_will_provide_juice,
+		we_will_provide_mixers,
+		we_will_provide_garnish,
+		we_will_provide_beer,
+		we_will_provide_wine,
+		we_will_provide_cups,
+		will_require_glassware,
+		will_require_bar,
+		num_bars,
+		bar_type
+	FROM quote 
+	WHERE quote_id = $1`
+
+	var quoteDetails models.Quote
+
+	var leadID, bartenders, guests, hours, eventTypeID, venueTypeID, alcoholSegmentID, numBars sql.NullInt64
+	var eventDate sql.NullTime
+	var amount sql.NullFloat64
+	var barType sql.NullString
+	var weWillProvideAlcohol, weWillProvideIce, weWillProvideSoftDrinks, weWillProvideJuice,
+		weWillProvideMixers, weWillProvideGarnish, weWillProvideBeer, weWillProvideWine,
+		weWillProvideCups, willRequireGlassware, willRequireBar sql.NullBool
+
+	row := DB.QueryRow(query, quoteId)
+
+	err := row.Scan(
+		&leadID, &bartenders, &guests, &hours, &eventTypeID, &venueTypeID, &eventDate, &amount,
+		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
+		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
+		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
+		&numBars, &barType,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return quoteDetails, fmt.Errorf("no quote found with ID %s", quoteId)
+		}
+		return quoteDetails, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	if leadID.Valid {
+		quoteDetails.LeadID = int(leadID.Int64)
+	}
+	if bartenders.Valid {
+		quoteDetails.NumberOfBartenders = int(bartenders.Int64)
+	}
+	if guests.Valid {
+		quoteDetails.Guests = int(guests.Int64)
+	}
+	if hours.Valid {
+		quoteDetails.Hours = int(hours.Int64)
+	}
+	if eventTypeID.Valid {
+		quoteDetails.EventTypeID = int(eventTypeID.Int64)
+	}
+	if venueTypeID.Valid {
+		quoteDetails.VenueTypeID = int(venueTypeID.Int64)
+	}
+	if eventDate.Valid {
+		quoteDetails.EventDate = eventDate.Time.Unix()
+	}
+	if amount.Valid {
+		quoteDetails.Amount = amount.Float64
+	}
+	if weWillProvideAlcohol.Valid {
+		quoteDetails.WeWillProvideAlcohol = weWillProvideAlcohol.Bool
+	}
+	if alcoholSegmentID.Valid {
+		quoteDetails.AlcoholSegment = int(alcoholSegmentID.Int64)
+	}
+	if weWillProvideIce.Valid {
+		quoteDetails.WeWillProvideIce = weWillProvideIce.Bool
+	}
+	if weWillProvideSoftDrinks.Valid {
+		quoteDetails.WeWillProvideSoftDrinks = weWillProvideSoftDrinks.Bool
+	}
+	if weWillProvideJuice.Valid {
+		quoteDetails.WeWillProvideJuice = weWillProvideJuice.Bool
+	}
+	if weWillProvideMixers.Valid {
+		quoteDetails.WeWillProvideMixers = weWillProvideMixers.Bool
+	}
+	if weWillProvideGarnish.Valid {
+		quoteDetails.WeWillProvideGarnish = weWillProvideGarnish.Bool
+	}
+	if weWillProvideBeer.Valid {
+		quoteDetails.WeWillProvideBeer = weWillProvideBeer.Bool
+	}
+	if weWillProvideWine.Valid {
+		quoteDetails.WeWillProvideWine = weWillProvideWine.Bool
+	}
+	if weWillProvideCups.Valid {
+		quoteDetails.WeWillProvideCupsStrawsNapkins = weWillProvideCups.Bool
+	}
+	if willRequireGlassware.Valid {
+		quoteDetails.WillRequireGlassware = willRequireGlassware.Bool
+	}
+	if willRequireBar.Valid {
+		quoteDetails.WillRequireBar = willRequireBar.Bool
+	}
+	if numBars.Valid {
+		quoteDetails.NumBars = int(numBars.Int64)
+	}
+	if barType.Valid {
+		quoteDetails.BarType = barType.String
+	}
+
+	return quoteDetails, nil
+}
