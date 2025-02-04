@@ -1637,3 +1637,63 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 
 	return quoteDetails, nil
 }
+
+func UpdateLeadQuote(form types.LeadQuoteForm) error {
+	query := `
+		UPDATE quote
+		SET 
+			number_of_bartenders = COALESCE($2, number_of_bartenders),
+			guests = COALESCE($3, guests),
+			hours = COALESCE($4, hours),
+			will_require_bar = COALESCE($5, will_require_bar),
+			num_bars = $6,
+			bar_type = $7,
+			we_will_provide_alcohol = COALESCE($8, we_will_provide_alcohol),
+			alcohol_segment_id = $9,
+			event_type_id = $10,
+			venue_type_id = $11,
+			event_date = COALESCE(to_timestamp($12)::timestamptz AT TIME ZONE 'America/New_York', event_date),
+			we_will_provide_ice = COALESCE($13, we_will_provide_ice),
+			we_will_provide_soft_drinks = COALESCE($14, we_will_provide_soft_drinks),
+			we_will_provide_juice = COALESCE($15, we_will_provide_juice),
+			we_will_provide_mixers = COALESCE($16, we_will_provide_mixers),
+			we_will_provide_garnish = COALESCE($17, we_will_provide_garnish),
+			we_will_provide_beer = COALESCE($18, we_will_provide_beer),
+			we_will_provide_wine = COALESCE($19, we_will_provide_wine),
+			we_will_provide_cups_straws_napkins = COALESCE($20, we_will_provide_cups_straws_napkins),
+			will_require_glassware = COALESCE($21, will_require_glassware),
+			amount = $22
+		WHERE quote_id = $1
+	`
+
+	_, err := DB.Exec(
+		query,
+		utils.CreateNullInt(form.QuoteID),
+		utils.CreateNullInt(form.NumberOfBartenders),
+		utils.CreateNullInt(form.Guests),
+		utils.CreateNullInt(form.Hours),
+		utils.CreateNullBoolDefaultFalse(form.WillRequireBar),
+		utils.CreateNullInt(form.NumBars),
+		utils.CreateNullString(form.BarType),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideAlcohol),
+		utils.CreateNullInt(form.AlcoholSegment),
+		utils.CreateNullInt(form.EventTypeID),
+		utils.CreateNullInt(form.VenueTypeID),
+		utils.CreateNullInt64(form.EventDate),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideIce),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideSoftDrinks),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideJuice),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideMixers),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideGarnish),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideBeer),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideWine),
+		utils.CreateNullBoolDefaultFalse(form.WeWillProvideCupsStrawsNapkins),
+		utils.CreateNullBoolDefaultFalse(form.WillRequireGlassware),
+		utils.CreateNullFloat64(form.Amount),
+	)
+	if err != nil {
+		return fmt.Errorf("error updating lead quote data: %w", err)
+	}
+
+	return nil
+}
