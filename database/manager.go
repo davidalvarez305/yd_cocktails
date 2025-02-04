@@ -11,6 +11,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/models"
 	"github.com/davidalvarez305/yd_cocktails/types"
 	"github.com/davidalvarez305/yd_cocktails/utils"
+	"github.com/google/uuid"
 )
 
 func InsertCSRFToken(token models.CSRFToken) error {
@@ -1410,14 +1411,15 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 			event_type_id, venue_type_id, event_date, 
 			we_will_provide_ice, we_will_provide_soft_drinks, we_will_provide_juice, 
 			we_will_provide_mixers, we_will_provide_garnish, we_will_provide_beer, 
-			we_will_provide_wine, we_will_provide_cups_straws_napkins, will_require_glassware, amount
+			we_will_provide_wine, we_will_provide_cups_straws_napkins, will_require_glassware, amount,
+			external_id
 		)
 		VALUES (
 			$1, $2, $3, $4, 
 			$5, $6, $7, $8, $9, 
 			$10, $11, to_timestamp($12)::timestamptz AT TIME ZONE 'America/New_York', 
 			$13, $14, $15, $16, $17, $18, 
-			$19, $20, $21, $22
+			$19, $20, $21, $22, $23
 		);
 	`
 
@@ -1445,6 +1447,7 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 		utils.CreateNullBoolDefaultFalse(form.WeWillProvideCupsStrawsNapkins),
 		utils.CreateNullBoolDefaultFalse(form.WillRequireGlassware),
 		utils.CreateNullFloat64(form.Amount),
+		uuid.New().String(),
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting lead quote data: %w", err)
@@ -1696,4 +1699,91 @@ func UpdateLeadQuote(form types.LeadQuoteForm) error {
 	}
 
 	return nil
+}
+
+func AssignStripeCustomerIDToLead(stripeCustomerId string, leadId int) error {
+	if leadId == 0 {
+		return fmt.Errorf("lead_id cannot be nil")
+	}
+
+	query := `
+		UPDATE lead
+		SET stripe_customer_id = $2
+		WHERE lead_id = $1
+	`
+	_, err := DB.Exec(query, leadId, stripeCustomerId)
+	if err != nil {
+		return fmt.Errorf("failed to assign stripe customer id to lead: %v", err)
+	}
+
+	return nil
+}
+
+func AssignStripeInvoiceIDToQuote(stripeInvoiceId string, quoteId int) error {
+	if quoteId == 0 {
+		return fmt.Errorf("quote_id cannot be nil")
+	}
+
+	query := `
+		UPDATE quote
+		SET stripe_invoice_id = $2
+		WHERE quote_id = $1
+	`
+	_, err := DB.Exec(query, quoteId, stripeInvoiceId)
+	if err != nil {
+		return fmt.Errorf("failed to assign stripe invoice id to quote: %v", err)
+	}
+
+	return nil
+}
+
+func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, error) {
+	query := `SELECT l.lead_id,
+	l.full_name,
+	l.email,
+	l.phone_number,
+	l.stripe_customer_id,
+	q.event_date,
+	q.amount::NUMERIC,
+	q.external_id
+	FROM lead l
+	JOIN quote AS q ON q.lead_id = l.lead_id
+	WHERE l.lead_id = $1 AND q.quote_id = $2`
+
+	var quote types.QuoteDetails
+
+	row := DB.QueryRow(query, leadID)
+
+	var email, stripeCustomerId sql.NullString
+	var eventDate time.Time
+	var amount sql.NullFloat64
+
+	err := row.Scan(
+		&quote.LeadID,
+		&quote.FullName,
+		&quote.PhoneNumber,
+		&email,
+		&stripeCustomerId,
+		&eventDate,
+		&amount,
+		&quote.ExternalID,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return quote, fmt.Errorf("no lead found with ID %s", leadID)
+		}
+		return quote, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	if email.Valid {
+		quote.Email = email.String
+	}
+	if amount.Valid {
+		quote.Amount = amount.Float64
+	}
+	if stripeCustomerId.Valid {
+		quote.StripeCustomerID = stripeCustomerId.String
+	}
+
+	return quote, nil
 }

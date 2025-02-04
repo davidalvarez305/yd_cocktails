@@ -11,30 +11,44 @@ import (
 	"github.com/stripe/stripe-go/v81/invoiceitem"
 )
 
-func CreateStripeInvoiceForNewCustomer(email, firstName, lastName string, packagePrice float64) (stripe.Invoice, error) {
+func CreateStripeInvoice(stripeCustomerId, email, fullName string, eventDate int64, quote float64) (stripe.Invoice, error) {
 	stripe.Key = constants.StrikeAPIKey
 
-	custParams := &stripe.CustomerParams{
-		Email: stripe.String(email),
-		Name:  stripe.String(fmt.Sprintf("%s %s", firstName, lastName)),
-	}
-	cust, err := customer.New(custParams)
-	if err != nil {
-		return stripe.Invoice{}, fmt.Errorf("failed to create customer: %v", err)
+	if len(stripeCustomerId) == 0 {
+		custParams := &stripe.CustomerParams{
+			Email: stripe.String(email),
+			Name:  stripe.String(fullName),
+		}
+
+		cust, err := customer.New(custParams)
+		if err != nil {
+			return stripe.Invoice{}, fmt.Errorf("failed to create customer: %v", err)
+		}
+
+		stripeCustomerId = cust.ID
 	}
 
-	_, err = invoiceitem.New(&stripe.InvoiceItemParams{
-		Customer:    stripe.String(cust.ID),
-		Amount:      stripe.Int64(int64(packagePrice * 100)), // Convert to cents
+	_, err := invoiceitem.New(&stripe.InvoiceItemParams{
+		Customer:    stripe.String(stripeCustomerId),
+		Amount:      stripe.Int64(int64(quote * 100)),
 		Currency:    stripe.String(string(stripe.CurrencyUSD)),
-		Description: stripe.String("Full open bar service."),
+		Description: stripe.String("Bartending service."),
 	})
 	if err != nil {
 		return stripe.Invoice{}, fmt.Errorf("failed to create invoice item: %v", err)
 	}
 
+	t := time.Unix(eventDate, 0)
+	paymentDueDate := t.Add(-1 * time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
+
+	memo := `***TERMS & CONDITIONS***`
+
 	invoiceParams := &stripe.InvoiceParams{
-		Customer: stripe.String(cust.ID),
+		Customer:         stripe.String(stripeCustomerId),
+		DueDate:          stripe.Int64(paymentDueDate),
+		CollectionMethod: stripe.String("send_invoice"),
+		Description:      stripe.String(memo),
+		Currency:         stripe.String("USD"),
 	}
 
 	inv, err := invoice.New(invoiceParams)
@@ -46,8 +60,6 @@ func CreateStripeInvoiceForNewCustomer(email, firstName, lastName string, packag
 	if err != nil {
 		return stripe.Invoice{}, fmt.Errorf("failed to finalize invoice: %v", err)
 	}
-
-	inv.DueDate = time.Now().Local().Unix()
 
 	return *inv, nil
 }

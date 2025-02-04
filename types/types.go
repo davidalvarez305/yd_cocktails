@@ -483,3 +483,14 @@ type LeadQuoteForm struct {
 	NumBars        *int    `json:"num_bars" form:"num_bars" schema:"num_bars"`
 	BarType        *string `json:"bar_type" form:"bar_type" schema:"bar_type"`
 }
+
+type QuoteDetails struct {
+	LeadID           int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	ExternalID       string  `json:"external_id" form:"external_id" schema:"external_id"`
+	FullName         string  `json:"full_name" form:"full_name" schema:"full_name"`
+	Email            string  `json:"email" form:"email" schema:"email"`
+	PhoneNumber      string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	StripeCustomerID string  `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
+	Amount           float64 `json:"amount" form:"amount" schema:"amount"`
+	EventDate        int64   `json:"event_date" form:"event_date" schema:"event_date"`
+}

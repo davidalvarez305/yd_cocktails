@@ -10,6 +10,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/conversions"
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/services"
 	"github.com/davidalvarez305/yd_cocktails/sessions"
 	"github.com/davidalvarez305/yd_cocktails/types"
 )
@@ -1112,14 +1113,14 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	leadId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/lead")
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Failed to parse form data.",
+				"Message": "Failed to parse lead id.",
 			},
 		}
 		w.WriteHeader(http.StatusBadRequest)
@@ -1127,16 +1128,14 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var form types.LeadQuoteForm
-	err = decoder.Decode(&form, r.PostForm)
-
+	quoteId, err := helpers.GetSecondIDFromPath(r, "/crm/lead")
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Error decoding form data.",
+				"Message": "Failed to parse quote id.",
 			},
 		}
 		w.WriteHeader(http.StatusBadRequest)
@@ -1144,14 +1143,80 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.UpdateLeadQuote(form)
+	quote, err := database.GetLeadQuoteInvoiceDetails(fmt.Sprint(leadId), fmt.Sprint(quoteId))
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Error updating quote.",
+				"Message": "Error getting lead details.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	invoice, err := services.CreateStripeInvoice(quote.StripeCustomerID, quote.Email, quote.FullName, quote.EventDate, quote.Amount)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error sending stripe invoice.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.AssignStripeCustomerIDToLead(quote.StripeCustomerID, quote.LeadID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error assigning stripe customer ID to lead.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.AssignStripeInvoiceIDToQuote(invoice.ID, quote.LeadID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error assigning stripe invoice ID to quote.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var externalQuoteView = fmt.Sprintf("%s/quote/%s", constants.RootDomain, quote.ExternalID)
+	var textMessageTemplateNotification = fmt.Sprintf(
+		`BARTENDING QUOTE:
+		Here's the link to your estimate: %s
+	`, externalQuoteView)
+
+	_, err = services.SendTextMessage(quote.PhoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error sending invoice via text.",
 			},
 		}
 		w.WriteHeader(http.StatusBadRequest)
@@ -1164,7 +1229,7 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
 		Data: map[string]any{
 			"AlertHeader":  "Success!",
-			"AlertMessage": "Quote has been successfully updated.",
+			"AlertMessage": "Invoice has been sent.",
 		},
 	}
 

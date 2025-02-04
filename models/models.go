@@ -180,9 +180,10 @@ type CocktailIngredient struct {
 }
 
 type Quote struct {
-	QuoteID int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	LeadID  int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	Amount  float64 `json:"amount" form:"amount" schema:"amount"`
+	QuoteID    int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	ExternalID string  `json:"external_id" form:"external_id" schema:"external_id"`
+	LeadID     int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	Amount     float64 `json:"amount" form:"amount" schema:"amount"`
 
 	EventTypeID        int   `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
 	VenueTypeID        int   `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
