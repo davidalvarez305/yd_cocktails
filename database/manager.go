@@ -1787,3 +1787,129 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 
 	return quote, nil
 }
+
+func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails, error) {
+	query := `SELECT 
+		lead_id,
+		bartenders,
+		guests,
+		hours,
+		e.name AS event_type,
+		v.name AS venue_type,
+		start_time,
+		amount::NUMERIC,
+		we_will_provide_alcohol,
+		alcohol_segment_id,
+		we_will_provide_ice,
+		we_will_provide_soft_drinks,
+		we_will_provide_juice,
+		we_will_provide_mixers,
+		we_will_provide_garnish,
+		we_will_provide_beer,
+		we_will_provide_wine,
+		we_will_provide_cups,
+		will_require_glassware,
+		will_require_bar,
+		num_bars,
+		bar_type,
+		a.alcohol_segment_rate
+	FROM quote AS q
+	JOIN alcohol_segment AS a ON q.alcohol_segment_id = a.alcohol_segment_id
+	WHERE quote_id = $1`
+
+	var quoteDetails types.ExternalQuoteDetails
+
+	var bartenders, guests, hours, alcoholSegmentID, numBars sql.NullInt64
+	var eventDate sql.NullTime
+	var amount, alcoholSegmentAdjustment sql.NullFloat64
+	var barType, eventType, venueType sql.NullString
+	var weWillProvideAlcohol, weWillProvideIce, weWillProvideSoftDrinks, weWillProvideJuice,
+		weWillProvideMixers, weWillProvideGarnish, weWillProvideBeer, weWillProvideWine,
+		weWillProvideCups, willRequireGlassware, willRequireBar sql.NullBool
+
+	row := DB.QueryRow(query, externalQuoteId)
+
+	err := row.Scan(
+		&bartenders, &guests, &hours, &eventType, &venueType, &eventDate, &amount,
+		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
+		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
+		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
+		&numBars, &barType, &alcoholSegmentAdjustment,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return quoteDetails, fmt.Errorf("no quote found with external id: %s", externalQuoteId)
+		}
+		return quoteDetails, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	var floatGuests float64
+
+	if bartenders.Valid {
+		quoteDetails.NumberOfBartenders = int(bartenders.Int64)
+	}
+	if guests.Valid {
+		quoteDetails.Guests = int(guests.Int64)
+		floatGuests = float64(guests.Int64)
+	}
+	if hours.Valid {
+		quoteDetails.Hours = int(hours.Int64)
+	}
+	if eventType.Valid {
+		quoteDetails.EventType = eventType.String
+	}
+	if venueType.Valid {
+		quoteDetails.VenueType = venueType.String
+	}
+	if eventDate.Valid {
+		quoteDetails.EventDate = utils.FormatTimestampEST(eventDate.Time.Unix())
+	}
+	if amount.Valid {
+		quoteDetails.Amount = amount.Float64
+	}
+	if weWillProvideAlcohol.Valid {
+		quoteDetails.Alcohol = floatGuests * constants.PerPersonAlcoholFee
+	}
+	if alcoholSegmentAdjustment.Valid {
+		quoteDetails.Alcohol = floatGuests * constants.PerPersonAlcoholFee * alcoholSegmentAdjustment.Float64
+	}
+	if weWillProvideIce.Valid && weWillProvideIce.Bool {
+		quoteDetails.Ice = floatGuests * constants.PerPersonIceFee
+	}
+	if weWillProvideSoftDrinks.Valid && weWillProvideSoftDrinks.Bool {
+		quoteDetails.SoftDrinks = floatGuests * constants.PerPersonSoftDrinksFee
+	}
+	if weWillProvideJuice.Valid && weWillProvideJuice.Bool {
+		quoteDetails.Juice = floatGuests * constants.PerPersonJuicesFee
+	}
+	if weWillProvideMixers.Valid && weWillProvideMixers.Bool {
+		quoteDetails.Mixers = floatGuests * constants.PerPersonMixersFee
+	}
+	if weWillProvideGarnish.Valid && weWillProvideGarnish.Bool {
+		quoteDetails.Garnish = floatGuests * constants.PerPersonGarnishFee
+	}
+	if weWillProvideBeer.Valid && weWillProvideBeer.Bool {
+		quoteDetails.Beer = floatGuests * constants.PerPersonBeerFee
+	}
+	if weWillProvideWine.Valid && weWillProvideWine.Bool {
+		quoteDetails.Wine = floatGuests * constants.PerPersonWineFee
+	}
+	if weWillProvideCups.Valid && weWillProvideCups.Bool {
+		quoteDetails.CupsStrawsNapkins = floatGuests * constants.PerPersonCupsStrawsNapkinsFee
+	}
+	if willRequireGlassware.Valid {
+		quoteDetails.WillRequireGlassware = willRequireGlassware.Bool
+	}
+	if willRequireBar.Valid {
+		quoteDetails.WillRequireBar = willRequireBar.Bool
+	}
+	if numBars.Valid {
+		quoteDetails.NumBars = int(numBars.Int64)
+	}
+	if barType.Valid {
+		quoteDetails.BarType = barType.String
+	}
+
+	return quoteDetails, nil
+}

@@ -494,3 +494,29 @@ type QuoteDetails struct {
 	Amount           float64 `json:"amount" form:"amount" schema:"amount"`
 	EventDate        int64   `json:"event_date" form:"event_date" schema:"event_date"`
 }
+
+type ExternalQuoteDetails struct {
+	QuoteID            int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	ExternalID         string  `json:"external_id" form:"external_id" schema:"external_id"`
+	Amount             float64 `json:"amount" form:"amount" schema:"amount"`
+	EventType          string  `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType          string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	Guests             int     `json:"guests" form:"guests" schema:"guests"`
+	Hours              int     `json:"hours" form:"hours" schema:"hours"`
+	NumberOfBartenders int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+	EventDate          string  `json:"event_date" form:"event_date" schema:"event_date"`
+	Alcohol            float64 `json:"alcohol" form:"alcohol" schema:"alcohol"`
+	AlcoholSegment     string  `json:"alcohol_segment" form:"alcohol_segment" schema:"alcohol_segment"`
+	Ice                float64 `json:"ice" form:"ice" schema:"ice"`
+	SoftDrinks         float64 `json:"soft_drinks" form:"soft_drinks" schema:"soft_drinks"`
+	Juice              float64 `json:"juice" form:"juice" schema:"juice"`
+	Mixers             float64 `json:"mixers" form:"mixers" schema:"mixers"`
+	Garnish            float64 `json:"garnish" form:"garnish" schema:"garnish"`
+	Beer               float64 `json:"beer" form:"beer" schema:"beer"`
+	Wine               float64 `json:"wine" form:"wine" schema:"wine"`
+	CupsStrawsNapkins  float64 `json:"cups" form:"cups" schema:"cups"`
+	Glassware          float64 `json:"glassware" form:"glassware" schema:"glassware"`
+	BarRental          float64 `json:"bar_rental" form:"bar_rental" schema:"bar_rental"`
+	NumBars            int     `json:"num_bars" form:"num_bars" schema:"num_bars"`
+	BarType            string  `json:"bar_type" form:"bar_type" schema:"bar_type"`
+}
