@@ -19,8 +19,8 @@
 			</div>
 			<div class="md:w-2/3 md:pl-24">
 				<form id="leadQuoteForm" class="space-y-6 xl:w-2/3">
-					<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
-					<input type="hidden" id="lead_id" name="lead_id" value="{{ .Lead.LeadID }}" />
+					<input type="hidden" id="csrf_token" name="csrf_token" value="{{ .CSRFToken }}" />
+					<input type="hidden" id="lead_id" name="lead_id" value="{{ .Quote.LeadID }}" />
 					<div class="grow space-y-1">
 						<label for="number_of_bartenders" class="font-medium">Bartenders Needed*</label>
 						<input type="number" id="number_of_bartenders" name="number_of_bartenders"
@@ -301,6 +301,11 @@
 
 	function handleSendInvoice() {
 		const alertModal = document.getElementById("alertModal");
+
+		const csrfToken = document.getElementById("csrf_token");
+
+		const body = new FormData();
+		body.set("csrf_token", csrfToken.value);
 
 		fetch("/crm/lead/{{ .Quote.LeadID }}/quote/{{ .Quote.QuoteID }}/invoice", {
 			method: "POST",

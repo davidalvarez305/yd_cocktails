@@ -1540,7 +1540,8 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 		will_require_glassware,
 		will_require_bar,
 		num_bars,
-		bar_type_id
+		bar_type_id,
+		quote_id
 	FROM quote 
 	WHERE quote_id = $1`
 
@@ -1560,7 +1561,7 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
 		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
 		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
-		&numBars, &barTypeId,
+		&numBars, &barTypeId, &quoteDetails.QuoteID,
 	)
 
 	if err != nil {
@@ -1739,10 +1740,10 @@ func AssignStripeInvoiceIDToQuote(stripeInvoiceId string, quoteId int) error {
 func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, error) {
 	query := `SELECT l.lead_id,
 	l.full_name,
-	l.email,
 	l.phone_number,
+	l.email,
 	l.stripe_customer_id,
-	q.event_date,
+	q.event_date AT TIME ZONE 'America/New_York' AT TIME ZONE 'UTC',
 	q.amount::NUMERIC,
 	q.external_id
 	FROM lead l
@@ -1751,7 +1752,7 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 
 	var quote types.QuoteDetails
 
-	row := DB.QueryRow(query, leadID)
+	row := DB.QueryRow(query, leadID, quoteId)
 
 	var email, stripeCustomerId sql.NullString
 	var eventDate time.Time
@@ -1783,6 +1784,8 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 	if stripeCustomerId.Valid {
 		quote.StripeCustomerID = stripeCustomerId.String
 	}
+
+	quote.EventDate = eventDate.Unix()
 
 	return quote, nil
 }

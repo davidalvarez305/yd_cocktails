@@ -100,6 +100,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		if strings.HasPrefix(path, "/crm/lead/") {
 			parts := strings.Split(path, "/")
+			if strings.Contains(path, "invoice") {
+				PostSendInvoice(w, r)
+				return
+			}
 			if len(parts) >= 5 && parts[4] == "event" && helpers.IsNumeric(parts[3]) {
 				PostEvent(w, r)
 				return
@@ -1125,7 +1129,7 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
-	leadId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/lead")
+	leadId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/lead/")
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
@@ -1140,7 +1144,7 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quoteId, err := helpers.GetSecondIDFromPath(r, "/crm/lead")
+	quoteId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
@@ -1162,7 +1166,7 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Error getting lead details.",
+				"Message": "Error getting quote details.",
 			},
 		}
 		w.WriteHeader(http.StatusBadRequest)
