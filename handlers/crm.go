@@ -1219,7 +1219,7 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var externalQuoteView = fmt.Sprintf("%s/quote/%s", constants.RootDomain, quote.ExternalID)
+	var externalQuoteView = fmt.Sprintf("%s/external/%s", constants.RootDomain, quote.ExternalID)
 	var textMessageTemplateNotification = fmt.Sprintf(
 		`BARTENDING QUOTE:
 		Here's the link to your estimate: %s
