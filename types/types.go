@@ -457,6 +457,7 @@ type LeadQuoteForm struct {
 	CSRFToken          *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
 	QuoteID            *int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
 	LeadID             *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	ExternalID         *string  `json:"external_id" form:"external_id" schema:"external_id"`
 	NumberOfBartenders *int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
 	Guests             *int     `json:"guests" form:"guests" schema:"guests"`
 	Hours              *int     `json:"hours" form:"hours" schema:"hours"`

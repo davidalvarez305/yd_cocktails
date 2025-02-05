@@ -210,3 +210,9 @@ type Quote struct {
 	NumBars        int  `json:"num_bars" form:"num_bars" schema:"num_bars"`
 	BarTypeID      int  `json:"bar_type_id" form:"bar_type_id" schema:"bar_type_id"`
 }
+
+type BarType struct {
+	BarTypeID int     `json:"bar_type_id" form:"bar_type_id" schema:"bar_type_id"`
+	Type      string  `json:"type" form:"type" schema:"type"`
+	Price     float64 `json:"price" form:"price" schema:"price"`
+}

@@ -48,6 +48,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				GetEventDetail(w, r, ctx)
 				return
 			}
+			if len(parts) >= 5 && parts[4] == "quote" && helpers.IsNumeric(parts[3]) {
+				GetLeadQuoteDetail(w, r, ctx)
+				return
+			}
 			return
 		}
 
@@ -250,6 +254,13 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	barTypes, err := database.GetBarTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bar types.", http.StatusInternalServerError)
+		return
+	}
+
 	var params types.GetLeadsParams
 	params.PageNum = helpers.SafeStringToPointer(r.URL.Query().Get("page_num"))
 
@@ -272,6 +283,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["Bartenders"] = bartenders
 	data["Referrals"] = referrals
 	data["LeadQuotes"] = leadQuotes
+	data["BarTypes"] = barTypes
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -1259,11 +1271,83 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 		return
 	}
 
+	barTypes, err := database.GetBarTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bar types.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Quote View — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["Quote"] = quote
+	data["BarTypes"] = barTypes
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	helpers.ServeContent(w, files, data)
+}
+
+func GetLeadQuoteDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
+	fileName := "lead_quote_detail.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName}
+	nonce, ok := r.Context().Value("nonce").(string)
+	if !ok {
+		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
+		return
+	}
+
+	csrfToken, ok := r.Context().Value("csrf_token").(string)
+	if !ok {
+		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
+		return
+	}
+
+	quoteId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting quote id from URL.", http.StatusInternalServerError)
+		return
+	}
+
+	quoteDetails, err := database.GetLeadQuoteDetails(fmt.Sprint(quoteId))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting quote details from DB.", http.StatusInternalServerError)
+		return
+	}
+
+	eventTypes, err := database.GetEventTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting event types.", http.StatusInternalServerError)
+		return
+	}
+
+	venueTypes, err := database.GetVenueTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting venue types.", http.StatusInternalServerError)
+		return
+	}
+
+	barTypes, err := database.GetBarTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bar types.", http.StatusInternalServerError)
+		return
+	}
+
+	data := ctx
+	data["PageTitle"] = "Quote Detail — " + constants.CompanyName
+	data["Nonce"] = nonce
+	data["CSRFToken"] = csrfToken
+	data["Quote"] = quoteDetails
+	data["EventTypes"] = eventTypes
+	data["VenueTypes"] = venueTypes
+	data["BarTypes"] = barTypes
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 

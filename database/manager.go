@@ -1520,12 +1520,12 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 	query := `SELECT 
 		lead_id,
-		bartenders,
+		number_of_bartenders,
 		guests,
 		hours,
 		event_type_id,
 		venue_type_id,
-		start_time,
+		event_date,
 		amount::NUMERIC,
 		we_will_provide_alcohol,
 		alcohol_segment_id,
@@ -1536,7 +1536,7 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 		we_will_provide_garnish,
 		we_will_provide_beer,
 		we_will_provide_wine,
-		we_will_provide_cups,
+		we_will_provide_cups_straws_napkins,
 		will_require_glassware,
 		will_require_bar,
 		num_bars,
@@ -1806,7 +1806,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		we_will_provide_garnish,
 		we_will_provide_beer,
 		we_will_provide_wine,
-		we_will_provide_cups,
+		we_will_provide_cups_straws_napkins,
 		will_require_glassware,
 		will_require_bar,
 		num_bars,
@@ -1908,4 +1908,29 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	}
 
 	return quoteDetails, nil
+}
+
+func GetBarTypes() ([]models.BarType, error) {
+	var barTypes []models.BarType
+
+	rows, err := DB.Query(`SELECT bar_type_id, type, price::NUMERIC FROM "bar_type"`)
+	if err != nil {
+		return barTypes, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var bt models.BarType
+		err := rows.Scan(&bt.BarTypeID, &bt.Type, &bt.Price)
+		if err != nil {
+			return barTypes, fmt.Errorf("error scanning row: %w", err)
+		}
+		barTypes = append(barTypes, bt)
+	}
+
+	if err := rows.Err(); err != nil {
+		return barTypes, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return barTypes, nil
 }
