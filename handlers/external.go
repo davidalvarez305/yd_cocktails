@@ -34,7 +34,7 @@ func ExternalHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		if strings.HasPrefix(path, "/quote/") {
+		if strings.HasPrefix(path, "/external/") {
 			GetExternalQuoteDetails(w, r, ctx)
 			return
 		}
