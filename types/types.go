@@ -520,6 +520,7 @@ type ExternalQuoteDetails struct {
 	Glassware          float64 `json:"glassware" form:"glassware" schema:"glassware"`
 	BarRental          float64 `json:"bar_rental" form:"bar_rental" schema:"bar_rental"`
 	BarType            string  `json:"bar_type" form:"bar_type" schema:"bar_type"`
+	RentalFeePerBar    float64 `json:"rental_fee_per_bar" form:"rental_fee_per_bar" schema:"rental_fee_per_bar"`
 	FullName           string  `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber        string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Email              string  `json:"email" form:"email" schema:"email"`

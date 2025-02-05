@@ -22,7 +22,7 @@ func Router() *http.ServeMux {
 	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(currentDir, "static")))))
 
 	router.Handle("/crm/", middleware.AuthRequired(http.HandlerFunc(handlers.CRMHandler)))
-	router.HandleFunc("/quote/", handlers.ExternalHandler)
+	router.HandleFunc("/external/", handlers.ExternalHandler)
 	router.HandleFunc("/partials/", handlers.PartialsHandler)
 	router.HandleFunc("/sms/", handlers.PhoneServiceHandler)
 	router.HandleFunc("/call/", handlers.PhoneServiceHandler)

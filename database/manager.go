@@ -1914,6 +1914,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	if willRequireBar.Valid && willRequireBar.Bool && barTypePrice.Valid && barType.Valid {
 		quoteDetails.BarRental = float64(numBars.Int64) * barTypePrice.Float64
 		quoteDetails.BarType = barType.String
+		quoteDetails.RentalFeePerBar = quoteDetails.BarRental / float64(numBars.Int64)
 	}
 	if email.Valid {
 		quoteDetails.Email = email.String
