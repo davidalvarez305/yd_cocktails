@@ -20,19 +20,6 @@ func GenerateTokenExpiryTime() time.Time {
 	return time.Now().Add(time.Duration(constants.CSRFTokenLength) * 24 * time.Hour)
 }
 
-func GetCurrentTimeInEST() (int64, error) {
-	var est int64
-
-	loc, err := time.LoadLocation(constants.TimeZone)
-	if err != nil {
-		return est, err
-	}
-
-	est = time.Now().In(loc).Unix()
-
-	return est, nil
-}
-
 func GetDateFromInstantForm(dateString string) (int64, error) {
 	parsedTime, err := time.Parse(time.RFC3339, dateString)
 	if err != nil {
