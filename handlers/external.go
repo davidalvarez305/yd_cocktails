@@ -67,7 +67,7 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 		return
 	}
 
-	externalQuoteId := strings.TrimPrefix(r.URL.Path, "/quote/")
+	externalQuoteId := strings.TrimPrefix(r.URL.Path, "/external/")
 
 	quote, err := database.GetExternalQuoteDetails(externalQuoteId)
 	if err != nil {
