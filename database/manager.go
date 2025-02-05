@@ -1859,8 +1859,8 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 
 	if bartenders.Valid && hours.Valid {
 		quoteDetails.NumberOfBartenders = int(bartenders.Int64)
-		quoteDetails.Hours = int(hours.Int64)
-		quoteDetails.BartendingFee = float64(hours.Int64) * constants.BartendingRate
+		quoteDetails.Hours = int(hours.Int64) * int(bartenders.Int64)
+		quoteDetails.BartendingFee = float64(bartenders.Int64) * float64(hours.Int64) * constants.BartendingRate
 	}
 	if guests.Valid {
 		quoteDetails.Guests = int(guests.Int64)
