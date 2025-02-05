@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -33,9 +34,11 @@ func ExternalHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		switch r.URL.Path {
-		case "/quote/":
+		if strings.HasPrefix(path, "/quote/") {
 			GetExternalQuoteDetails(w, r, ctx)
+			return
+		}
+		switch path {
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -68,6 +71,7 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 
 	quote, err := database.GetExternalQuoteDetails(externalQuoteId)
 	if err != nil {
+		fmt.Printf("ERROR GETTING QUOTE DETRAILS: %+v\n", err)
 		http.Error(w, "Error retrieving quote details.", http.StatusInternalServerError)
 		return
 	}

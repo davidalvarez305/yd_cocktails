@@ -1792,16 +1792,16 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 
 func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails, error) {
 	query := `SELECT 
-		lead_id,
-		bartenders,
+		q.quote_id,
+		number_of_bartenders,
 		guests,
 		hours,
 		e.name AS event_type,
 		v.name AS venue_type,
-		start_time,
+		event_date,
 		amount::NUMERIC,
 		we_will_provide_alcohol,
-		alcohol_segment_id,
+		a.alcohol_segment_id,
 		we_will_provide_ice,
 		we_will_provide_soft_drinks,
 		we_will_provide_juice,
@@ -1814,7 +1814,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		will_require_bar,
 		num_bars,
 		b.price::NUMERIC,
-		a.alcohol_segment_rate,
+		a.price_modification,
 		b.type,
 		l.full_name,
 		l.phone_number,
@@ -1822,8 +1822,10 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	FROM quote AS q
 	LEFT JOIN alcohol_segment AS a ON q.alcohol_segment_id = a.alcohol_segment_id
 	LEFT JOIN bar_type AS b ON q.bar_type_id = b.bar_type_id
+	LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
+	LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
 	JOIN lead AS l ON q.lead_id = l.lead_id
-	WHERE quote_id = $1`
+	WHERE q.external_id = $1`
 
 	var quoteDetails types.ExternalQuoteDetails
 
@@ -1838,6 +1840,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	row := DB.QueryRow(query, externalQuoteId)
 
 	err := row.Scan(
+		&quoteDetails.QuoteID,
 		&bartenders, &guests, &hours, &eventType, &venueType, &eventDate, &amount,
 		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
 		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
@@ -1854,16 +1857,14 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 
 	var floatGuests float64
 
-	if bartenders.Valid {
+	if bartenders.Valid && hours.Valid {
 		quoteDetails.NumberOfBartenders = int(bartenders.Int64)
-		quoteDetails.BartendingFee = float64(bartenders.Int64) * constants.BartendingRate
+		quoteDetails.Hours = int(hours.Int64)
+		quoteDetails.BartendingFee = float64(hours.Int64) * constants.BartendingRate
 	}
 	if guests.Valid {
 		quoteDetails.Guests = int(guests.Int64)
 		floatGuests = float64(guests.Int64)
-	}
-	if hours.Valid {
-		quoteDetails.Hours = int(hours.Int64)
 	}
 	if eventType.Valid {
 		quoteDetails.EventType = eventType.String
