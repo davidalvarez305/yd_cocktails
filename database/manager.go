@@ -1815,10 +1815,14 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		num_bars,
 		b.price::NUMERIC,
 		a.alcohol_segment_rate,
-		b.type
+		b.type,
+		l.full_name,
+		l.phone_number,
+		l.email
 	FROM quote AS q
 	LEFT JOIN alcohol_segment AS a ON q.alcohol_segment_id = a.alcohol_segment_id
 	LEFT JOIN bar_type AS b ON q.bar_type_id = b.bar_type_id
+	JOIN lead AS l ON q.lead_id = l.lead_id
 	WHERE quote_id = $1`
 
 	var quoteDetails types.ExternalQuoteDetails
@@ -1826,7 +1830,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	var bartenders, guests, hours, alcoholSegmentID, numBars sql.NullInt64
 	var eventDate sql.NullTime
 	var amount, alcoholSegmentAdjustment, barTypePrice sql.NullFloat64
-	var eventType, venueType, barType sql.NullString
+	var eventType, venueType, barType, email sql.NullString
 	var weWillProvideAlcohol, weWillProvideIce, weWillProvideSoftDrinks, weWillProvideJuice,
 		weWillProvideMixers, weWillProvideGarnish, weWillProvideBeer, weWillProvideWine,
 		weWillProvideCups, willRequireGlassware, willRequireBar sql.NullBool
@@ -1838,7 +1842,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
 		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
 		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
-		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType,
+		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType, &quoteDetails.FullName, &quoteDetails.PhoneNumber, &email,
 	)
 
 	if err != nil {
@@ -1852,6 +1856,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 
 	if bartenders.Valid {
 		quoteDetails.NumberOfBartenders = int(bartenders.Int64)
+		quoteDetails.BartendingFee = float64(bartenders.Int64) * constants.BartendingRate
 	}
 	if guests.Valid {
 		quoteDetails.Guests = int(guests.Int64)
@@ -1908,6 +1913,9 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	if willRequireBar.Valid && willRequireBar.Bool && barTypePrice.Valid && barType.Valid {
 		quoteDetails.BarRental = float64(numBars.Int64) * barTypePrice.Float64
 		quoteDetails.BarType = barType.String
+	}
+	if email.Valid {
+		quoteDetails.Email = email.String
 	}
 
 	return quoteDetails, nil

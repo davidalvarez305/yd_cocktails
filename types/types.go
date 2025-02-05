@@ -505,6 +505,7 @@ type ExternalQuoteDetails struct {
 	Guests             int     `json:"guests" form:"guests" schema:"guests"`
 	Hours              int     `json:"hours" form:"hours" schema:"hours"`
 	NumberOfBartenders int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+	BartendingFee      float64 `json:"bartending_fee" form:"bartending_fee" schema:"bartending_fee"`
 	EventDate          string  `json:"event_date" form:"event_date" schema:"event_date"`
 	Alcohol            float64 `json:"alcohol" form:"alcohol" schema:"alcohol"`
 	AlcoholSegment     string  `json:"alcohol_segment" form:"alcohol_segment" schema:"alcohol_segment"`
@@ -519,4 +520,7 @@ type ExternalQuoteDetails struct {
 	Glassware          float64 `json:"glassware" form:"glassware" schema:"glassware"`
 	BarRental          float64 `json:"bar_rental" form:"bar_rental" schema:"bar_rental"`
 	BarType            string  `json:"bar_type" form:"bar_type" schema:"bar_type"`
+	FullName           string  `json:"full_name" form:"full_name" schema:"full_name"`
+	PhoneNumber        string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	Email              string  `json:"email" form:"email" schema:"email"`
 }

@@ -1252,48 +1252,6 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
 
-func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
-	fileName := "external_quote_details.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName}
-	nonce, ok := r.Context().Value("nonce").(string)
-	if !ok {
-		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
-		return
-	}
-
-	csrfToken, ok := r.Context().Value("csrf_token").(string)
-	if !ok {
-		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
-		return
-	}
-
-	externalQuoteId := strings.TrimPrefix(r.URL.Path, "/quote/")
-
-	quote, err := database.GetExternalQuoteDetails(externalQuoteId)
-	if err != nil {
-		http.Error(w, "Error retrieving quote details.", http.StatusInternalServerError)
-		return
-	}
-
-	barTypes, err := database.GetBarTypes()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting bar types.", http.StatusInternalServerError)
-		return
-	}
-
-	data := ctx
-	data["PageTitle"] = "Quote View — " + constants.CompanyName
-	data["Nonce"] = nonce
-	data["CSRFToken"] = csrfToken
-	data["Quote"] = quote
-	data["BarTypes"] = barTypes
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-	helpers.ServeContent(w, files, data)
-}
-
 func GetLeadQuoteDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	fileName := "lead_quote_detail.html"
 	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName}

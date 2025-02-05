@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html class="dark" xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+
+<head>
+	<!-- Google tag (gtag.js) -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id={{ .GoogleAnalyticsID }}"></script>
+	<script nonce="{{ .Nonce }}">
+		window.dataLayer = window.dataLayer || [];
+		function gtag() { dataLayer.push(arguments); }
+		gtag("js", new Date());
+
+		gtag("config", "{{ .GoogleAnalyticsID }}");
+		gtag("set", "user_id", "{{ .ExternalID }}");
+
+		gtag('config', '{{ .GoogleAdsID }}');
+	</script>
+
+	<script nonce="{{ .Nonce }}">
+		gtag('config', '{{ .GoogleAdsID }}/{{ .GoogleAdsCallConversionLabel }}', {
+			'phone_conversion_number': '{{ .PhoneNumber }}',
+			'phone_conversion_css_class': 'phoneNumber'
+		});
+	</script>
+	<!-- End Google tag -->
+
+	<!-- Facebook Tag -->
+	<script nonce="{{ .Nonce }}">
+		!function (f, b, e, v, n, t, s) {
+			if (f.fbq) return; n = f.fbq = function () {
+				n.callMethod ?
+					n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+			};
+			if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+			n.queue = []; t = b.createElement(e); t.async = !0;
+			t.src = v; s = b.getElementsByTagName(e)[0];
+			s.parentNode.insertBefore(t, s)
+		}(window, document, 'script',
+			'https://connect.facebook.net/en_US/fbevents.js');
+		fbq('init', '{{ .FacebookDataSetID }}', { 'external_id': "{{ .ExternalID }}" });
+		fbq('track', 'PageView');
+	</script>
+	<noscript><img height="1" width="1" style="display:none"
+			src="https://www.facebook.com/tr?id={{ .FacebookDataSetID }}&ev=PageView&noscript=1" /></noscript>
+	<!-- End Facebook Tag -->
+
+	<!-- Essential Meta Tags -->
+	<meta charset="utf-8">
+	<title>{{ .PageTitle }}</title>
+	<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="{{ .MetaDescription }}">
+
+	<!-- Open Graph -->
+	<meta property="og:locale" content="en_US" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="{{ .PageTitle }}" />
+	<meta property="og:description" content="{{ .MetaDescription }}" />
+	<meta property="og:site_name" content="{{ .SiteName }}" />
+
+	<!-- Twitter -->
+	<meta name="twitter:title" content="{{ .PageTitle }}" />
+	<meta name="twitter:description" content="{{ .MetaDescription }}" />
+	<meta name="twitter:url" content="{{ .PagePath }}" />
+
+	<!-- CSS -->
+	<link href="{{ .StaticPath }}/main.css" rel="stylesheet" type="text/css">
+
+	<!-- Rels -->
+	<link rel="canonical" href="{{ .PagePath }}" />
+
+	<!-- Favicon -->
+	<link rel="shortcut icon" href="{{ .MediaPath }}/favicon.ico">
+	<link rel="icon" type="image/png" sizes="32x32" href="{{ .MediaPath }}/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="{{ .MediaPath }}/favicon-16x16.png">
+
+	<!-- Apple Touch Icons -->
+	<link rel="apple-touch-icon" sizes="180x180" href="{{ .MediaPath }}/apple-touch-icon.png">
+
+	<!-- Android Chrome -->
+	<link rel="icon" type="image/png" sizes="192x192" href="{{ .MediaPath }}/android-chrome-192x192.png">
+	<link rel="icon" type="image/png" sizes="512x512" href="{{ .MediaPath }}/android-chrome-512x512.png">
+</head>
+
+
+<body>
+	<div class="relative overflow-hidden bg-white dark:bg-gray-900 dark:text-gray-100">
+		<!-- Header -->
+		{{ template "header.html" . }}
+		<!-- END Header -->
+
+		<!-- Page Content -->
+		<main id="page-content" class="flex flex-auto flex-col mt-16 md:mt-0 max-w-full">
+			<div class="container xl:max-w-7xl mx-auto px-4 lg:p-8">
+				{{ template "content.html" . }}
+			</div>
+			<script src="{{ .StaticPath }}/main.js" nonce="{{ .Nonce }}"></script>
+		</main>
+		<!-- Page Content -->
+
+		<!-- Page Footer -->
+		{{ template "footer.html" . }}
+		<!-- END Page Footer -->
+	</div>
+</body>
+</html>
