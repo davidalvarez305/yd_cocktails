@@ -29,6 +29,7 @@ const (
 	PerPersonWineFee              float64 = 2.00
 	PerPersonBeerFee              float64 = 3.00
 	PerPersonMixersFee            float64 = 3.00
+	PerPersonGarnishFee           float64 = 1.00
 	PerPersonJuicesFee            float64 = 1.00
 	PerPersonSoftDrinksFee        float64 = 2.00
 	PerPersonCupsStrawsNapkinsFee float64 = 2.00
