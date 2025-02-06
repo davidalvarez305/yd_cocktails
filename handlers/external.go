@@ -61,12 +61,6 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 		return
 	}
 
-	csrfToken, ok := r.Context().Value("csrf_token").(string)
-	if !ok {
-		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
-		return
-	}
-
 	externalQuoteId := strings.TrimPrefix(r.URL.Path, "/external/")
 
 	quote, err := database.GetExternalQuoteDetails(externalQuoteId)
@@ -79,9 +73,17 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 	data := ctx
 	data["PageTitle"] = "Quote View — " + constants.CompanyName
 	data["Nonce"] = nonce
-	data["CSRFToken"] = csrfToken
 	data["Quote"] = quote
 	data["BartendingRate"] = constants.BartendingRate
+	data["PerPersonIceFee"] = constants.PerPersonIceFee
+	data["PerPersonSoftDrinksFee"] = constants.PerPersonSoftDrinksFee
+	data["PerPersonJuicesFee"] = constants.PerPersonJuicesFee
+	data["PerPersonMixersFee"] = constants.PerPersonMixersFee
+	data["PerPersonGarnishFee"] = constants.PerPersonGarnishFee
+	data["PerPersonBeerFee"] = constants.PerPersonBeerFee
+	data["PerPersonWineFee"] = constants.PerPersonWineFee
+	data["PerPersonCupsStrawsNapkinsFee"] = constants.PerPersonCupsStrawsNapkinsFee
+	data["PerPersonGlasswareFee"] = constants.PerPersonGlasswareFee
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 

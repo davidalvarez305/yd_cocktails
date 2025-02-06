@@ -1878,11 +1878,9 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	if amount.Valid {
 		quoteDetails.Amount = amount.Float64
 	}
-	if weWillProvideAlcohol.Valid {
-		quoteDetails.Alcohol = floatGuests * constants.PerPersonAlcoholFee
-	}
-	if alcoholSegmentAdjustment.Valid {
+	if weWillProvideAlcohol.Valid && alcoholSegmentAdjustment.Valid {
 		quoteDetails.Alcohol = floatGuests * constants.PerPersonAlcoholFee * alcoholSegmentAdjustment.Float64
+		quoteDetails.PerPersonAlcoholFee = constants.PerPersonAlcoholFee * alcoholSegmentAdjustment.Float64
 	}
 	if weWillProvideIce.Valid && weWillProvideIce.Bool {
 		quoteDetails.Ice = floatGuests * constants.PerPersonIceFee
@@ -1915,10 +1913,13 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		quoteDetails.BarRental = float64(numBars.Int64) * barTypePrice.Float64
 		quoteDetails.BarType = barType.String
 		quoteDetails.RentalFeePerBar = quoteDetails.BarRental / float64(numBars.Int64)
+		quoteDetails.NumBars = int(numBars.Int64)
 	}
 	if email.Valid {
 		quoteDetails.Email = email.String
 	}
+
+	quoteDetails.Deposit = quoteDetails.Amount * constants.DepositPercentageAmount
 
 	return quoteDetails, nil
 }

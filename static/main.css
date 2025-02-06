@@ -3306,6 +3306,10 @@ select{
   background-color: rgb(17 24 39 / var(--tw-bg-opacity));
 }
 
+.dark\:bg-gray-900\/50:is(.dark *){
+  background-color: rgb(17 24 39 / 0.5);
+}
+
 .dark\:bg-primary-700:is(.dark *){
   --tw-bg-opacity: 1;
   background-color: rgb(62 13 41 / var(--tw-bg-opacity));
