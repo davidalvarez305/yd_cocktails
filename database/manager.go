@@ -2001,3 +2001,52 @@ func SetInvoiceStatusToPaid(stripeInvoiceId string, datePaid int64) error {
 
 	return nil
 }
+
+func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuoteDetails, error) {
+	query := `SELECT l.lead_id,
+	q.event_type_id,
+	q.venue_type_id,
+	q.amount,
+	q.guests,
+	q.phone_number,
+	q.event_date
+	JOIN invoice i
+	JOIN quote q ON i.stripe_invoice_id = q.stripe_invoice_id
+	JOIN lead l ON l.lead_id = q.lead_id
+	WHERE i.stripe_invoice_id = $1`
+
+	var invoiceQuoteDetails types.InvoiceQuoteDetails
+
+	row := DB.QueryRow(query, stripeInvoiceId)
+
+	var eventTypeId, venueTypeId sql.NullInt64
+	var eventDate time.Time
+
+	err := row.Scan(
+		&invoiceQuoteDetails.LeadID,
+		&eventTypeId,
+		&venueTypeId,
+		&invoiceQuoteDetails.Amount,
+		&invoiceQuoteDetails.Guests,
+		&invoiceQuoteDetails.PhoneNumber,
+		&eventDate,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return invoiceQuoteDetails, fmt.Errorf("no lead found with stripeInvoiceId: %s", stripeInvoiceId)
+		}
+		return invoiceQuoteDetails, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	if eventTypeId.Valid {
+		invoiceQuoteDetails.EventTypeID = int(eventTypeId.Int64)
+	}
+
+	if venueTypeId.Valid {
+		invoiceQuoteDetails.VenueTypeID = int(venueTypeId.Int64)
+	}
+
+	invoiceQuoteDetails.EventDate = eventDate.Unix()
+
+	return invoiceQuoteDetails, nil
+}

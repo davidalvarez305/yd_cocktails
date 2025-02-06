@@ -2,13 +2,20 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
-	"github.com/davidalvarez305/yd_cocktails/database
-	"
+	"github.com/davidalvarez305/yd_cocktails/conversions"
+	"github.com/davidalvarez305/yd_cocktails/database"
+	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/services"
+	"github.com/davidalvarez305/yd_cocktails/types"
+	"github.com/davidalvarez305/yd_cocktails/utils"
+
 	"github.com/stripe/stripe-go/v81"
 	"github.com/stripe/stripe-go/v81/webhook"
 )
@@ -67,7 +74,9 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Update invoice status to paid
-		err = database.SetInvoiceStatusToPaid(invoice.ID, invoice.DatePaid)
+		datePaid := time.Now().Unix()
+		dateEventCreated := time.Now().Unix()
+		err = database.SetInvoiceStatusToPaid(invoice.ID, datePaid)
 		if err != nil {
 			log.Printf("Failed to get invoice by stripe invoice id: %v", err)
 			http.Error(w, "Error updating invoice status to paid", http.StatusInternalServerError)
@@ -75,8 +84,24 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// If invoice type = deposit, schedule event + report to google
-		if inv.InvoiceTypeID = constants.DepositInvoiceTypeID {
-			err = database.CreateEvent()
+		if inv.InvoiceTypeID == constants.DepositInvoiceTypeID {
+			quote, err := database.GetQuoteDetailsByStripeInvoiceID(inv.StripeInvoiceID)
+			if err != nil {
+				log.Printf("Failed to get invoice by stripe invoice id: %v", err)
+				http.Error(w, "Error creating event", http.StatusInternalServerError)
+				return
+			}
+
+			eventForm := types.EventForm{
+				LeadID:      &quote.LeadID,
+				EventTypeID: &quote.EventTypeID,
+				VenueTypeID: &quote.VenueTypeID,
+				DateCreated: &dateEventCreated,
+				DatePaid:    &datePaid,
+				Amount:      &quote.Amount,
+				Guests:      &quote.Guests,
+			}
+			err = database.CreateEvent(eventForm)
 			if err != nil {
 				log.Printf("Failed to get invoice by stripe invoice id: %v", err)
 				http.Error(w, "Error creating event", http.StatusInternalServerError)
@@ -84,7 +109,7 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if constants.Production {
-				lead, err := database.GetConversionReporting(int(helpers.SafeInt(form.LeadID)))
+				lead, err := database.GetConversionReporting(int(helpers.SafeInt(eventForm.LeadID)))
 				if err != nil {
 					fmt.Printf("Error getting conversion: %+v\n", err)
 					tmplCtx := types.DynamicPartialTemplate{
@@ -94,16 +119,16 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 							"Message": "Internal error reporting conversions to Google.",
 						},
 					}
-		
+
 					w.WriteHeader(http.StatusBadRequest)
 					helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 					return
 				}
-		
+
 				if lead.FacebookClickID != "" {
 					fbEvent := types.FacebookEventData{
 						EventName:      constants.EventConversionEventName,
-						EventTime:      helpers.SafeInt64(form.DatePaid),
+						EventTime:      helpers.SafeInt64(eventForm.DatePaid),
 						ActionSource:   "phone_call",
 						EventSourceURL: lead.LandingPage,
 						UserData: types.FacebookUserData{
@@ -121,16 +146,16 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 						},
 						EventID: fmt.Sprint(lead.EventID),
 					}
-		
+
 					metaPayload := types.FacebookPayload{
 						Data: []types.FacebookEventData{fbEvent},
 					}
-		
+
 					go conversions.SendFacebookConversion(metaPayload)
 				} else {
 					fbLeadAdEvent := types.FacebookEventData{
 						EventName:    constants.EventConversionEventName,
-						EventTime:    helpers.SafeInt64(form.DatePaid),
+						EventTime:    helpers.SafeInt64(eventForm.DatePaid),
 						ActionSource: "phone_call",
 						UserData: types.FacebookUserData{
 							LeadID: lead.InstantFormLeadID,
@@ -143,14 +168,14 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 						},
 						EventID: fmt.Sprint(lead.EventID),
 					}
-		
+
 					metaLeadAdPayload := types.FacebookPayload{
 						Data: []types.FacebookEventData{fbLeadAdEvent},
 					}
-		
+
 					go conversions.SendFacebookConversion(metaLeadAdPayload)
 				}
-		
+
 				googlePayload := types.GooglePayload{
 					ClientID: lead.GoogleClientID,
 					UserId:   lead.ExternalID,
@@ -172,25 +197,26 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 						Sha256PhoneNumber:  []string{helpers.HashString(lead.PhoneNumber)},
 					},
 				}
-		
+
 				go conversions.SendGoogleConversion(googlePayload)
-		}
+			}
 
-		var notifyList = []string{quote.PhoneNumber, ...constants.NotificationSubscribers}
+			var notifyList = append([]string{quote.PhoneNumber}, constants.NotificationSubscribers...)
 
-		// Text notification event details
-		for _, phoneNumber := range notifyList {
-			var textMessageTemplateNotification = fmt.Sprintf(
-				`EVENT BOOKED:
+			// Text notification event details
+			for _, phoneNumber := range notifyList {
+				var textMessageTemplateNotification = fmt.Sprintf(
+					`EVENT BOOKED:
 	
 				Date: %s,
 				Full Name: %s
-			`, utils.FormatTimestampEST(quote.EventDate), lead.FullName, helpers.SafeString(form.Message))
-	
-			_, err := services.SendTextMessage(constants.DavidPhoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
-	
-			if err != nil {
-				fmt.Printf("ERROR SENDING EVENT BOOKED NOTIFICATION MSG: %+v\n", err)
+			`, utils.FormatTimestampEST(quote.EventDate), quote.FullName)
+
+				_, err := services.SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+
+				if err != nil {
+					fmt.Printf("ERROR SENDING EVENT BOOKED NOTIFICATION MSG: %+v\n", err)
+				}
 			}
 		}
 	}

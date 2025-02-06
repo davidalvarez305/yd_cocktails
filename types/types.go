@@ -537,3 +537,15 @@ type CreateInvoiceParams struct {
 	Quote             float64
 	ShouldSendInvoice bool
 }
+
+type InvoiceQuoteDetails struct {
+	FullName         string  `json:"full_name" form:"full_name" schema:"full_name"`
+	StripeCustomerID string  `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
+	Amount           float64 `json:"amount" form:"amount" schema:"amount"`
+	EventTypeID      int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID      int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	LeadID           int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	Guests           int     `json:"guests" form:"guests" schema:"guests"`
+	PhoneNumber      string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	EventDate        int64   `json:"event_date" form:"event_date" schema:"event_date"`
+}
