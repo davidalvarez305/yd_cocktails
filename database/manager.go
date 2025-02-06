@@ -1719,19 +1719,14 @@ func AssignStripeCustomerIDToLead(stripeCustomerId string, leadId int) error {
 	return nil
 }
 
-func AssignStripeInvoiceIDToQuote(stripeInvoiceId string, quoteId int) error {
-	if quoteId == 0 {
-		return fmt.Errorf("quote_id cannot be nil")
-	}
-
+func CreateQuoteInvoice(stripeInvoiceId, invoiceUrl string, quoteId, invoiceTypeId int, dueDate int64) error {
 	query := `
-		UPDATE quote
-		SET stripe_invoice_id = $2
-		WHERE quote_id = $1
+		INSERT INTO invoice (stripe_invoice_id, quote_id, invoice_type_id, url, due_date, date_paid)
+		VALUES ($1, $2, $3, $4, to_timestamp($5)::timestamptz AT TIME ZONE 'America/New_York', to_timestamp($6)::timestamptz AT TIME ZONE 'America/New_York');
 	`
-	_, err := DB.Exec(query, quoteId, stripeInvoiceId)
+	_, err := DB.Exec(query, stripeInvoiceId, quoteId, invoiceTypeId, invoiceUrl, dueDate, time.Now().Unix())
 	if err != nil {
-		return fmt.Errorf("failed to assign stripe invoice id to quote: %v", err)
+		return fmt.Errorf("failed to create stripe invoice: %v", err)
 	}
 
 	return nil

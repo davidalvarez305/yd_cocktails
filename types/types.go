@@ -528,3 +528,12 @@ type ExternalQuoteDetails struct {
 	PhoneNumber         string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Email               string  `json:"email" form:"email" schema:"email"`
 }
+
+type CreateInvoiceParams struct {
+	StripeCustomerID  string
+	Email             string
+	FullName          string
+	DueDate           int64
+	Quote             float64
+	ShouldSendInvoice bool
+}

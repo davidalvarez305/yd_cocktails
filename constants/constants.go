@@ -37,6 +37,10 @@ const (
 	PerPersonGlasswareFee         float64 = 3.00
 	DepositPercentageAmount       float64 = 0.25
 
+	DepositInvoiceTypeID   int = 1
+	RemainingInvoiceTypeID int = 2
+	FullInvoiceTypeID      int = 3
+
 	SocialMediaAdsMedium  = "paid"
 	SocialMediaAdsChannel = "social"
 )

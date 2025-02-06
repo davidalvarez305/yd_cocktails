@@ -216,3 +216,18 @@ type BarType struct {
 	Type      string  `json:"type" form:"type" schema:"type"`
 	Price     float64 `json:"price" form:"price" schema:"price"`
 }
+
+type InvoiceType struct {
+	InvoiceTypeID int    `json:"invoice_type_id" form:"invoice_type_id" schema:"invoice_type_id"`
+	Type          string `json:"type" form:"type" schema:"type"`
+}
+
+type Invoice struct {
+	InvoiceID       int    `json:"invoice_id" form:"invoice_id" schema:"invoice_id"`
+	QuoteID         int    `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	DatePaid        int64  `json:"date_paid" form:"date_paid" schema:"date_paid"`
+	DueDate         int64  `json:"due_date" form:"due_date" schema:"due_date"`
+	InvoiceTypeID   int    `json:"invoice_type_id" form:"invoice_type_id" schema:"invoice_type_id"`
+	URL             string `json:"url" form:"url" schema:"url"`
+	StripeInvoiceID string `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+}
