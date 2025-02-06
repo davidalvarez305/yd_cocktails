@@ -48,6 +48,7 @@ const (
 var (
 	Production                    bool
 	StrikeAPIKey                  string
+	StripeWebhookSecret           string
 	FacebookAccessToken           string
 	FacebookDatasetID             string
 	GoogleAnalyticsID             string
@@ -142,6 +143,7 @@ func Init() {
 	GoogleAdsID = os.Getenv("GOOGLE_ADS_ID")
 	GoogleAdsCallConversionLabel = os.Getenv("GOOGLE_ADS_CALL_CONVERSION_LABEL")
 	StrikeAPIKey = os.Getenv("STRIPE_API_KEY")
+	StripeWebhookSecret = os.Getenv("STRIPE_WEBHOOK_SECRET")
 	FacebookLeadsSpreadsheetID = os.Getenv("FACEBOOK_LEADS_SPREADSHEET_ID")
 	FacebookLeadsSpreadsheetRange = os.Getenv("FACEBOOK_LEADS_SPREADSHEET_RANGE")
 

@@ -1943,3 +1943,61 @@ func GetBarTypes() ([]models.BarType, error) {
 
 	return barTypes, nil
 }
+
+func GetInvoiceByStripeInvoiceID(stripeInvoiceId string) (models.Invoice, error) {
+	query := `SELECT i.invoice_id,
+	i.quote_id,
+	i.date_paid,
+	i.due_date,
+	i.invoice_type_id,
+	i.url,
+	i.stripe_invoice_id
+	FROM invoice i
+	WHERE i.stripe_invoice_id = $1`
+
+	var invoice models.Invoice
+
+	row := DB.QueryRow(query, stripeInvoiceId)
+
+	var datePaid, dueDate time.Time
+	var url sql.NullString
+
+	err := row.Scan(
+		&invoice.InvoiceID,
+		&invoice.QuoteID,
+		&datePaid,
+		&dueDate,
+		&invoice.InvoiceTypeID,
+		&url,
+		&invoice.StripeInvoiceID,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return invoice, fmt.Errorf("no invoice found with Stripe Invoice ID %s", stripeInvoiceId)
+		}
+		return invoice, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	if url.Valid {
+		invoice.URL = url.String
+	}
+
+	invoice.DatePaid = datePaid.Unix()
+	invoice.DueDate = dueDate.Unix()
+
+	return invoice, nil
+}
+
+func SetInvoiceStatusToPaid(stripeInvoiceId string, datePaid int64) error {
+	query := `
+		UPDATE invoice
+		SET date_paid = $2
+		WHERE stripe_invoice_id = $1
+	`
+	_, err := DB.Exec(query, stripeInvoiceId, datePaid)
+	if err != nil {
+		return fmt.Errorf("failed to assign stripe customer id to lead: %v", err)
+	}
+
+	return nil
+}
