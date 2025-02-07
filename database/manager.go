@@ -1721,7 +1721,7 @@ func AssignStripeCustomerIDToLead(stripeCustomerId string, leadId int) error {
 
 func CreateQuoteInvoice(stripeInvoiceId, invoiceUrl string, quoteId, invoiceTypeId int, dueDate int64) error {
 	query := `
-		INSERT INTO invoice (stripe_invoice_id, quote_id, invoice_type_id, url, due_date, date_paid)
+		INSERT INTO invoice (stripe_invoice_id, quote_id, invoice_type_id, url, due_date, date_created)
 		VALUES ($1, $2, $3, $4, to_timestamp($5)::timestamptz AT TIME ZONE 'America/New_York', to_timestamp($6)::timestamptz AT TIME ZONE 'America/New_York');
 	`
 	_, err := DB.Exec(query, stripeInvoiceId, quoteId, invoiceTypeId, invoiceUrl, dueDate, time.Now().Unix())
@@ -1785,7 +1785,7 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 	return quote, nil
 }
 
-func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails, error) {
+func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.ExternalQuoteDetails, error) {
 	query := `SELECT 
 		q.quote_id,
 		number_of_bartenders,
@@ -1813,14 +1813,18 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		b.type,
 		l.full_name,
 		l.phone_number,
-		l.email
+		l.email,
+		i.url
 	FROM quote AS q
 	LEFT JOIN alcohol_segment AS a ON q.alcohol_segment_id = a.alcohol_segment_id
 	LEFT JOIN bar_type AS b ON q.bar_type_id = b.bar_type_id
 	LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
 	LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
 	JOIN lead AS l ON q.lead_id = l.lead_id
-	WHERE q.external_id = $1`
+	JOIN invoice AS i ON i.quote_id = q.quote_id
+	WHERE q.external_id = $1 and i.invoice_type_id = $2
+	ORDER BY i.date_created DESC
+	LIMIT 1;`
 
 	var quoteDetails types.ExternalQuoteDetails
 
@@ -1832,7 +1836,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		weWillProvideMixers, weWillProvideGarnish, weWillProvideBeer, weWillProvideWine,
 		weWillProvideCups, willRequireGlassware, willRequireBar sql.NullBool
 
-	row := DB.QueryRow(query, externalQuoteId)
+	row := DB.QueryRow(query, externalQuoteId, invoiceTypeId)
 
 	err := row.Scan(
 		&quoteDetails.QuoteID,
@@ -1840,7 +1844,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
 		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
 		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
-		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType, &quoteDetails.FullName, &quoteDetails.PhoneNumber, &email,
+		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType, &quoteDetails.FullName, &quoteDetails.PhoneNumber, &email, &quoteDetails.InvoiceURL,
 	)
 
 	if err != nil {

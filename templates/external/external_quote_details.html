@@ -245,7 +245,7 @@
     const dateReservation = document.getElementById("dateReservation");
 
     dateReservation.addEventListener("click", () => {
-        window.location.href = "https://invoice.stripe.com/i/acct_1QQdnrH7U6DN7fCL/live_YWNjdF8xUVFkbnJIN1U2RE43ZkNMLF9SaVROdlIyTEhTaVVUcUsxTG95OWhNTTlhcExrcnhJLDEyOTQ0MDY5MA0200CqucLhDR?s=db";
+        window.location.href = "{{ .Quote.InvoiceURL }}";
     });
 </script>
 {{ end }}

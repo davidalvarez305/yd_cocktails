@@ -225,6 +225,7 @@ type InvoiceType struct {
 type Invoice struct {
 	InvoiceID       int    `json:"invoice_id" form:"invoice_id" schema:"invoice_id"`
 	QuoteID         int    `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	DateCreated     int64  `json:"date_created" form:"date_created" schema:"date_created"`
 	DatePaid        int64  `json:"date_paid" form:"date_paid" schema:"date_paid"`
 	DueDate         int64  `json:"due_date" form:"due_date" schema:"due_date"`
 	InvoiceTypeID   int    `json:"invoice_type_id" form:"invoice_type_id" schema:"invoice_type_id"`

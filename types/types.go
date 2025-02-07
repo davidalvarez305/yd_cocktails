@@ -527,6 +527,7 @@ type ExternalQuoteDetails struct {
 	FullName            string  `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber         string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Email               string  `json:"email" form:"email" schema:"email"`
+	InvoiceURL          string  `json:"invoice_url" form:"invoice_url" schema:"invoice_url"`
 }
 
 type CreateInvoiceParams struct {

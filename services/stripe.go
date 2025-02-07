@@ -59,10 +59,10 @@ func CreateStripeInvoice(params types.CreateInvoiceParams) (stripe.Invoice, erro
 	}
 
 	// Send the Invoice
-	_, err = invoice.SendInvoice(inv.ID, &stripe.InvoiceSendInvoiceParams{})
+	sentInvoice, err := invoice.SendInvoice(inv.ID, &stripe.InvoiceSendInvoiceParams{})
 	if err != nil {
 		return stripe.Invoice{}, fmt.Errorf("failed to send invoice: %v", err)
 	}
 
-	return *inv, nil
+	return *sentInvoice, nil
 }
