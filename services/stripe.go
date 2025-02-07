@@ -85,10 +85,11 @@ func UpdateStripeInvoice(leadQuoteInvoice types.LeadQuoteInvoice) error {
 	}
 
 	// Delete the old invoice items that are associated with this invoice
-	if invoiceItems.Next() {
+	for invoiceItems.Next() {
 		var item = invoiceItems.InvoiceItem()
-		// Only delete invoice items that have not been invoiced
+		// Only delete invoice items that are associated with the current invoice and have not been paid
 		if item.Invoice != nil && item.Invoice.ID == inv.ID && !item.Invoice.Paid {
+			// Delete the invoice item
 			_, err := invoiceitem.Del(item.ID, nil)
 			if err != nil {
 				return fmt.Errorf("failed to delete invoice item %v: %v", item.ID, err)
