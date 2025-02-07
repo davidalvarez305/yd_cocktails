@@ -1412,14 +1412,14 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 			we_will_provide_ice, we_will_provide_soft_drinks, we_will_provide_juice, 
 			we_will_provide_mixers, we_will_provide_garnish, we_will_provide_beer, 
 			we_will_provide_wine, we_will_provide_cups_straws_napkins, will_require_glassware, amount,
-			external_id
+			external_id, will_require_coolers, num_coolers
 		)
 		VALUES (
 			$1, $2, $3, $4, 
 			$5, $6, $7, $8, $9, 
 			$10, $11, to_timestamp($12)::timestamptz AT TIME ZONE 'America/New_York', 
 			$13, $14, $15, $16, $17, $18, 
-			$19, $20, $21, $22, $23
+			$19, $20, $21, $22, $23, $24, $25
 		);
 	`
 
@@ -1448,6 +1448,8 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 		utils.CreateNullBoolDefaultFalse(form.WillRequireGlassware),
 		utils.CreateNullFloat64(form.Amount),
 		uuid.New().String(),
+		utils.CreateNullBoolDefaultFalse(form.WillRequireCoolers),
+		utils.CreateNullInt(form.NumCoolers),
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting lead quote data: %w", err)
@@ -1665,7 +1667,9 @@ func UpdateLeadQuote(form types.LeadQuoteForm) error {
 			we_will_provide_wine = COALESCE($19, we_will_provide_wine),
 			we_will_provide_cups_straws_napkins = COALESCE($20, we_will_provide_cups_straws_napkins),
 			will_require_glassware = COALESCE($21, will_require_glassware),
-			amount = $22
+			amount = $22,
+			will_require_coolers = COALESCE($23, will_require_coolers),
+			num_coolers = $24
 		WHERE quote_id = $1
 	`
 
@@ -1693,6 +1697,8 @@ func UpdateLeadQuote(form types.LeadQuoteForm) error {
 		utils.CreateNullBoolDefaultFalse(form.WeWillProvideCupsStrawsNapkins),
 		utils.CreateNullBoolDefaultFalse(form.WillRequireGlassware),
 		utils.CreateNullFloat64(form.Amount),
+		utils.CreateNullBoolDefaultFalse(form.WillRequireCoolers),
+		utils.CreateNullInt(form.NumCoolers),
 	)
 	if err != nil {
 		return fmt.Errorf("error updating lead quote data: %w", err)
