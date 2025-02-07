@@ -1740,9 +1740,11 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 	l.stripe_customer_id,
 	q.event_date AT TIME ZONE 'America/New_York' AT TIME ZONE 'UTC',
 	q.amount::NUMERIC,
-	q.external_id
+	q.external_id,
+	i.invoice_id
 	FROM lead l
 	JOIN quote AS q ON q.lead_id = l.lead_id
+	LEFT JOIN invoice AS i ON i.quote_id = q.quote_id
 	WHERE l.lead_id = $1 AND q.quote_id = $2`
 
 	var quote types.QuoteDetails
@@ -1752,6 +1754,7 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 	var email, stripeCustomerId sql.NullString
 	var eventDate time.Time
 	var amount sql.NullFloat64
+	var invoiceId sql.NullInt64
 
 	err := row.Scan(
 		&quote.LeadID,
@@ -1762,12 +1765,17 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 		&eventDate,
 		&amount,
 		&quote.ExternalID,
+		&invoiceId,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return quote, fmt.Errorf("no lead found with ID %s", leadID)
 		}
 		return quote, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	if invoiceId.Valid {
+		quote.InvoiceID = int(invoiceId.Int64)
 	}
 
 	if email.Valid {
@@ -2053,4 +2061,46 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 	invoiceQuoteDetails.EventDate = eventDate.Unix()
 
 	return invoiceQuoteDetails, nil
+}
+
+func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
+	var leadQuoteInvoices []types.LeadQuoteInvoice
+
+	query := `SELECT i.stripe_invoice_id, l.stripe_customer_id, q.amount::NUMERIC
+		FROM quote AS q
+		JOIN invoice AS i ON i.quote_id = q.quote_id
+		JOIN lead AS l ON l.lead_id = q.lead_id
+		WHERE q.quote_id = $1;`
+
+	rows, err := DB.Query(query, quoteId)
+	if err != nil {
+		return leadQuoteInvoices, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var leadQuoteInvoice types.LeadQuoteInvoice
+		var amount sql.NullFloat64
+
+		err := rows.Scan(
+			&leadQuoteInvoice.StripeInvoiceID,
+			&leadQuoteInvoice.StripeCustomerID,
+			&amount,
+		)
+		if err != nil {
+			return leadQuoteInvoices, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		if amount.Valid {
+			leadQuoteInvoice.Amount = amount.Float64
+		}
+
+		leadQuoteInvoices = append(leadQuoteInvoices, leadQuoteInvoice)
+	}
+
+	if err := rows.Err(); err != nil {
+		return leadQuoteInvoices, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return leadQuoteInvoices, nil
 }

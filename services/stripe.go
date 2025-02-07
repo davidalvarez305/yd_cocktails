@@ -66,3 +66,53 @@ func CreateStripeInvoice(params types.CreateInvoiceParams) (stripe.Invoice, erro
 
 	return *sentInvoice, nil
 }
+
+func UpdateStripeInvoice(leadQuoteInvoice types.LeadQuoteInvoice) error {
+	stripe.Key = constants.StrikeAPIKey
+
+	// Retrieve the existing invoice
+	inv, err := invoice.Get(leadQuoteInvoice.StripeInvoiceID, &stripe.InvoiceParams{})
+	if err != nil {
+		return fmt.Errorf("failed to retrieve invoice: %v", err)
+	}
+
+	// Retrieve all invoice items associated with this invoice
+	invoiceItems := invoiceitem.List(&stripe.InvoiceItemListParams{
+		Invoice: stripe.String(inv.ID),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to list invoice items: %v", err)
+	}
+
+	// Delete the old invoice items that are associated with this invoice
+	if invoiceItems.Next() {
+		var item = invoiceItems.InvoiceItem()
+		// Only delete invoice items that have not been invoiced
+		if item.Invoice != nil && item.Invoice.ID == inv.ID && !item.Invoice.Paid {
+			_, err := invoiceitem.Del(item.ID, nil)
+			if err != nil {
+				return fmt.Errorf("failed to delete invoice item %v: %v", item.ID, err)
+			}
+		}
+	}
+
+	// Add the new invoice item with the updated amount
+	_, err = invoiceitem.New(&stripe.InvoiceItemParams{
+		Customer:    stripe.String(leadQuoteInvoice.StripeCustomerID),
+		Amount:      stripe.Int64(int64(leadQuoteInvoice.Amount) * 100), // Amount in cents
+		Currency:    stripe.String(string(stripe.CurrencyUSD)),
+		Description: stripe.String("Bartending service."),
+		Invoice:     stripe.String(inv.ID), // Attach to the existing invoice
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to create invoice item: %v", err)
+	}
+
+	_, err = invoice.FinalizeInvoice(inv.ID, nil)
+	if err != nil {
+		return fmt.Errorf("failed to finalize invoice: %v", err)
+	}
+
+	return nil
+}

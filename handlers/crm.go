@@ -1101,6 +1101,9 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	amount := helpers.CalculatePackageQuote(form)
+	form.Amount = &amount
+
 	err = database.UpdateLeadQuote(form)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -1114,6 +1117,39 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 		return
+	}
+
+	// Update stripe invoices
+	leadQuoteInvoices, err := database.GetLeadQuoteInvoices(helpers.SafeInt(form.QuoteID))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error updating quote.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	for _, leadQuoteInvoice := range leadQuoteInvoices {
+		err = services.UpdateStripeInvoice(leadQuoteInvoice)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Error updating stripe invoice.",
+				},
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
+		}
 	}
 
 	tmplCtx := types.DynamicPartialTemplate{
@@ -1174,97 +1210,101 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Deposit Invoice
-	createInvoiceParams := types.CreateInvoiceParams{
-		Email:             quote.Email,
-		StripeCustomerID:  quote.StripeCustomerID,
-		FullName:          quote.FullName,
-		DueDate:           time.Now().Unix(),
-		Quote:             quote.Amount * constants.DepositPercentageAmount,
-		ShouldSendInvoice: true,
-	}
+	// Do not create invoice if quote has invoice already
+	if quote.InvoiceID == 0 {
 
-	depositInvoice, err := services.CreateStripeInvoice(createInvoiceParams)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error sending stripe invoice.",
-			},
+		// Deposit Invoice
+		createInvoiceParams := types.CreateInvoiceParams{
+			Email:             quote.Email,
+			StripeCustomerID:  quote.StripeCustomerID,
+			FullName:          quote.FullName,
+			DueDate:           time.Now().Unix(),
+			Quote:             quote.Amount * constants.DepositPercentageAmount,
+			ShouldSendInvoice: true,
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
 
-	err = database.CreateQuoteInvoice(depositInvoice.ID, depositInvoice.HostedInvoiceURL, quoteId, constants.DepositInvoiceTypeID, depositInvoice.DueDate)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error assigning stripe invoice ID to quote.",
-			},
+		depositInvoice, err := services.CreateStripeInvoice(createInvoiceParams)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Error sending stripe invoice.",
+				},
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
 
-	// Remaining
-	t := time.Unix(quote.EventDate, 0)
-	finalInvoiceDueDate := t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
-
-	createInvoiceParams.ShouldSendInvoice = false
-	createInvoiceParams.Quote = quote.Amount * (1 - constants.DepositPercentageAmount)
-	createInvoiceParams.DueDate = finalInvoiceDueDate
-
-	remainingInvoice, err := services.CreateStripeInvoice(createInvoiceParams)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error sending stripe invoice.",
-			},
+		err = database.CreateQuoteInvoice(depositInvoice.ID, depositInvoice.HostedInvoiceURL, quoteId, constants.DepositInvoiceTypeID, depositInvoice.DueDate)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Error assigning stripe invoice ID to quote.",
+				},
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
 
-	err = database.CreateQuoteInvoice(remainingInvoice.ID, remainingInvoice.HostedInvoiceURL, quoteId, constants.RemainingInvoiceTypeID, remainingInvoice.DueDate)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error assigning stripe invoice ID to quote.",
-			},
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
+		// Remaining
+		t := time.Unix(quote.EventDate, 0)
+		finalInvoiceDueDate := t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
 
-	err = database.AssignStripeCustomerIDToLead(quote.StripeCustomerID, quote.LeadID)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error assigning stripe customer ID to lead.",
-			},
+		createInvoiceParams.ShouldSendInvoice = false
+		createInvoiceParams.Quote = quote.Amount * (1 - constants.DepositPercentageAmount)
+		createInvoiceParams.DueDate = finalInvoiceDueDate
+
+		remainingInvoice, err := services.CreateStripeInvoice(createInvoiceParams)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Error sending stripe invoice.",
+				},
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
+
+		err = database.CreateQuoteInvoice(remainingInvoice.ID, remainingInvoice.HostedInvoiceURL, quoteId, constants.RemainingInvoiceTypeID, remainingInvoice.DueDate)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Error assigning stripe invoice ID to quote.",
+				},
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
+		}
+
+		err = database.AssignStripeCustomerIDToLead(quote.StripeCustomerID, quote.LeadID)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Error assigning stripe customer ID to lead.",
+				},
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
+		}
 	}
 
 	var externalQuoteView = fmt.Sprintf("%s/external/%s", constants.RootDomain, quote.ExternalID)

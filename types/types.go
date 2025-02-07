@@ -494,6 +494,7 @@ type QuoteDetails struct {
 	StripeCustomerID string  `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
 	Amount           float64 `json:"amount" form:"amount" schema:"amount"`
 	EventDate        int64   `json:"event_date" form:"event_date" schema:"event_date"`
+	InvoiceID        int     `json:"invoice_id" form:"invoice_id" schema:"invoice_id"`
 }
 
 type ExternalQuoteDetails struct {
@@ -549,4 +550,10 @@ type InvoiceQuoteDetails struct {
 	Guests           int     `json:"guests" form:"guests" schema:"guests"`
 	PhoneNumber      string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	EventDate        int64   `json:"event_date" form:"event_date" schema:"event_date"`
+}
+
+type LeadQuoteInvoice struct {
+	StripeCustomerID string  `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
+	StripeInvoiceID  string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+	Amount           float64 `json:"amount" form:"amount" schema:"amount"`
 }
