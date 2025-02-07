@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/models"
 	"github.com/davidalvarez305/yd_cocktails/types"
 )
 
@@ -9,7 +10,7 @@ func calculateBartenderRate(numBartenders, hours float64) float64 {
 	return constants.BartendingRate * numBartenders * hours
 }
 
-func CalculatePackageQuote(form types.LeadQuoteForm) float64 {
+func CalculatePackageQuote(form types.LeadQuoteForm, barTypes []models.BarType) float64 {
 	var totalCost float64
 
 	guests := SafeInt(form.Guests)
@@ -35,6 +36,8 @@ func CalculatePackageQuote(form types.LeadQuoteForm) float64 {
 	weWillProvideIce := SafeBoolDefaultFalse(form.WeWillProvideIce)
 
 	willRequireBar := SafeBoolDefaultFalse(form.WillRequireBar)
+	barTypeId := SafeInt(form.BarTypeID)
+
 	willRequireGlassware := SafeBoolDefaultFalse(form.WillRequireGlassware)
 
 	if weWillProvideAlcohol {
@@ -70,8 +73,15 @@ func CalculatePackageQuote(form types.LeadQuoteForm) float64 {
 	}
 
 	if willRequireBar {
+		var barRentalFee float64
+		for _, barType := range barTypes {
+			if barType.BarTypeID == barTypeId {
+				barRentalFee = barType.Price
+			}
+		}
+
 		numBarsFloat := float64(SafeInt(form.NumBars))
-		totalCost += numBarsFloat * constants.BarRentalCost
+		totalCost += numBarsFloat * barRentalFee
 	}
 
 	return totalCost

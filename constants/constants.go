@@ -24,7 +24,6 @@ const (
 
 	PerGuestBartendingRatio       float64 = 70.00
 	BartendingRate                float64 = 70.00
-	BarRentalCost                 float64 = 200.00
 	PerPersonAlcoholFee           float64 = 10.00
 	PerPersonWineFee              float64 = 2.00
 	PerPersonBeerFee              float64 = 3.00
