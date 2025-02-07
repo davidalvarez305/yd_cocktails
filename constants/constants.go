@@ -23,6 +23,7 @@ const (
 	CallConversionDuration int = 15
 
 	PerGuestBartendingRatio       float64 = 70.00
+	PerCoolerRentalFee            float64 = 50.00
 	BartendingRate                float64 = 70.00
 	PerPersonAlcoholFee           float64 = 10.00
 	PerPersonWineFee              float64 = 2.00

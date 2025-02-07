@@ -483,6 +483,9 @@ type LeadQuoteForm struct {
 	WillRequireBar *bool `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
 	NumBars        *int  `json:"num_bars" form:"num_bars" schema:"num_bars"`
 	BarTypeID      *int  `json:"bar_type_id" form:"bar_type_id" schema:"bar_type_id"`
+
+	WillRequireCoolers *bool `json:"will_require_cooler" form:"will_require_cooler" schema:"will_require_cooler"`
+	NumCoolers         *int  `json:"num_coolers" form:"num_coolers" schema:"num_coolers"`
 }
 
 type QuoteDetails struct {
@@ -529,6 +532,8 @@ type ExternalQuoteDetails struct {
 	PhoneNumber         string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Email               string  `json:"email" form:"email" schema:"email"`
 	InvoiceURL          string  `json:"invoice_url" form:"invoice_url" schema:"invoice_url"`
+	CoolerRental        float64 `json:"cooler_rental" form:"cooler_rental" schema:"cooler_rental"`
+	NumCoolers          int     `json:"num_coolers" form:"num_coolers" schema:"num_coolers"`
 }
 
 type CreateInvoiceParams struct {

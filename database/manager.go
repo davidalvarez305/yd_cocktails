@@ -1822,7 +1822,9 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 		l.full_name,
 		l.phone_number,
 		l.email,
-		i.url
+		i.url,
+		will_require_cooler,
+		num_coolers
 	FROM quote AS q
 	LEFT JOIN alcohol_segment AS a ON q.alcohol_segment_id = a.alcohol_segment_id
 	LEFT JOIN bar_type AS b ON q.bar_type_id = b.bar_type_id
@@ -1836,13 +1838,13 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 
 	var quoteDetails types.ExternalQuoteDetails
 
-	var bartenders, guests, hours, alcoholSegmentID, numBars sql.NullInt64
+	var bartenders, guests, hours, alcoholSegmentID, numBars, numCoolers sql.NullInt64
 	var eventDate sql.NullTime
 	var amount, alcoholSegmentAdjustment, barTypePrice sql.NullFloat64
 	var eventType, venueType, barType, email sql.NullString
 	var weWillProvideAlcohol, weWillProvideIce, weWillProvideSoftDrinks, weWillProvideJuice,
 		weWillProvideMixers, weWillProvideGarnish, weWillProvideBeer, weWillProvideWine,
-		weWillProvideCups, willRequireGlassware, willRequireBar sql.NullBool
+		weWillProvideCups, willRequireGlassware, willRequireBar, willRequireCooler sql.NullBool
 
 	row := DB.QueryRow(query, externalQuoteId, invoiceTypeId)
 
@@ -1852,7 +1854,7 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
 		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
 		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
-		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType, &quoteDetails.FullName, &quoteDetails.PhoneNumber, &email, &quoteDetails.InvoiceURL,
+		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType, &quoteDetails.FullName, &quoteDetails.PhoneNumber, &email, &quoteDetails.InvoiceURL, &willRequireCooler, &numCoolers,
 	)
 
 	if err != nil {
@@ -1931,6 +1933,10 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 		quoteDetails.BarType = barType.String
 		quoteDetails.RentalFeePerBar = quoteDetails.BarRental / float64(numBars.Int64)
 		quoteDetails.NumBars = int(numBars.Int64)
+	}
+
+	if willRequireCooler.Valid && numCoolers.Valid {
+		quoteDetails.CoolerRental = float64(numCoolers.Int64) * constants.PerCoolerRentalFee
 	}
 
 	if email.Valid {

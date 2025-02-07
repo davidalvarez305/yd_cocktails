@@ -38,6 +38,8 @@ func CalculatePackageQuote(form types.LeadQuoteForm, barTypes []models.BarType, 
 
 	willRequireBar := SafeBoolDefaultFalse(form.WillRequireBar)
 	barTypeId := SafeInt(form.BarTypeID)
+	willRequireCoolers := SafeBoolDefaultFalse(form.WillRequireCoolers)
+	numCoolers := SafeInt(form.NumCoolers)
 
 	willRequireGlassware := SafeBoolDefaultFalse(form.WillRequireGlassware)
 
@@ -82,6 +84,7 @@ func CalculatePackageQuote(form types.LeadQuoteForm, barTypes []models.BarType, 
 	}
 	// Supplies
 
+	// Rentals
 	if willRequireBar {
 		var barRentalFee float64
 		for _, barType := range barTypes {
@@ -93,6 +96,11 @@ func CalculatePackageQuote(form types.LeadQuoteForm, barTypes []models.BarType, 
 		numBarsFloat := float64(SafeInt(form.NumBars))
 		totalCost += numBarsFloat * barRentalFee
 	}
+
+	if willRequireCoolers {
+		totalCost += float64(numCoolers) * constants.PerCoolerRentalFee
+	}
+	// Rentals
 
 	return totalCost
 }
