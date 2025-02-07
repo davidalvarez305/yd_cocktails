@@ -10,7 +10,7 @@ func calculateBartenderRate(numBartenders, hours float64) float64 {
 	return constants.BartendingRate * numBartenders * hours
 }
 
-func CalculatePackageQuote(form types.LeadQuoteForm, barTypes []models.BarType) float64 {
+func CalculatePackageQuote(form types.LeadQuoteForm, barTypes []models.BarType, alcoholFeeAdjustment float64) float64 {
 	var totalCost float64
 
 	guests := SafeInt(form.Guests)
@@ -34,16 +34,17 @@ func CalculatePackageQuote(form types.LeadQuoteForm, barTypes []models.BarType) 
 	weWillProvideCupsStrawsNapkins := SafeBoolDefaultFalse(form.WeWillProvideCupsStrawsNapkins)
 	weWillProvideSoftDrinks := SafeBoolDefaultFalse(form.WeWillProvideSoftDrinks)
 	weWillProvideIce := SafeBoolDefaultFalse(form.WeWillProvideIce)
+	weWillProvideGarnish := SafeBoolDefaultFalse(form.WeWillProvideGarnish)
 
 	willRequireBar := SafeBoolDefaultFalse(form.WillRequireBar)
 	barTypeId := SafeInt(form.BarTypeID)
 
 	willRequireGlassware := SafeBoolDefaultFalse(form.WillRequireGlassware)
 
+	// Alcohol
 	if weWillProvideAlcohol {
-		totalCost += floatGuests * constants.PerPersonAlcoholFee
+		totalCost += floatGuests * constants.PerPersonAlcoholFee * alcoholFeeAdjustment
 	}
-
 	if weWillProvideBeer {
 		totalCost += floatGuests * constants.PerPersonBeerFee
 	}
@@ -51,26 +52,35 @@ func CalculatePackageQuote(form types.LeadQuoteForm, barTypes []models.BarType) 
 	if weWillProvideWine {
 		totalCost += floatGuests * constants.PerPersonWineFee
 	}
+	// Alcohol
 
-	if weWillProvideMixers {
-		totalCost += floatGuests * constants.PerPersonMixersFee
-	}
-	if weWillProvideJuices {
-		totalCost += floatGuests * constants.PerPersonJuicesFee
+	// Ingredients
+	if weWillProvideIce {
+		totalCost += floatGuests * constants.PerPersonIceFee
 	}
 	if weWillProvideSoftDrinks {
 		totalCost += floatGuests * constants.PerPersonSoftDrinksFee
 	}
+	if weWillProvideJuices {
+		totalCost += floatGuests * constants.PerPersonJuicesFee
+	}
+	if weWillProvideMixers {
+		totalCost += floatGuests * constants.PerPersonMixersFee
+	}
+	if weWillProvideGarnish {
+		totalCost += floatGuests * constants.PerPersonGarnishFee
+	}
+	// Ingredients
+
+	// Supplies
 	if weWillProvideCupsStrawsNapkins {
 		totalCost += floatGuests * constants.PerPersonCupsStrawsNapkinsFee
-	}
-	if weWillProvideIce {
-		totalCost += floatGuests * constants.PerPersonIceFee
 	}
 
 	if willRequireGlassware {
 		totalCost += floatGuests * constants.PerPersonGlasswareFee
 	}
+	// Supplies
 
 	if willRequireBar {
 		var barRentalFee float64

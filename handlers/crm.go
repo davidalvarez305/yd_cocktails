@@ -1025,7 +1025,23 @@ func PostLeadQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quote := helpers.CalculatePackageQuote(form, barTypes)
+	alcoholFeeAdjustment, err := database.GetAlcoholFeeAdjustment(helpers.SafeInt(form.AlcoholSegment))
+	if err != nil {
+		fmt.Printf("Error getting bar types: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while getting bar types.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	quote := helpers.CalculatePackageQuote(form, barTypes, alcoholFeeAdjustment)
 	form.Amount = &quote
 
 	err = database.CreateLeadQuote(form)
@@ -1133,7 +1149,23 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	amount := helpers.CalculatePackageQuote(form, barTypes)
+	alcoholFeeAdjustment, err := database.GetAlcoholFeeAdjustment(helpers.SafeInt(form.AlcoholSegment))
+	if err != nil {
+		fmt.Printf("Error getting bar types: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while getting bar types.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	amount := helpers.CalculatePackageQuote(form, barTypes, alcoholFeeAdjustment)
 	form.Amount = &amount
 
 	err = database.UpdateLeadQuote(form)

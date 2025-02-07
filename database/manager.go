@@ -1864,14 +1864,14 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 
 	var floatGuests float64
 
+	if guests.Valid {
+		quoteDetails.Guests = int(guests.Int64)
+		floatGuests = float64(guests.Int64)
+	}
 	if bartenders.Valid && hours.Valid {
 		quoteDetails.NumberOfBartenders = int(bartenders.Int64)
 		quoteDetails.Hours = int(hours.Int64) * int(bartenders.Int64)
 		quoteDetails.BartendingFee = float64(bartenders.Int64) * float64(hours.Int64) * constants.BartendingRate
-	}
-	if guests.Valid {
-		quoteDetails.Guests = int(guests.Int64)
-		floatGuests = float64(guests.Int64)
 	}
 	if eventType.Valid {
 		quoteDetails.EventType = eventType.String
@@ -1885,24 +1885,11 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 	if amount.Valid {
 		quoteDetails.Amount = amount.Float64
 	}
+
+	// Alcohol
 	if weWillProvideAlcohol.Valid && alcoholSegmentAdjustment.Valid {
 		quoteDetails.Alcohol = floatGuests * constants.PerPersonAlcoholFee * alcoholSegmentAdjustment.Float64
 		quoteDetails.PerPersonAlcoholFee = constants.PerPersonAlcoholFee * alcoholSegmentAdjustment.Float64
-	}
-	if weWillProvideIce.Valid && weWillProvideIce.Bool {
-		quoteDetails.Ice = floatGuests * constants.PerPersonIceFee
-	}
-	if weWillProvideSoftDrinks.Valid && weWillProvideSoftDrinks.Bool {
-		quoteDetails.SoftDrinks = floatGuests * constants.PerPersonSoftDrinksFee
-	}
-	if weWillProvideJuice.Valid && weWillProvideJuice.Bool {
-		quoteDetails.Juice = floatGuests * constants.PerPersonJuicesFee
-	}
-	if weWillProvideMixers.Valid && weWillProvideMixers.Bool {
-		quoteDetails.Mixers = floatGuests * constants.PerPersonMixersFee
-	}
-	if weWillProvideGarnish.Valid && weWillProvideGarnish.Bool {
-		quoteDetails.Garnish = floatGuests * constants.PerPersonGarnishFee
 	}
 	if weWillProvideBeer.Valid && weWillProvideBeer.Bool {
 		quoteDetails.Beer = floatGuests * constants.PerPersonBeerFee
@@ -1910,18 +1897,42 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 	if weWillProvideWine.Valid && weWillProvideWine.Bool {
 		quoteDetails.Wine = floatGuests * constants.PerPersonWineFee
 	}
+	// Alcohol
+
+	// Ingredients
+	if weWillProvideIce.Valid && weWillProvideIce.Bool {
+		quoteDetails.Ice = floatGuests * constants.PerPersonIceFee
+	}
+	if weWillProvideSoftDrinks.Valid && weWillProvideSoftDrinks.Bool {
+		quoteDetails.SoftDrinks = floatGuests * constants.PerPersonSoftDrinksFee
+	}
+	if weWillProvideMixers.Valid && weWillProvideMixers.Bool {
+		quoteDetails.Mixers = floatGuests * constants.PerPersonMixersFee
+	}
+	if weWillProvideJuice.Valid && weWillProvideJuice.Bool {
+		quoteDetails.Juice = floatGuests * constants.PerPersonJuicesFee
+	}
+	if weWillProvideGarnish.Valid && weWillProvideGarnish.Bool {
+		quoteDetails.Garnish = floatGuests * constants.PerPersonGarnishFee
+	}
+	// Ingredients
+
+	// Supplies
 	if weWillProvideCups.Valid && weWillProvideCups.Bool {
 		quoteDetails.CupsStrawsNapkins = floatGuests * constants.PerPersonCupsStrawsNapkinsFee
 	}
 	if willRequireGlassware.Valid && willRequireGlassware.Bool {
 		quoteDetails.Glassware = floatGuests * constants.PerPersonGlasswareFee
 	}
+	// Supplies
+
 	if willRequireBar.Valid && willRequireBar.Bool && barTypePrice.Valid && barType.Valid {
 		quoteDetails.BarRental = float64(numBars.Int64) * barTypePrice.Float64
 		quoteDetails.BarType = barType.String
 		quoteDetails.RentalFeePerBar = quoteDetails.BarRental / float64(numBars.Int64)
 		quoteDetails.NumBars = int(numBars.Int64)
 	}
+
 	if email.Valid {
 		quoteDetails.Email = email.String
 	}
@@ -2103,4 +2114,23 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 	}
 
 	return leadQuoteInvoices, nil
+}
+
+func GetAlcoholFeeAdjustment(alcoholSegment int) (float64, error) {
+	var alcoholFeeAdjustment float64
+
+	stmt, err := DB.Prepare(`SELECT price_modification FROM "alcohol_segment" WHERE "alcohol_segment_id" = $1`)
+	if err != nil {
+		return alcoholFeeAdjustment, fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(alcoholSegment)
+
+	err = row.Scan(&alcoholFeeAdjustment)
+	if err != nil {
+		return alcoholFeeAdjustment, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	return alcoholFeeAdjustment, nil
 }
