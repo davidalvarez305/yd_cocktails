@@ -24,7 +24,7 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		switch r.URL.Path {
-		case "/stripe/invoice":
+		case "/webhook/stripe/invoice":
 			handleStripeInvoicePayment(w, r)
 			return
 		default:
