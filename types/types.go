@@ -552,6 +552,7 @@ type InvoiceQuoteDetails struct {
 	EventTypeID      int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
 	VenueTypeID      int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
 	LeadID           int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	QuoteID          int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
 	Guests           int     `json:"guests" form:"guests" schema:"guests"`
 	PhoneNumber      string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	EventDate        int64   `json:"event_date" form:"event_date" schema:"event_date"`

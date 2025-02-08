@@ -83,15 +83,15 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// If invoice type = deposit, schedule event + report to google
-		if inv.InvoiceTypeID == constants.DepositInvoiceTypeID {
-			quote, err := database.GetQuoteDetailsByStripeInvoiceID(inv.StripeInvoiceID)
-			if err != nil {
-				log.Printf("Failed to get invoice by stripe invoice id: %v", err)
-				http.Error(w, "Error creating event", http.StatusInternalServerError)
-				return
-			}
+		quote, err := database.GetQuoteDetailsByStripeInvoiceID(inv.StripeInvoiceID)
+		if err != nil {
+			log.Printf("Failed to get invoice by stripe invoice id: %v", err)
+			http.Error(w, "Error creating event", http.StatusInternalServerError)
+			return
+		}
 
+		// If invoice type = deposit || full, schedule event + report to google
+		if inv.InvoiceTypeID == constants.DepositInvoiceTypeID || inv.InvoiceTypeID == constants.FullInvoiceTypeID {
 			eventForm := types.EventForm{
 				LeadID:      &quote.LeadID,
 				EventTypeID: &quote.EventTypeID,
@@ -217,6 +217,14 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					fmt.Printf("ERROR SENDING EVENT BOOKED NOTIFICATION MSG: %+v\n", err)
 				}
+			}
+		}
+
+		// Void all invoices if full or remaining has been paid
+		if inv.InvoiceTypeID == constants.FullInvoiceTypeID || inv.InvoiceTypeID == constants.RemainingInvoiceTypeID {
+			err = database.SetOpenInvoicesToVoid(quote.QuoteID)
+			if err != nil {
+				fmt.Printf("ERROR SETTING INVOICES TO VOID: %+v\n", err)
 			}
 		}
 	}

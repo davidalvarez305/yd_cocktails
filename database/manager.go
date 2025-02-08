@@ -2080,7 +2080,8 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 	q.amount,
 	q.guests,
 	q.phone_number,
-	q.event_date
+	q.event_date,
+	q.quote_id
 	JOIN invoice i
 	JOIN quote q ON i.stripe_invoice_id = q.stripe_invoice_id
 	JOIN lead l ON l.lead_id = q.lead_id
@@ -2101,6 +2102,7 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 		&invoiceQuoteDetails.Guests,
 		&invoiceQuoteDetails.PhoneNumber,
 		&eventDate,
+		&invoiceQuoteDetails.QuoteID,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -2223,4 +2225,21 @@ func GetInvoiceTypes() ([]models.InvoiceType, error) {
 	}
 
 	return invoiceTypes, nil
+}
+
+func SetOpenInvoicesToVoid(quoteId int) error {
+	query := `
+		UPDATE invoice AS i
+		SET i.invoice_status_id = $2
+		FROM quote AS q
+		WHERE q.quote_id = i.quote_id
+		AND q.quote_id = $1
+		AND i.invoice_status_id <> $3;
+	`
+	_, err := DB.Exec(query, quoteId, constants.VoidInvoiceStatusID, constants.PaidInvoiceStatusID)
+	if err != nil {
+		return fmt.Errorf("failed to assign stripe customer id to lead: %v", err)
+	}
+
+	return nil
 }
