@@ -221,8 +221,9 @@ type BarType struct {
 }
 
 type InvoiceType struct {
-	InvoiceTypeID int    `json:"invoice_type_id" form:"invoice_type_id" schema:"invoice_type_id"`
-	Type          string `json:"type" form:"type" schema:"type"`
+	InvoiceTypeID    int     `json:"invoice_type_id" form:"invoice_type_id" schema:"invoice_type_id"`
+	Type             string  `json:"type" form:"type" schema:"type"`
+	AmountPercentage float64 `json:"amount_percentage" form:"amount_percentage" schema:"amount_percentage"`
 }
 
 type Invoice struct {

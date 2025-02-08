@@ -1821,7 +1821,7 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 	return quote, nil
 }
 
-func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.ExternalQuoteDetails, error) {
+func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails, error) {
 	query := `SELECT 
 		q.quote_id,
 		number_of_bartenders,
@@ -1852,7 +1852,8 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 		l.email,
 		i.url,
 		will_require_coolers,
-		num_coolers
+		num_coolers,
+		q.amount::NUMERIC * it.amount_percentage
 	FROM quote AS q
 	LEFT JOIN alcohol_segment AS a ON q.alcohol_segment_id = a.alcohol_segment_id
 	LEFT JOIN bar_type AS b ON q.bar_type_id = b.bar_type_id
@@ -1860,21 +1861,22 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 	LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
 	JOIN lead AS l ON q.lead_id = l.lead_id
 	JOIN invoice AS i ON i.quote_id = q.quote_id
-	WHERE q.external_id = $1 and i.invoice_type_id = $2
-	ORDER BY i.date_created DESC
-	LIMIT 1;`
+	JOIN invoice_type AS it ON it.invoice_type_id = i.invoice_type_id AND it.invoice_type_id = $3
+	JOIN invoice_status AS is ON is.invoice_status_id = $2
+	WHERE q.external_id = $1
+	ORDER BY i.date_created DESC;`
 
 	var quoteDetails types.ExternalQuoteDetails
 
 	var bartenders, guests, hours, alcoholSegmentID, numBars, numCoolers sql.NullInt64
 	var eventDate sql.NullTime
-	var amount, alcoholSegmentAdjustment, barTypePrice sql.NullFloat64
+	var amount, alcoholSegmentAdjustment, barTypePrice, deposit sql.NullFloat64
 	var eventType, venueType, barType, email sql.NullString
 	var weWillProvideAlcohol, weWillProvideIce, weWillProvideSoftDrinks, weWillProvideJuice,
 		weWillProvideMixers, weWillProvideGarnish, weWillProvideBeer, weWillProvideWine,
 		weWillProvideCups, willRequireGlassware, willRequireBar, willRequireCooler sql.NullBool
 
-	row := DB.QueryRow(query, externalQuoteId, invoiceTypeId)
+	row := DB.QueryRow(query, externalQuoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID)
 
 	err := row.Scan(
 		&quoteDetails.QuoteID,
@@ -1883,6 +1885,7 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
 		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
 		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType, &quoteDetails.FullName, &quoteDetails.PhoneNumber, &email, &quoteDetails.InvoiceURL, &willRequireCooler, &numCoolers,
+		&deposit,
 	)
 
 	if err != nil {
@@ -1914,6 +1917,9 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 	}
 	if amount.Valid {
 		quoteDetails.Amount = amount.Float64
+	}
+	if deposit.Valid {
+		quoteDetails.Deposit = deposit.Float64
 	}
 
 	// Alcohol
@@ -1970,8 +1976,6 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 	if email.Valid {
 		quoteDetails.Email = email.String
 	}
-
-	quoteDetails.Deposit = quoteDetails.Amount * constants.DepositPercentageAmount
 
 	return quoteDetails, nil
 }
@@ -2185,4 +2189,29 @@ func GetAlcoholFeeAdjustment(alcoholSegment int) (float64, error) {
 	}
 
 	return alcoholFeeAdjustment, nil
+}
+
+func GetInvoiceTypes() ([]models.InvoiceType, error) {
+	var invoiceTypes []models.InvoiceType
+
+	rows, err := DB.Query(`SELECT invoice_type_id, type, amount_percentage FROM "invoice_type"`)
+	if err != nil {
+		return invoiceTypes, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var invType models.InvoiceType
+		err := rows.Scan(&invType.InvoiceTypeID, &invType.Type, &invType.AmountPercentage)
+		if err != nil {
+			return invoiceTypes, fmt.Errorf("error scanning row: %w", err)
+		}
+		invoiceTypes = append(invoiceTypes, invType)
+	}
+
+	if err := rows.Err(); err != nil {
+		return invoiceTypes, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return invoiceTypes, nil
 }

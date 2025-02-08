@@ -63,7 +63,7 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 
 	externalQuoteId := strings.TrimPrefix(r.URL.Path, "/external/")
 
-	quote, err := database.GetExternalQuoteDetails(externalQuoteId, constants.DepositInvoiceTypeID)
+	quote, err := database.GetExternalQuoteDetails(externalQuoteId)
 	if err != nil {
 		fmt.Printf("ERROR GETTING QUOTE DETRAILS: %+v\n", err)
 		http.Error(w, "Error retrieving quote details.", http.StatusInternalServerError)
