@@ -41,42 +41,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// Get user variables
 	localStorage.getItem("user") ?? setUser();
-
-	// Pop quote form when CTA's are clicked
-	let quoteButtons = document.querySelectorAll(".quoteButton");
-
-	quoteButtons.forEach((button) => {
-		button.addEventListener("click", function () {
-			const formModal = document.getElementById("formModalContainer");
-			if (formModal) formModal.style.display = "";
-
-			const buttonClicked = document.getElementById("button_clicked");
-			if (buttonClicked) buttonClicked.value = button.getAttribute("name");
-
-			const popUp = document.getElementById("popUpModalOverlay");
-			if (popUp) popUp.style.display = "none";
-		});
-	});
-
-	// Show floating header After 25% scroll
-	const floatingHeader = document.getElementById("floatingHeader");
-
-	if (!floatingHeader) return;
-
-    floatingHeader.style.display = "none";
-
-    function handleScroll() {
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
-        const pageHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-
-        const scrollPercentage = (scrollTop / pageHeight) * 100;
-
-        if (scrollPercentage > 5 && floatingHeader) {
-            floatingHeader.style.display = "";
-        } else {
-            floatingHeader.style.display = "none";
-        }
-    }
-
-	window.addEventListener("scroll", handleScroll);
 });

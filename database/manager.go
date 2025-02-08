@@ -1862,7 +1862,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	JOIN lead AS l ON q.lead_id = l.lead_id
 	JOIN invoice AS i ON i.quote_id = q.quote_id
 	JOIN invoice_type AS it ON it.invoice_type_id = i.invoice_type_id AND it.invoice_type_id = $3
-	JOIN invoice_status AS is ON is.invoice_status_id = $2
+	JOIN invoice_status AS stat ON stat.invoice_status_id = i.invoice_status_id AND stat.invoice_status_id = $2
 	WHERE q.external_id = $1
 	ORDER BY i.date_created DESC;`
 
@@ -1884,7 +1884,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
 		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
 		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
-		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType, &quoteDetails.FullName, &quoteDetails.PhoneNumber, &email, &quoteDetails.InvoiceURL, &willRequireCooler, &numCoolers,
+		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType, &quoteDetails.FullName, &quoteDetails.PhoneNumber, &email, &quoteDetails.DepositInvoiceURL, &willRequireCooler, &numCoolers,
 		&deposit,
 	)
 

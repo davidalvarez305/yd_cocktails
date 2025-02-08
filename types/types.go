@@ -531,7 +531,8 @@ type ExternalQuoteDetails struct {
 	FullName            string  `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber         string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Email               string  `json:"email" form:"email" schema:"email"`
-	InvoiceURL          string  `json:"invoice_url" form:"invoice_url" schema:"invoice_url"`
+	DepositInvoiceURL   string  `json:"deposit_invoice_url" form:"deposit_invoice_url" schema:"deposit_invoice_url"`
+	FullInvoiceURL      string  `json:"full_invoice_url" form:"full_invoice_url" schema:"full_invoice_url"`
 	CoolerRental        float64 `json:"cooler_rental" form:"cooler_rental" schema:"cooler_rental"`
 	NumCoolers          int     `json:"num_coolers" form:"num_coolers" schema:"num_coolers"`
 }
