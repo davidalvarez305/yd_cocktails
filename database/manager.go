@@ -1850,10 +1850,18 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		l.full_name,
 		l.phone_number,
 		l.email,
-		i.url,
+		i.url AS deposit_invoice_url,
 		will_require_coolers,
 		num_coolers,
-		q.amount::NUMERIC * it.amount_percentage
+		q.amount::NUMERIC * it.amount_percentage AS adjusted_amount,
+		(
+			SELECT i2.url
+			FROM invoice AS i2
+			JOIN invoice_type AS it2 ON it2.invoice_type_id = i2.invoice_type_id
+			JOIN invoice_status AS stat2 ON stat2.invoice_status_id = i2.invoice_status_id AND i2.invoice_status_id = $2
+			WHERE i2.quote_id = q.quote_id AND i2.invoice_type_id = $4
+			LIMIT 1
+		) AS full_invoice_url
 	FROM quote AS q
 	LEFT JOIN alcohol_segment AS a ON q.alcohol_segment_id = a.alcohol_segment_id
 	LEFT JOIN bar_type AS b ON q.bar_type_id = b.bar_type_id
@@ -1863,6 +1871,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	JOIN invoice AS i ON i.quote_id = q.quote_id
 	JOIN invoice_type AS it ON it.invoice_type_id = i.invoice_type_id AND it.invoice_type_id = $3
 	JOIN invoice_status AS stat ON stat.invoice_status_id = i.invoice_status_id AND stat.invoice_status_id = $2
+
 	WHERE q.external_id = $1
 	ORDER BY i.date_created DESC;`
 
@@ -1876,7 +1885,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		weWillProvideMixers, weWillProvideGarnish, weWillProvideBeer, weWillProvideWine,
 		weWillProvideCups, willRequireGlassware, willRequireBar, willRequireCooler sql.NullBool
 
-	row := DB.QueryRow(query, externalQuoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID)
+	row := DB.QueryRow(query, externalQuoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID, constants.FullInvoiceTypeID)
 
 	err := row.Scan(
 		&quoteDetails.QuoteID,
@@ -1885,7 +1894,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
 		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
 		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType, &quoteDetails.FullName, &quoteDetails.PhoneNumber, &email, &quoteDetails.DepositInvoiceURL, &willRequireCooler, &numCoolers,
-		&deposit,
+		&deposit, &quoteDetails.FullInvoiceURL,
 	)
 
 	if err != nil {
