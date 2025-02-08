@@ -1433,7 +1433,7 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 		utils.CreateNullInt(form.NumBars),
 		utils.CreateNullInt(form.BarTypeID),
 		utils.CreateNullBoolDefaultFalse(form.WeWillProvideAlcohol),
-		utils.CreateNullInt(form.AlcoholSegment),
+		utils.CreateNullInt(form.AlcoholSegmentID),
 		utils.CreateNullInt(form.EventTypeID),
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),
@@ -1543,18 +1543,20 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 		will_require_bar,
 		num_bars,
 		bar_type_id,
-		quote_id
+		quote_id,
+		will_require_coolers,
+		num_coolers
 	FROM quote 
 	WHERE quote_id = $1`
 
 	var quoteDetails models.Quote
 
-	var leadID, bartenders, guests, hours, eventTypeID, venueTypeID, alcoholSegmentID, numBars, barTypeId sql.NullInt64
+	var leadID, bartenders, guests, hours, eventTypeID, venueTypeID, alcoholSegmentID, numBars, barTypeId, numCoolers sql.NullInt64
 	var eventDate sql.NullTime
 	var amount sql.NullFloat64
 	var weWillProvideAlcohol, weWillProvideIce, weWillProvideSoftDrinks, weWillProvideJuice,
 		weWillProvideMixers, weWillProvideGarnish, weWillProvideBeer, weWillProvideWine,
-		weWillProvideCups, willRequireGlassware, willRequireBar sql.NullBool
+		weWillProvideCups, willRequireGlassware, willRequireBar, willRequireCoolers sql.NullBool
 
 	row := DB.QueryRow(query, quoteId)
 
@@ -1563,7 +1565,7 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
 		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
 		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
-		&numBars, &barTypeId, &quoteDetails.QuoteID,
+		&numBars, &barTypeId, &quoteDetails.QuoteID, &willRequireCoolers, &numCoolers,
 	)
 
 	if err != nil {
@@ -1639,6 +1641,12 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 	if barTypeId.Valid {
 		quoteDetails.BarTypeID = int(barTypeId.Int64)
 	}
+	if willRequireCoolers.Valid {
+		quoteDetails.WillRequireCoolers = willRequireCoolers.Bool
+	}
+	if numCoolers.Valid {
+		quoteDetails.NumCoolers = int(numCoolers.Int64)
+	}
 
 	return quoteDetails, nil
 }
@@ -1654,7 +1662,7 @@ func UpdateLeadQuote(form types.LeadQuoteForm) error {
 			num_bars = $6,
 			bar_type_id = $7,
 			we_will_provide_alcohol = COALESCE($8, we_will_provide_alcohol),
-			alcohol_segment_id = $9,
+			alcohol_segment_id = COALESCE($9, alcohol_segment_id),
 			event_type_id = $10,
 			venue_type_id = $11,
 			event_date = COALESCE(to_timestamp($12)::timestamptz AT TIME ZONE 'America/New_York', event_date),
@@ -1683,7 +1691,7 @@ func UpdateLeadQuote(form types.LeadQuoteForm) error {
 		utils.CreateNullInt(form.NumBars),
 		utils.CreateNullInt(form.BarTypeID),
 		utils.CreateNullBoolDefaultFalse(form.WeWillProvideAlcohol),
-		utils.CreateNullInt(form.AlcoholSegment),
+		utils.CreateNullInt(form.AlcoholSegmentID),
 		utils.CreateNullInt(form.EventTypeID),
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),

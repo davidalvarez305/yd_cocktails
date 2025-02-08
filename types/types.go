@@ -467,7 +467,7 @@ type LeadQuoteForm struct {
 	Amount             *float64 `json:"amount" form:"amount" schema:"amount"`
 
 	WeWillProvideAlcohol *bool `json:"we_will_provide_alcohol" form:"we_will_provide_alcohol" schema:"we_will_provide_alcohol"`
-	AlcoholSegment       *int  `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
+	AlcoholSegmentID     *int  `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
 
 	WeWillProvideIce               *bool `json:"we_will_provide_ice" form:"we_will_provide_ice" schema:"we_will_provide_ice"`
 	WeWillProvideSoftDrinks        *bool `json:"we_will_provide_soft_drinks" form:"we_will_provide_soft_drinks" schema:"we_will_provide_soft_drinks"`

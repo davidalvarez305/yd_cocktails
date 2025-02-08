@@ -209,6 +209,9 @@ type Quote struct {
 	WillRequireBar bool `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
 	NumBars        int  `json:"num_bars" form:"num_bars" schema:"num_bars"`
 	BarTypeID      int  `json:"bar_type_id" form:"bar_type_id" schema:"bar_type_id"`
+
+	WillRequireCoolers bool `json:"will_require_coolers" form:"will_require_coolers" schema:"will_require_coolers"`
+	NumCoolers         int  `json:"num_coolers" form:"num_coolers" schema:"num_coolers"`
 }
 
 type BarType struct {

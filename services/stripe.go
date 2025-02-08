@@ -70,13 +70,11 @@ func CreateStripeInvoice(params types.CreateInvoiceParams) (stripe.Invoice, erro
 func UpdateStripeInvoice(leadQuoteInvoice types.LeadQuoteInvoice) error {
 	stripe.Key = constants.StrikeAPIKey
 
-	// Retrieve the existing invoice
 	inv, err := invoice.Get(leadQuoteInvoice.StripeInvoiceID, &stripe.InvoiceParams{})
 	if err != nil {
 		return fmt.Errorf("failed to retrieve invoice: %v", err)
 	}
 
-	// Retrieve all invoice items associated with this invoice
 	invoiceItems := invoiceitem.List(&stripe.InvoiceItemListParams{
 		Invoice: stripe.String(inv.ID),
 	})
@@ -84,30 +82,19 @@ func UpdateStripeInvoice(leadQuoteInvoice types.LeadQuoteInvoice) error {
 		return fmt.Errorf("failed to list invoice items: %v", err)
 	}
 
-	// Delete the old invoice items that are associated with this invoice
+	// Update existing invoice items
 	for invoiceItems.Next() {
-		var item = invoiceItems.InvoiceItem()
-		// Only delete invoice items that are associated with the current invoice and have not been paid
+		item := invoiceItems.InvoiceItem()
+
 		if item.Invoice != nil && item.Invoice.ID == inv.ID && !item.Invoice.Paid {
-			// Delete the invoice item
-			_, err := invoiceitem.Del(item.ID, nil)
+			_, err := invoiceitem.Update(item.ID, &stripe.InvoiceItemParams{
+				Amount:      stripe.Int64(int64(leadQuoteInvoice.Amount) * 100), // Update the amount in cents
+				Description: stripe.String("Updated bartending service."),
+			})
 			if err != nil {
-				return fmt.Errorf("failed to delete invoice item %v: %v", item.ID, err)
+				return fmt.Errorf("failed to update invoice item %v: %v", item.ID, err)
 			}
 		}
-	}
-
-	// Add the new invoice item with the updated amount
-	_, err = invoiceitem.New(&stripe.InvoiceItemParams{
-		Customer:    stripe.String(leadQuoteInvoice.StripeCustomerID),
-		Amount:      stripe.Int64(int64(leadQuoteInvoice.Amount) * 100), // Amount in cents
-		Currency:    stripe.String(string(stripe.CurrencyUSD)),
-		Description: stripe.String("Bartending service."),
-		Invoice:     stripe.String(inv.ID), // Attach to the existing invoice
-	})
-
-	if err != nil {
-		return fmt.Errorf("failed to create invoice item: %v", err)
 	}
 
 	_, err = invoice.FinalizeInvoice(inv.ID, nil)

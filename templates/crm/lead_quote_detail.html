@@ -21,6 +21,7 @@
 				<form id="leadQuoteForm" class="space-y-6 xl:w-2/3">
 					<input type="hidden" id="csrf_token" name="csrf_token" value="{{ .CSRFToken }}" />
 					<input type="hidden" id="lead_id" name="lead_id" value="{{ .Quote.LeadID }}" />
+					<input type="hidden" id="quote_id" name="quote_id" value="{{ .Quote.QuoteID }}" />
 					<div class="grow space-y-1">
 						<label for="number_of_bartenders" class="font-medium">Bartenders Needed*</label>
 						<input type="number" id="number_of_bartenders" name="number_of_bartenders"
@@ -41,27 +42,44 @@
 					</div>
 					<div class="space-y-1">
 						<label for="will_require_bar" class="group relative inline-flex items-center gap-3">
-							<input type="checkbox" class="peer sr-only" id="will_require_bar" name="will_require_bar" {{
-								if .Quote.WillRequireBar }}checked{{ end }} />
+							<input type="checkbox" class="peer sr-only" id="will_require_bar" name="will_require_bar" {{ if .Quote.WillRequireBar }}checked{{ end }} />
 							<span
 								class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
 							<span class="font-medium">Do we need to bring a bar?</span>
 						</label>
 					</div>
-					<div class="grow space-y-1">
-						<label for="num_bars" class="font-medium">How many bars?</label>
-						<input type="number" id="num_bars" name="num_bars" value="{{ .Quote.NumBars }}"
-							class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+						<div class="grow space-y-1">
+							<label for="num_bars" class="font-medium">How many bars?</label>
+							<input type="number" id="num_bars" name="num_bars" value="{{ .Quote.NumBars }}"
+								class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+						</div>
+						<div class="grow space-y-1">
+							<label for="bar_type_id" class="font-medium">Bar Type</label>
+							<select id="bar_type_id" name="bar_type_id"
+								class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+								<option></option>
+								{{ range .BarTypes }}
+								<option value="{{ .BarTypeID }}" {{ if eq .BarTypeID $.Quote.BarTypeID }}selected{{ end }}>{{ .Type }}</option>
+								{{ end }}
+							</select>
+						</div>
 					</div>
-					<div class="grow space-y-1">
-						<label for="bar_type_id" class="font-medium">Bar Type</label>
-						<select id="bar_type_id" name="bar_type_id"
-							class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-							<option></option>
-							{{ range .BarTypes }}
-							<option value="{{ .BarTypeID }}" {{ if eq .BarTypeID $.Quote.BarTypeID }}selected{{ end }}>{{ .Type }}</option>
-							{{ end }}
-						</select>
+					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+						<div class="space-y-1">
+							<label for="will_require_coolers" class="group relative inline-flex items-center gap-3">
+								<input type="checkbox" class="peer sr-only" id="will_require_coolers"
+									name="will_require_coolers" {{ if .Quote.WillRequireCoolers }}checked{{ end }} />
+								<span
+									class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
+								<span class="font-medium">Will the client need coolers?</span>
+							</label>
+						</div>
+						<div class="grow space-y-1">
+							<label for="num_coolers" class="font-medium">How many coolers?</label>
+							<input type="number" id="num_coolers" name="num_coolers" value="{{ .Quote.NumCoolers }}"
+								class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+						</div>
 					</div>
 					<div class="space-y-1">
 						<label for="we_will_provide_alcohol" class="group relative inline-flex items-center gap-3">
@@ -78,8 +96,7 @@
 							class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
 							<option></option>
 							{{ range .AlcoholSegments }}
-							<option value="{{ .AlcoholSegmentID }}" {{ if eq .AlcoholSegmentID $.Quote.AlcoholSegmentID
-								}}selected{{ end }}>{{ .Name }}</option>
+							<option value="{{ .AlcoholSegmentID }}" {{ if eq .AlcoholSegmentID $.Quote.AlcoholSegmentID }}selected{{ end }}>{{ .Name }}</option>
 							{{ end }}
 						</select>
 					</div>
@@ -116,8 +133,7 @@
 						<div class="space-y-1">
 							<label for="we_will_provide_garnish" class="group relative inline-flex items-center gap-3">
 								<input type="checkbox" class="peer sr-only" id="we_will_provide_garnish"
-									name="we_will_provide_garnish" {{ if .Quote.WeWillProvideGarnish }}checked{{ end
-									}} />
+									name="we_will_provide_garnish" {{ if .Quote.WeWillProvideGarnish }}checked{{ end }} />
 								<span
 									class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
 								<span class="font-medium">Will we be providing garnish?</span>
@@ -159,8 +175,7 @@
 						<div class="space-y-1">
 							<label for="we_will_provide_cups" class="group relative inline-flex items-center gap-3">
 								<input type="checkbox" class="peer sr-only" id="we_will_provide_cups"
-									name="we_will_provide_cups" {{ if .Quote.WeWillProvideCupsStrawsNapkins }}checked{{
-									end }} />
+									name="we_will_provide_cups" {{ if .Quote.WeWillProvideCupsStrawsNapkins }}checked{{ end }} />
 								<span
 									class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
 								<span class="font-medium">Will we be providing cups, straws, & napkins?</span>
@@ -169,8 +184,7 @@
 						<div class="space-y-1">
 							<label for="will_require_glassware" class="group relative inline-flex items-center gap-3">
 								<input type="checkbox" class="peer sr-only" id="will_require_glassware"
-									name="will_require_glassware" {{ if .Quote.WillRequireGlassware }}checked{{ end
-									}} />
+									name="will_require_glassware" {{ if .Quote.WillRequireGlassware }}checked{{ end }} />
 								<span
 									class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
 								<span class="font-medium">Does client want glassware?</span>
@@ -254,13 +268,17 @@
 		const alertModal = document.getElementById("alertModal");
 		e.preventDefault();
 
-		const body = new FormData(e.target);
+		const data = new FormData(e.target);
+        const body = new FormData();
 
-		for (const [key, value] of body.entries()) {
+		for (const [key, value] of data.entries()) {
             if ((key.includes("_date")) && value) {
                 const timestamp = new Date(value).getTime() / 1000;
                 body.set(key, timestamp);
+                continue;
             }
+
+			if (value) body.append(key, value);
         }
 
 		fetch("/crm/lead/{{ .Quote.LeadID }}/quote/{{ .Quote.QuoteID }}", {
