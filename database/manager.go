@@ -363,16 +363,17 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
 	query := `SELECT l.lead_id, l.full_name, l.phone_number, 
-		l.created_at, lm.language, li.interest, ls.status, na.action, COUNT(*) OVER() AS total_rows
+       l.created_at, lm.language, li.interest, ls.status, na.action, COUNT(*) OVER() AS total_rows
 		FROM lead AS l
 		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
 		LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id
 		LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
 		LEFT JOIN next_action AS na ON na.next_action_id = l.next_action_id
-		WHERE ls.lead_status_id IS DISTINCT FROM $3 OR li.lead_interest_id IS DISTINCT FROM $4
+		WHERE (ls.lead_status_id IS DISTINCT FROM $3 OR ls.lead_status_id IS NULL)
+		AND (li.lead_interest_id IS DISTINCT FROM $4 OR li.lead_interest_id IS NULL)
 		ORDER BY l.created_at DESC
 		LIMIT $1
-		OFFSET $2`
+		OFFSET $2;`
 
 	var offset int
 

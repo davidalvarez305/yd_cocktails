@@ -47,7 +47,7 @@
                     <div class="space-y-6 sm:flex sm:gap-3 sm:space-y-0">
                         <div class="grow space-y-1">
                             <label for="lead_interest_id" class="font-medium">Lead Interest</label>
-                            <select id="lead_interest_id" name="lead_interest_id" required
+                            <select id="lead_interest_id" name="lead_interest_id"
                                 class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
                                 <option></option>
                                 {{ range .LeadInterestList }}
@@ -59,7 +59,7 @@
                         </div>
                         <div class="grow space-y-1">
                             <label for="lead_status_id" class="font-medium">Lead Status</label>
-                            <select id="lead_status_id" name="lead_status_id" required
+                            <select id="lead_status_id" name="lead_status_id"
                                 class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
                                 <option></option>
                                 {{ range .LeadStatusList }}
@@ -72,7 +72,7 @@
                     </div>
                     <div class="grow space-y-1">
                         <label for="next_action_id" class="font-medium">Next Action</label>
-                        <select id="next_action_id" name="next_action_id" required
+                        <select id="next_action_id" name="next_action_id"
                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
                             <option></option>
                             {{ range .NextActionList }}
@@ -295,7 +295,13 @@
     function handleLeadSaveChanges(e) {
         e.preventDefault();
 
-        var body = new FormData(e.target);
+        const data = new FormData(e.target);
+        const body = new FormData();
+
+		for (const [key, value] of data.entries()) {
+			if (value) body.append(key, value);
+        }
+
         const endpoint = e.target.action;
         const method = e.target.method === "get" ? body.get('_method') : e.target.method;
 
