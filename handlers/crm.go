@@ -265,6 +265,27 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	leadInterestList, err := database.GetLeadInterestList()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting lead interest list.", http.StatusInternalServerError)
+		return
+	}
+
+	leadStatusList, err := database.GetLeadStatusList()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting lead status list.", http.StatusInternalServerError)
+		return
+	}
+
+	nextActionList, err := database.GetNextActionList()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting next action list.", http.StatusInternalServerError)
+		return
+	}
+
 	var params types.GetLeadsParams
 	params.PageNum = helpers.SafeStringToPointer(r.URL.Query().Get("page_num"))
 
@@ -288,6 +309,9 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["Referrals"] = referrals
 	data["LeadQuotes"] = leadQuotes
 	data["BarTypes"] = barTypes
+	data["LeadInterestList"] = leadInterestList
+	data["LeadStatusList"] = leadStatusList
+	data["NextActionList"] = nextActionList
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 

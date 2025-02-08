@@ -44,6 +44,10 @@ const (
 	VoidInvoiceStatusID int = 2
 	PaidInvoiceStatusID int = 3
 
+	NewLeadStatusID int = 1
+
+	InitialContactStatusID int = 1
+
 	SocialMediaAdsMedium  = "paid"
 	SocialMediaAdsChannel = "social"
 )

@@ -57,8 +57,8 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 	defer tx.Rollback()
 
 	leadStmt, err := tx.Prepare(`
-		INSERT INTO lead (full_name, phone_number, created_at, message, opt_in_text_messaging, email)
-		VALUES ($1, $2, to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York', $4, $5, $6)
+		INSERT INTO lead (full_name, phone_number, created_at, message, opt_in_text_messaging, email, lead_status_id, next_action_id)
+		VALUES ($1, $2, to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York', $4, $5, $6, $7, $8)
 		RETURNING lead_id
 	`)
 	if err != nil {
@@ -75,6 +75,8 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 		message,
 		utils.CreateNullBool(quoteForm.OptInTextMessaging),
 		utils.CreateNullString(quoteForm.Email),
+		constants.NewLeadStatusID,
+		constants.InitialContactStatusID,
 	).Scan(&leadID)
 	if err != nil {
 		return leadID, fmt.Errorf("error inserting lead: %w", err)
@@ -361,9 +363,12 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
 	query := `SELECT l.lead_id, l.full_name, l.phone_number, 
-		l.created_at, lm.language, COUNT(*) OVER() AS total_rows
+		l.created_at, lm.language, li.interest, ls.status, na.action, COUNT(*) OVER() AS total_rows
 		FROM lead AS l
 		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
+		LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id
+		LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
+		LEFT JOIN next_action AS na ON na.next_action_id = l.next_action_id
 		ORDER BY l.created_at DESC
 		LIMIT $1
 		OFFSET $2`
@@ -389,13 +394,16 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	for rows.Next() {
 		var lead types.LeadList
 		var createdAt time.Time
-		var language sql.NullString
+		var language, nextAction, leadInterest, leadStatus sql.NullString
 
 		err := rows.Scan(&lead.LeadID,
 			&lead.FullName,
 			&lead.PhoneNumber,
 			&createdAt,
 			&language,
+			&leadInterest,
+			&leadStatus,
+			&nextAction,
 			&totalRows)
 		if err != nil {
 			return nil, 0, fmt.Errorf("error scanning row: %w", err)
@@ -404,6 +412,18 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 
 		if language.Valid {
 			lead.Language = language.String
+		}
+
+		if nextAction.Valid {
+			lead.NextAction = nextAction.String
+		}
+
+		if leadInterest.Valid {
+			lead.LeadInterest = leadInterest.String
+		}
+
+		if leadStatus.Valid {
+			lead.LeadStatus = leadStatus.String
 		}
 
 		leads = append(leads, lead)
@@ -796,7 +816,10 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		SET full_name = COALESCE($2, full_name), 
 		    phone_number = COALESCE($3, phone_number), 
 		    email = $4,
-			stripe_customer_id = $5
+			stripe_customer_id = $5,
+			lead_interest_id = $6,
+			lead_status_id = $7,
+			next_action_id = $8
 		WHERE lead_id = $1
 	`
 
@@ -806,6 +829,9 @@ func UpdateLead(form types.UpdateLeadForm) error {
 		utils.CreateNullString(form.PhoneNumber),
 		utils.CreateNullString(form.Email),
 		utils.CreateNullString(form.StripeCustomerID),
+		utils.CreateNullInt(form.LeadInterestID),
+		utils.CreateNullInt(form.LeadStatusID),
+		utils.CreateNullInt(form.NextActionID),
 	}
 
 	_, err := DB.Exec(query, args...)
@@ -2242,4 +2268,79 @@ func SetOpenInvoicesToVoid(quoteId int) error {
 	}
 
 	return nil
+}
+
+func GetLeadStatusList() ([]models.LeadStatus, error) {
+	var leadStatuses []models.LeadStatus
+
+	rows, err := DB.Query(`SELECT lead_status_id, status FROM "lead_status"`)
+	if err != nil {
+		return leadStatuses, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ls models.LeadStatus
+		err := rows.Scan(&ls.LeadStatusID, &ls.Status)
+		if err != nil {
+			return leadStatuses, fmt.Errorf("error scanning row: %w", err)
+		}
+		leadStatuses = append(leadStatuses, ls)
+	}
+
+	if err := rows.Err(); err != nil {
+		return leadStatuses, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return leadStatuses, nil
+}
+
+func GetLeadInterestList() ([]models.LeadInterest, error) {
+	var leadInterests []models.LeadInterest
+
+	rows, err := DB.Query(`SELECT lead_interest_id, interest FROM "lead_interest"`)
+	if err != nil {
+		return leadInterests, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var li models.LeadInterest
+		err := rows.Scan(&li.LeadInterestID, &li.Interest)
+		if err != nil {
+			return leadInterests, fmt.Errorf("error scanning row: %w", err)
+		}
+		leadInterests = append(leadInterests, li)
+	}
+
+	if err := rows.Err(); err != nil {
+		return leadInterests, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return leadInterests, nil
+}
+
+func GetNextActionList() ([]models.NextAction, error) {
+	var nextActions []models.NextAction
+
+	rows, err := DB.Query(`SELECT next_action_id, action FROM "next_action"`)
+	if err != nil {
+		return nextActions, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var na models.NextAction
+		err := rows.Scan(&na.NextActionID, &na.Action)
+		if err != nil {
+			return nextActions, fmt.Errorf("error scanning row: %w", err)
+		}
+		nextActions = append(nextActions, na)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nextActions, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return nextActions, nil
 }

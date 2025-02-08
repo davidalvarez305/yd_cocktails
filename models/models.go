@@ -30,6 +30,11 @@ type Lead struct {
 	// Nullable
 	Email   string `json:"email" form:"email" schema:"email"`
 	Message string `json:"message" form:"message" schema:"message"`
+
+	// Flow Management
+	NextActionID   int `json:"next_action_id" form:"next_action_id" schema:"next_action_id"`
+	LeadInterestID int `json:"lead_interest_id" form:"lead_interest_id" schema:"lead_interest_id"`
+	LeadStatusID   int `json:"lead_status_id" form:"lead_status_id" schema:"lead_status_id"`
 }
 
 type LeadMarketing struct {
@@ -235,4 +240,19 @@ type Invoice struct {
 	InvoiceTypeID   int    `json:"invoice_type_id" form:"invoice_type_id" schema:"invoice_type_id"`
 	URL             string `json:"url" form:"url" schema:"url"`
 	StripeInvoiceID string `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+}
+
+type LeadStatus struct {
+	LeadStatusID int    `json:"lead_status_id" form:"lead_status_id" schema:"lead_status_id"`
+	Status       string `json:"status" form:"status" schema:"status"`
+}
+
+type LeadInterest struct {
+	LeadInterestID int    `json:"lead_interest_id" form:"lead_interest_id" schema:"lead_interest_id"`
+	Interest       string `json:"interest" form:"interest" schema:"interest"`
+}
+
+type NextAction struct {
+	NextActionID int    `json:"next_action_id" form:"next_action_id" schema:"next_action_id"`
+	Action       string `json:"action" form:"action" schema:"action"`
 }

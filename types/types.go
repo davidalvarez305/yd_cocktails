@@ -94,15 +94,22 @@ type LeadDetails struct {
 	InstantFormLeadID int64  `json:"instant_form_lead_id" form:"instant_form_lead_id" schema:"instant_form_lead_id"`
 	InstantFormID     int64  `json:"instant_form_id" form:"instant_form_id" schema:"instant_form_id"`
 	InstantFormName   string `json:"instant_form_name" form:"instant_form_name" schema:"instant_form_name"`
+
+	NextActionID   int `json:"next_action_id" form:"next_action_id" schema:"next_action_id"`
+	LeadInterestID int `json:"lead_interest_id" form:"lead_interest_id" schema:"lead_interest_id"`
+	LeadStatusID   int `json:"lead_status_id" form:"lead_status_id" schema:"lead_status_id"`
 }
 
 type LeadList struct {
-	LeadID      int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FullName    string `json:"full_name" form:"full_name" schema:"full_name"`
-	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	CreatedAt   string `json:"created_at" form:"created_at" schema:"created_at"`
-	Language    string `json:"language" form:"language" schema:"language"`
-	TotalRows   int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
+	LeadID       int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	FullName     string `json:"full_name" form:"full_name" schema:"full_name"`
+	PhoneNumber  string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	CreatedAt    string `json:"created_at" form:"created_at" schema:"created_at"`
+	Language     string `json:"language" form:"language" schema:"language"`
+	NextAction   string `json:"next_action" form:"next_action" schema:"next_action"`
+	LeadInterest string `json:"lead_interest" form:"lead_interest" schema:"lead_interest"`
+	LeadStatus   string `json:"lead_status" form:"lead_status" schema:"lead_status"`
+	TotalRows    int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
 }
 
 type Referral struct {
@@ -142,6 +149,10 @@ type UpdateLeadForm struct {
 	PhoneNumber      *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Email            *string `json:"email" form:"email" schema:"email"`
 	StripeCustomerID *string `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
+
+	LeadInterestID *int `json:"lead_interest_id" form:"lead_interest_id" schema:"lead_interest_id"`
+	LeadStatusID   *int `json:"lead_status_id" form:"lead_status_id" schema:"lead_status_id"`
+	NextActionID   *int `json:"next_action_id" form:"next_action_id" schema:"next_action_id"`
 }
 
 type UpdateLeadMarketingForm struct {
