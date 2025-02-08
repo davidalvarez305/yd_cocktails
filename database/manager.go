@@ -2145,6 +2145,7 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 			&leadQuoteInvoice.StripeCustomerID,
 			&amount,
 			&invoiceDueDate,
+			&leadQuoteInvoice.InvoiceTypeMultiplier,
 			&leadQuoteInvoice.InvoiceTypeID,
 		)
 		if err != nil {

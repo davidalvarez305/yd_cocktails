@@ -1419,7 +1419,7 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = database.AssignStripeCustomerIDToLead(quote.StripeCustomerID, quote.LeadID)
+		err = database.AssignStripeCustomerIDToLead(depositInvoice.Customer.ID, quote.LeadID)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
 			tmplCtx := types.DynamicPartialTemplate{
