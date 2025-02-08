@@ -1,21 +1,19 @@
 const floatingHeader = document.getElementById("floatingHeader");
+const scrollPercentageTrigger = 5;
 
-if (!floatingHeader) return;
-
-floatingHeader.style.display = "none";
-
-// Show floating header After 25% scroll
 function handleScroll() {
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const pageHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const pageHeight =
+    document.documentElement.scrollHeight -
+    document.documentElement.clientHeight;
 
-    const scrollPercentage = (scrollTop / pageHeight) * 100;
+  const scrollPercentage = (scrollTop / pageHeight) * 100;
 
-    if (scrollPercentage > 5 && floatingHeader) {
-        floatingHeader.style.display = "";
-    } else {
-        floatingHeader.style.display = "none";
-    }
+  if (scrollPercentage > scrollPercentageTrigger) {
+    floatingHeader.style.display = "";
+  } else {
+    floatingHeader.style.display = "none";
+  }
 }
 
-window.addEventListener("scroll", handleScroll);
+if (floatingHeader) window.addEventListener("scroll", handleScroll);
