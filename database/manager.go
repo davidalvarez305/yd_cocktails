@@ -364,7 +364,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		l.created_at, lm.language, COUNT(*) OVER() AS total_rows
 		FROM lead AS l
 		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
-		ORDER BY l.created_at ASC
+		ORDER BY l.created_at DESC
 		LIMIT $1
 		OFFSET $2`
 
