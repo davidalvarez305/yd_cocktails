@@ -54,17 +54,12 @@ func CreateStripeInvoice(params types.CreateInvoiceParams) (stripe.Invoice, erro
 		return stripe.Invoice{}, fmt.Errorf("failed to create invoice item: %v", err)
 	}
 
-	if !params.ShouldSendInvoice {
-		return *inv, nil
-	}
-
-	// Send the Invoice
-	sentInvoice, err := invoice.SendInvoice(inv.ID, &stripe.InvoiceSendInvoiceParams{})
+	finalizedInvoice, err := invoice.FinalizeInvoice(inv.ID, &stripe.InvoiceFinalizeInvoiceParams{})
 	if err != nil {
 		return stripe.Invoice{}, fmt.Errorf("failed to send invoice: %v", err)
 	}
 
-	return *sentInvoice, nil
+	return *finalizedInvoice, nil
 }
 
 func UpdateStripeInvoice(leadQuoteInvoice types.LeadQuoteInvoice) (stripe.Invoice, error) {

@@ -1343,12 +1343,11 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 
 		// Deposit Invoice
 		createInvoiceParams := types.CreateInvoiceParams{
-			Email:             quote.Email,
-			StripeCustomerID:  quote.StripeCustomerID,
-			FullName:          quote.FullName,
-			DueDate:           time.Now().Unix(),
-			Quote:             quote.Amount * constants.DepositPercentageAmount,
-			ShouldSendInvoice: true,
+			Email:            quote.Email,
+			StripeCustomerID: quote.StripeCustomerID,
+			FullName:         quote.FullName,
+			DueDate:          time.Now().Unix(),
+			Quote:            quote.Amount * constants.DepositPercentageAmount,
 		}
 
 		depositInvoice, err := services.CreateStripeInvoice(createInvoiceParams)
@@ -1385,7 +1384,6 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 		t := time.Unix(quote.EventDate, 0)
 		finalInvoiceDueDate := t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
 
-		createInvoiceParams.ShouldSendInvoice = false
 		createInvoiceParams.Quote = quote.Amount * (1 - constants.DepositPercentageAmount)
 		createInvoiceParams.DueDate = finalInvoiceDueDate
 

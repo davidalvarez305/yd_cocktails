@@ -537,12 +537,11 @@ type ExternalQuoteDetails struct {
 }
 
 type CreateInvoiceParams struct {
-	StripeCustomerID  string
-	Email             string
-	FullName          string
-	DueDate           int64
-	Quote             float64
-	ShouldSendInvoice bool
+	StripeCustomerID string
+	Email            string
+	FullName         string
+	DueDate          int64
+	Quote            float64
 }
 
 type InvoiceQuoteDetails struct {
