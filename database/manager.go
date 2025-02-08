@@ -2097,7 +2097,17 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 	var leadQuoteInvoices []types.LeadQuoteInvoice
 
-	query := `SELECT i.stripe_invoice_id, l.stripe_customer_id, q.amount::NUMERIC
+	query := `SELECT 
+			i.stripe_invoice_id, 
+			l.stripe_customer_id, 
+			q.amount::NUMERIC, 
+			i.due_date,
+			CASE 
+				WHEN i.invoice_type_id = 1 THEN 0.25
+				WHEN i.invoice_type_id = 2 THEN 0.75
+				ELSE 1.00
+			END AS invoice_multiplier,
+			i.invoice_type_id
 		FROM quote AS q
 		JOIN invoice AS i ON i.quote_id = q.quote_id
 		JOIN lead AS l ON l.lead_id = q.lead_id
@@ -2109,6 +2119,8 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 	}
 	defer rows.Close()
 
+	var invoiceDueDate time.Time
+
 	for rows.Next() {
 		var leadQuoteInvoice types.LeadQuoteInvoice
 		var amount sql.NullFloat64
@@ -2117,6 +2129,8 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 			&leadQuoteInvoice.StripeInvoiceID,
 			&leadQuoteInvoice.StripeCustomerID,
 			&amount,
+			&invoiceDueDate,
+			&leadQuoteInvoice.InvoiceTypeID,
 		)
 		if err != nil {
 			return leadQuoteInvoices, fmt.Errorf("error scanning row: %w", err)
@@ -2125,6 +2139,8 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 		if amount.Valid {
 			leadQuoteInvoice.Amount = amount.Float64
 		}
+
+		leadQuoteInvoice.DueDate = invoiceDueDate.Unix()
 
 		leadQuoteInvoices = append(leadQuoteInvoices, leadQuoteInvoice)
 	}

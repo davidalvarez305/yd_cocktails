@@ -1206,8 +1206,33 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check for event date validation
+	formEventDate := helpers.SafeInt64(form.EventDate)
+
 	for _, leadQuoteInvoice := range leadQuoteInvoices {
-		err = services.UpdateStripeInvoice(leadQuoteInvoice)
+
+		// Calculate new due date
+		dueDate := time.Now().Unix()
+		if leadQuoteInvoice.InvoiceTypeID == constants.RemainingInvoiceTypeID {
+			if formEventDate == 0 {
+				tmplCtx := types.DynamicPartialTemplate{
+					TemplateName: "error",
+					TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+					Data: map[string]any{
+						"Message": "Event date cannot be nil.",
+					},
+				}
+				w.WriteHeader(http.StatusBadRequest)
+				helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+				return
+			}
+
+			t := time.Unix(formEventDate, 0)
+			dueDate = t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
+		}
+
+		leadQuoteInvoice.DueDate = dueDate
+		invoice, err := services.UpdateStripeInvoice(leadQuoteInvoice)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
 			tmplCtx := types.DynamicPartialTemplate{
@@ -1215,6 +1240,21 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 				Data: map[string]any{
 					"Message": "Error updating stripe invoice.",
+				},
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
+		}
+
+		err = database.CreateQuoteInvoice(invoice.ID, invoice.HostedInvoiceURL, helpers.SafeInt(form.QuoteID), leadQuoteInvoice.InvoiceTypeID, invoice.DueDate)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Error assigning stripe invoice ID to quote.",
 				},
 			}
 			w.WriteHeader(http.StatusBadRequest)

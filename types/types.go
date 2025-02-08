@@ -558,7 +558,10 @@ type InvoiceQuoteDetails struct {
 }
 
 type LeadQuoteInvoice struct {
-	StripeCustomerID string  `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
-	StripeInvoiceID  string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
-	Amount           float64 `json:"amount" form:"amount" schema:"amount"`
+	StripeCustomerID      string  `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
+	StripeInvoiceID       string  `json:"stripe_invoice_id" form:"stripe_invoice_id" schema:"stripe_invoice_id"`
+	Amount                float64 `json:"amount" form:"amount" schema:"amount"`
+	DueDate               int64   `json:"due_date" form:"due_date" schema:"due_date"`
+	InvoiceTypeMultiplier float64 `json:"invoice_type_multiplier" form:"invoice_type_multiplier" schema:"invoice_type_multiplier"`
+	InvoiceTypeID         int     `json:"invoice_type_id" form:"invoice_type_id" schema:"invoice_type_id"`
 }

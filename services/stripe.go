@@ -67,40 +67,56 @@ func CreateStripeInvoice(params types.CreateInvoiceParams) (stripe.Invoice, erro
 	return *sentInvoice, nil
 }
 
-func UpdateStripeInvoice(leadQuoteInvoice types.LeadQuoteInvoice) error {
+func UpdateStripeInvoice(leadQuoteInvoice types.LeadQuoteInvoice) (stripe.Invoice, error) {
 	stripe.Key = constants.StrikeAPIKey
+	var updatedInvoice stripe.Invoice
 
-	inv, err := invoice.Get(leadQuoteInvoice.StripeInvoiceID, &stripe.InvoiceParams{})
+	// Retrieve the existing invoice
+	originalInvoice, err := invoice.Get(leadQuoteInvoice.StripeInvoiceID, nil)
 	if err != nil {
-		return fmt.Errorf("failed to retrieve invoice: %v", err)
+		return updatedInvoice, fmt.Errorf("failed to retrieve invoice: %v", err)
 	}
 
-	invoiceItems := invoiceitem.List(&stripe.InvoiceItemListParams{
-		Invoice: stripe.String(inv.ID),
+	// Void the existing invoice
+	_, err = invoice.VoidInvoice(originalInvoice.ID, nil)
+	if err != nil {
+		return updatedInvoice, fmt.Errorf("failed to void invoice: %v", err)
+	}
+
+	// Create New Invoice
+	invoiceParams := &stripe.InvoiceParams{
+		Customer:         stripe.String(leadQuoteInvoice.StripeCustomerID),
+		CollectionMethod: stripe.String(string(originalInvoice.CollectionMethod)),
+		DueDate:          stripe.Int64(leadQuoteInvoice.DueDate),
+		Description:      stripe.String(originalInvoice.Description),
+		Footer:           stripe.String(originalInvoice.Footer),
+		Currency:         stripe.String(constants.DefaultCurrency),
+	}
+
+	newInvoice, err := invoice.New(invoiceParams)
+	if err != nil {
+		return stripe.Invoice{}, fmt.Errorf("failed to create invoice: %v", err)
+	}
+
+	// Add Invoice Item (Attaching to Invoice)
+	_, err = invoiceitem.New(&stripe.InvoiceItemParams{
+		Customer:    stripe.String(leadQuoteInvoice.StripeCustomerID),
+		Amount:      stripe.Int64(int64(leadQuoteInvoice.Amount*leadQuoteInvoice.InvoiceTypeMultiplier) * 100),
+		Currency:    stripe.String(string(stripe.CurrencyUSD)),
+		Description: stripe.String("Bartending service."),
+		Invoice:     stripe.String(newInvoice.ID), // Attach to invoice
 	})
 	if err != nil {
-		return fmt.Errorf("failed to list invoice items: %v", err)
+		return stripe.Invoice{}, fmt.Errorf("failed to create invoice item: %v", err)
 	}
 
-	// Update existing invoice items
-	for invoiceItems.Next() {
-		item := invoiceItems.InvoiceItem()
-
-		if item.Invoice != nil && item.Invoice.ID == inv.ID && !item.Invoice.Paid {
-			_, err := invoiceitem.Update(item.ID, &stripe.InvoiceItemParams{
-				Amount:      stripe.Int64(int64(leadQuoteInvoice.Amount) * 100), // Update the amount in cents
-				Description: stripe.String("Updated bartending service."),
-			})
-			if err != nil {
-				return fmt.Errorf("failed to update invoice item %v: %v", item.ID, err)
-			}
-		}
-	}
-
-	_, err = invoice.FinalizeInvoice(inv.ID, nil)
+	// Finalize the new invoice
+	finalizedInvoice, err := invoice.FinalizeInvoice(newInvoice.ID, nil)
 	if err != nil {
-		return fmt.Errorf("failed to finalize invoice: %v", err)
+		return updatedInvoice, fmt.Errorf("failed to finalize new invoice: %v", err)
 	}
 
-	return nil
+	updatedInvoice = *finalizedInvoice
+
+	return updatedInvoice, nil
 }
