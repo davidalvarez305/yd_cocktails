@@ -1025,20 +1025,24 @@ func PostLeadQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	alcoholFeeAdjustment, err := database.GetAlcoholFeeAdjustment(helpers.SafeInt(form.AlcoholSegment))
-	if err != nil {
-		fmt.Printf("Error getting bar types: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Server error while getting bar types.",
-			},
-		}
+	var alcoholFeeAdjustment float64
 
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
+	if helpers.SafeBoolDefaultFalse(form.WeWillProvideAlcohol) {
+		alcoholFeeAdjustment, err = database.GetAlcoholFeeAdjustment(helpers.SafeInt(form.AlcoholSegment))
+		if err != nil {
+			fmt.Printf("Error getting alcohol fee adjustments: %+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Server error while getting alcohol fee adjustments.",
+				},
+			}
+
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
+		}
 	}
 
 	quote := helpers.CalculatePackageQuote(form, barTypes, alcoholFeeAdjustment)

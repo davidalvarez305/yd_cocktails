@@ -1829,7 +1829,7 @@ func GetExternalQuoteDetails(externalQuoteId string, invoiceTypeId int) (types.E
 		l.phone_number,
 		l.email,
 		i.url,
-		will_require_cooler,
+		will_require_coolers,
 		num_coolers
 	FROM quote AS q
 	LEFT JOIN alcohol_segment AS a ON q.alcohol_segment_id = a.alcohol_segment_id
