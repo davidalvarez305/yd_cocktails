@@ -332,53 +332,53 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fbEvent := types.FacebookEventData{
-		EventName:      constants.LeadEventName,
-		EventTime:      time.Now().UTC().Unix(),
-		ActionSource:   "website",
-		EventSourceURL: helpers.SafeString(form.LandingPage),
-		UserData: types.FacebookUserData{
-			Phone:           helpers.HashString(helpers.SafeString(form.PhoneNumber)),
-			FBC:             helpers.SafeString(form.FacebookClickID),
-			FBP:             helpers.SafeString(form.FacebookClientID),
-			ExternalID:      helpers.HashString(helpers.SafeString(form.ExternalID)),
-			ClientIPAddress: helpers.SafeString(form.IP),
-			ClientUserAgent: helpers.SafeString(form.UserAgent),
-		},
-	}
+	if constants.Production {
 
-	metaPayload := types.FacebookPayload{
-		Data: []types.FacebookEventData{fbEvent},
-	}
+		fbEvent := types.FacebookEventData{
+			EventName:      constants.LeadEventName,
+			EventTime:      time.Now().UTC().Unix(),
+			ActionSource:   "website",
+			EventSourceURL: helpers.SafeString(form.LandingPage),
+			UserData: types.FacebookUserData{
+				Phone:           helpers.HashString(helpers.SafeString(form.PhoneNumber)),
+				FBC:             helpers.SafeString(form.FacebookClickID),
+				FBP:             helpers.SafeString(form.FacebookClientID),
+				ExternalID:      helpers.HashString(helpers.SafeString(form.ExternalID)),
+				ClientIPAddress: helpers.SafeString(form.IP),
+				ClientUserAgent: helpers.SafeString(form.UserAgent),
+			},
+		}
 
-	payload := types.GooglePayload{
-		ClientID: helpers.SafeString(form.GoogleClientID),
-		UserId:   helpers.SafeString(form.ExternalID),
-		Events: []types.GoogleEventLead{
-			{
-				Name: constants.LeadGeneratedEventName,
-				Params: types.GoogleEventParamsLead{
-					GCLID:      helpers.SafeString(form.ClickID),
-					CampaignID: fmt.Sprint(helpers.SafeInt64(form.CampaignID)),
-					Campaign:   helpers.SafeString(form.AdCampaign),
-					Source:     helpers.SafeString(form.Source),
-					Medium:     helpers.SafeString(form.Medium),
-					Term:       helpers.SafeString(form.Keyword),
-					Value:      constants.DefaultLeadValue,
-					Currency:   constants.DefaultCurrency,
+		metaPayload := types.FacebookPayload{
+			Data: []types.FacebookEventData{fbEvent},
+		}
+
+		payload := types.GooglePayload{
+			ClientID: helpers.SafeString(form.GoogleClientID),
+			UserId:   helpers.SafeString(form.ExternalID),
+			Events: []types.GoogleEventLead{
+				{
+					Name: constants.LeadGeneratedEventName,
+					Params: types.GoogleEventParamsLead{
+						GCLID:      helpers.SafeString(form.ClickID),
+						CampaignID: fmt.Sprint(helpers.SafeInt64(form.CampaignID)),
+						Campaign:   helpers.SafeString(form.AdCampaign),
+						Source:     helpers.SafeString(form.Source),
+						Medium:     helpers.SafeString(form.Medium),
+						Term:       helpers.SafeString(form.Keyword),
+						Value:      constants.DefaultLeadValue,
+						Currency:   constants.DefaultCurrency,
+					},
 				},
 			},
-		},
-		UserData: types.GoogleUserData{
-			Sha256PhoneNumber: []string{helpers.HashString(utils.AddPhonePrefixIfNeeded(helpers.SafeString(form.PhoneNumber)))},
-		},
-	}
+			UserData: types.GoogleUserData{
+				Sha256PhoneNumber: []string{helpers.HashString(utils.AddPhonePrefixIfNeeded(helpers.SafeString(form.PhoneNumber)))},
+			},
+		}
 
-	// Send conversion events
-	go conversions.SendGoogleConversion(payload)
-	go conversions.SendFacebookConversion(metaPayload)
-
-	if constants.Production {
+		// Send conversion events
+		go conversions.SendGoogleConversion(payload)
+		go conversions.SendFacebookConversion(metaPayload)
 
 		go func() {
 			subject := "YD Cocktails: New Lead"
