@@ -1735,12 +1735,26 @@ func AssignStripeCustomerIDToLead(stripeCustomerId string, leadId int) error {
 
 func CreateQuoteInvoice(stripeInvoiceId, invoiceUrl string, quoteId, invoiceTypeId int, dueDate int64) error {
 	query := `
-		INSERT INTO invoice (stripe_invoice_id, quote_id, invoice_type_id, url, due_date, date_created)
-		VALUES ($1, $2, $3, $4, to_timestamp($5)::timestamptz AT TIME ZONE 'America/New_York', to_timestamp($6)::timestamptz AT TIME ZONE 'America/New_York');
+		INSERT INTO invoice (stripe_invoice_id, quote_id, invoice_type_id, url, due_date, date_created, invoice_status_id)
+		VALUES ($1, $2, $3, $4, to_timestamp($5)::timestamptz AT TIME ZONE 'America/New_York', to_timestamp($6)::timestamptz AT TIME ZONE 'America/New_York', $7);
 	`
-	_, err := DB.Exec(query, stripeInvoiceId, quoteId, invoiceTypeId, invoiceUrl, dueDate, time.Now().Unix())
+	_, err := DB.Exec(query, stripeInvoiceId, quoteId, invoiceTypeId, invoiceUrl, dueDate, time.Now().Unix(), constants.OpenInvoiceStatusID)
 	if err != nil {
 		return fmt.Errorf("failed to create stripe invoice: %v", err)
+	}
+
+	return nil
+}
+
+func UpdateInvoiceStatus(stripeInvoiceId string, invoiceStatusId int) error {
+	query := `
+		UPDATE invoice
+		SET invoice_status_id = $2
+		WHERE stripe_invoice_id = $1
+	`
+	_, err := DB.Exec(query, stripeInvoiceId, invoiceStatusId)
+	if err != nil {
+		return fmt.Errorf("failed to update invoice status: %v", err)
 	}
 
 	return nil
@@ -2034,10 +2048,11 @@ func GetInvoiceByStripeInvoiceID(stripeInvoiceId string) (models.Invoice, error)
 func SetInvoiceStatusToPaid(stripeInvoiceId string, datePaid int64) error {
 	query := `
 		UPDATE invoice
-		SET date_paid = $2
+		SET date_paid = $2,
+		invoice_status_id = $3
 		WHERE stripe_invoice_id = $1
 	`
-	_, err := DB.Exec(query, stripeInvoiceId, datePaid)
+	_, err := DB.Exec(query, stripeInvoiceId, datePaid, constants.PaidInvoiceStatusID)
 	if err != nil {
 		return fmt.Errorf("failed to assign stripe customer id to lead: %v", err)
 	}
@@ -2111,7 +2126,7 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 		FROM quote AS q
 		JOIN invoice AS i ON i.quote_id = q.quote_id
 		JOIN lead AS l ON l.lead_id = q.lead_id
-		WHERE q.quote_id = $1;`
+		WHERE q.quote_id = $1 AND i.invoice_status_id = 1`
 
 	rows, err := DB.Query(query, quoteId)
 	if err != nil {

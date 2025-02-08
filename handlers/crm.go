@@ -1208,30 +1208,30 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 
 	// Check for event date validation
 	formEventDate := helpers.SafeInt64(form.EventDate)
+	if formEventDate == 0 {
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Event date cannot be nil.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
 
 	for _, leadQuoteInvoice := range leadQuoteInvoices {
 
 		// Calculate new due date
 		dueDate := time.Now().Unix()
 		if leadQuoteInvoice.InvoiceTypeID == constants.RemainingInvoiceTypeID {
-			if formEventDate == 0 {
-				tmplCtx := types.DynamicPartialTemplate{
-					TemplateName: "error",
-					TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-					Data: map[string]any{
-						"Message": "Event date cannot be nil.",
-					},
-				}
-				w.WriteHeader(http.StatusBadRequest)
-				helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-				return
-			}
-
 			t := time.Unix(formEventDate, 0)
 			dueDate = t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
 		}
-
 		leadQuoteInvoice.DueDate = dueDate
+
+		// Void old invoice and copy over to new invoice on stripe
 		invoice, err := services.UpdateStripeInvoice(leadQuoteInvoice)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
@@ -1247,6 +1247,23 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Set old invoice status to void
+		err = database.UpdateInvoiceStatus(leadQuoteInvoice.StripeInvoiceID, constants.VoidInvoiceStatusID)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Failed to set invoice status to void.",
+				},
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
+		}
+
+		// Create new invoice with status open
 		err = database.CreateQuoteInvoice(invoice.ID, invoice.HostedInvoiceURL, helpers.SafeInt(form.QuoteID), leadQuoteInvoice.InvoiceTypeID, invoice.DueDate)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
