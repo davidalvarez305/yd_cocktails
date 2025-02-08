@@ -76,7 +76,7 @@ func CreateLeadAndMarketing(quoteForm types.QuoteForm) (int, error) {
 		utils.CreateNullBool(quoteForm.OptInTextMessaging),
 		utils.CreateNullString(quoteForm.Email),
 		constants.NewLeadStatusID,
-		constants.InitialContactStatusID,
+		constants.InitialContactActionID,
 	).Scan(&leadID)
 	if err != nil {
 		return leadID, fmt.Errorf("error inserting lead: %w", err)
@@ -369,6 +369,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id
 		LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
 		LEFT JOIN next_action AS na ON na.next_action_id = l.next_action_id
+		WHERE ls.lead_status_id IS NOT $3 AND li.lead_interest_id IS NOT $4
 		ORDER BY l.created_at DESC
 		LIMIT $1
 		OFFSET $2`
@@ -384,7 +385,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		offset = (pageNum - 1) * int(constants.LeadsPerPage)
 	}
 
-	rows, err := DB.Query(query, constants.LeadsPerPage, offset)
+	rows, err := DB.Query(query, constants.LeadsPerPage, offset, constants.ArchivedLeadStatusID, constants.NoInterestLeadInterestID)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error executing query: %w", err)
 	}
