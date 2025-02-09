@@ -2346,3 +2346,68 @@ func GetNextActionList() ([]models.NextAction, error) {
 
 	return nextActions, nil
 }
+
+func DeleteService(id int) error {
+	sqlStatement := `
+        DELETE FROM service WHERE service_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetServicesList(pageNum int) ([]models.Service, int, error) {
+	var services []models.Service
+	var totalRows int
+
+	offset := (pageNum - 1) * int(constants.LeadsPerPage)
+
+	rows, err := DB.Query(`SELECT service_id, service,
+			COUNT(*) OVER() AS total_rows
+			FROM "service"
+			OFFSET $1
+			LIMIT $2`, offset, constants.LeadsPerPage)
+	if err != nil {
+		return services, totalRows, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var service models.Service
+		err := rows.Scan(&service.ServiceID, &service.Service, &totalRows)
+		if err != nil {
+			return services, totalRows, fmt.Errorf("error scanning row: %w", err)
+		}
+		services = append(services, service)
+	}
+
+	if err := rows.Err(); err != nil {
+		return services, totalRows, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return services, totalRows, nil
+}
+
+func CreateService(form types.ServiceForm) error {
+	stmt, err := DB.Prepare(`
+		INSERT INTO service (
+			service
+		) VALUES ($1)
+	`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	serviceName := utils.CreateNullString(form.Service)
+
+	_, err = stmt.Exec(serviceName)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}

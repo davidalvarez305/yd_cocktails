@@ -577,3 +577,26 @@ type LeadQuoteInvoice struct {
 	InvoiceTypeMultiplier float64 `json:"invoice_type_multiplier" form:"invoice_type_multiplier" schema:"invoice_type_multiplier"`
 	InvoiceTypeID         int     `json:"invoice_type_id" form:"invoice_type_id" schema:"invoice_type_id"`
 }
+
+type QuoteServiceList struct {
+	ServiceID    int     `json:"service_id" form:"service_id" schema:"service_id"`
+	QuoteID      int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	Service      string  `json:"service" form:"service" schema:"service"`
+	Units        int     `json:"units" form:"units" schema:"units"`
+	PricePerUnit float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
+	Total        float64 `json:"total" form:"total" schema:"total"`
+}
+
+type QuoteServiceForm struct {
+	CSRFToken    *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	ServiceID    *int     `json:"service_id" form:"service_id" schema:"service_id"`
+	QuoteID      *int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	Units        *int     `json:"units" form:"units" schema:"units"`
+	PricePerUnit *float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
+}
+
+type ServiceForm struct {
+	CSRFToken *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	ServiceID *int    `json:"service_id" form:"service_id" schema:"service_id"`
+	Service   *string `json:"service" form:"service" schema:"service"`
+}

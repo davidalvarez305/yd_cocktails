@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -1546,4 +1547,195 @@ func GetLeadQuoteDetail(w http.ResponseWriter, r *http.Request, ctx map[string]a
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	helpers.ServeContent(w, files, data)
+}
+
+func GetServices(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
+	baseFile := constants.CRM_TEMPLATES_DIR + "services.html"
+	createServiceForm := constants.CRM_TEMPLATES_DIR + "create_service_form.html"
+	table := constants.PARTIAL_TEMPLATES_DIR + "services_table.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, baseFile, table, createServiceForm}
+
+	nonce, ok := r.Context().Value("nonce").(string)
+	if !ok {
+		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
+		return
+	}
+
+	csrfToken, ok := r.Context().Value("csrf_token").(string)
+	if !ok {
+		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
+		return
+	}
+
+	pageNum := 1
+	hasPageNum := r.URL.Query().Has("page_num")
+
+	if hasPageNum {
+		num, err := strconv.Atoi(r.URL.Query().Get("page_num"))
+		if err == nil && num > 1 {
+			pageNum = num
+		}
+	}
+
+	services, totalRows, err := database.GetServicesList(pageNum)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting vendors from DB.", http.StatusInternalServerError)
+		return
+	}
+
+	data := ctx
+	data["PageTitle"] = "Services — " + constants.CompanyName
+	data["Nonce"] = nonce
+	data["CSRFToken"] = csrfToken
+	data["Services"] = services
+	data["MaxPages"] = helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage)
+	data["CurrentPage"] = pageNum
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	helpers.ServeContent(w, files, data)
+}
+
+func PostService(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("Error parsing form: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var form types.ServiceForm
+	err = decoder.Decode(&form, r.PostForm)
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.CreateService(form)
+	if err != nil {
+		fmt.Printf("Error creating service: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to create service.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	pageNum := 1
+	services, totalRows, err := database.GetServicesList(pageNum)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting services from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "services_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "services_table.html",
+		Data: map[string]any{
+			"Services":    services,
+			"CurrentPage": pageNum,
+			"MaxPages":    helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage),
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func DeleteService(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("Error parsing form: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	serviceId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/service/")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = database.DeleteService(serviceId)
+	if err != nil {
+		fmt.Printf("Error deleting service: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to delete service.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	pageNum := 1
+	services, totalRows, err := database.GetServicesList(pageNum)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting services from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "services_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "services_table.html",
+		Data: map[string]any{
+			"Services":    services,
+			"CurrentPage": pageNum,
+			"MaxPages":    helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage),
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }

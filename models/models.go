@@ -256,3 +256,15 @@ type NextAction struct {
 	NextActionID int    `json:"next_action_id" form:"next_action_id" schema:"next_action_id"`
 	Action       string `json:"action" form:"action" schema:"action"`
 }
+
+type Service struct {
+	ServiceID int    `json:"service_id" form:"service_id" schema:"service_id"`
+	Service   string `json:"service" form:"service" schema:"service"`
+}
+
+type QuoteService struct {
+	ServiceID    int     `json:"service_id" form:"service_id" schema:"service_id"`
+	QuoteID      int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	Units        int     `json:"units" form:"units" schema:"units"`
+	PricePerUnit float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
+}
