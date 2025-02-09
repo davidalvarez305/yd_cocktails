@@ -59,6 +59,8 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 		switch path {
 		case "/crm/lead":
 			GetLeads(w, r, ctx)
+		case "/crm/service":
+			GetServices(w, r, ctx)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -98,6 +100,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+		if strings.HasPrefix(path, "/crm/service/") {
+			DeleteService(w, r)
+			return
+		}
 	case http.MethodPost:
 		if strings.HasPrefix(path, "/crm/lead/") {
 			parts := strings.Split(path, "/")
@@ -113,6 +119,12 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				PostLeadQuote(w, r)
 				return
 			}
+		}
+		switch path {
+		case "/crm/service":
+			PostService(w, r)
+		default:
+			http.Error(w, "Not Found", http.StatusNotFound)
 		}
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
