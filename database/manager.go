@@ -495,9 +495,15 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	lm.instant_form_lead_id,
 	lm.instant_form_id,
 	lm.instant_form_name,
-	lm.referral_lead_id
+	lm.referral_lead_id,
+	li.lead_interest_id,
+	ls.lead_status_id,
+	na.next_action_id
 	FROM lead l
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
+	JOIN lead_interest li ON l.lead_interest_id = li.lead_interest_id
+	JOIN lead_status ls ON l.lead_status_id = ls.lead_status_id
+	JOIN next_action na ON l.next_action_id = na.next_action_id
 	WHERE l.lead_id = $1`
 
 	var leadDetails types.LeadDetails
@@ -506,7 +512,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
 	var message, externalId, userAgent, clickId, googleClientId sql.NullString
-	var campaignId, instantFormleadId, instantFormId, referralLeadId sql.NullInt64
+	var campaignId, instantFormleadId, instantFormId, referralLeadId, leadInterestId, leadStatusId, nextActionId sql.NullInt64
 
 	var buttonClicked, instantFormName sql.NullString
 
@@ -537,6 +543,9 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&instantFormId,
 		&instantFormName,
 		&referralLeadId,
+		&leadInterestId,
+		&leadStatusId,
+		&nextActionId,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -546,6 +555,15 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	}
 
 	// Map the nullable fields to your struct
+	if leadInterestId.Valid {
+		leadDetails.LeadInterestID = int(leadInterestId.Int64)
+	}
+	if leadStatusId.Valid {
+		leadDetails.LeadStatusID = int(leadStatusId.Int64)
+	}
+	if nextActionId.Valid {
+		leadDetails.NextActionID = int(nextActionId.Int64)
+	}
 	if referralLeadId.Valid {
 		leadDetails.ReferralLeadID = int(referralLeadId.Int64)
 	}
