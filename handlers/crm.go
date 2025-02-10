@@ -67,6 +67,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPut:
 		parts := strings.Split(path, "/")
 		if strings.HasPrefix(path, "/crm/lead/") {
+			if len(path) > len("/crm/lead/") && strings.Contains(path, "archive") {
+				ArchiveLead(w, r)
+				return
+			}
 			if len(parts) >= 5 && parts[4] == "marketing" && helpers.IsNumeric(parts[3]) {
 				PutLeadMarketing(w, r)
 				return
@@ -77,10 +81,6 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			if len(parts) >= 5 && parts[4] == "quote" && helpers.IsNumeric(parts[3]) {
 				PutLeadQuote(w, r)
-				return
-			}
-			if len(path) > len("/crm/lead/") && helpers.IsNumeric(path[len("/crm/lead/"):]) && strings.Contains(path, "archive") {
-				ArchiveLead(w, r)
 				return
 			}
 			if len(path) > len("/crm/lead/") && helpers.IsNumeric(path[len("/crm/lead/"):]) {
