@@ -501,9 +501,9 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	na.next_action_id
 	FROM lead l
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
-	JOIN lead_interest li ON l.lead_interest_id = li.lead_interest_id
-	JOIN lead_status ls ON l.lead_status_id = ls.lead_status_id
-	JOIN next_action na ON l.next_action_id = na.next_action_id
+	LEFT JOIN lead_interest li ON l.lead_interest_id = li.lead_interest_id
+	LEFT JOIN lead_status ls ON l.lead_status_id = ls.lead_status_id
+	LEFT JOIN next_action na ON l.next_action_id = na.next_action_id
 	WHERE l.lead_id = $1`
 
 	var leadDetails types.LeadDetails
