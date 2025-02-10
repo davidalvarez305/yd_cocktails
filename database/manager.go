@@ -1128,6 +1128,20 @@ func DeleteLead(id int) error {
 	return nil
 }
 
+func ArchiveLead(id int) error {
+	sqlStatement := `
+        UPDATE lead
+		SET lead_status_id = $2
+		WHERE lead_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id, constants.ArchivedLeadStatusID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func CreateEvent(form types.EventForm) error {
 	query := `
 		INSERT INTO event (

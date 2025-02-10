@@ -79,6 +79,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				PutLeadQuote(w, r)
 				return
 			}
+			if len(path) > len("/crm/lead/") && helpers.IsNumeric(path[len("/crm/lead/"):]) && strings.Contains(path, "archive") {
+				ArchiveLead(w, r)
+				return
+			}
 			if len(path) > len("/crm/lead/") && helpers.IsNumeric(path[len("/crm/lead/"):]) {
 				PutLead(w, r)
 				return
@@ -91,10 +95,6 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		if strings.HasPrefix(path, "/crm/lead/") {
 			parts := strings.Split(path, "/")
-			if len(path) > len("/crm/lead/") && helpers.IsNumeric(path[len("/crm/lead/"):]) {
-				DeleteLead(w, r)
-				return
-			}
 			if len(parts) >= 5 && parts[4] == "event" && helpers.IsNumeric(parts[3]) {
 				DeleteEvent(w, r)
 				return
@@ -469,7 +469,7 @@ func PutLeadMarketing(w http.ResponseWriter, r *http.Request) {
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
 
-func DeleteLead(w http.ResponseWriter, r *http.Request) {
+func ArchiveLead(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		fmt.Printf("Error parsing form: %+v\n", err)
@@ -491,14 +491,14 @@ func DeleteLead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.DeleteLead(leadId)
+	err = database.ArchiveLead(leadId)
 	if err != nil {
-		fmt.Printf("Error deleting lead: %+v\n", err)
+		fmt.Printf("Error archiving lead: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Failed to delete lead.",
+				"Message": "Failed to archive lead.",
 			},
 		}
 		w.WriteHeader(http.StatusInternalServerError)
