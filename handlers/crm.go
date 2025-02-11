@@ -66,6 +66,11 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodPut:
 		parts := strings.Split(path, "/")
+		if strings.HasPrefix(path, "/crm/quote-service/") {
+			PutQuoteService(w, r)
+			return
+		}
+
 		if strings.HasPrefix(path, "/crm/lead/") {
 			if len(path) > len("/crm/lead/") && strings.Contains(path, "archive") {
 				ArchiveLead(w, r)
@@ -104,7 +109,15 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			DeleteService(w, r)
 			return
 		}
+		if strings.HasPrefix(path, "/crm/quote-service/") {
+			DeleteQuoteService(w, r)
+			return
+		}
 	case http.MethodPost:
+		if strings.HasPrefix(path, "/crm/lead/") {
+			PostQuoteService(w, r)
+			return
+		}
 		if strings.HasPrefix(path, "/crm/lead/") {
 			parts := strings.Split(path, "/")
 			if strings.Contains(path, "invoice") {
@@ -1497,70 +1510,6 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
 
-func GetLeadQuoteDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
-	fileName := "lead_quote_detail.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName}
-	nonce, ok := r.Context().Value("nonce").(string)
-	if !ok {
-		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
-		return
-	}
-
-	csrfToken, ok := r.Context().Value("csrf_token").(string)
-	if !ok {
-		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
-		return
-	}
-
-	quoteId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting quote id from URL.", http.StatusInternalServerError)
-		return
-	}
-
-	quoteDetails, err := database.GetLeadQuoteDetails(fmt.Sprint(quoteId))
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting quote details from DB.", http.StatusInternalServerError)
-		return
-	}
-
-	eventTypes, err := database.GetEventTypes()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting event types.", http.StatusInternalServerError)
-		return
-	}
-
-	venueTypes, err := database.GetVenueTypes()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting venue types.", http.StatusInternalServerError)
-		return
-	}
-
-	barTypes, err := database.GetBarTypes()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting bar types.", http.StatusInternalServerError)
-		return
-	}
-
-	data := ctx
-	data["PageTitle"] = "Quote Detail — " + constants.CompanyName
-	data["Nonce"] = nonce
-	data["CSRFToken"] = csrfToken
-	data["Quote"] = quoteDetails
-	data["EventTypes"] = eventTypes
-	data["VenueTypes"] = venueTypes
-	data["BarTypes"] = barTypes
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-	helpers.ServeContent(w, files, data)
-}
-
 func GetServices(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	baseFile := constants.CRM_TEMPLATES_DIR + "services.html"
 	createServiceForm := constants.CRM_TEMPLATES_DIR + "create_service_form.html"
@@ -1746,6 +1695,302 @@ func DeleteService(w http.ResponseWriter, r *http.Request) {
 			"Services":    services,
 			"CurrentPage": pageNum,
 			"MaxPages":    helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage),
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func GetLeadQuoteDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
+	fileName := "lead_quote_detail.html"
+	quoteServicesTable := "quote_services_table.html"
+	createQuoteServiceForm := "create_quote_service_form.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, quoteServicesTable, createQuoteServiceForm}
+	nonce, ok := r.Context().Value("nonce").(string)
+	if !ok {
+		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
+		return
+	}
+
+	csrfToken, ok := r.Context().Value("csrf_token").(string)
+	if !ok {
+		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
+		return
+	}
+
+	quoteId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting quote id from URL.", http.StatusInternalServerError)
+		return
+	}
+
+	quoteDetails, err := database.GetLeadQuoteDetails(fmt.Sprint(quoteId))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting quote details from DB.", http.StatusInternalServerError)
+		return
+	}
+
+	eventTypes, err := database.GetEventTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting event types.", http.StatusInternalServerError)
+		return
+	}
+
+	venueTypes, err := database.GetVenueTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting venue types.", http.StatusInternalServerError)
+		return
+	}
+
+	barTypes, err := database.GetBarTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bar types.", http.StatusInternalServerError)
+		return
+	}
+
+	services, err := database.GetServices()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bar types.", http.StatusInternalServerError)
+		return
+	}
+
+	quoteServices, err := database.GetQuoteServices(quoteId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting quote services.", http.StatusInternalServerError)
+		return
+	}
+
+	data := ctx
+	data["PageTitle"] = "Quote Detail — " + constants.CompanyName
+	data["Nonce"] = nonce
+	data["CSRFToken"] = csrfToken
+	data["Quote"] = quoteDetails
+	data["EventTypes"] = eventTypes
+	data["VenueTypes"] = venueTypes
+	data["BarTypes"] = barTypes
+	data["QuoteServices"] = quoteServices
+	data["Services"] = services
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	helpers.ServeContent(w, files, data)
+}
+
+func DeleteQuoteService(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("Error parsing form: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	quoteServiceId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/quote-service/")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = database.DeleteQuoteService(quoteServiceId)
+	if err != nil {
+		fmt.Printf("Error deleting quote service: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to delete quote service.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	quoteServices, err := database.GetQuoteServices(quoteServiceId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting services from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "quote_services_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "quote_services_table.html",
+		Data: map[string]any{
+			"QuoteServices": quoteServices,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func PostQuoteService(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var form types.QuoteServiceForm
+	err = decoder.Decode(&form, r.PostForm)
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.CreateQuoteService(form)
+	if err != nil {
+		fmt.Printf("Error creating lead quote: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while creating lead quote.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	quoteServices, err := database.GetQuoteServices(helpers.SafeInt(form.QuoteID))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting quote services from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "quote_services_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "quote_services_table.html",
+		Data: map[string]any{
+			"QuoteServices": quoteServices,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func PutQuoteService(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to parse form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var form types.QuoteServiceForm
+	err = decoder.Decode(&form, r.PostForm)
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.UpdateQuoteService(form)
+	if err != nil {
+		fmt.Printf("Error updating quote service: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while updating quote service.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	quoteServices, err := database.GetQuoteServices(helpers.SafeInt(form.QuoteID))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting quote services from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "quote_services_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "quote_services_table.html",
+		Data: map[string]any{
+			"QuoteServices": quoteServices,
 		},
 	}
 

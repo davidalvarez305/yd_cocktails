@@ -588,11 +588,12 @@ type QuoteServiceList struct {
 }
 
 type QuoteServiceForm struct {
-	CSRFToken    *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	ServiceID    *int     `json:"service_id" form:"service_id" schema:"service_id"`
-	QuoteID      *int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	Units        *int     `json:"units" form:"units" schema:"units"`
-	PricePerUnit *float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
+	CSRFToken      *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	QuoteServiceID *int     `json:"quote_service_id" form:"quote_service_id" schema:"quote_service_id"`
+	ServiceID      *int     `json:"service_id" form:"service_id" schema:"service_id"`
+	QuoteID        *int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	Units          *int     `json:"units" form:"units" schema:"units"`
+	PricePerUnit   *float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
 }
 
 type ServiceForm struct {

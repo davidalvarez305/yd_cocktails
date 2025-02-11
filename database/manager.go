@@ -2423,6 +2423,31 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 	return services, totalRows, nil
 }
 
+func GetServices() ([]models.Service, error) {
+	var services []models.Service
+
+	rows, err := DB.Query(`SELECT service_id, service FROM "service";`)
+	if err != nil {
+		return services, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var service models.Service
+		err := rows.Scan(&service.ServiceID, &service.Service)
+		if err != nil {
+			return services, fmt.Errorf("error scanning row: %w", err)
+		}
+		services = append(services, service)
+	}
+
+	if err := rows.Err(); err != nil {
+		return services, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return services, nil
+}
+
 func CreateService(form types.ServiceForm) error {
 	stmt, err := DB.Prepare(`
 		INSERT INTO service (
@@ -2437,6 +2462,105 @@ func CreateService(form types.ServiceForm) error {
 	serviceName := utils.CreateNullString(form.Service)
 
 	_, err = stmt.Exec(serviceName)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
+func GetQuoteServices(quoteId int) ([]types.QuoteServiceList, error) {
+	var quoteServiceList []types.QuoteServiceList
+
+	query := `SELECT qs.quote_id, 
+		qs.service_id, 
+		s.service, 
+		qs.units, 
+		qs.price_per_unit::NUMERIC, 
+		(qs.price_per_unit::NUMERIC * qs.units)
+	FROM quote_service AS qs
+	JOIN service AS s ON qs.service_id = s.service_id
+	WHERE qs.quote_id = $1;`
+
+	rows, err := DB.Query(query, quoteId)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var service types.QuoteServiceList
+
+		err := rows.Scan(&service.QuoteID,
+			&service.ServiceID,
+			&service.Service,
+			&service.Units,
+			&service.PricePerUnit,
+			&service.Total)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		quoteServiceList = append(quoteServiceList, service)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return quoteServiceList, nil
+}
+
+func DeleteQuoteService(id int) error {
+	sqlStatement := `
+        DELETE FROM quote_service WHERE quote_service_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CreateQuoteService(form types.QuoteServiceForm) error {
+	stmt, err := DB.Prepare(`
+		INSERT INTO quote_service (service_id, quote_id, units, price_per_unit) VALUES ($1, $2, $3, $4)
+	`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		utils.CreateNullInt(form.ServiceID),
+		utils.CreateNullInt(form.QuoteID),
+		utils.CreateNullInt(form.Units),
+		utils.CreateNullFloat64(form.PricePerUnit),
+	)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
+func UpdateQuoteService(form types.QuoteServiceForm) error {
+	stmt, err := DB.Prepare(`
+		UPDATE quote_service
+		SET units = COALESCE($1, units), price_per_unit = COALESCE($2, price_per_unit)
+		WHERE quote_service_id = $3
+	`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		utils.CreateNullInt(form.Units),
+		utils.CreateNullFloat64(form.PricePerUnit),
+		utils.CreateNullInt(form.QuoteServiceID),
+	)
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
