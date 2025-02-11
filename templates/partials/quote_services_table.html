@@ -36,7 +36,7 @@
                     <p class="font-medium">{{ .Units }}</p>
                 </td>
                 <td class="p-3 text-center">
-                    <p class="font-medium">${{ .PricePerUnit }}</p>
+                    <input type="number" value="{{ .PricePerUnit }}" class="font-medium w-full text-center bg-transparent border-none focus:ring-0 dark:bg-gray-800 dark:text-gray-300 dark:focus:ring-gray-600/40">
                 </td>
                 <td class="p-3 text-center">
                     <p class="font-medium">${{ .Total }}</p>
