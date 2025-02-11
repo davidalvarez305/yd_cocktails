@@ -1,5 +1,6 @@
 {{ define "quote_services_table.html" }}
-<div id="quoteServicesTable" class="min-w-full overflow-x-auto rounded border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+<div id="quoteServicesTable"
+    class="min-w-full overflow-x-auto rounded border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
     <table class="min-w-full whitespace-nowrap align-middle text-sm">
         <thead>
             <tr>
@@ -7,22 +8,22 @@
                     class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
                     Service
                 </th>
-				<th
-					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Units
-				</th>
-				<th
-					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Per Unit Fee
-				</th>
-				<th
-					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Total
-				</th>
-				<th
-					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Actions
-				</th>
+                <th
+                    class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
+                    Units
+                </th>
+                <th
+                    class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
+                    Per Unit Fee
+                </th>
+                <th
+                    class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
+                    Total
+                </th>
+                <th
+                    class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
+                    Actions
+                </th>
             </tr>
         </thead>
 
@@ -30,20 +31,21 @@
             {{ range .QuoteServices }}
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
                 <td class="p-3 text-center">
-                    <p class="font-medium">{{ .Service }}</p>
+                    <p data-quote-service-id="{{ .QuoteServiceID }}" data-field-name="service" class="tableCell font-medium">{{ .Service }}</p>
                 </td>
                 <td class="p-3 text-center">
-                    <p class="font-medium">{{ .Units }}</p>
+                    <p data-quote-service-id="{{ .QuoteServiceID }}" data-field-name="units" class="tableCell font-medium">{{ .Units }}</p>
                 </td>
                 <td class="p-3 text-center">
-                    <input type="number" value="{{ .PricePerUnit }}" class="font-medium w-full text-center bg-transparent border-none focus:ring-0 dark:bg-gray-800 dark:text-gray-300 dark:focus:ring-gray-600/40">
+                    <input data-quote-service-id="{{ .QuoteServiceID }}" data-field-name="price_per_unit" type="number" value="{{ .PricePerUnit }}"
+                        class="tableCell font-medium w-full text-center bg-transparent border-none focus:ring-0 dark:bg-gray-800 dark:text-gray-300 dark:focus:ring-gray-600/40">
                 </td>
                 <td class="p-3 text-center">
-                    <p class="font-medium">${{ .Total }}</p>
+                    <p data-quote-service-id="{{ .QuoteServiceID }}" data-field-name="total" class="tableCell font-medium">${{ .Total }}</p>
                 </td>
                 <td class="p-3 text-center">
-                    <button data-service-id="{{ .ServiceID }}"
-                        class="editService inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 font-semibold leading-6 text-gray-800 hover:z-1 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+                    <button data-quote-service-id="{{ .QuoteServiceID }}"
+                        class="updateService inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 font-semibold leading-6 text-gray-800 hover:z-1 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
                             class="hi-micro hi-x-circle inline-block size-4">
                             <path fill-rule="evenodd"
@@ -51,7 +53,7 @@
                                 clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <button data-service-id="{{ .ServiceID }}"
+                    <button data-quote-service-id="{{ .QuoteServiceID }}"
                         class="deleteQuoteService inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 font-semibold leading-6 text-gray-800 hover:z-1 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
                             class="hi-micro hi-x-circle inline-block size-4">
@@ -71,15 +73,15 @@
 
 <script nonce="{{ .Nonce }}">
     function handleDeleteQuoteService(quoteServiceId) {
-		const alertModal = document.getElementById("alertModal");
+        const alertModal = document.getElementById("alertModal");
 
-		const data = new FormData();
-		const csrfToken = document.querySelector('[name="csrf_token"]');
-		if (csrfToken) {
-			data.set("csrf_token", csrfToken.value);
-		}
+        const data = new FormData();
+        const csrfToken = document.querySelector('[name="csrf_token"]');
+        if (csrfToken) {
+            data.set("csrf_token", csrfToken.value);
+        }
 
-        fetch(`/crm/quote-service/${quoteServiceId}` + window.location.search, {
+        fetch(`/crm/quote-service/${quoteServiceId}`, {
             method: "DELETE",
             credentials: "include",
             body: data
@@ -101,7 +103,7 @@
             .then(html => {
                 const table = document.getElementById('quoteServicesTable');
                 table.outerHTML = html;
-				handleBindQuoteServiceTableActions();
+                handleBindQuoteServiceTableActions();
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
@@ -109,19 +111,31 @@
             .finally(() => handleCloseAlertModal());
     }
 
-    function handleEditQuoteService(quoteServiceId) {
-		const alertModal = document.getElementById("alertModal");
+    function handleUpdateQuoteService(quoteServiceId) {
+        const alertModal = document.getElementById("alertModal");
+        const pricePerUnitFieldName = "price_per_unit";
+        const tableCells = document.querySelectorAll(".tableCell");
 
-        const form = document.getElementById("editQuoteServiceForm");
-
-		const data = new FormData(form);
         const body = new FormData();
 
-        for (const [key, value] of data.entries()) {
-            if (value) body.append(key, value);
-        }
+        // Append form values
+        body.set("quote_service_id", quoteServiceId);
 
-        fetch(`/crm/quote-service/${quoteServiceId}` + window.location.search, {
+        tableCells.forEach(cell => {
+            const dataQuoteServiceId = cell.dataset.quoteServiceId;
+            const fieldName = cell.dataset.fieldName;
+
+            if (dataQuoteServiceId === quoteServiceId && fieldName === pricePerUnitFieldName) {
+                body.set(fieldName, cell.textContent);
+            }
+        });
+
+        const csrfToken = document.querySelector('[name="csrf_token"]');
+		if (csrfToken) {
+			body.set("csrf_token", csrfToken.value);
+		}
+
+        fetch(`/crm/quote-service/${quoteServiceId}`, {
             method: "PUT",
             credentials: "include",
             body: data
@@ -143,7 +157,7 @@
             .then(html => {
                 const table = document.getElementById('quoteServicesTable');
                 table.outerHTML = html;
-				handleBindQuoteServiceTableActions();
+                handleBindQuoteServiceTableActions();
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
@@ -160,11 +174,11 @@
             });
         });
 
-        const editButtons = document.querySelectorAll(".editQuoteService");
+        const updateButtons = document.querySelectorAll(".updateQuoteService");
 
-        editButtons.forEach(btn => {
+        updateButtons.forEach(btn => {
             btn.addEventListener("click", () => {
-                handleEditQuoteService(btn.dataset.quoteServiceId);
+                handleUpdateQuoteService(btn.dataset.quoteServiceId);
             });
         });
     }
