@@ -31,7 +31,7 @@
             {{ range .QuoteServices }}
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
                 <td class="p-3 text-center">
-                    <p data-quote-service-id="{{ .QuoteServiceID }}" data-field-name="service" class="tableCell font-medium">{{ .Service }}</p>
+                    <p class="font-medium">{{ .Service }}</p>
                 </td>
                 <td class="p-3 text-center">
                     <p data-quote-service-id="{{ .QuoteServiceID }}" data-field-name="units" class="tableCell font-medium">{{ .Units }}</p>
@@ -41,7 +41,7 @@
                         class="tableCell block w-full sm:w-1/3 rounded-lg border border-gray-200 px-3 py-2 leading-6 placeholder-gray-500 focus:border-primary-500 focus:ring-3 focus:ring-primary-500/50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary-500" />
                 </td>
                 <td class="p-3 text-center">
-                    <p data-quote-service-id="{{ .QuoteServiceID }}" data-field-name="total" class="tableCell font-medium">${{ .Total }}</p>
+                    <p class="font-medium">${{ .Total }}</p>
                 </td>
                 <td class="p-3 text-center">
                     <button data-quote-service-id="{{ .QuoteServiceID }}"
@@ -108,7 +108,6 @@
 
     function handleUpdateQuoteService(quoteServiceId) {
         const alertModal = document.getElementById("alertModal");
-        const pricePerUnitFieldName = "price_per_unit";
         const tableCells = document.querySelectorAll(".tableCell");
 
         const body = new FormData();
@@ -118,11 +117,8 @@
         body.set("quote_id", "{{ .Quote.QuoteID }}");
 
         tableCells.forEach(cell => {
-            const dataQuoteServiceId = cell.dataset.quoteServiceId;
-            const fieldName = cell.dataset.fieldName;
-
-            if (dataQuoteServiceId === quoteServiceId && fieldName === pricePerUnitFieldName) {
-                body.set(fieldName, cell.value);
+            if (cell.dataset.quoteServiceId === quoteServiceId) {
+                body.set(cell.dataset.fieldName, cell.value);
             }
         });
 
