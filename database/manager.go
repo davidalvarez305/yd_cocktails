@@ -2329,8 +2329,9 @@ func CreateQuoteService(form types.QuoteServiceForm) error {
 func UpdateQuoteService(form types.QuoteServiceForm) error {
 	stmt, err := DB.Prepare(`
 		UPDATE quote_service
-		SET price_per_unit = COALESCE($1, price_per_unit)
-		WHERE quote_service_id = $2
+		SET price_per_unit = COALESCE($1, price_per_unit),
+		SET units = COALESCE($2, units)
+		WHERE quote_service_id = $3
 	`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
@@ -2339,6 +2340,7 @@ func UpdateQuoteService(form types.QuoteServiceForm) error {
 
 	_, err = stmt.Exec(
 		utils.CreateNullFloat64(form.PricePerUnit),
+		utils.CreateNullInt(form.Units),
 		utils.CreateNullInt(form.QuoteServiceID),
 	)
 	if err != nil {
