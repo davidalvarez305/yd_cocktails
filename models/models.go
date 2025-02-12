@@ -159,10 +159,8 @@ type EventExpenseType struct {
 }
 
 type Cocktail struct {
-	CocktailID   int    `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
-	Name         string `json:"name" form:"name" schema:"name"`
-	Instructions string `json:"instructions" form:"instructions" schema:"instructions"`
-	GlassType    string `json:"glass_type" form:"glass_type" schema:"glass_type"`
+	CocktailID int    `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
+	Name       string `json:"name" form:"name" schema:"name"`
 }
 
 type Ingredient struct {
