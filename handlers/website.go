@@ -388,7 +388,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			var notificationTemplateData = map[string]any{
 				"Name":           helpers.SafeString(form.FullName),
 				"PhoneNumber":    helpers.SafeString(form.PhoneNumber),
-				"DateCreated":    utils.FormatTimestamp(createdAt),
+				"DateCreated":    utils.FormatTimestampEST(createdAt),
 				"ButtonClicked":  helpers.SafeString(form.ButtonClicked),
 				"Message":        helpers.SafeString(form.Message),
 				"LeadDetailsURL": fmt.Sprintf("%s/crm/lead/%d", constants.RootDomain, leadID),
