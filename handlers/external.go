@@ -65,8 +65,15 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 
 	quote, err := database.GetExternalQuoteDetails(externalQuoteId)
 	if err != nil {
-		fmt.Printf("ERROR GETTING QUOTE DETRAILS: %+v\n", err)
+		fmt.Printf("ERROR GETTING QUOTE DETAILS: %+v\n", err)
 		http.Error(w, "Error retrieving quote details.", http.StatusInternalServerError)
+		return
+	}
+
+	quoteServices, err := database.GetQuoteServices(quote.QuoteID)
+	if err != nil {
+		fmt.Printf("ERROR GETTING QUOTE SERVICES: %+v\n", err)
+		http.Error(w, "Error retrieving quote services.", http.StatusInternalServerError)
 		return
 	}
 
@@ -74,16 +81,7 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 	data["PageTitle"] = "Quote View — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["Quote"] = quote
-	data["BartendingRate"] = constants.BartendingRate
-	data["PerPersonIceFee"] = constants.PerPersonIceFee
-	data["PerPersonSoftDrinksFee"] = constants.PerPersonSoftDrinksFee
-	data["PerPersonJuicesFee"] = constants.PerPersonJuicesFee
-	data["PerPersonMixersFee"] = constants.PerPersonMixersFee
-	data["PerPersonGarnishFee"] = constants.PerPersonGarnishFee
-	data["PerPersonBeerFee"] = constants.PerPersonBeerFee
-	data["PerPersonWineFee"] = constants.PerPersonWineFee
-	data["PerPersonCupsStrawsNapkinsFee"] = constants.PerPersonCupsStrawsNapkinsFee
-	data["PerPersonGlasswareFee"] = constants.PerPersonGlasswareFee
+	data["QuoteServices"] = quoteServices
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
