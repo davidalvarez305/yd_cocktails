@@ -683,40 +683,34 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 		FROM lead_marketing
 		WHERE lead_id = $1
 	),
-	revenue AS (
+	lead_events AS (
 		SELECT SUM(e.amount::NUMERIC + e.tip::NUMERIC) AS total_revenue
 		FROM event e
 		WHERE e.lead_id = $1
-		OR e.lead_id IN (
+	),
+	referral_events AS (
+		SELECT SUM(e.amount::NUMERIC + e.tip::NUMERIC) AS total_revenue
+		FROM event e
+		WHERE e.lead_id IN (
 			SELECT lm1.lead_id
 			FROM lead_marketing lm1
-			WHERE lm1.referral_lead_id IN (SELECT referral_lead_id FROM referral_lead)
-				OR lm1.lead_id IN (SELECT referral_lead_id FROM referral_lead)
+			WHERE lm1.referral_lead_id = (SELECT referral_lead_id FROM referral_lead)
 		)
 	)
 	SELECT 
-		COALESCE(rf_lead.lead_id, l.lead_id) AS lead_id,
-		COALESCE(rf_lead.phone_number, l.phone_number) AS phone_number,
-		COALESCE(rf_lm.ad_campaign, lm.ad_campaign) AS ad_campaign,
-		COALESCE(rf_lm.landing_page, lm.landing_page) AS landing_page,
-		COALESCE(rf_lm.ip, lm.ip) AS ip,
-		COALESCE(rf_lead.email, l.email) AS email,
-		COALESCE(rf_lm.facebook_click_id, lm.facebook_click_id) AS facebook_click_id,
-		COALESCE(rf_lm.facebook_client_id, lm.facebook_client_id) AS facebook_client_id,
-		COALESCE(rf_lm.external_id, lm.external_id) AS external_id,
-		COALESCE(rf_lm.user_agent, lm.user_agent) AS user_agent,
-		COALESCE(rf_lm.click_id, lm.click_id) AS click_id,
-		COALESCE(rf_lm.google_client_id, lm.google_client_id) AS google_client_id,
-		COALESCE(rf_lm.campaign_id, lm.campaign_id) AS campaign_id,
-		COALESCE(rf_lm.instant_form_lead_id, lm.instant_form_lead_id) AS instant_form_lead_id,
-		e.event_id,
-		r.total_revenue AS revenue
+		COALESCE(referral_lead.lead_id, l.lead_id) AS lead_id,
+		COALESCE(referral_lead.phone_number, l.phone_number) AS phone_number,
+		COALESCE(referral_lead.email, l.email) AS email,
+		COALESCE(referral_lead.first_name, l.first_name) AS first_name,
+		COALESCE(referral_lead.last_name, l.last_name) AS last_name,
+		COALESCE(referral_lead.city, l.city) AS city,
+		COALESCE(referral_lead.state, l.state) AS state,
+		COALESCE(referral_lead.zip_code, l.zip_code) AS zip_code,
+		COALESCE(referral_events.total_revenue, 0) + COALESCE(lead_events.total_revenue, 0) AS total_revenue
 	FROM lead l
-	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
-	JOIN lead rf_lead ON lm.referral_lead_id = rf_lead.lead_id
-	JOIN lead_marketing rf_lm ON rf_lm.lead_id = lm.referral_lead_id
-	JOIN event e ON e.lead_id = l.lead_id
-	LEFT JOIN revenue r ON TRUE
+	LEFT JOIN referral_lead ON TRUE
+	LEFT JOIN lead_events ON TRUE
+	LEFT JOIN referral_events ON TRUE
 	WHERE l.lead_id = $1;`
 
 	var conversionReporting types.ConversionReporting
