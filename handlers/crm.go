@@ -114,7 +114,7 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case http.MethodPost:
-		if strings.HasPrefix(path, "/crm/lead/") {
+		if strings.HasPrefix(path, "/crm/quote-service/") {
 			PostQuoteService(w, r)
 			return
 		}
@@ -1618,8 +1618,8 @@ func DeleteService(w http.ResponseWriter, r *http.Request) {
 
 func GetLeadQuoteDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	fileName := "lead_quote_detail.html"
-	quoteServicesTable := "quote_services_table.html"
-	createQuoteServiceForm := "create_quote_service_form.html"
+	quoteServicesTable := constants.PARTIAL_TEMPLATES_DIR + "quote_services_table.html"
+	createQuoteServiceForm := constants.CRM_TEMPLATES_DIR + "create_quote_service_form.html"
 	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, quoteServicesTable, createQuoteServiceForm}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {

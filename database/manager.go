@@ -1509,7 +1509,7 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 	FROM quote AS q
 	LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
 	LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
-	JOIN quote_service qs ON qs.quote_id = q.quote_id
+	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	WHERE q.lead_id = $1
 	GROUP BY q.quote_id, e.name, v.name, q.event_date, q.guests, q.lead_id
 	ORDER BY q.event_date ASC;`
@@ -1716,7 +1716,7 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 		SUM(qs.units * qs.price_per_unit::NUMERIC)
 	FROM lead l
 	JOIN quote AS q ON q.lead_id = l.lead_id
-	JOIN quote_service qs ON qs.quote_id = q.quote_id
+	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	LEFT JOIN invoice AS i ON i.quote_id = q.quote_id
 	WHERE l.lead_id = $1 AND q.quote_id = $2
 	GROUP BY l.lead_id, l.full_name, l.phone_number, l.email, l.stripe_customer_id, q.event_date, q.external_id, i.invoice_id`
@@ -1792,7 +1792,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	JOIN invoice AS i ON i.quote_id = q.quote_id
 	JOIN invoice_type AS it ON it.invoice_type_id = i.invoice_type_id AND it.invoice_type_id = $3
 	JOIN invoice_status AS stat ON stat.invoice_status_id = i.invoice_status_id AND stat.invoice_status_id = $2
-	JOIN quote_service qs ON qs.quote_id = q.quote_id  -- JOIN with quote_service
+	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id  -- JOIN with quote_service
 	WHERE q.external_id = $1
 	GROUP BY q.quote_id, number_of_bartenders, guests, hours, e.name, v.name, event_date, 
 			l.full_name, l.phone_number, l.email, i.url, it.amount_percentage
@@ -1935,7 +1935,7 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 	FROM invoice i
 	JOIN quote q ON i.stripe_invoice_id = q.stripe_invoice_id
 	JOIN lead l ON l.lead_id = q.lead_id
-	JOIN quote_service qs ON qs.quote_id = q.quote_id
+	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	WHERE i.stripe_invoice_id = $1
 	GROUP BY l.lead_id, q.event_type_id, q.venue_type_id, q.guests, l.phone_number, q.event_date, q.quote_id;`
 
@@ -1991,7 +1991,7 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 		END AS invoice_multiplier,
 		i.invoice_type_id
 	FROM quote AS q
-	JOIN quote_service qs ON qs.quote_id = q.quote_id
+	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	JOIN invoice AS i ON i.quote_id = q.quote_id
 	JOIN lead AS l ON l.lead_id = q.lead_id
 	WHERE q.quote_id = $1 AND i.invoice_status_id = $2
