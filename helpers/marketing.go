@@ -145,15 +145,7 @@ func MapInstantFormToQuoteForm(lead types.FacebookInstantFormLead) (types.QuoteF
 
 func ExtractPhoneNumber(input string) string {
 	re := regexp.MustCompile(`\d+`)
-
-	matches := re.FindAllString(input, -1)
-
-	phoneNumber := ""
-	for _, match := range matches {
-		phoneNumber += match
-	}
-
-	return phoneNumber
+	return strings.Join(re.FindAllString(input, -1), "")
 }
 
 func ExtractMarketingID(input string) *int64 {
