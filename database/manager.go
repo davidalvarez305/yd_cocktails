@@ -1466,20 +1466,19 @@ func IsPhoneNumberInDB(phoneNumber string) (bool, error) {
 func CreateLeadQuote(form types.LeadQuoteForm) error {
 	query := `
 		INSERT INTO quote (
-			lead_id, number_of_bartenders, guests, hours, 
-			will_require_bar, num_bars, bar_type_id, we_will_provide_alcohol, alcohol_segment_id, 
-			event_type_id, venue_type_id, event_date, 
-			we_will_provide_ice, we_will_provide_soft_drinks, we_will_provide_juice, 
-			we_will_provide_mixers, we_will_provide_garnish, we_will_provide_beer, 
-			we_will_provide_wine, we_will_provide_cups_straws_napkins, will_require_glassware, amount,
-			external_id, will_require_coolers, num_coolers
+			lead_id, 
+			number_of_bartenders, 
+			guests, 
+			hours, 
+			event_type_id, 
+			venue_type_id, 
+			event_date, 
+			external_id
 		)
 		VALUES (
 			$1, $2, $3, $4, 
-			$5, $6, $7, $8, $9, 
-			$10, $11, to_timestamp($12)::timestamptz AT TIME ZONE 'America/New_York', 
-			$13, $14, $15, $16, $17, $18, 
-			$19, $20, $21, $22, $23, $24, $25
+			$5, $6, to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York', 
+			$8
 		);
 	`
 
@@ -1489,27 +1488,10 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 		utils.CreateNullInt(form.NumberOfBartenders),
 		utils.CreateNullInt(form.Guests),
 		utils.CreateNullInt(form.Hours),
-		utils.CreateNullBoolDefaultFalse(form.WillRequireBar),
-		utils.CreateNullInt(form.NumBars),
-		utils.CreateNullInt(form.BarTypeID),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideAlcohol),
-		utils.CreateNullInt(form.AlcoholSegmentID),
 		utils.CreateNullInt(form.EventTypeID),
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideIce),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideSoftDrinks),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideJuice),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideMixers),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideGarnish),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideBeer),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideWine),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideCupsStrawsNapkins),
-		utils.CreateNullBoolDefaultFalse(form.WillRequireGlassware),
-		utils.CreateNullFloat64(form.Amount),
 		uuid.New().String(),
-		utils.CreateNullBoolDefaultFalse(form.WillRequireCoolers),
-		utils.CreateNullInt(form.NumCoolers),
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting lead quote data: %w", err)
@@ -1521,12 +1503,16 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 	var leads []types.LeadQuoteList
 
-	query := `SELECT q.quote_id, e.name, v.name, q.event_date, q.guests, q.amount::NUMERIC, q.lead_id
-		FROM quote AS q
-		LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
-		LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
-		WHERE q.lead_id = $1
-		ORDER BY q.event_date ASC;`
+	query := `SELECT q.quote_id, e.name, v.name, q.event_date, q.guests, 
+		SUM(qs.units * qs.price_per_unit::NUMERIC) AS total_price, 
+		q.lead_id
+	FROM quote AS q
+	LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
+	LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
+	JOIN quote_service qs ON qs.quote_id = q.quote_id
+	WHERE q.lead_id = $1
+	GROUP BY q.quote_id, e.name, v.name, q.event_date, q.guests, q.lead_id
+	ORDER BY q.event_date ASC;`
 
 	rows, err := DB.Query(query, leadId)
 	if err != nil {
@@ -1588,44 +1574,26 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 		event_type_id,
 		venue_type_id,
 		event_date,
-		amount::NUMERIC,
-		we_will_provide_alcohol,
-		alcohol_segment_id,
-		we_will_provide_ice,
-		we_will_provide_soft_drinks,
-		we_will_provide_juice,
-		we_will_provide_mixers,
-		we_will_provide_garnish,
-		we_will_provide_beer,
-		we_will_provide_wine,
-		we_will_provide_cups_straws_napkins,
-		will_require_glassware,
-		will_require_bar,
-		num_bars,
-		bar_type_id,
-		quote_id,
-		will_require_coolers,
-		num_coolers
+		quote_id
 	FROM quote 
 	WHERE quote_id = $1`
 
 	var quoteDetails models.Quote
 
-	var leadID, bartenders, guests, hours, eventTypeID, venueTypeID, alcoholSegmentID, numBars, barTypeId, numCoolers sql.NullInt64
+	var leadID, bartenders, guests, hours, eventTypeID, venueTypeID sql.NullInt64
 	var eventDate sql.NullTime
-	var amount sql.NullFloat64
-	var weWillProvideAlcohol, weWillProvideIce, weWillProvideSoftDrinks, weWillProvideJuice,
-		weWillProvideMixers, weWillProvideGarnish, weWillProvideBeer, weWillProvideWine,
-		weWillProvideCups, willRequireGlassware, willRequireBar, willRequireCoolers sql.NullBool
 
 	row := DB.QueryRow(query, quoteId)
 
 	err := row.Scan(
-		&leadID, &bartenders, &guests, &hours, &eventTypeID, &venueTypeID, &eventDate, &amount,
-		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
-		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
-		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
-		&numBars, &barTypeId, &quoteDetails.QuoteID, &willRequireCoolers, &numCoolers,
+		&leadID,
+		&bartenders,
+		&guests,
+		&hours,
+		&eventTypeID,
+		&venueTypeID,
+		&eventDate,
+		&quoteDetails.QuoteID,
 	)
 
 	if err != nil {
@@ -1656,57 +1624,6 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 	if eventDate.Valid {
 		quoteDetails.EventDate = eventDate.Time.Unix()
 	}
-	if amount.Valid {
-		quoteDetails.Amount = amount.Float64
-	}
-	if weWillProvideAlcohol.Valid {
-		quoteDetails.WeWillProvideAlcohol = weWillProvideAlcohol.Bool
-	}
-	if alcoholSegmentID.Valid {
-		quoteDetails.AlcoholSegment = int(alcoholSegmentID.Int64)
-	}
-	if weWillProvideIce.Valid {
-		quoteDetails.WeWillProvideIce = weWillProvideIce.Bool
-	}
-	if weWillProvideSoftDrinks.Valid {
-		quoteDetails.WeWillProvideSoftDrinks = weWillProvideSoftDrinks.Bool
-	}
-	if weWillProvideJuice.Valid {
-		quoteDetails.WeWillProvideJuice = weWillProvideJuice.Bool
-	}
-	if weWillProvideMixers.Valid {
-		quoteDetails.WeWillProvideMixers = weWillProvideMixers.Bool
-	}
-	if weWillProvideGarnish.Valid {
-		quoteDetails.WeWillProvideGarnish = weWillProvideGarnish.Bool
-	}
-	if weWillProvideBeer.Valid {
-		quoteDetails.WeWillProvideBeer = weWillProvideBeer.Bool
-	}
-	if weWillProvideWine.Valid {
-		quoteDetails.WeWillProvideWine = weWillProvideWine.Bool
-	}
-	if weWillProvideCups.Valid {
-		quoteDetails.WeWillProvideCupsStrawsNapkins = weWillProvideCups.Bool
-	}
-	if willRequireGlassware.Valid {
-		quoteDetails.WillRequireGlassware = willRequireGlassware.Bool
-	}
-	if willRequireBar.Valid {
-		quoteDetails.WillRequireBar = willRequireBar.Bool
-	}
-	if numBars.Valid {
-		quoteDetails.NumBars = int(numBars.Int64)
-	}
-	if barTypeId.Valid {
-		quoteDetails.BarTypeID = int(barTypeId.Int64)
-	}
-	if willRequireCoolers.Valid {
-		quoteDetails.WillRequireCoolers = willRequireCoolers.Bool
-	}
-	if numCoolers.Valid {
-		quoteDetails.NumCoolers = int(numCoolers.Int64)
-	}
 
 	return quoteDetails, nil
 }
@@ -1718,26 +1635,9 @@ func UpdateLeadQuote(form types.LeadQuoteForm) error {
 			number_of_bartenders = COALESCE($2, number_of_bartenders),
 			guests = COALESCE($3, guests),
 			hours = COALESCE($4, hours),
-			will_require_bar = COALESCE($5, will_require_bar),
-			num_bars = $6,
-			bar_type_id = $7,
-			we_will_provide_alcohol = COALESCE($8, we_will_provide_alcohol),
-			alcohol_segment_id = COALESCE($9, alcohol_segment_id),
-			event_type_id = $10,
-			venue_type_id = $11,
-			event_date = COALESCE(to_timestamp($12)::timestamptz AT TIME ZONE 'America/New_York', event_date),
-			we_will_provide_ice = COALESCE($13, we_will_provide_ice),
-			we_will_provide_soft_drinks = COALESCE($14, we_will_provide_soft_drinks),
-			we_will_provide_juice = COALESCE($15, we_will_provide_juice),
-			we_will_provide_mixers = COALESCE($16, we_will_provide_mixers),
-			we_will_provide_garnish = COALESCE($17, we_will_provide_garnish),
-			we_will_provide_beer = COALESCE($18, we_will_provide_beer),
-			we_will_provide_wine = COALESCE($19, we_will_provide_wine),
-			we_will_provide_cups_straws_napkins = COALESCE($20, we_will_provide_cups_straws_napkins),
-			will_require_glassware = COALESCE($21, will_require_glassware),
-			amount = $22,
-			will_require_coolers = COALESCE($23, will_require_coolers),
-			num_coolers = $24
+			event_type_id = COALESCE($5, event_type_id),
+			venue_type_id = COALESCE($6, venue_type_id),
+			event_date = COALESCE(to_timestamp($7)::timestamp AT TIME ZONE 'America/New_York', event_date)
 		WHERE quote_id = $1
 	`
 
@@ -1747,26 +1647,9 @@ func UpdateLeadQuote(form types.LeadQuoteForm) error {
 		utils.CreateNullInt(form.NumberOfBartenders),
 		utils.CreateNullInt(form.Guests),
 		utils.CreateNullInt(form.Hours),
-		utils.CreateNullBoolDefaultFalse(form.WillRequireBar),
-		utils.CreateNullInt(form.NumBars),
-		utils.CreateNullInt(form.BarTypeID),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideAlcohol),
-		utils.CreateNullInt(form.AlcoholSegmentID),
 		utils.CreateNullInt(form.EventTypeID),
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideIce),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideSoftDrinks),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideJuice),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideMixers),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideGarnish),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideBeer),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideWine),
-		utils.CreateNullBoolDefaultFalse(form.WeWillProvideCupsStrawsNapkins),
-		utils.CreateNullBoolDefaultFalse(form.WillRequireGlassware),
-		utils.CreateNullFloat64(form.Amount),
-		utils.CreateNullBoolDefaultFalse(form.WillRequireCoolers),
-		utils.CreateNullInt(form.NumCoolers),
 	)
 	if err != nil {
 		return fmt.Errorf("error updating lead quote data: %w", err)
@@ -1821,19 +1704,22 @@ func UpdateInvoiceStatus(stripeInvoiceId string, invoiceStatusId int) error {
 }
 
 func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, error) {
-	query := `SELECT l.lead_id,
-	l.full_name,
-	l.phone_number,
-	l.email,
-	l.stripe_customer_id,
-	q.event_date AT TIME ZONE 'America/New_York' AT TIME ZONE 'UTC',
-	q.amount::NUMERIC,
-	q.external_id,
-	i.invoice_id
+	query := `SELECT 
+		l.lead_id,
+		l.full_name,
+		l.phone_number,
+		l.email,
+		l.stripe_customer_id,
+		q.event_date AT TIME ZONE 'America/New_York' AT TIME ZONE 'UTC' AS event_date_utc,
+		q.external_id,
+		i.invoice_id,
+		SUM(qs.units * qs.price_per_unit::NUMERIC)
 	FROM lead l
 	JOIN quote AS q ON q.lead_id = l.lead_id
+	JOIN quote_service qs ON qs.quote_id = q.quote_id
 	LEFT JOIN invoice AS i ON i.quote_id = q.quote_id
-	WHERE l.lead_id = $1 AND q.quote_id = $2`
+	WHERE l.lead_id = $1 AND q.quote_id = $2
+	GROUP BY l.lead_id, l.full_name, l.phone_number, l.email, l.stripe_customer_id, q.event_date, q.external_id, i.invoice_id`
 
 	var quote types.QuoteDetails
 
@@ -1841,7 +1727,6 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 
 	var email, stripeCustomerId sql.NullString
 	var eventDate time.Time
-	var amount sql.NullFloat64
 	var invoiceId sql.NullInt64
 
 	err := row.Scan(
@@ -1851,9 +1736,9 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 		&email,
 		&stripeCustomerId,
 		&eventDate,
-		&amount,
 		&quote.ExternalID,
 		&invoiceId,
+		&quote.Amount,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -1865,12 +1750,8 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 	if invoiceId.Valid {
 		quote.InvoiceID = int(invoiceId.Int64)
 	}
-
 	if email.Valid {
 		quote.Email = email.String
-	}
-	if amount.Valid {
-		quote.Amount = amount.Float64
 	}
 	if stripeCustomerId.Valid {
 		quote.StripeCustomerID = stripeCustomerId.String
@@ -1890,30 +1771,12 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		e.name AS event_type,
 		v.name AS venue_type,
 		event_date,
-		amount::NUMERIC,
-		we_will_provide_alcohol,
-		a.alcohol_segment_id,
-		we_will_provide_ice,
-		we_will_provide_soft_drinks,
-		we_will_provide_juice,
-		we_will_provide_mixers,
-		we_will_provide_garnish,
-		we_will_provide_beer,
-		we_will_provide_wine,
-		we_will_provide_cups_straws_napkins,
-		will_require_glassware,
-		will_require_bar,
-		num_bars,
-		b.price::NUMERIC,
-		a.price_modification,
-		b.type,
+		SUM(qs.units * qs.price_per_unit::NUMERIC),
 		l.full_name,
 		l.phone_number,
 		l.email,
 		i.url AS deposit_invoice_url,
-		will_require_coolers,
-		num_coolers,
-		q.amount::NUMERIC * it.amount_percentage AS adjusted_amount,
+		SUM(qs.units * qs.price_per_unit::NUMERIC) * it.amount_percentage AS adjusted_amount,
 		(
 			SELECT i2.url
 			FROM invoice AS i2
@@ -1923,38 +1786,43 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 			LIMIT 1
 		) AS full_invoice_url
 	FROM quote AS q
-	LEFT JOIN alcohol_segment AS a ON q.alcohol_segment_id = a.alcohol_segment_id
-	LEFT JOIN bar_type AS b ON q.bar_type_id = b.bar_type_id
 	LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
 	LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
 	JOIN lead AS l ON q.lead_id = l.lead_id
 	JOIN invoice AS i ON i.quote_id = q.quote_id
 	JOIN invoice_type AS it ON it.invoice_type_id = i.invoice_type_id AND it.invoice_type_id = $3
 	JOIN invoice_status AS stat ON stat.invoice_status_id = i.invoice_status_id AND stat.invoice_status_id = $2
-
+	JOIN quote_service qs ON qs.quote_id = q.quote_id  -- JOIN with quote_service
 	WHERE q.external_id = $1
-	ORDER BY i.date_created DESC;`
+	GROUP BY q.quote_id, number_of_bartenders, guests, hours, e.name, v.name, event_date, 
+			l.full_name, l.phone_number, l.email, i.url, it.amount_percentage
+	ORDER BY i.date_created DESC
+	LIMIT 1;`
 
 	var quoteDetails types.ExternalQuoteDetails
 
-	var bartenders, guests, hours, alcoholSegmentID, numBars, numCoolers sql.NullInt64
+	var bartenders, guests, hours sql.NullInt64
 	var eventDate sql.NullTime
-	var amount, alcoholSegmentAdjustment, barTypePrice, deposit sql.NullFloat64
-	var eventType, venueType, barType, email sql.NullString
-	var weWillProvideAlcohol, weWillProvideIce, weWillProvideSoftDrinks, weWillProvideJuice,
-		weWillProvideMixers, weWillProvideGarnish, weWillProvideBeer, weWillProvideWine,
-		weWillProvideCups, willRequireGlassware, willRequireBar, willRequireCooler sql.NullBool
+	var amount, deposit sql.NullFloat64
+	var eventType, venueType, email sql.NullString
 
 	row := DB.QueryRow(query, externalQuoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID, constants.FullInvoiceTypeID)
 
 	err := row.Scan(
 		&quoteDetails.QuoteID,
-		&bartenders, &guests, &hours, &eventType, &venueType, &eventDate, &amount,
-		&weWillProvideAlcohol, &alcoholSegmentID, &weWillProvideIce, &weWillProvideSoftDrinks,
-		&weWillProvideJuice, &weWillProvideMixers, &weWillProvideGarnish, &weWillProvideBeer,
-		&weWillProvideWine, &weWillProvideCups, &willRequireGlassware, &willRequireBar,
-		&numBars, &barTypePrice, &alcoholSegmentAdjustment, &barType, &quoteDetails.FullName, &quoteDetails.PhoneNumber, &email, &quoteDetails.DepositInvoiceURL, &willRequireCooler, &numCoolers,
-		&deposit, &quoteDetails.FullInvoiceURL,
+		&bartenders,
+		&guests,
+		&hours,
+		&eventType,
+		&venueType,
+		&eventDate,
+		&amount,
+		&quoteDetails.FullName,
+		&quoteDetails.PhoneNumber,
+		&email,
+		&quoteDetails.DepositInvoiceURL,
+		&deposit,
+		&quoteDetails.FullInvoiceURL,
 	)
 
 	if err != nil {
@@ -1964,16 +1832,14 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		return quoteDetails, fmt.Errorf("error scanning row: %w", err)
 	}
 
-	var floatGuests float64
-
+	if bartenders.Valid {
+		quoteDetails.NumberOfBartenders = int(bartenders.Int64)
+	}
 	if guests.Valid {
 		quoteDetails.Guests = int(guests.Int64)
-		floatGuests = float64(guests.Int64)
 	}
-	if bartenders.Valid && hours.Valid {
-		quoteDetails.NumberOfBartenders = int(bartenders.Int64)
-		quoteDetails.Hours = int(hours.Int64) * int(bartenders.Int64)
-		quoteDetails.BartendingFee = float64(bartenders.Int64) * float64(hours.Int64) * constants.BartendingRate
+	if hours.Valid {
+		quoteDetails.Hours = int(hours.Int64)
 	}
 	if eventType.Valid {
 		quoteDetails.EventType = eventType.String
@@ -1990,88 +1856,11 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	if deposit.Valid {
 		quoteDetails.Deposit = deposit.Float64
 	}
-
-	// Alcohol
-	if weWillProvideAlcohol.Valid && alcoholSegmentAdjustment.Valid {
-		quoteDetails.Alcohol = floatGuests * constants.PerPersonAlcoholFee * alcoholSegmentAdjustment.Float64
-		quoteDetails.PerPersonAlcoholFee = constants.PerPersonAlcoholFee * alcoholSegmentAdjustment.Float64
-	}
-	if weWillProvideBeer.Valid && weWillProvideBeer.Bool {
-		quoteDetails.Beer = floatGuests * constants.PerPersonBeerFee
-	}
-	if weWillProvideWine.Valid && weWillProvideWine.Bool {
-		quoteDetails.Wine = floatGuests * constants.PerPersonWineFee
-	}
-	// Alcohol
-
-	// Ingredients
-	if weWillProvideIce.Valid && weWillProvideIce.Bool {
-		quoteDetails.Ice = floatGuests * constants.PerPersonIceFee
-	}
-	if weWillProvideSoftDrinks.Valid && weWillProvideSoftDrinks.Bool {
-		quoteDetails.SoftDrinks = floatGuests * constants.PerPersonSoftDrinksFee
-	}
-	if weWillProvideMixers.Valid && weWillProvideMixers.Bool {
-		quoteDetails.Mixers = floatGuests * constants.PerPersonMixersFee
-	}
-	if weWillProvideJuice.Valid && weWillProvideJuice.Bool {
-		quoteDetails.Juice = floatGuests * constants.PerPersonJuicesFee
-	}
-	if weWillProvideGarnish.Valid && weWillProvideGarnish.Bool {
-		quoteDetails.Garnish = floatGuests * constants.PerPersonGarnishFee
-	}
-	// Ingredients
-
-	// Supplies
-	if weWillProvideCups.Valid && weWillProvideCups.Bool {
-		quoteDetails.CupsStrawsNapkins = floatGuests * constants.PerPersonCupsStrawsNapkinsFee
-	}
-	if willRequireGlassware.Valid && willRequireGlassware.Bool {
-		quoteDetails.Glassware = floatGuests * constants.PerPersonGlasswareFee
-	}
-	// Supplies
-
-	if willRequireBar.Valid && willRequireBar.Bool && barTypePrice.Valid && barType.Valid {
-		quoteDetails.BarRental = float64(numBars.Int64) * barTypePrice.Float64
-		quoteDetails.BarType = barType.String
-		quoteDetails.RentalFeePerBar = quoteDetails.BarRental / float64(numBars.Int64)
-		quoteDetails.NumBars = int(numBars.Int64)
-	}
-
-	if willRequireCooler.Valid && numCoolers.Valid {
-		quoteDetails.CoolerRental = float64(numCoolers.Int64) * constants.PerCoolerRentalFee
-	}
-
 	if email.Valid {
 		quoteDetails.Email = email.String
 	}
 
 	return quoteDetails, nil
-}
-
-func GetBarTypes() ([]models.BarType, error) {
-	var barTypes []models.BarType
-
-	rows, err := DB.Query(`SELECT bar_type_id, type, price::NUMERIC FROM "bar_type"`)
-	if err != nil {
-		return barTypes, fmt.Errorf("error executing query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var bt models.BarType
-		err := rows.Scan(&bt.BarTypeID, &bt.Type, &bt.Price)
-		if err != nil {
-			return barTypes, fmt.Errorf("error scanning row: %w", err)
-		}
-		barTypes = append(barTypes, bt)
-	}
-
-	if err := rows.Err(); err != nil {
-		return barTypes, fmt.Errorf("error iterating rows: %w", err)
-	}
-
-	return barTypes, nil
 }
 
 func GetInvoiceByStripeInvoiceID(stripeInvoiceId string) (models.Invoice, error) {
@@ -2134,18 +1923,21 @@ func SetInvoiceStatusToPaid(stripeInvoiceId string, datePaid int64) error {
 }
 
 func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuoteDetails, error) {
-	query := `SELECT l.lead_id,
-	q.event_type_id,
-	q.venue_type_id,
-	q.amount,
-	q.guests,
-	q.phone_number,
-	q.event_date,
-	q.quote_id
-	JOIN invoice i
+	query := `SELECT 
+		l.lead_id,
+		q.event_type_id,
+		q.venue_type_id,
+		SUM(qs.units * qs.price_per_unit::NUMERIC),
+		q.guests,
+		l.phone_number,
+		q.event_date,
+		q.quote_id
+	FROM invoice i
 	JOIN quote q ON i.stripe_invoice_id = q.stripe_invoice_id
 	JOIN lead l ON l.lead_id = q.lead_id
-	WHERE i.stripe_invoice_id = $1`
+	JOIN quote_service qs ON qs.quote_id = q.quote_id
+	WHERE i.stripe_invoice_id = $1
+	GROUP BY l.lead_id, q.event_type_id, q.venue_type_id, q.guests, l.phone_number, q.event_date, q.quote_id;`
 
 	var invoiceQuoteDetails types.InvoiceQuoteDetails
 
@@ -2188,22 +1980,28 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 	var leadQuoteInvoices []types.LeadQuoteInvoice
 
 	query := `SELECT 
-			i.stripe_invoice_id, 
-			l.stripe_customer_id, 
-			q.amount::NUMERIC, 
-			i.due_date,
-			CASE 
-				WHEN i.invoice_type_id = 1 THEN 0.25
-				WHEN i.invoice_type_id = 2 THEN 0.75
-				ELSE 1.00
-			END AS invoice_multiplier,
-			i.invoice_type_id
-		FROM quote AS q
-		JOIN invoice AS i ON i.quote_id = q.quote_id
-		JOIN lead AS l ON l.lead_id = q.lead_id
-		WHERE q.quote_id = $1 AND i.invoice_status_id = 1`
+		i.stripe_invoice_id, 
+		l.stripe_customer_id, 
+		SUM(qs.units * qs.price_per_unit::NUMERIC),
+		i.due_date,
+		CASE 
+			WHEN i.invoice_type_id = 1 THEN 0.25
+			WHEN i.invoice_type_id = 2 THEN 0.75
+			ELSE 1.00
+		END AS invoice_multiplier,
+		i.invoice_type_id
+	FROM quote AS q
+	JOIN quote_service qs ON qs.quote_id = q.quote_id
+	JOIN invoice AS i ON i.quote_id = q.quote_id
+	JOIN lead AS l ON l.lead_id = q.lead_id
+	WHERE q.quote_id = $1 AND i.invoice_status_id = $2
+	GROUP BY 
+		i.stripe_invoice_id, 
+		l.stripe_customer_id, 
+		i.due_date, 
+		i.invoice_type_id;`
 
-	rows, err := DB.Query(query, quoteId)
+	rows, err := DB.Query(query, quoteId, constants.OpenInvoiceStatusID)
 	if err != nil {
 		return leadQuoteInvoices, fmt.Errorf("error executing query: %w", err)
 	}
@@ -2241,25 +2039,6 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 	}
 
 	return leadQuoteInvoices, nil
-}
-
-func GetAlcoholFeeAdjustment(alcoholSegment int) (float64, error) {
-	var alcoholFeeAdjustment float64
-
-	stmt, err := DB.Prepare(`SELECT price_modification FROM "alcohol_segment" WHERE "alcohol_segment_id" = $1`)
-	if err != nil {
-		return alcoholFeeAdjustment, fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close()
-
-	row := stmt.QueryRow(alcoholSegment)
-
-	err = row.Scan(&alcoholFeeAdjustment)
-	if err != nil {
-		return alcoholFeeAdjustment, fmt.Errorf("error scanning row: %w", err)
-	}
-
-	return alcoholFeeAdjustment, nil
 }
 
 func GetInvoiceTypes() ([]models.InvoiceType, error) {

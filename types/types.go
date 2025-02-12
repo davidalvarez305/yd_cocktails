@@ -465,38 +465,16 @@ type LeadQuoteList struct {
 }
 
 type LeadQuoteForm struct {
-	CSRFToken          *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	QuoteID            *int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	LeadID             *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	ExternalID         *string  `json:"external_id" form:"external_id" schema:"external_id"`
-	NumberOfBartenders *int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
-	Guests             *int     `json:"guests" form:"guests" schema:"guests"`
-	Hours              *int     `json:"hours" form:"hours" schema:"hours"`
-	EventTypeID        *int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID        *int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	EventDate          *int64   `json:"event_date" form:"event_date" schema:"event_date"`
-	Amount             *float64 `json:"amount" form:"amount" schema:"amount"`
-
-	WeWillProvideAlcohol *bool `json:"we_will_provide_alcohol" form:"we_will_provide_alcohol" schema:"we_will_provide_alcohol"`
-	AlcoholSegmentID     *int  `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
-
-	WeWillProvideIce               *bool `json:"we_will_provide_ice" form:"we_will_provide_ice" schema:"we_will_provide_ice"`
-	WeWillProvideSoftDrinks        *bool `json:"we_will_provide_soft_drinks" form:"we_will_provide_soft_drinks" schema:"we_will_provide_soft_drinks"`
-	WeWillProvideJuice             *bool `json:"we_will_provide_juice" form:"we_will_provide_juice" schema:"we_will_provide_juice"`
-	WeWillProvideMixers            *bool `json:"we_will_provide_mixers" form:"we_will_provide_mixers" schema:"we_will_provide_mixers"`
-	WeWillProvideGarnish           *bool `json:"we_will_provide_garnish" form:"we_will_provide_garnish" schema:"we_will_provide_garnish"`
-	WeWillProvideBeer              *bool `json:"we_will_provide_beer" form:"we_will_provide_beer" schema:"we_will_provide_beer"`
-	WeWillProvideWine              *bool `json:"we_will_provide_wine" form:"we_will_provide_wine" schema:"we_will_provide_wine"`
-	WeWillProvideCupsStrawsNapkins *bool `json:"we_will_provide_cups" form:"we_will_provide_cups" schema:"we_will_provide_cups"`
-
-	WillRequireGlassware *bool `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
-
-	WillRequireBar *bool `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
-	NumBars        *int  `json:"num_bars" form:"num_bars" schema:"num_bars"`
-	BarTypeID      *int  `json:"bar_type_id" form:"bar_type_id" schema:"bar_type_id"`
-
-	WillRequireCoolers *bool `json:"will_require_coolers" form:"will_require_coolers" schema:"will_require_coolers"`
-	NumCoolers         *int  `json:"num_coolers" form:"num_coolers" schema:"num_coolers"`
+	CSRFToken          *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	QuoteID            *int    `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	LeadID             *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	ExternalID         *string `json:"external_id" form:"external_id" schema:"external_id"`
+	EventTypeID        *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID        *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	NumberOfBartenders *int    `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+	Guests             *int    `json:"guests" form:"guests" schema:"guests"`
+	Hours              *int    `json:"hours" form:"hours" schema:"hours"`
+	EventDate          *int64  `json:"event_date" form:"event_date" schema:"event_date"`
 }
 
 type QuoteDetails struct {
@@ -506,46 +484,27 @@ type QuoteDetails struct {
 	Email            string  `json:"email" form:"email" schema:"email"`
 	PhoneNumber      string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	StripeCustomerID string  `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
-	Amount           float64 `json:"amount" form:"amount" schema:"amount"`
 	EventDate        int64   `json:"event_date" form:"event_date" schema:"event_date"`
 	InvoiceID        int     `json:"invoice_id" form:"invoice_id" schema:"invoice_id"`
+	Amount           float64 `json:"amount" form:"amount" schema:"amount"`
 }
 
 type ExternalQuoteDetails struct {
-	QuoteID             int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	ExternalID          string  `json:"external_id" form:"external_id" schema:"external_id"`
-	Amount              float64 `json:"amount" form:"amount" schema:"amount"`
-	Deposit             float64 `json:"deposit" form:"deposit" schema:"deposit"`
-	EventType           string  `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType           string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
-	Guests              int     `json:"guests" form:"guests" schema:"guests"`
-	Hours               int     `json:"hours" form:"hours" schema:"hours"`
-	EventDate           string  `json:"event_date" form:"event_date" schema:"event_date"`
-	NumberOfBartenders  int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
-	BartendingFee       float64 `json:"bartending_fee" form:"bartending_fee" schema:"bartending_fee"`
-	Alcohol             float64 `json:"alcohol" form:"alcohol" schema:"alcohol"`
-	AlcoholSegment      string  `json:"alcohol_segment" form:"alcohol_segment" schema:"alcohol_segment"`
-	PerPersonAlcoholFee float64 `json:"per_person_alcohol_fee" form:"per_person_alcohol_fee" schema:"per_person_alcohol_fee"`
-	Ice                 float64 `json:"ice" form:"ice" schema:"ice"`
-	SoftDrinks          float64 `json:"soft_drinks" form:"soft_drinks" schema:"soft_drinks"`
-	Juice               float64 `json:"juice" form:"juice" schema:"juice"`
-	Mixers              float64 `json:"mixers" form:"mixers" schema:"mixers"`
-	Garnish             float64 `json:"garnish" form:"garnish" schema:"garnish"`
-	Beer                float64 `json:"beer" form:"beer" schema:"beer"`
-	Wine                float64 `json:"wine" form:"wine" schema:"wine"`
-	CupsStrawsNapkins   float64 `json:"cups" form:"cups" schema:"cups"`
-	Glassware           float64 `json:"glassware" form:"glassware" schema:"glassware"`
-	BarRental           float64 `json:"bar_rental" form:"bar_rental" schema:"bar_rental"`
-	NumBars             int     `json:"num_bars" form:"num_bars" schema:"num_bars"`
-	BarType             string  `json:"bar_type" form:"bar_type" schema:"bar_type"`
-	RentalFeePerBar     float64 `json:"rental_fee_per_bar" form:"rental_fee_per_bar" schema:"rental_fee_per_bar"`
-	FullName            string  `json:"full_name" form:"full_name" schema:"full_name"`
-	PhoneNumber         string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	Email               string  `json:"email" form:"email" schema:"email"`
-	DepositInvoiceURL   string  `json:"deposit_invoice_url" form:"deposit_invoice_url" schema:"deposit_invoice_url"`
-	FullInvoiceURL      string  `json:"full_invoice_url" form:"full_invoice_url" schema:"full_invoice_url"`
-	CoolerRental        float64 `json:"cooler_rental" form:"cooler_rental" schema:"cooler_rental"`
-	NumCoolers          int     `json:"num_coolers" form:"num_coolers" schema:"num_coolers"`
+	QuoteID            int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	ExternalID         string  `json:"external_id" form:"external_id" schema:"external_id"`
+	Amount             float64 `json:"amount" form:"amount" schema:"amount"`
+	Deposit            float64 `json:"deposit" form:"deposit" schema:"deposit"`
+	EventType          string  `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType          string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	Guests             int     `json:"guests" form:"guests" schema:"guests"`
+	Hours              int     `json:"hours" form:"hours" schema:"hours"`
+	EventDate          string  `json:"event_date" form:"event_date" schema:"event_date"`
+	NumberOfBartenders int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+	FullName           string  `json:"full_name" form:"full_name" schema:"full_name"`
+	PhoneNumber        string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	Email              string  `json:"email" form:"email" schema:"email"`
+	DepositInvoiceURL  string  `json:"deposit_invoice_url" form:"deposit_invoice_url" schema:"deposit_invoice_url"`
+	FullInvoiceURL     string  `json:"full_invoice_url" form:"full_invoice_url" schema:"full_invoice_url"`
 }
 
 type CreateInvoiceParams struct {

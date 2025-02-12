@@ -284,13 +284,6 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	barTypes, err := database.GetBarTypes()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting bar types.", http.StatusInternalServerError)
-		return
-	}
-
 	leadInterestList, err := database.GetLeadInterestList()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -334,7 +327,6 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["Bartenders"] = bartenders
 	data["Referrals"] = referrals
 	data["LeadQuotes"] = leadQuotes
-	data["BarTypes"] = barTypes
 	data["LeadInterestList"] = leadInterestList
 	data["LeadStatusList"] = leadStatusList
 	data["NextActionList"] = nextActionList
@@ -1059,45 +1051,6 @@ func PostLeadQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	barTypes, err := database.GetBarTypes()
-	if err != nil {
-		fmt.Printf("Error getting bar types: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Server error while getting bar types.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	var alcoholFeeAdjustment float64
-
-	if helpers.SafeBoolDefaultFalse(form.WeWillProvideAlcohol) {
-		alcoholFeeAdjustment, err = database.GetAlcoholFeeAdjustment(helpers.SafeInt(form.AlcoholSegmentID))
-		if err != nil {
-			fmt.Printf("Error getting alcohol fee adjustments: %+v\n", err)
-			tmplCtx := types.DynamicPartialTemplate{
-				TemplateName: "error",
-				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-				Data: map[string]any{
-					"Message": "Server error while getting alcohol fee adjustments.",
-				},
-			}
-
-			w.WriteHeader(http.StatusBadRequest)
-			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-			return
-		}
-	}
-
-	quote := helpers.CalculatePackageQuote(form, barTypes, alcoholFeeAdjustment)
-	form.Amount = &quote
-
 	err = database.CreateLeadQuote(form)
 	if err != nil {
 		fmt.Printf("Error creating lead quote: %+v\n", err)
@@ -1186,44 +1139,6 @@ func PutLeadQuote(w http.ResponseWriter, r *http.Request) {
 		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 		return
 	}
-
-	barTypes, err := database.GetBarTypes()
-	if err != nil {
-		fmt.Printf("Error getting bar types: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Server error while getting bar types.",
-			},
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	var alcoholFeeAdjustment float64
-	if helpers.SafeBoolDefaultFalse(form.WeWillProvideAlcohol) {
-		alcoholFeeAdjustment, err = database.GetAlcoholFeeAdjustment(helpers.SafeInt(form.AlcoholSegmentID))
-		if err != nil {
-			fmt.Printf("Error getting alcohol fee adjustments: %+v\n", err)
-			tmplCtx := types.DynamicPartialTemplate{
-				TemplateName: "error",
-				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-				Data: map[string]any{
-					"Message": "Server error while getting alcohol fee adjustments.",
-				},
-			}
-
-			w.WriteHeader(http.StatusBadRequest)
-			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-			return
-		}
-	}
-
-	amount := helpers.CalculatePackageQuote(form, barTypes, alcoholFeeAdjustment)
-	form.Amount = &amount
 
 	err = database.UpdateLeadQuote(form)
 	if err != nil {
@@ -1746,13 +1661,6 @@ func GetLeadQuoteDetail(w http.ResponseWriter, r *http.Request, ctx map[string]a
 		return
 	}
 
-	barTypes, err := database.GetBarTypes()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting bar types.", http.StatusInternalServerError)
-		return
-	}
-
 	services, err := database.GetServices()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -1774,7 +1682,6 @@ func GetLeadQuoteDetail(w http.ResponseWriter, r *http.Request, ctx map[string]a
 	data["Quote"] = quoteDetails
 	data["EventTypes"] = eventTypes
 	data["VenueTypes"] = venueTypes
-	data["BarTypes"] = barTypes
 	data["QuoteServices"] = quoteServices
 	data["Services"] = services
 

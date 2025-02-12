@@ -185,44 +185,15 @@ type CocktailIngredient struct {
 }
 
 type Quote struct {
-	QuoteID    int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	ExternalID string  `json:"external_id" form:"external_id" schema:"external_id"`
-	LeadID     int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	Amount     float64 `json:"amount" form:"amount" schema:"amount"`
-
-	EventTypeID        int   `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID        int   `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	Guests             int   `json:"guests" form:"guests" schema:"guests"`
-	Hours              int   `json:"hours" form:"hours" schema:"hours"`
-	NumberOfBartenders int   `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
-	EventDate          int64 `json:"event_date" form:"event_date" schema:"event_date"`
-
-	WeWillProvideAlcohol bool `json:"we_will_provide_alcohol" form:"we_will_provide_alcohol" schema:"we_will_provide_alcohol"`
-	AlcoholSegment       int  `json:"alcohol_segment_id" form:"alcohol_segment_id" schema:"alcohol_segment_id"`
-
-	WeWillProvideIce               bool `json:"we_will_provide_ice" form:"we_will_provide_ice" schema:"we_will_provide_ice"`
-	WeWillProvideSoftDrinks        bool `json:"we_will_provide_soft_drinks" form:"we_will_provide_soft_drinks" schema:"we_will_provide_soft_drinks"`
-	WeWillProvideJuice             bool `json:"we_will_provide_juice" form:"we_will_provide_juice" schema:"we_will_provide_juice"`
-	WeWillProvideMixers            bool `json:"we_will_provide_mixers" form:"we_will_provide_mixers" schema:"we_will_provide_mixers"`
-	WeWillProvideGarnish           bool `json:"we_will_provide_garnish" form:"we_will_provide_garnish" schema:"we_will_provide_garnish"`
-	WeWillProvideBeer              bool `json:"we_will_provide_beer" form:"we_will_provide_beer" schema:"we_will_provide_beer"`
-	WeWillProvideWine              bool `json:"we_will_provide_wine" form:"we_will_provide_wine" schema:"we_will_provide_wine"`
-	WeWillProvideCupsStrawsNapkins bool `json:"we_will_provide_cups" form:"we_will_provide_cups" schema:"we_will_provide_cups"`
-
-	WillRequireGlassware bool `json:"will_require_glassware" form:"will_require_glassware" schema:"will_require_glassware"`
-
-	WillRequireBar bool `json:"will_require_bar" form:"will_require_bar" schema:"will_require_bar"`
-	NumBars        int  `json:"num_bars" form:"num_bars" schema:"num_bars"`
-	BarTypeID      int  `json:"bar_type_id" form:"bar_type_id" schema:"bar_type_id"`
-
-	WillRequireCoolers bool `json:"will_require_coolers" form:"will_require_coolers" schema:"will_require_coolers"`
-	NumCoolers         int  `json:"num_coolers" form:"num_coolers" schema:"num_coolers"`
-}
-
-type BarType struct {
-	BarTypeID int     `json:"bar_type_id" form:"bar_type_id" schema:"bar_type_id"`
-	Type      string  `json:"type" form:"type" schema:"type"`
-	Price     float64 `json:"price" form:"price" schema:"price"`
+	QuoteID            int    `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	ExternalID         string `json:"external_id" form:"external_id" schema:"external_id"`
+	LeadID             int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventTypeID        int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID        int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	Guests             int    `json:"guests" form:"guests" schema:"guests"`
+	Hours              int    `json:"hours" form:"hours" schema:"hours"`
+	NumberOfBartenders int    `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+	EventDate          int64  `json:"event_date" form:"event_date" schema:"event_date"`
 }
 
 type InvoiceType struct {
