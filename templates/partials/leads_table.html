@@ -141,7 +141,8 @@
 	function handleFullTextSearch() {
 		if (search.value.length === 0) return;
 
-		fetch(`/crm/lead?search=` + search.value, {
+		// Default pageNum to 1 when new search happens
+		fetch(`/crm/lead?search=${search.value}&pageNum=1`, {
 			method: "GET",
 			credentials: "include",
 		})

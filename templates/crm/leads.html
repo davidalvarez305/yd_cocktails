@@ -7,21 +7,30 @@
 				class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
 				Filter
 			</button>
-			<select id="event_type" name="event_type"
+			<select id="lead_interest_id" name="lead_interest_id"
 				class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold leading-5 focus:border-blue-500 focus:ring focus:ring-blue-500/50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-blue-500 sm:w-36">
-				<option value="" selected>Event Type</option>
-				{{ range .EventTypes }}
-				<option value="{{ .EventTypeID }}">
-					{{ .Name }}
+				<option value="" selected>Interest</option>
+				{{ range .LeadInterests }}
+				<option value="{{ .LeadInterestID }}">
+					{{ .Interest }}
 				</option>
 				{{ end }}
 			</select>
-			<select id="venue_type" name="venue_type"
+			<select id="lead_status_id" name="lead_status_id"
 				class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold leading-5 focus:border-blue-500 focus:ring focus:ring-blue-500/50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-blue-500 sm:w-36">
-				<option value="" selected>Venue Type</option>
-				{{ range .VenueTypes }}
-				<option value="{{ .VenueTypeID }}">
-					{{ .Name }}
+				<option value="" selected>Status</option>
+				{{ range .LeadStatuses }}
+				<option value="{{ .LeadStatusID }}">
+					{{ .Status }}
+				</option>
+				{{ end }}
+			</select>
+			<select id="next_action_id" name="next_action_id"
+				class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold leading-5 focus:border-blue-500 focus:ring focus:ring-blue-500/50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-blue-500 sm:w-36">
+				<option value="" selected>Next Action</option>
+				{{ range .NextActions }}
+				<option value="{{ .NextActionID }}">
+					{{ .Action }}
 				</option>
 				{{ end }}
 			</select>
