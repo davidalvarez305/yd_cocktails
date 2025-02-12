@@ -1795,7 +1795,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id  -- JOIN with quote_service
 	WHERE q.external_id = $1
 	GROUP BY q.quote_id, number_of_bartenders, guests, hours, e.name, v.name, event_date, 
-			l.full_name, l.phone_number, l.email, i.url, it.amount_percentage
+			l.full_name, l.phone_number, l.email, i.url, it.amount_percentage, i.date_created
 	ORDER BY i.date_created DESC
 	LIMIT 1;`
 
