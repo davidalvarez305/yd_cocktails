@@ -2372,3 +2372,41 @@ func UpdateQuoteService(form types.QuoteServiceForm) error {
 
 	return nil
 }
+
+func GetQuoteIDByQuoteServiceID(quoteServiceId int) (int, error) {
+	var quoteId int
+
+	query := `SELECT qs.quote_id FROM quote_service AS qs WHERE qs.quote_service_id = $1;`
+
+	rows, err := DB.Query(query, quoteServiceId)
+	if err != nil {
+		return quoteId, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&quoteId)
+		if err != nil {
+			return quoteId, err
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return quoteId, err
+	}
+
+	return quoteId, err
+}
+
+func CheckQuoteHasInvoiceID(quote int) (bool, error) {
+	var hasInvoice bool
+
+	query := `SELECT EXISTS(SELECT 1 FROM invoice AS i WHERE i.quote_id = $1 AND i.stripe_invoice_id IS NOT NULL)`
+
+	err := DB.QueryRow(query, quote).Scan(&hasInvoice)
+	if err != nil {
+		return false, err
+	}
+
+	return hasInvoice, nil
+}
