@@ -679,7 +679,18 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 
 func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 	query := `WITH referral_lead AS (
-		SELECT referral_lead_id
+		SELECT 
+			l.lead_id, 
+			l.phone_number, 
+			l.email, 
+			l.first_name, 
+			l.last_name, 
+			l.city, 
+			l.state, 
+			l.zip_code
+		FROM lead l
+		JOIN lead_marketing lm ON l.lead_id = lm.lead_id
+		WHERE lm.referral_lead_id = $1
 		FROM lead_marketing
 		WHERE lead_id = $1
 	),
