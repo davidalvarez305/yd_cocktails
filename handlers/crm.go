@@ -1373,7 +1373,7 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// This is only true when a new customer is created
-			if createdInvoice.Customer.ID != stripeCustomerId {
+			if stripeCustomerId == "" {
 				stripeCustomerId = createdInvoice.Customer.ID
 			}
 		}
