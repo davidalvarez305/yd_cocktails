@@ -363,17 +363,36 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
 	query := `SELECT l.lead_id, l.full_name, l.phone_number, 
-       l.created_at, lm.language, li.interest, ls.status, na.action, COUNT(*) OVER() AS total_rows
-		FROM lead AS l
-		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
-		LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id
-		LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
-		LEFT JOIN next_action AS na ON na.next_action_id = l.next_action_id
-		WHERE (ls.lead_status_id IS DISTINCT FROM $3 OR ls.lead_status_id IS NULL)
-		AND (li.lead_interest_id IS DISTINCT FROM $4 OR li.lead_interest_id IS NULL)
-		ORDER BY l.created_at DESC
-		LIMIT $1
-		OFFSET $2;`
+				l.created_at, lm.language, li.interest, ls.status, na.action, COUNT(*) OVER() AS total_rows
+			FROM lead AS l
+			JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
+			LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id
+			LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
+			LEFT JOIN next_action AS na ON na.next_action_id = l.next_action_id
+			WHERE (
+				($5 IS NOT NULL AND l.search_vector @@ plainto_tsquery('english', $5)) 
+				OR 
+				(
+					$5 IS NULL 
+					AND (
+						($6 IS NOT NULL AND ls.lead_status_id = $6) 
+						OR 
+						($6 IS NULL AND (ls.lead_status_id IS DISTINCT FROM $3 OR ls.lead_status_id IS NULL))
+					)
+					AND
+					(
+						($7 IS NOT NULL AND li.lead_interest_id = $7) 
+						OR 
+						($7 IS NULL AND (li.lead_interest_id IS DISTINCT FROM $4 OR li.lead_interest_id IS NULL))
+					)
+					AND
+					(
+						($8 IS NULL OR na.next_action_id = $8)
+					)
+				)
+			)
+			ORDER BY l.created_at DESC
+			LIMIT $1 OFFSET $2;`
 
 	var offset int
 
@@ -386,7 +405,11 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		offset = (pageNum - 1) * int(constants.LeadsPerPage)
 	}
 
-	rows, err := DB.Query(query, constants.LeadsPerPage, offset, constants.ArchivedLeadStatusID, constants.NoInterestLeadInterestID)
+	rows, err := DB.Query(query, constants.LeadsPerPage, offset, constants.ArchivedLeadStatusID, constants.NoInterestLeadInterestID,
+		utils.CreateNullString(params.Search),
+		utils.CreateNullInt(params.LeadStatusID),
+		utils.CreateNullInt(params.LeadInterestID),
+		utils.CreateNullInt(params.NextActionID))
 	if err != nil {
 		return nil, 0, fmt.Errorf("error executing query: %w", err)
 	}

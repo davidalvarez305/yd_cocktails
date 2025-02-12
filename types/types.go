@@ -118,7 +118,11 @@ type Referral struct {
 }
 
 type GetLeadsParams struct {
-	PageNum *string `json:"page_num" form:"page_num" schema:"page_num"`
+	PageNum        *string `json:"page_num" form:"page_num" schema:"page_num"`
+	Search         *string `json:"search" form:"search" schema:"search"`
+	LeadInterestID *int    `json:"lead_interest_id" form:"lead_interest_id" schema:"lead_interest_id"`
+	LeadStatusID   *int    `json:"lead_status_id" form:"lead_status_id" schema:"lead_status_id"`
+	NextActionID   *int    `json:"next_action_id" form:"next_action_id" schema:"next_action_id"`
 }
 
 type DynamicPartialTemplate struct {

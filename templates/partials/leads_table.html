@@ -1,5 +1,23 @@
 {{ define "leads_table.html" }}
-<div id="leadsTable" class="min-w-full overflow-x-auto rounded border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+<div class="grow border-b border-gray-100 p-5 dark:border-gray-700">
+	<div class="relative">
+		<div
+			class="pointer-events-none absolute inset-y-0 left-0 my-px ml-px flex w-10 items-center justify-center rounded-l text-gray-500">
+			<svg class="hi-mini hi-magnifying-glass inline-block size-5" xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+				<path fill-rule="evenodd"
+					d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+					clip-rule="evenodd" />
+			</svg>
+		</div>
+		<form id="fullTextSearch" >
+			<input type="text" name="search" class="block w-full rounded-lg border border-gray-200 py-2 pr-3 pl-10 text-sm leading-6 placeholder-gray-400 focus:border-primary-500 focus:ring-3 focus:ring-primary-500/50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-primary-500"
+			placeholder="Search for customer..." />
+		</form>
+	</div>
+</div>
+<div id="leadsTable"
+	class="min-w-full overflow-x-auto rounded border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
 	<table class="min-w-full whitespace-nowrap align-middle text-sm">
 		<thead>
 			<tr>
@@ -69,16 +87,16 @@
 					<p class="font-medium">{{ .NextAction }}</p>
 				</td>
 				<td class="p-3 text-center">
-                    <button data-lead-id="{{ .LeadID }}"
-                        class="archiveLead inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 font-semibold leading-6 text-gray-800 hover:z-1 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                            class="hi-micro hi-x-circle inline-block size-4">
-                            <path fill-rule="evenodd"
-                                d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm2.78-4.22a.75.75 0 0 1-1.06 0L8 9.06l-1.72 1.72a.75.75 0 1 1-1.06-1.06L6.94 8 5.22 6.28a.75.75 0 0 1 1.06-1.06L8 6.94l1.72-1.72a.75.75 0 1 1 1.06 1.06L9.06 8l1.72 1.72a.75.75 0 0 1 0 1.06Z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </td>
+					<button data-lead-id="{{ .LeadID }}"
+						class="archiveLead inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 font-semibold leading-6 text-gray-800 hover:z-1 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
+							class="hi-micro hi-x-circle inline-block size-4">
+							<path fill-rule="evenodd"
+								d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm2.78-4.22a.75.75 0 0 1-1.06 0L8 9.06l-1.72 1.72a.75.75 0 1 1-1.06-1.06L6.94 8 5.22 6.28a.75.75 0 0 1 1.06-1.06L8 6.94l1.72-1.72a.75.75 0 1 1 1.06 1.06L9.06 8l1.72 1.72a.75.75 0 0 1 0 1.06Z"
+								clip-rule="evenodd" />
+						</svg>
+					</button>
+				</td>
 			</tr>
 			{{ end }}
 		</tbody>
@@ -97,7 +115,8 @@
 				</svg>
 			</button>
 			<div class="flex grow items-center justify-center px-2 sm:px-4">
-				<span>Page <span class="font-semibold">{{ .CurrentPage }}</span> of <span id="maxPages" class="font-semibold">{{ .MaxPages }}</span></span>
+				<span>Page <span class="font-semibold">{{ .CurrentPage }}</span> of <span id="maxPages"
+						class="font-semibold">{{ .MaxPages }}</span></span>
 			</div>
 			<button name="right"
 				class="pagination-link inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 font-semibold leading-6 text-gray-800 hover:z-1 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
@@ -116,7 +135,47 @@
 <input type="hidden" value="{{ .CSRFToken }}" name="csrf_token" />
 
 <script nonce="{{ .Nonce }}">
-    function handleArchiveLead(leadId) {
+	const form = document.getElementById("fullTextSearch");
+	const search = document.getElementById("search");
+
+	function handleFullTextSearch() {
+		if (search.value.length === 0) return;
+
+		fetch(`/crm/lead?search=` + search.value, {
+			method: "GET",
+			credentials: "include",
+		})
+			.then((response) => {
+				const token = response.headers.get('X-Csrf-Token');
+				if (token) {
+					const tokens = document.querySelectorAll('[name="csrf_token"]');
+					tokens.forEach(csrf_token => csrf_token.value = token);
+				}
+				if (response.ok) {
+					return response.text();
+				} else {
+					return response.text().then((err) => {
+						throw new Error(err);
+					});
+				}
+			})
+			.then(html => {
+				const table = document.getElementById('leadsTable');
+				table.outerHTML = html;
+				handleBindPagination();
+				handleBindTableActions();
+			})
+			.catch(err => {
+				alertModal.outerHTML = err.message;
+			})
+			.finally(() => handleCloseAlertModal());
+	};
+
+	form.addEventListener("keydown", handleFullTextSearch());
+</script>
+
+<script nonce="{{ .Nonce }}">
+	function handleArchiveLead(leadId) {
 		const alertModal = document.getElementById("alertModal");
 
 		const data = new FormData();
@@ -125,47 +184,47 @@
 			data.set("csrf_token", csrfToken.value);
 		}
 
-        fetch(`/crm/lead/${leadId}/archive` + window.location.search, {
-            method: "PUT",
-            credentials: "include",
-            body: data
-        })
-            .then((response) => {
-                const token = response.headers.get('X-Csrf-Token');
-                if (token) {
-                    const tokens = document.querySelectorAll('[name="csrf_token"]');
-                    tokens.forEach(csrf_token => csrf_token.value = token);
-                }
-                if (response.ok) {
-                    return response.text();
-                } else {
-                    return response.text().then((err) => {
-                        throw new Error(err);
-                    });
-                }
-            })
-            .then(html => {
-                const table = document.getElementById('leadsTable');
-                table.outerHTML = html;
-                handleBindPagination();
+		fetch(`/crm/lead/${leadId}/archive` + window.location.search, {
+			method: "PUT",
+			credentials: "include",
+			body: data
+		})
+			.then((response) => {
+				const token = response.headers.get('X-Csrf-Token');
+				if (token) {
+					const tokens = document.querySelectorAll('[name="csrf_token"]');
+					tokens.forEach(csrf_token => csrf_token.value = token);
+				}
+				if (response.ok) {
+					return response.text();
+				} else {
+					return response.text().then((err) => {
+						throw new Error(err);
+					});
+				}
+			})
+			.then(html => {
+				const table = document.getElementById('leadsTable');
+				table.outerHTML = html;
+				handleBindPagination();
 				handleBindTableActions();
-            })
-            .catch(err => {
-                alertModal.outerHTML = err.message;
-            })
-            .finally(() => handleCloseAlertModal());
-    }
+			})
+			.catch(err => {
+				alertModal.outerHTML = err.message;
+			})
+			.finally(() => handleCloseAlertModal());
+	}
 
-    function handleBindTableActions() {
-        const archiveButtons = document.querySelectorAll(".archiveLead");
+	function handleBindTableActions() {
+		const archiveButtons = document.querySelectorAll(".archiveLead");
 
-        archiveButtons.forEach(btn => {
-            btn.addEventListener("click", () => {
-                handleArchiveLead(btn.dataset.leadId);
-            });
-        });
-    }
+		archiveButtons.forEach(btn => {
+			btn.addEventListener("click", () => {
+				handleArchiveLead(btn.dataset.leadId);
+			});
+		});
+	}
 
-    document.addEventListener("DOMContentLoaded", () => handleBindTableActions());
+	document.addEventListener("DOMContentLoaded", () => handleBindTableActions());
 </script>
-{{  end }}
+{{ end }}
