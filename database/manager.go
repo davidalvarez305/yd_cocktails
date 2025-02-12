@@ -678,42 +678,45 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 }
 
 func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
-	query := `SELECT 
-		COALESCE(referral_lead.lead_id, l.lead_id) AS lead_id,
-		COALESCE(referral_lead.phone_number, l.phone_number) AS phone_number,
-		COALESCE(referral_lead_marketing.ad_campaign, lm.ad_campaign) AS ad_campaign,
-		COALESCE(referral_lead_marketing.landing_page, lm.landing_page) AS landing_page,
-		COALESCE(referral_lead_marketing.ip, lm.ip) AS ip,
-		COALESCE(referral_lead.email, l.email) AS email,
-		COALESCE(referral_lead_marketing.facebook_click_id, lm.facebook_click_id) AS facebook_click_id,
-		COALESCE(referral_lead_marketing.facebook_client_id, lm.facebook_client_id) AS facebook_client_id,
-		COALESCE(referral_lead_marketing.external_id, lm.external_id) AS external_id,
-		COALESCE(referral_lead_marketing.user_agent, lm.user_agent) AS user_agent,
-		COALESCE(referral_lead_marketing.click_id, lm.click_id) AS click_id,
-		COALESCE(referral_lead_marketing.google_client_id, lm.google_client_id) AS google_client_id,
-		COALESCE(referral_lead_marketing.campaign_id, lm.campaign_id) AS campaign_id,
-		COALESCE(referral_lead_marketing.instant_form_lead_id, lm.instant_form_lead_id) AS instant_form_lead_id,
-		e.event_id,
-		(
-			WITH referral_lead AS (
-		    SELECT referral_lead_id
-		    FROM lead_marketing
-		    WHERE lead_id = $1
-		)
-		SELECT SUM(e.amount::NUMERIC + e.tip::NUMERIC)
-		FROM event AS e
+	query := `WITH referral_lead AS (
+		SELECT referral_lead_id
+		FROM lead_marketing
+		WHERE lead_id = $1
+	),
+	revenue AS (
+		SELECT SUM(e.amount::NUMERIC + e.tip::NUMERIC) AS total_revenue
+		FROM event e
 		WHERE e.lead_id = $1
-		   OR e.lead_id IN (
-		       SELECT lm1.lead_id
-		       FROM lead_marketing lm1
-		       WHERE lm1.referral_lead_id IN (SELECT referral_lead_id FROM referral_lead)
-		          OR lm1.lead_id IN (SELECT referral_lead_id FROM referral_lead)
-		   )
-		) AS revenue
+		OR e.lead_id IN (
+			SELECT lm1.lead_id
+			FROM lead_marketing lm1
+			WHERE lm1.referral_lead_id IN (SELECT referral_lead_id FROM referral_lead)
+				OR lm1.lead_id IN (SELECT referral_lead_id FROM referral_lead)
+		)
+	)
+	SELECT 
+		COALESCE(rf_lead.lead_id, l.lead_id) AS lead_id,
+		COALESCE(rf_lead.phone_number, l.phone_number) AS phone_number,
+		COALESCE(rf_lm.ad_campaign, lm.ad_campaign) AS ad_campaign,
+		COALESCE(rf_lm.landing_page, lm.landing_page) AS landing_page,
+		COALESCE(rf_lm.ip, lm.ip) AS ip,
+		COALESCE(rf_lead.email, l.email) AS email,
+		COALESCE(rf_lm.facebook_click_id, lm.facebook_click_id) AS facebook_click_id,
+		COALESCE(rf_lm.facebook_client_id, lm.facebook_client_id) AS facebook_client_id,
+		COALESCE(rf_lm.external_id, lm.external_id) AS external_id,
+		COALESCE(rf_lm.user_agent, lm.user_agent) AS user_agent,
+		COALESCE(rf_lm.click_id, lm.click_id) AS click_id,
+		COALESCE(rf_lm.google_client_id, lm.google_client_id) AS google_client_id,
+		COALESCE(rf_lm.campaign_id, lm.campaign_id) AS campaign_id,
+		COALESCE(rf_lm.instant_form_lead_id, lm.instant_form_lead_id) AS instant_form_lead_id,
+		e.event_id,
+		r.total_revenue AS revenue
 	FROM lead l
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
-	JOIN lead AS referral_lead ON lm.referral_lead_id = referral_lead.lead_id
-	JOIN lead_marketing AS referral_lead_marketing ON referral_lead_marketing.lead_id = lm.referral_lead_id
+	JOIN lead rf_lead ON lm.referral_lead_id = rf_lead.lead_id
+	JOIN lead_marketing rf_lm ON rf_lm.lead_id = lm.referral_lead_id
+	JOIN event e ON e.lead_id = l.lead_id
+	LEFT JOIN revenue r ON TRUE
 	WHERE l.lead_id = $1;`
 
 	var conversionReporting types.ConversionReporting
