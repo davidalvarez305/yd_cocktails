@@ -21,6 +21,8 @@ func PhoneServiceHandler(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/call/inbound":
 			handleInboundCall(w, r)
+		case "/call/outbound":
+			handleOutboundCall(w, r)
 		case "/call/inbound/end":
 			handleInboundCallEnd(w, r)
 		case "/sms/inbound":
@@ -140,6 +142,30 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/xml")
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
+		return
+	}
+
+	from := r.FormValue("from")
+	to := r.FormValue("to")
+	inboundCallWebhook := constants.RootDomain + "/call/inbound" // Twilio will initiate the call to the inbound webhook, which will handle the rest
+
+	if from == "" || to == "" {
+		http.Error(w, "Missing required parameters (From, To)", http.StatusBadRequest)
+		return
+	}
+
+	_, err := services.InitiateOutboundCall(to, from, inboundCallWebhook)
+	if err != nil {
+		http.Error(w, "Failed to initiate phone call", http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
