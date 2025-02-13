@@ -86,8 +86,6 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 
 	phoneCall := models.PhoneCall{
 		ExternalID:   incomingPhoneCall.CallSid,
-		UserID:       forwardNumber.UserID,
-		LeadID:       forwardNumber.LeadID,
 		CallDuration: 0,
 		DateCreated:  time.Now().Unix(),
 		CallFrom:     incomingPhoneCall.From,
@@ -187,22 +185,8 @@ func handleInboundSMS(w http.ResponseWriter, r *http.Request) {
 	twilioMessage.SmsStatus = r.FormValue("SmsStatus")
 	twilioMessage.ApiVersion = r.FormValue("ApiVersion")
 
-	userId, err := database.GetUserIDFromPhoneNumber(helpers.RemoveCountryCode(twilioMessage.To))
-	if err != nil {
-		http.Error(w, "Failed to get User ID.", http.StatusBadRequest)
-		return
-	}
-
-	leadId, err := database.GetLeadIDFromPhoneNumber(helpers.RemoveCountryCode(twilioMessage.From))
-	if err != nil {
-		http.Error(w, "Failed to get Lead ID.", http.StatusBadRequest)
-		return
-	}
-
 	message := models.Message{
 		ExternalID:  twilioMessage.MessageSid,
-		UserID:      userId,
-		LeadID:      leadId,
 		Text:        twilioMessage.Body,
 		TextFrom:    helpers.RemoveCountryCode(twilioMessage.From),
 		TextTo:      helpers.RemoveCountryCode(twilioMessage.To),
@@ -273,8 +257,6 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 
 	message := models.Message{
 		ExternalID:  externalID,
-		UserID:      form.UserID,
-		LeadID:      form.LeadID,
 		Text:        form.Body,
 		TextFrom:    form.From,
 		TextTo:      form.To,
