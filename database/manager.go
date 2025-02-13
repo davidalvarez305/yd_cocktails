@@ -1807,12 +1807,13 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		e.name AS event_type,
 		v.name AS venue_type,
 		event_date,
-		SUM(qs.units * qs.price_per_unit::NUMERIC),
+		SUM(qs.units * qs.price_per_unit::NUMERIC) AS full_amount,
 		l.full_name,
 		l.phone_number,
 		l.email,
 		i.url AS deposit_invoice_url,
-		SUM(qs.units * qs.price_per_unit::NUMERIC) * it.amount_percentage AS adjusted_amount,
+		SUM(qs.units * qs.price_per_unit::NUMERIC) * it.amount_percentage AS deposit_amount,
+		SUM(qs.units * qs.price_per_unit::NUMERIC) * (1 - it.amount_percentage) AS remaining_amount,
 		(
 			SELECT i2.url
 			FROM invoice AS i2
@@ -1820,15 +1821,28 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 			JOIN invoice_status AS stat2 ON stat2.invoice_status_id = i2.invoice_status_id AND i2.invoice_status_id = $2
 			WHERE i2.quote_id = q.quote_id AND i2.invoice_type_id = $4
 			LIMIT 1
-		) AS full_invoice_url
+		) AS full_invoice_url,
+		(
+			SELECT i3.url
+			FROM invoice AS i3
+			JOIN invoice_type AS it3 ON it3.invoice_type_id = i3.invoice_type_id
+			JOIN invoice_status AS stat3 ON stat3.invoice_status_id = i3.invoice_status_id AND i3.invoice_status_id = $2
+			WHERE i3.quote_id = q.quote_id AND i3.invoice_type_id = $5
+			LIMIT 1
+		) AS remaining_invoice_url,
+		EXISTS (
+			SELECT 1 FROM invoice AS deposit_invoice
+			JOIN invoice_type AS deposit_invoice_type ON deposit_invoice_type.invoice_type_id = deposit_invoice.invoice_type_id AND deposit_invoice.invoice_type_id = $3
+			JOIN invoice_status AS deposit_invoice_status ON deposit_invoice_status.invoice_status_id = deposit_invoice.invoice_status_id AND deposit_invoice.invoice_status_id = $6
+			WHERE deposit_invoice.quote_id = q.quote_id
+		) AS is_deposit_paid
 	FROM quote AS q
 	LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
 	LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
 	JOIN lead AS l ON q.lead_id = l.lead_id
 	JOIN invoice AS i ON i.quote_id = q.quote_id
 	JOIN invoice_type AS it ON it.invoice_type_id = i.invoice_type_id AND it.invoice_type_id = $3
-	JOIN invoice_status AS stat ON stat.invoice_status_id = i.invoice_status_id AND stat.invoice_status_id = $2
-	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id  -- JOIN with quote_service
+	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	WHERE q.external_id = $1
 	GROUP BY q.quote_id, number_of_bartenders, guests, hours, e.name, v.name, event_date, 
 			l.full_name, l.phone_number, l.email, i.url, it.amount_percentage, i.date_created
@@ -1839,10 +1853,9 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 
 	var bartenders, guests, hours sql.NullInt64
 	var eventDate sql.NullTime
-	var amount, deposit sql.NullFloat64
 	var eventType, venueType, email sql.NullString
 
-	row := DB.QueryRow(query, externalQuoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID, constants.FullInvoiceTypeID)
+	row := DB.QueryRow(query, externalQuoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID, constants.FullInvoiceTypeID, constants.RemainingInvoiceTypeID, constants.PaidInvoiceStatusID)
 
 	err := row.Scan(
 		&quoteDetails.QuoteID,
@@ -1852,13 +1865,16 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		&eventType,
 		&venueType,
 		&eventDate,
-		&amount,
+		&quoteDetails.Amount,
 		&quoteDetails.FullName,
 		&quoteDetails.PhoneNumber,
 		&email,
 		&quoteDetails.DepositInvoiceURL,
-		&deposit,
+		&quoteDetails.Deposit,
+		&quoteDetails.RemainingAmount,
 		&quoteDetails.FullInvoiceURL,
+		&quoteDetails.RemainingInvoiceURL,
+		&quoteDetails.IsDepositPaid,
 	)
 
 	if err != nil {
@@ -1885,12 +1901,6 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	}
 	if eventDate.Valid {
 		quoteDetails.EventDate = utils.FormatTimestamp(eventDate.Time.Unix())
-	}
-	if amount.Valid {
-		quoteDetails.Amount = amount.Float64
-	}
-	if deposit.Valid {
-		quoteDetails.Deposit = deposit.Float64
 	}
 	if email.Valid {
 		quoteDetails.Email = email.String

@@ -494,21 +494,24 @@ type QuoteDetails struct {
 }
 
 type ExternalQuoteDetails struct {
-	QuoteID            int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	ExternalID         string  `json:"external_id" form:"external_id" schema:"external_id"`
-	Amount             float64 `json:"amount" form:"amount" schema:"amount"`
-	Deposit            float64 `json:"deposit" form:"deposit" schema:"deposit"`
-	EventType          string  `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType          string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
-	Guests             int     `json:"guests" form:"guests" schema:"guests"`
-	Hours              int     `json:"hours" form:"hours" schema:"hours"`
-	EventDate          string  `json:"event_date" form:"event_date" schema:"event_date"`
-	NumberOfBartenders int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
-	FullName           string  `json:"full_name" form:"full_name" schema:"full_name"`
-	PhoneNumber        string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	Email              string  `json:"email" form:"email" schema:"email"`
-	DepositInvoiceURL  string  `json:"deposit_invoice_url" form:"deposit_invoice_url" schema:"deposit_invoice_url"`
-	FullInvoiceURL     string  `json:"full_invoice_url" form:"full_invoice_url" schema:"full_invoice_url"`
+	QuoteID             int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	ExternalID          string  `json:"external_id" form:"external_id" schema:"external_id"`
+	Amount              float64 `json:"amount" form:"amount" schema:"amount"`
+	Deposit             float64 `json:"deposit" form:"deposit" schema:"deposit"`
+	RemainingAmount     float64 `json:"remaining_amount" form:"remaining_amount" schema:"remaining_amount"`
+	EventType           string  `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType           string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	Guests              int     `json:"guests" form:"guests" schema:"guests"`
+	Hours               int     `json:"hours" form:"hours" schema:"hours"`
+	EventDate           string  `json:"event_date" form:"event_date" schema:"event_date"`
+	NumberOfBartenders  int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+	FullName            string  `json:"full_name" form:"full_name" schema:"full_name"`
+	PhoneNumber         string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	Email               string  `json:"email" form:"email" schema:"email"`
+	DepositInvoiceURL   string  `json:"deposit_invoice_url" form:"deposit_invoice_url" schema:"deposit_invoice_url"`
+	FullInvoiceURL      string  `json:"full_invoice_url" form:"full_invoice_url" schema:"full_invoice_url"`
+	RemainingInvoiceURL string  `json:"remaining_invoice_url" form:"remaining_invoice_url" schema:"remaining_invoice_url"`
+	IsDepositPaid       bool    `json:"is_deposit_paid" form:"is_deposit_paid" schema:"is_deposit_paid"`
 }
 
 type CreateInvoiceParams struct {
