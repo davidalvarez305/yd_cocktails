@@ -569,3 +569,11 @@ type ServiceForm struct {
 	Service        *string  `json:"service" form:"service" schema:"service"`
 	SuggestedPrice *float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
 }
+
+type FrontendMessage struct {
+	ClientName  string `json:"client_name"`
+	UserName    string `json:"user_name"`
+	DateCreated string `json:"date_created"`
+	Message     string `json:"message"`
+	IsInbound   bool   `json:"is_inbound"`
+}

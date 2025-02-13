@@ -2456,3 +2456,51 @@ func CheckQuoteHasInvoiceID(quote int) (bool, error) {
 
 	return hasInvoice, nil
 }
+
+func GetMessagesByLeadID(leadId int) ([]types.FrontendMessage, error) {
+	var messages []types.FrontendMessage
+
+	query := `SELECT l.full_name as client_name,
+	CONCAT(u.first_name, ' ', u.last_name) as user_name,
+	m.text,
+	m.date_created,
+	m.is_inbound
+	FROM "message" AS m
+	JOIN "lead" AS l ON l.lead_id  = m.lead_id 
+	JOIN "user" AS u ON u.user_id = m.user_id
+	WHERE m.lead_id = $1
+	ORDER BY m.date_created DESC`
+
+	rows, err := DB.Query(query, leadId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		return messages, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var dateCreated time.Time
+
+		var message types.FrontendMessage
+		err := rows.Scan(
+			&message.ClientName,
+			&message.UserName,
+			&message.Message,
+			&dateCreated,
+			&message.IsInbound,
+		)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			return messages, err
+		}
+
+		message.DateCreated = utils.FormatTimestamp(dateCreated.Unix())
+		messages = append(messages, message)
+	}
+
+	if err = rows.Err(); err != nil {
+		return messages, err
+	}
+
+	return messages, nil
+}

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
 	"github.com/davidalvarez305/yd_cocktails/models"
+	"github.com/davidalvarez305/yd_cocktails/services"
 	"github.com/davidalvarez305/yd_cocktails/types"
 )
 
@@ -22,6 +24,10 @@ func PhoneServiceHandler(w http.ResponseWriter, r *http.Request) {
 			handleInboundCall(w, r)
 		case "/call/inbound/end":
 			handleInboundCallEnd(w, r)
+		case "/sms/inbound":
+			handleInboundSMS(w, r)
+		case "/sms/outbound":
+			handleOutboundSMS(w, r)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -160,4 +166,208 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/xml")
 	w.WriteHeader(http.StatusOK)
+}
+
+func handleInboundSMS(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
+		return
+	}
+
+	var twilioMessage types.TwilioMessage
+
+	twilioMessage.MessageSid = r.FormValue("MessageSid")
+	twilioMessage.AccountSid = r.FormValue("AccountSid")
+	twilioMessage.MessagingServiceSid = r.FormValue("MessagingServiceSid")
+	twilioMessage.From = r.FormValue("From")
+	twilioMessage.To = r.FormValue("To")
+	twilioMessage.Body = r.FormValue("Body")
+	twilioMessage.NumMedia = r.FormValue("NumMedia")
+	twilioMessage.NumSegments = r.FormValue("NumSegments")
+	twilioMessage.SmsStatus = r.FormValue("SmsStatus")
+	twilioMessage.ApiVersion = r.FormValue("ApiVersion")
+
+	// DateCreated needs to be parsed into time.Time
+	if dateCreatedStr := r.FormValue("DateCreated"); dateCreatedStr != "" {
+		if dateCreated, err := time.Parse(time.RFC3339, dateCreatedStr); err == nil {
+			twilioMessage.DateCreated = dateCreated
+		} else {
+			http.Error(w, "Failed to parse DateCreated", http.StatusBadRequest)
+			return
+		}
+	}
+
+	userId, err := database.GetUserIDFromPhoneNumber(helpers.RemoveCountryCode(twilioMessage.To))
+	if err != nil {
+		http.Error(w, "Failed to get User ID.", http.StatusBadRequest)
+		return
+	}
+
+	leadId, err := database.GetLeadIDFromIncomingTextMessage(helpers.RemoveCountryCode(twilioMessage.From))
+	if err != nil {
+		http.Error(w, "Failed to get Lead ID.", http.StatusBadRequest)
+		return
+	}
+
+	dateCreated := time.Unix(twilioMessage.DateCreated.Unix(), 0).Unix()
+
+	message := models.Message{
+		ExternalID:  twilioMessage.MessageSid,
+		UserID:      userId,
+		LeadID:      leadId,
+		Text:        twilioMessage.Body,
+		TextFrom:    helpers.RemoveCountryCode(twilioMessage.From),
+		TextTo:      helpers.RemoveCountryCode(twilioMessage.To),
+		IsInbound:   true,
+		DateCreated: dateCreated,
+		Status:      twilioMessage.SmsStatus,
+	}
+
+	if err := database.SaveSMS(message); err != nil {
+		log.Printf("Error saving SMS to database: %s", err)
+		http.Error(w, "Failed to save message.", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	form := types.OutboundMessageForm{
+		To:   r.FormValue("to"),
+		Body: r.FormValue("body"),
+		From: r.FormValue("from"),
+	}
+
+	userId, err := database.GetUserIDFromPhoneNumber(form.From)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Could not find matching user.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	leadId, err := database.GetLeadIDFromPhoneNumber(form.To)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Could not find matching lead.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	messageResponse, err := services.SendTextMessage(form.To, form.From, form.Body)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to send text message.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var externalID = helpers.SafeString(messageResponse.Sid)
+	var messageStatus = helpers.SafeString(messageResponse.Status)
+
+	message := models.Message{
+		ExternalID:  externalID,
+		UserID:      userId,
+		LeadID:      leadId,
+		Text:        form.Body,
+		TextFrom:    form.From,
+		TextTo:      form.To,
+		IsInbound:   false,
+		DateCreated: time.Now().Unix(),
+		Status:      messageStatus,
+	}
+
+	err = database.SaveSMS(message)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to save message.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	messages, err := database.GetMessagesByLeadID(leadId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to get new messages.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "messages.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "messages.html",
+		Data: map[string]any{
+			"Messages": messages,
+		},
+	}
+
+	token, err := helpers.GenerateTokenInHeader(w, r)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error generating new token. Reload page.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	w.Header().Set("X-Csrf-Token", token)
+	w.WriteHeader(http.StatusOK)
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
