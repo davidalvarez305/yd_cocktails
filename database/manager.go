@@ -838,30 +838,6 @@ func GetLeadIDFromPhoneNumber(from string) (int, error) {
 	return leadId, nil
 }
 
-func GetLeadIDFromIncomingTextMessage(from string) (int, error) {
-	var leadId int
-
-	stmt, err := DB.Prepare(`SELECT l.lead_id FROM "lead" AS l WHERE l.phone_number = $1`)
-	if err != nil {
-		return leadId, err
-	}
-	defer stmt.Close()
-
-	row := stmt.QueryRow(from)
-
-	var forwardingLeadID sql.NullInt64
-	err = row.Scan(&forwardingLeadID)
-	if err != nil && err != sql.ErrNoRows {
-		return leadId, err
-	}
-
-	if forwardingLeadID.Valid {
-		leadId = int(forwardingLeadID.Int64)
-	}
-
-	return leadId, nil
-}
-
 func UpdateLead(form types.UpdateLeadForm) error {
 	if form.LeadID == nil {
 		return fmt.Errorf("lead_id cannot be nil")
@@ -2503,4 +2479,67 @@ func GetMessagesByLeadID(leadId int) ([]types.FrontendMessage, error) {
 	}
 
 	return messages, nil
+}
+
+func CreateLeadNote(note models.LeadNote) error {
+	stmt, err := DB.Prepare(`
+		INSERT INTO lead_note (note, lead_id, date_added, added_by_user_id)
+		VALUES ($1, $2, to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York', $4)
+	`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	leadID := utils.CreateNullInt(&note.LeadID)
+
+	_, err = stmt.Exec(note.Note, leadID, note.DateAdded, note.AddedByUserID)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
+func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
+	var notes []types.FrontendNote
+
+	query := `SELECT u.username,
+	n.note,
+	n.date_added
+	FROM "lead_note" AS n
+	JOIN "user" AS u ON u.user_id = n.added_by_user_id
+	WHERE n.lead_id = $1
+	ORDER BY n.date_added DESC`
+
+	rows, err := DB.Query(query, leadId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		return notes, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var dateAdded time.Time
+
+		var note types.FrontendNote
+		err := rows.Scan(
+			&note.UserName,
+			&note.Note,
+			&dateAdded,
+		)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			return notes, err
+		}
+
+		note.DateAdded = utils.FormatTimestamp(dateAdded.Unix())
+		notes = append(notes, note)
+	}
+
+	if err = rows.Err(); err != nil {
+		return notes, err
+	}
+
+	return notes, nil
 }

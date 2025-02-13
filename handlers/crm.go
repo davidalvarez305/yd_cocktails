@@ -11,6 +11,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/conversions"
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/models"
 	"github.com/davidalvarez305/yd_cocktails/services"
 	"github.com/davidalvarez305/yd_cocktails/sessions"
 	"github.com/davidalvarez305/yd_cocktails/types"
@@ -137,6 +138,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				PostLeadQuote(w, r)
 				return
 			}
+			if len(parts) >= 5 && parts[4] == "note" && helpers.IsNumeric(parts[3]) {
+				PostLeadNote(w, r)
+				return
+			}
 		}
 		switch path {
 		case "/crm/service":
@@ -248,7 +253,11 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	eventTable := constants.PARTIAL_TEMPLATES_DIR + "events_table.html"
 	leadQuoteForm := constants.PARTIAL_TEMPLATES_DIR + "lead_quote_form.html"
 	leadQuoteTable := constants.PARTIAL_TEMPLATES_DIR + "lead_quotes_table.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, eventForm, eventTable, leadQuoteForm, leadQuoteTable}
+	createLeadNoteForm := constants.PARTIAL_TEMPLATES_DIR + "create_lead_note_form.html"
+	leadNotesTemplate := constants.PARTIAL_TEMPLATES_DIR + "lead_notes.html"
+	createLeadMessageForm := constants.PARTIAL_TEMPLATES_DIR + "create_lead_message_form.html"
+	leadMessagesTemplate := constants.PARTIAL_TEMPLATES_DIR + "lead_messages.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, eventForm, eventTable, leadQuoteForm, leadQuoteTable, createLeadMessageForm, leadMessagesTemplate, createLeadNoteForm, leadNotesTemplate}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -350,12 +359,27 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	leadMessages, err := database.GetMessagesByLeadID(leadDetails.LeadID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting lead messages.", http.StatusInternalServerError)
+		return
+	}
+
+	leadNotes, err := database.GetLeadNotesByLeadID(leadDetails.LeadID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting lead notes.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Lead Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["Lead"] = leadDetails
 	data["CRMUserPhoneNumber"] = phoneNumber
+	data["UserID"] = values.UserID
 	data["EventTypes"] = eventTypes
 	data["VenueTypes"] = venueTypes
 	data["Events"] = events
@@ -365,6 +389,8 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["LeadInterestList"] = leadInterestList
 	data["LeadStatusList"] = leadStatusList
 	data["NextActionList"] = nextActionList
+	data["LeadNotes"] = leadNotes
+	data["LeadMessages"] = leadMessages
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -2096,6 +2122,120 @@ func PutQuoteService(w http.ResponseWriter, r *http.Request) {
 		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "quote_services_table.html",
 		Data: map[string]any{
 			"QuoteServices": quoteServices,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func PostLeadNote(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	leadIdForm := r.FormValue("lead_id")
+	userIdForm := r.FormValue("user_id")
+	note := r.FormValue("note")
+
+	leadID, err := strconv.Atoi(leadIdForm)
+	if err != nil {
+		fmt.Printf("Error converting lead_id to int: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid lead ID.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIdForm)
+	if err != nil {
+		fmt.Printf("Error converting user_id to int: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid user ID.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	leadNote := models.LeadNote{
+		LeadID:        leadID,
+		Note:          note,
+		DateAdded:     time.Now().Unix(),
+		AddedByUserID: userID,
+	}
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.CreateLeadNote(leadNote)
+	if err != nil {
+		fmt.Printf("Error creating lead quote: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while creating lead quote.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	leadNotes, err := database.GetLeadNotesByLeadID(leadID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting lead quotes from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "lead_notes.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_notes.html",
+		Data: map[string]any{
+			"LeadNotes": leadNotes,
 		},
 	}
 

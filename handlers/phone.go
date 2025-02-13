@@ -203,7 +203,7 @@ func handleInboundSMS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	leadId, err := database.GetLeadIDFromIncomingTextMessage(helpers.RemoveCountryCode(twilioMessage.From))
+	leadId, err := database.GetLeadIDFromPhoneNumber(helpers.RemoveCountryCode(twilioMessage.From))
 	if err != nil {
 		http.Error(w, "Failed to get Lead ID.", http.StatusBadRequest)
 		return
@@ -248,38 +248,19 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form := types.OutboundMessageForm{
-		To:   r.FormValue("to"),
-		Body: r.FormValue("body"),
-		From: r.FormValue("from"),
-	}
+	var form types.OutboundMessageForm
+	err = decoder.Decode(&form, r.PostForm)
 
-	userId, err := database.GetUserIDFromPhoneNumber(form.From)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Could not find matching user.",
+				"Message": "Error decoding form data.",
 			},
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	leadId, err := database.GetLeadIDFromPhoneNumber(form.To)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Could not find matching lead.",
-			},
-		}
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 		return
 	}
@@ -304,8 +285,8 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 
 	message := models.Message{
 		ExternalID:  externalID,
-		UserID:      userId,
-		LeadID:      leadId,
+		UserID:      form.UserID,
+		LeadID:      form.LeadID,
 		Text:        form.Body,
 		TextFrom:    form.From,
 		TextTo:      form.To,
@@ -329,7 +310,7 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	messages, err := database.GetMessagesByLeadID(leadId)
+	messages, err := database.GetMessagesByLeadID(form.LeadID)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
@@ -345,29 +326,12 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "messages.html",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "messages.html",
+		TemplateName: "lead_messages.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_messages.html",
 		Data: map[string]any{
 			"Messages": messages,
 		},
 	}
 
-	token, err := helpers.GenerateTokenInHeader(w, r)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error generating new token. Reload page.",
-			},
-		}
-		w.WriteHeader(http.StatusInternalServerError)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	w.Header().Set("X-Csrf-Token", token)
-	w.WriteHeader(http.StatusOK)
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }

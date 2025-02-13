@@ -238,3 +238,11 @@ type QuoteService struct {
 	Units        int     `json:"units" form:"units" schema:"units"`
 	PricePerUnit float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
 }
+
+type LeadNote struct {
+	LeadNoteID    int    `json:"lead_note_id" form:"lead_note_id" schema:"lead_note_id"`
+	Note          string `json:"note" form:"note" schema:"note"`
+	LeadID        int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	DateAdded     int64  `json:"date_added" form:"date_added" schema:"date_added"`
+	AddedByUserID int    `json:"added_by_user_id" form:"added_by_user_id" schema:"added_by_user_id"`
+}
