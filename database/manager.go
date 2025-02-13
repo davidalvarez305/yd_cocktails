@@ -2283,18 +2283,14 @@ func GetServices() ([]models.Service, error) {
 
 func CreateService(form types.ServiceForm) error {
 	stmt, err := DB.Prepare(`
-		INSERT INTO service (
-			service
-		) VALUES ($1)
+		INSERT INTO service (service, suggested_price) VALUES ($1, $2)
 	`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	serviceName := utils.CreateNullString(form.Service)
-
-	_, err = stmt.Exec(serviceName)
+	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice))
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}

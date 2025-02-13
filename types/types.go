@@ -564,7 +564,8 @@ type QuoteServiceForm struct {
 }
 
 type ServiceForm struct {
-	CSRFToken *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	ServiceID *int    `json:"service_id" form:"service_id" schema:"service_id"`
-	Service   *string `json:"service" form:"service" schema:"service"`
+	CSRFToken      *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	ServiceID      *int     `json:"service_id" form:"service_id" schema:"service_id"`
+	Service        *string  `json:"service" form:"service" schema:"service"`
+	SuggestedPrice *float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
 }
