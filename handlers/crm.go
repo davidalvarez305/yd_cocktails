@@ -1681,6 +1681,20 @@ func DeleteQuoteService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	quoteId, err := database.GetQuoteIDByQuoteServiceID(quoteServiceId)
+	if err != nil {
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting quote id from quote service id.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
 	err = database.DeleteQuoteService(quoteServiceId)
 	if err != nil {
 		fmt.Printf("Error deleting quote service: %+v\n", err)
@@ -1692,20 +1706,6 @@ func DeleteQuoteService(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
-	}
-
-	quoteId, err := database.GetQuoteIDByQuoteServiceID(quoteServiceId)
-	if err != nil {
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error getting quote id from quote service id.",
-			},
-		}
-		w.WriteHeader(http.StatusBadRequest)
 		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 		return
 	}
