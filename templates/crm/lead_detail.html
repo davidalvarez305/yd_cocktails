@@ -358,7 +358,7 @@
         const csrfToken = document.querySelector('[name="csrf_token"]');
         const body = new FormData();
 
-        body.set("csrf_token", csrfToken);
+        body.set("csrf_token", csrfToken.value);
         body.set("from", "{{ .CRMUserPhoneNumber }}");
         body.set("to", "{{ .Lead.PhoneNumber }}");
 
