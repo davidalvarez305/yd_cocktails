@@ -122,7 +122,7 @@
 			.then(html => {
 				const table = document.getElementById('quoteServicesTable');
 				table.outerHTML = html;
-				handleBindPagination();
+				handleBindQuoteServiceTableActions();
 
 				form.reset();
 			})
