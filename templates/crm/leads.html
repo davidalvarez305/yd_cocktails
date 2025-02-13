@@ -10,7 +10,7 @@
 			<select id="lead_interest_id" name="lead_interest_id"
 				class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold leading-5 focus:border-blue-500 focus:ring focus:ring-blue-500/50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-blue-500 sm:w-36">
 				<option value="" selected>Interest</option>
-				{{ range .LeadInterests }}
+				{{ range .Interests }}
 				<option value="{{ .LeadInterestID }}">
 					{{ .Interest }}
 				</option>
@@ -19,7 +19,7 @@
 			<select id="lead_status_id" name="lead_status_id"
 				class="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold leading-5 focus:border-blue-500 focus:ring focus:ring-blue-500/50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-blue-500 sm:w-36">
 				<option value="" selected>Status</option>
-				{{ range .LeadStatuses }}
+				{{ range .Statuses }}
 				<option value="{{ .LeadStatusID }}">
 					{{ .Status }}
 				</option>

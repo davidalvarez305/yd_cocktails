@@ -167,6 +167,10 @@ func GetLeads(w http.ResponseWriter, r *http.Request, ctx map[string]interface{}
 
 	var params types.GetLeadsParams
 	params.PageNum = helpers.SafeStringToPointer(r.URL.Query().Get("page_num"))
+	params.Search = helpers.SafeStringToPointer(r.URL.Query().Get("search"))
+	params.LeadInterestID = helpers.SafeStringToIntPointer(r.URL.Query().Get("lead_interest_id"))
+	params.LeadStatusID = helpers.SafeStringToIntPointer(r.URL.Query().Get("lead_status_id"))
+	params.NextActionID = helpers.SafeStringToIntPointer(r.URL.Query().Get("next_action_id"))
 
 	leads, totalRows, err := database.GetLeadList(params)
 	if err != nil {
@@ -189,6 +193,27 @@ func GetLeads(w http.ResponseWriter, r *http.Request, ctx map[string]interface{}
 		return
 	}
 
+	interests, err := database.GetLeadInterestList()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
+		return
+	}
+
+	statuses, err := database.GetLeadStatusList()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
+		return
+	}
+
+	nextActions, err := database.GetNextActionList()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting vending locations.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Leads — " + constants.CompanyName
 
@@ -198,6 +223,9 @@ func GetLeads(w http.ResponseWriter, r *http.Request, ctx map[string]interface{}
 	data["MaxPages"] = helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage)
 	data["EventTypes"] = eventTypes
 	data["VenueTypes"] = venueTypes
+	data["Interests"] = interests
+	data["Statuses"] = statuses
+	data["NextActions"] = nextActions
 
 	data["CurrentPage"] = 1
 	if params.PageNum != nil {
