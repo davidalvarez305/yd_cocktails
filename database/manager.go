@@ -153,20 +153,15 @@ func MarkCSRFTokenAsUsed(token string) error {
 
 func SaveSMS(msg models.Message) error {
 	stmt, err := DB.Prepare(`
-		INSERT INTO message (external_id, user_id, lead_id, text, date_created, text_from, text_to, is_inbound)
-		VALUES ($1, $2, $3, $4, to_timestamp($5)::timestamptz AT TIME ZONE 'America/New_York', $6, $7, $8)
+		INSERT INTO message (external_id, text, date_created, text_from, text_to, is_inbound)
+		VALUES ($1, $2, to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York', $4, $5, $6)
 	`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	var leadID sql.NullInt64
-	if msg.LeadID != 0 {
-		leadID = sql.NullInt64{Int64: int64(msg.LeadID), Valid: true}
-	}
-
-	_, err = stmt.Exec(msg.ExternalID, msg.UserID, leadID, msg.Text, msg.DateCreated, msg.TextFrom, msg.TextTo, msg.IsInbound)
+	_, err = stmt.Exec(msg.ExternalID, msg.Text, msg.DateCreated, msg.TextFrom, msg.TextTo, msg.IsInbound)
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
@@ -176,29 +171,20 @@ func SaveSMS(msg models.Message) error {
 
 func SavePhoneCall(phoneCall models.PhoneCall) error {
 	stmt, err := DB.Prepare(`
-		INSERT INTO phone_call (
-			external_id, user_id, lead_id, call_duration,
-			date_created, call_from, call_to, is_inbound,
-			recording_url, status
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`)
+		INSERT INTO phone_call (external_id, call_duration, date_created, call_from, call_to, is_inbound, recording_url, status) VALUES ($1, $2, to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York', $4, $5, $6, $7, $8)`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	var leadID, callDuration sql.NullInt64
+	var callDuration sql.NullInt64
 
-	if phoneCall.LeadID != 0 {
-		leadID = sql.NullInt64{Int64: int64(phoneCall.LeadID), Valid: true}
-	}
 	if phoneCall.CallDuration != 0 {
 		callDuration = sql.NullInt64{Int64: int64(phoneCall.CallDuration), Valid: true}
 	}
 
 	_, err = stmt.Exec(
 		phoneCall.ExternalID,
-		phoneCall.UserID,
-		leadID,
 		callDuration,
 		phoneCall.DateCreated,
 		phoneCall.CallFrom,
@@ -967,13 +953,13 @@ func GetForwardPhoneNumber(to, from string) (types.IncomingPhoneCallForwarding, 
 func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 	var phoneCall models.PhoneCall
 
-	stmt, err := DB.Prepare(`SELECT phone_call_id, external_id, user_id, lead_id, call_duration, date_created, call_from, call_to, is_inbound, recording_url, status FROM phone_call WHERE external_id = $1`)
+	stmt, err := DB.Prepare(`SELECT phone_call_id, external_id, call_duration, date_created, call_from, call_to, is_inbound, recording_url, status FROM phone_call WHERE external_id = $1`)
 	if err != nil {
 		return phoneCall, err
 	}
 	defer stmt.Close()
 
-	var leadID, callDuration sql.NullInt64
+	var callDuration sql.NullInt64
 	var recordingUrl, externalId sql.NullString
 
 	row := stmt.QueryRow(sid)
@@ -981,8 +967,6 @@ func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 	err = row.Scan(
 		&phoneCall.PhoneCallID,
 		&externalId,
-		&phoneCall.UserID,
-		&leadID,
 		&callDuration,
 		&phoneCall.DateCreated,
 		&phoneCall.CallFrom,
@@ -993,10 +977,6 @@ func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 	)
 	if err != nil {
 		return phoneCall, err
-	}
-
-	if leadID.Valid {
-		phoneCall.LeadID = int(leadID.Int64)
 	}
 
 	if callDuration.Valid {
@@ -1017,20 +997,16 @@ func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 func UpdatePhoneCall(phoneCall models.PhoneCall) error {
 	query := `
 		UPDATE phone_call SET
-			user_id = $1,
-			lead_id = $2,
-			call_duration = COALESCE($3, call_duration),
-			date_created = $4,
-			call_from = $5,
-			call_to = $6,
-			is_inbound = $7,
-			recording_url = COALESCE($8, recording_url),
-			status = COALESCE($9, status)
-		WHERE external_id = $10`
+			call_duration = COALESCE($1, call_duration),
+			date_created = to_timestamp($2)::timestamptz AT TIME ZONE 'America/New_York',
+			call_from = $3,
+			call_to = $4,
+			is_inbound = $5,
+			recording_url = COALESCE($6, recording_url),
+			status = COALESCE($7, status)
+		WHERE external_id = $8`
 
 	args := []interface{}{
-		phoneCall.UserID,
-		utils.CreateNullInt(&phoneCall.LeadID),
 		utils.CreateNullInt(&phoneCall.CallDuration),
 		phoneCall.DateCreated,
 		phoneCall.CallFrom,

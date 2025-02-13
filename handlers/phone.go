@@ -187,16 +187,6 @@ func handleInboundSMS(w http.ResponseWriter, r *http.Request) {
 	twilioMessage.SmsStatus = r.FormValue("SmsStatus")
 	twilioMessage.ApiVersion = r.FormValue("ApiVersion")
 
-	// DateCreated needs to be parsed into time.Time
-	if dateCreatedStr := r.FormValue("DateCreated"); dateCreatedStr != "" {
-		if dateCreated, err := time.Parse(time.RFC3339, dateCreatedStr); err == nil {
-			twilioMessage.DateCreated = dateCreated
-		} else {
-			http.Error(w, "Failed to parse DateCreated", http.StatusBadRequest)
-			return
-		}
-	}
-
 	userId, err := database.GetUserIDFromPhoneNumber(helpers.RemoveCountryCode(twilioMessage.To))
 	if err != nil {
 		http.Error(w, "Failed to get User ID.", http.StatusBadRequest)
@@ -209,8 +199,6 @@ func handleInboundSMS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dateCreated := time.Unix(twilioMessage.DateCreated.Unix(), 0).Unix()
-
 	message := models.Message{
 		ExternalID:  twilioMessage.MessageSid,
 		UserID:      userId,
@@ -219,7 +207,7 @@ func handleInboundSMS(w http.ResponseWriter, r *http.Request) {
 		TextFrom:    helpers.RemoveCountryCode(twilioMessage.From),
 		TextTo:      helpers.RemoveCountryCode(twilioMessage.To),
 		IsInbound:   true,
-		DateCreated: dateCreated,
+		DateCreated: time.Now().Unix(),
 		Status:      twilioMessage.SmsStatus,
 	}
 

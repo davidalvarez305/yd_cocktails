@@ -84,8 +84,6 @@ type CSRFToken struct {
 type Message struct {
 	MessageID   int    `json:"message_id"`
 	ExternalID  string `json:"external_id"`
-	UserID      int    `json:"user_id"`
-	LeadID      int    `json:"lead_id"`
 	Text        string `json:"text"`
 	DateCreated int64  `json:"date_created"`
 	TextFrom    string `json:"text_from"`
@@ -97,8 +95,6 @@ type Message struct {
 type PhoneCall struct {
 	PhoneCallID  int    `json:"phone_call_id" form:"phone_call_id" schema:"phone_call_id"`
 	ExternalID   string `json:"external_id" form:"external_id" schema:"external_id"`
-	UserID       int    `json:"user_id" form:"user_id" schema:"user_id"`
-	LeadID       int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
 	CallDuration int    `json:"call_duration" form:"call_duration" schema:"call_duration"`
 	DateCreated  int64  `json:"date_created" form:"date_created" schema:"date_created"`
 	CallFrom     string `json:"call_from" form:"call_from" schema:"call_from"`
