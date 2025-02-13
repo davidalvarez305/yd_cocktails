@@ -2298,6 +2298,25 @@ func CreateService(form types.ServiceForm) error {
 	return nil
 }
 
+func UpdateService(form types.ServiceForm) error {
+	stmt, err := DB.Prepare(`
+		UPDATE service
+		SET service = COALESCE($1, service), suggested_price = $2
+		WHERE service_id = $3
+	`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice), utils.CreateNullInt(form.ServiceID))
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
 func GetQuoteServices(quoteId int) ([]types.QuoteServiceList, error) {
 	var quoteServiceList []types.QuoteServiceList
 
