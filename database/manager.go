@@ -1884,7 +1884,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		quoteDetails.VenueType = venueType.String
 	}
 	if eventDate.Valid {
-		quoteDetails.EventDate = utils.FormatTimestampEST(eventDate.Time.Unix())
+		quoteDetails.EventDate = utils.FormatTimestamp(eventDate.Time.Unix())
 	}
 	if amount.Valid {
 		quoteDetails.Amount = amount.Float64
