@@ -1755,7 +1755,7 @@ func DeleteQuoteService(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	quoteServices, err := database.GetQuoteServices(quoteServiceId)
+	quoteServices, err := database.GetQuoteServices(quoteId)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
