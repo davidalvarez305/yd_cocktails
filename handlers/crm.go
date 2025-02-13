@@ -1681,6 +1681,7 @@ func DeleteQuoteService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Cannot get quote id after quote service has been deleted...
 	quoteId, err := database.GetQuoteIDByQuoteServiceID(quoteServiceId)
 	if err != nil {
 		tmplCtx := types.DynamicPartialTemplate{
