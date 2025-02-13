@@ -227,8 +227,9 @@ type NextAction struct {
 }
 
 type Service struct {
-	ServiceID int    `json:"service_id" form:"service_id" schema:"service_id"`
-	Service   string `json:"service" form:"service" schema:"service"`
+	ServiceID      int     `json:"service_id" form:"service_id" schema:"service_id"`
+	Service        string  `json:"service" form:"service" schema:"service"`
+	SuggestedPrice float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
 }
 
 type QuoteService struct {
