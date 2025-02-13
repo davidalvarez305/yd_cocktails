@@ -371,7 +371,14 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
 		LEFT JOIN next_action AS na ON na.next_action_id = l.next_action_id
 		WHERE 
-			($5::TEXT IS NOT NULL AND l.search_vector @@ plainto_tsquery('english', $5::TEXT))
+			(
+				$5::TEXT IS NOT NULL 
+				AND (
+					l.search_vector @@ plainto_tsquery('english', $5::TEXT)
+					OR l.full_name ILIKE '%' || $5 || '%'
+					OR l.phone_number ILIKE '%' || $5 || '%'
+				)
+			)
 			OR 
 			(
 				$5 IS NULL 
