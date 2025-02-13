@@ -2366,7 +2366,7 @@ func UpdateQuoteService(form types.QuoteServiceForm) error {
 	stmt, err := DB.Prepare(`
 		UPDATE quote_service
 		SET price_per_unit = COALESCE($1, price_per_unit),
-		SET units = COALESCE($2, units)
+		units = COALESCE($2, units)
 		WHERE quote_service_id = $3
 	`)
 	if err != nil {
