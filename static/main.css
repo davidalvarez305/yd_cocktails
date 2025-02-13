@@ -894,11 +894,6 @@ select{
   margin-bottom: 1px;
 }
 
-.my-16{
-  margin-top: 4rem;
-  margin-bottom: 4rem;
-}
-
 .-mr-20{
   margin-right: -5rem;
 }
@@ -1072,10 +1067,6 @@ select{
   width: 100%;
 }
 
-.w-1\/3{
-  width: 33.333333%;
-}
-
 .min-w-\[320px\]{
   min-width: 320px;
 }
@@ -1118,6 +1109,10 @@ select{
 
 .flex-none{
   flex: none;
+}
+
+.flex-grow{
+  flex-grow: 1;
 }
 
 .grow{
@@ -1195,6 +1190,10 @@ select{
 
 .justify-between{
   justify-content: space-between;
+}
+
+.gap-1{
+  gap: 0.25rem;
 }
 
 .gap-16{
@@ -1898,6 +1897,11 @@ select{
   color: rgb(244 63 94 / var(--tw-text-opacity));
 }
 
+.text-secondary-600{
+  --tw-text-opacity: 1;
+  color: rgb(216 118 9 / var(--tw-text-opacity));
+}
+
 .text-white{
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
@@ -1937,6 +1941,10 @@ select{
 .placeholder-gray-500::placeholder{
   --tw-placeholder-opacity: 1;
   color: rgb(107 114 128 / var(--tw-placeholder-opacity));
+}
+
+.opacity-25{
+  opacity: 0.25;
 }
 
 .opacity-30{
@@ -3017,6 +3025,11 @@ select{
   color: rgb(188 40 125 / var(--tw-text-opacity));
 }
 
+.hover\:text-secondary-400:hover{
+  --tw-text-opacity: 1;
+  color: rgb(248 165 74 / var(--tw-text-opacity));
+}
+
 .hover\:text-white:hover{
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
@@ -3400,6 +3413,11 @@ select{
   color: rgb(253 164 175 / var(--tw-text-opacity));
 }
 
+.dark\:text-secondary-400:is(.dark *){
+  --tw-text-opacity: 1;
+  color: rgb(248 165 74 / var(--tw-text-opacity));
+}
+
 .dark\:text-white:is(.dark *){
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
@@ -3460,6 +3478,11 @@ select{
 .dark\:hover\:text-primary-300:hover:is(.dark *){
   --tw-text-opacity: 1;
   color: rgb(212 56 147 / var(--tw-text-opacity));
+}
+
+.dark\:hover\:text-secondary-300:hover:is(.dark *){
+  --tw-text-opacity: 1;
+  color: rgb(249 185 113 / var(--tw-text-opacity));
 }
 
 .dark\:hover\:text-white:hover:is(.dark *){
@@ -3542,11 +3565,6 @@ select{
 
   .sm\:m-4{
     margin: 1rem;
-  }
-
-  .sm\:my-0{
-    margin-top: 0px;
-    margin-bottom: 0px;
   }
 
   .sm\:mb-0{
@@ -3656,11 +3674,6 @@ select{
     padding-bottom: 1.25rem;
   }
 
-  .sm\:py-0{
-    padding-top: 0px;
-    padding-bottom: 0px;
-  }
-
   .sm\:text-left{
     text-align: left;
   }
@@ -3678,11 +3691,6 @@ select{
 
   .md\:col-span-7{
     grid-column: span 7 / span 7;
-  }
-
-  .md\:my-0{
-    margin-top: 0px;
-    margin-bottom: 0px;
   }
 
   .md\:mb-0{
