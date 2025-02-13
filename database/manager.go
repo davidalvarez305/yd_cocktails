@@ -2198,7 +2198,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 
 	offset := (pageNum - 1) * int(constants.LeadsPerPage)
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC
 			COUNT(*) OVER() AS total_rows
 			FROM "service"
 			OFFSET $1
@@ -2231,7 +2231,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 func GetServices() ([]models.Service, error) {
 	var services []models.Service
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price FROM "service";`)
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC FROM "service";`)
 	if err != nil {
 		return services, fmt.Errorf("error executing query: %w", err)
 	}

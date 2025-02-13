@@ -1456,7 +1456,7 @@ func GetServices(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	services, totalRows, err := database.GetServicesList(pageNum)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting vendors from DB.", http.StatusInternalServerError)
+		http.Error(w, "Error getting services from DB.", http.StatusInternalServerError)
 		return
 	}
 
