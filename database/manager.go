@@ -960,20 +960,20 @@ func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 	defer stmt.Close()
 
 	var callDuration sql.NullInt64
-	var recordingUrl, externalId sql.NullString
+	var recordingUrl, status sql.NullString
 
 	row := stmt.QueryRow(sid)
 
 	err = row.Scan(
 		&phoneCall.PhoneCallID,
-		&externalId,
+		&phoneCall.ExternalID,
 		&callDuration,
 		&phoneCall.DateCreated,
 		&phoneCall.CallFrom,
 		&phoneCall.CallTo,
 		&phoneCall.IsInbound,
 		&recordingUrl,
-		&phoneCall.Status,
+		&status,
 	)
 	if err != nil {
 		return phoneCall, err
@@ -987,8 +987,8 @@ func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 		phoneCall.RecordingURL = recordingUrl.String
 	}
 
-	if externalId.Valid {
-		phoneCall.ExternalID = externalId.String
+	if status.Valid {
+		phoneCall.Status = status.String
 	}
 
 	return phoneCall, nil
@@ -997,21 +997,13 @@ func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 func UpdatePhoneCall(phoneCall models.PhoneCall) error {
 	query := `
 		UPDATE phone_call SET
-			call_duration = COALESCE($1, call_duration),
-			date_created = to_timestamp($2)::timestamptz AT TIME ZONE 'America/New_York',
-			call_from = $3,
-			call_to = $4,
-			is_inbound = $5,
-			recording_url = COALESCE($6, recording_url),
-			status = COALESCE($7, status)
-		WHERE external_id = $8`
+			call_duration = $1,
+			recording_url = $2,
+			status = $3
+		WHERE external_id = $4`
 
 	args := []interface{}{
 		utils.CreateNullInt(&phoneCall.CallDuration),
-		phoneCall.DateCreated,
-		phoneCall.CallFrom,
-		phoneCall.CallTo,
-		phoneCall.IsInbound,
 		utils.CreateNullString(&phoneCall.RecordingURL),
 		utils.CreateNullString(&phoneCall.Status),
 		phoneCall.ExternalID,

@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
-	"github.com/davidalvarez305/yd_cocktails/conversions"
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
 	"github.com/davidalvarez305/yd_cocktails/models"
@@ -133,28 +132,6 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 	phoneCall.CallDuration = dialStatus.DialCallDuration
 	phoneCall.RecordingURL = dialStatus.RecordingURL
 	phoneCall.Status = dialStatus.DialCallStatus
-
-	if phoneCall.CallDuration > constants.CallConversionDuration {
-		fbEvent := types.FacebookEventData{
-			EventName:      constants.LeadEventName,
-			EventTime:      phoneCall.DateCreated,
-			ActionSource:   "website",
-			EventSourceURL: constants.RootDomain,
-			UserData: types.FacebookUserData{
-				Phone: helpers.HashString(phoneCall.CallFrom),
-			},
-		}
-
-		metaPayload := types.FacebookPayload{
-			Data: []types.FacebookEventData{fbEvent},
-		}
-
-		err = conversions.SendFacebookConversion(metaPayload)
-
-		if err != nil {
-			fmt.Printf("Error sending Facebook conversion: %+v\n", err)
-		}
-	}
 
 	if err := database.UpdatePhoneCall(phoneCall); err != nil {
 		fmt.Printf("FAILED TO UPDATE PREVIOUS PHONE CALL: %+v\n", dialStatus)
