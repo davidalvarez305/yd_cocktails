@@ -23,8 +23,10 @@
 <script nonce="{{ .Nonce }}">
     const createLeadMessageForm = document.getElementById("createLeadMessageForm");
 
-    function handleCreateLeadMessageForm() {
-		const data = new FormData(createLeadMessageForm);
+    function handleCreateLeadMessageForm(e) {
+		e.preventDefault();
+
+		const data = new FormData(e.target);
 		const body = new FormData();
 		const alertModal = document.getElementById("alertModal");
 
@@ -62,6 +64,6 @@
 			})
     }
 
-    createLeadMessageForm.addEventListener("submit", handleCreateLeadMessageForm());
+    createLeadMessageForm.addEventListener("submit", (e) => handleCreateLeadMessageForm(e));
 </script>
 {{ end }}

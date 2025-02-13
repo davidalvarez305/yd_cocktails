@@ -21,8 +21,10 @@
 <script nonce="{{ .Nonce }}">
     const createLeadNoteForm = document.getElementById("createLeadNoteForm");
 
-    function handleCreateLeadNoteForm() {
-		const data = new FormData(createLeadNoteForm);
+    function handleCreateLeadNoteForm(e) {
+		e.preventDefault();
+
+		const data = new FormData(e.target);
 		const body = new FormData();
 		const alertModal = document.getElementById("alertModal");
 
@@ -60,6 +62,6 @@
 			})
     }
 
-    createLeadNoteForm.addEventListener("submit", handleCreateLeadNoteForm());
+    createLeadNoteForm.addEventListener("submit", (e) => handleCreateLeadNoteForm(e));
 </script>
 {{ end }}

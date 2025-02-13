@@ -10,7 +10,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/utils"
 )
 
-var urlsToSkip = []string{"/static/", "/partials/", "/sms/", "/call/", "/webhooks/"}
+var urlsToSkip = []string{"/static/", "/partials/", "/webhooks/"}
 
 func UserTracking(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
