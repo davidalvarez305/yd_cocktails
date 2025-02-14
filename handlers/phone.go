@@ -98,7 +98,7 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 
 	if err := database.SavePhoneCall(phoneCall); err != nil {
 		fmt.Printf("Failed to save phone call: %+v\n", err)
-		http.Error(w, "Failed to save phone call.", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
