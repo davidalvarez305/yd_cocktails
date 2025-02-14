@@ -11,13 +11,14 @@ type VenueType struct {
 }
 
 type User struct {
-	UserID      int    `json:"user_id" form:"user_id" schema:"user_id"`
-	Username    string `json:"username" form:"username" schema:"username"`
-	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	Password    string `json:"password" form:"password" schema:"password"`
-	UserRoleID  int    `json:"user_role_id" form:"user_role_id" schema:"user_role_id"`
-	FirstName   string `json:"first_name" form:"first_name" schema:"first_name"`
-	LastName    string `json:"last_name" form:"last_name" schema:"last_name"`
+	UserID             int    `json:"user_id" form:"user_id" schema:"user_id"`
+	Username           string `json:"username" form:"username" schema:"username"`
+	PhoneNumber        string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	ForwardPhoneNumber string `json:"forward_phone_number" form:"forward_phone_number" schema:"forward_phone_number"`
+	Password           string `json:"password" form:"password" schema:"password"`
+	UserRoleID         int    `json:"user_role_id" form:"user_role_id" schema:"user_role_id"`
+	FirstName          string `json:"first_name" form:"first_name" schema:"first_name"`
+	LastName           string `json:"last_name" form:"last_name" schema:"last_name"`
 }
 
 type Lead struct {
