@@ -44,33 +44,10 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 	}
 
 	incomingPhoneCall := types.TwilioIncomingCallBody{
-		CallSid:       r.FormValue("CallSid"),
-		AccountSid:    r.FormValue("AccountSid"),
-		From:          r.FormValue("From"),
-		To:            r.FormValue("To"),
-		CallStatus:    r.FormValue("CallStatus"),
-		ApiVersion:    r.FormValue("ApiVersion"),
-		Direction:     r.FormValue("Direction"),
-		ForwardedFrom: r.FormValue("ForwardedFrom"),
-		CallerName:    r.FormValue("CallerName"),
-		FromCity:      r.FormValue("FromCity"),
-		FromState:     r.FormValue("FromState"),
-		FromZip:       r.FormValue("FromZip"),
-		FromCountry:   r.FormValue("FromCountry"),
-		ToCity:        r.FormValue("ToCity"),
-		ToState:       r.FormValue("ToState"),
-		ToZip:         r.FormValue("ToZip"),
-		ToCountry:     r.FormValue("ToCountry"),
-		Caller:        r.FormValue("Caller"),
-		Digits:        r.FormValue("Digits"),
-		SpeechResult:  r.FormValue("SpeechResult"),
-	}
-
-	// Convert Confidence to float64
-	if confidenceStr := r.FormValue("Confidence"); confidenceStr != "" {
-		if confidence, err := strconv.ParseFloat(confidenceStr, 64); err == nil {
-			incomingPhoneCall.Confidence = confidence
-		}
+		CallSid:    r.FormValue("CallSid"),
+		From:       r.FormValue("From"),
+		To:         r.FormValue("To"),
+		CallStatus: r.FormValue("CallStatus"),
 	}
 
 	forwardPhoneNumber, err := database.GetForwardPhoneNumber(helpers.RemoveCountryCode(incomingPhoneCall.To), helpers.RemoveCountryCode(incomingPhoneCall.From))
@@ -153,16 +130,37 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 
 	from := r.FormValue("from")
 	to := r.FormValue("to")
-	inboundCallWebhook := constants.RootDomain + "/call/inbound" // Twilio will initiate the call to the inbound webhook, which will handle the rest
 
 	if from == "" || to == "" {
 		http.Error(w, "Missing required parameters (From, To)", http.StatusBadRequest)
 		return
 	}
 
-	_, err := services.InitiateOutboundCall(to, from, inboundCallWebhook)
+	twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
+	<Response>
+		<Dial action="%s">%s</Dial>
+	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, "+1"+to)
+
+	outboundCall, err := services.InitiateOutboundCall(to, from, twiML)
 	if err != nil {
 		http.Error(w, "Failed to initiate phone call", http.StatusInternalServerError)
+		return
+	}
+
+	phoneCall := models.PhoneCall{
+		ExternalID:   helpers.SafeString(outboundCall.Sid),
+		CallDuration: 0,
+		DateCreated:  time.Now().Unix(),
+		CallFrom:     from,
+		CallTo:       to,
+		IsInbound:    false,
+		RecordingURL: "",
+		Status:       helpers.SafeString(outboundCall.Status),
+	}
+
+	if err := database.SavePhoneCall(phoneCall); err != nil {
+		fmt.Printf("Failed to save phone call: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
