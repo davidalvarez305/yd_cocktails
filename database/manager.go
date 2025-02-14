@@ -929,11 +929,13 @@ func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 
 	row := stmt.QueryRow(sid)
 
+	var dateCreated time.Time
+
 	err = row.Scan(
 		&phoneCall.PhoneCallID,
 		&phoneCall.ExternalID,
 		&callDuration,
-		&phoneCall.DateCreated,
+		&dateCreated,
 		&phoneCall.CallFrom,
 		&phoneCall.CallTo,
 		&phoneCall.IsInbound,
@@ -955,6 +957,8 @@ func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
 	if status.Valid {
 		phoneCall.Status = status.String
 	}
+
+	phoneCall.DateCreated = dateCreated.Unix()
 
 	return phoneCall, nil
 }
