@@ -904,7 +904,7 @@ func UpdateLeadMarketing(form types.UpdateLeadMarketingForm) error {
 func GetForwardPhoneNumber(to, from string) (string, error) {
 	var forwardPhoneNumber string
 
-	query := `SELECT u.phone_number FROM "user" AS u WHERE u.phone_number IN ($1, $2) LIMIT 1`
+	query := `SELECT u.forward_phone_number FROM "user" AS u WHERE u.phone_number IN ($1, $2) LIMIT 1`
 	row := DB.QueryRow(query, to, from)
 
 	err := row.Scan(&forwardPhoneNumber)
