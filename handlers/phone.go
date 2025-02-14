@@ -73,7 +73,7 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	forwardNumber, err := database.GetForwardPhoneNumber(helpers.RemoveCountryCode(incomingPhoneCall.To), helpers.RemoveCountryCode(incomingPhoneCall.From))
+	forwardPhoneNumber, err := database.GetForwardPhoneNumber(helpers.RemoveCountryCode(incomingPhoneCall.To), helpers.RemoveCountryCode(incomingPhoneCall.From))
 	if err != nil {
 		fmt.Printf("Failed to get matching phone number: %+v\n", err)
 		http.Error(w, "Failed to get matching phone number.", http.StatusInternalServerError)
@@ -83,7 +83,7 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 	twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 	<Response>
 		<Dial action="%s">%s</Dial>
-	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, forwardNumber.ForwardPhoneNumber)
+	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, forwardPhoneNumber)
 
 	phoneCall := models.PhoneCall{
 		ExternalID:   incomingPhoneCall.CallSid,

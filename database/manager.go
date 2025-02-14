@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -902,52 +901,18 @@ func UpdateLeadMarketing(form types.UpdateLeadMarketingForm) error {
 	return nil
 }
 
-func GetForwardPhoneNumber(to, from string) (types.IncomingPhoneCallForwarding, error) {
-	var forwardingCall types.IncomingPhoneCallForwarding
+func GetForwardPhoneNumber(to, from string) (string, error) {
+	var forwardPhoneNumber string
 
-	stmt, err := DB.Prepare(`SELECT u.first_name, u.user_id FROM "user" AS u WHERE u.phone_number = $1`)
+	query := `SELECT u.phone_number FROM "user" AS u WHERE u.phone_number IN ($1, $2) LIMIT 1`
+	row := DB.QueryRow(query, to, from)
+
+	err := row.Scan(&forwardPhoneNumber)
 	if err != nil {
-		return forwardingCall, err
-	}
-	defer stmt.Close()
-
-	row := stmt.QueryRow(to)
-
-	err = row.Scan(&forwardingCall.FirstName, &forwardingCall.UserID)
-	if err != nil {
-		return forwardingCall, err
+		return forwardPhoneNumber, err
 	}
 
-	stmt, err = DB.Prepare(`SELECT l.lead_id FROM "lead" AS l WHERE l.phone_number = $1`)
-	if err != nil {
-		return forwardingCall, err
-	}
-	defer stmt.Close()
-
-	row = stmt.QueryRow(from)
-
-	var leadID sql.NullInt64
-	err = row.Scan(&leadID)
-	if err != nil && err != sql.ErrNoRows {
-		return forwardingCall, err
-	}
-
-	if leadID.Valid {
-		forwardingCall.LeadID = int(leadID.Int64)
-	} else {
-		forwardingCall.LeadID = 0
-	}
-
-	switch forwardingCall.FirstName {
-	case "Yovana":
-		forwardingCall.ForwardPhoneNumber = "+1" + constants.YovaPhoneNumber
-	case "David":
-		forwardingCall.ForwardPhoneNumber = "+1" + constants.DavidPhoneNumber
-	default:
-		return forwardingCall, errors.New("no matching phone number")
-	}
-
-	return forwardingCall, nil
+	return "1" + forwardPhoneNumber, nil
 }
 
 func GetPhoneCallBySID(sid string) (models.PhoneCall, error) {
