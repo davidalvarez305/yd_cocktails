@@ -50,21 +50,21 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 		CallStatus: r.FormValue("CallStatus"),
 	}
 
-	forwardPhoneNumber, err := database.GetForwardPhoneNumber(helpers.RemoveCountryCode(incomingPhoneCall.To), helpers.RemoveCountryCode(incomingPhoneCall.From))
-	if err != nil {
-		fmt.Printf("Failed to get matching phone number: %+v\n", err)
-		http.Error(w, "Failed to get matching phone number.", http.StatusInternalServerError)
-		return
-	}
+	if incomingPhoneCall.To != incomingPhoneCall.From {
+		forwardPhoneNumber, err := database.GetForwardPhoneNumber(helpers.RemoveCountryCode(incomingPhoneCall.To), helpers.RemoveCountryCode(incomingPhoneCall.From))
+		if err != nil {
+			fmt.Printf("Failed to get matching phone number: %+v\n", err)
+			http.Error(w, "Failed to get matching phone number.", http.StatusInternalServerError)
+			return
+		}
 
-	twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
-	<Response>
-		<Dial action="%s">%s</Dial>
-	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, forwardPhoneNumber)
+		twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
+		<Response>
+			<Dial action="%s">%s</Dial>
+		</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, forwardPhoneNumber)
 
-	// A temporary solution to the way Twilio handles outbound phone calls
-	// The initial call is from itself to itself in order to call the client from the company number
-	if forwardPhoneNumber != incomingPhoneCall.From {
+		// A temporary solution to the way Twilio handles outbound phone calls
+		// The initial call is from itself to itself in order to call the client from the company number
 		phoneCall := models.PhoneCall{
 			ExternalID:   incomingPhoneCall.CallSid,
 			CallDuration: 0,
@@ -81,11 +81,11 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	}
 
-	w.Header().Set("Content-Type", "application/xml")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(twiML))
+		w.Header().Set("Content-Type", "application/xml")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(twiML))
+	}
 }
 
 func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
