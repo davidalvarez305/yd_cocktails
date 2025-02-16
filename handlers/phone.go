@@ -151,6 +151,15 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var recordingURL string
+	subResources := outboundCall.SubresourceUris
+
+	if subResources != nil {
+		if recordings, ok := (*subResources)["recordings"].(string); ok {
+			recordingURL = recordings
+		}
+	}
+
 	phoneCall := models.PhoneCall{
 		ExternalID:   helpers.SafeString(outboundCall.Sid),
 		CallDuration: 0,
@@ -158,7 +167,7 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 		CallFrom:     from,
 		CallTo:       to,
 		IsInbound:    false,
-		RecordingURL: "",
+		RecordingURL: recordingURL,
 		Status:       helpers.SafeString(outboundCall.Status),
 	}
 
