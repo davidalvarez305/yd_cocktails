@@ -139,7 +139,7 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 	twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 	<Response>
 		<Dial action="%s">%s</Dial>
-	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, "+1"+to)
+	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, "+1"+from)
 
 	outboundCall, err := services.InitiateOutboundCall(to, from, twiML)
 	if err != nil {
