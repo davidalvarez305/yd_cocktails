@@ -62,21 +62,25 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 		<Dial action="%s">%s</Dial>
 	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, forwardPhoneNumber)
 
-	phoneCall := models.PhoneCall{
-		ExternalID:   incomingPhoneCall.CallSid,
-		CallDuration: 0,
-		DateCreated:  time.Now().Unix(),
-		CallFrom:     incomingPhoneCall.From,
-		CallTo:       incomingPhoneCall.To,
-		IsInbound:    true,
-		RecordingURL: "",
-		Status:       incomingPhoneCall.CallStatus,
-	}
+	// A temporary solution to the way Twilio handles outbound phone calls
+	// The initial call is from itself to itself in order to call the client from the company number
+	if forwardPhoneNumber != incomingPhoneCall.From {
+		phoneCall := models.PhoneCall{
+			ExternalID:   incomingPhoneCall.CallSid,
+			CallDuration: 0,
+			DateCreated:  time.Now().Unix(),
+			CallFrom:     incomingPhoneCall.From,
+			CallTo:       incomingPhoneCall.To,
+			IsInbound:    true,
+			RecordingURL: "",
+			Status:       incomingPhoneCall.CallStatus,
+		}
 
-	if err := database.SavePhoneCall(phoneCall); err != nil {
-		fmt.Printf("Failed to save phone call: %+v\n", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		if err := database.SavePhoneCall(phoneCall); err != nil {
+			fmt.Printf("Failed to save phone call: %+v\n", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/xml")
