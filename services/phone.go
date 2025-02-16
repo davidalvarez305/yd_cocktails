@@ -19,14 +19,14 @@ func SendTextMessage(to, from, body string) (*openapi.ApiV2010Message, error) {
 	return client.Api.CreateMessage(&params)
 }
 
-func InitiateOutboundCall(to, from, twiML string) (openapi.ApiV2010Call, error) {
+func InitiateOutboundCall(reversedNumberToDial, reversedCallerId, twiML string) (openapi.ApiV2010Call, error) {
 	client := twilio.NewRestClient()
 
 	var call openapi.ApiV2010Call
 	var params openapi.CreateCallParams
 
-	params.SetTo("+1" + to)
-	params.SetFrom("+1" + from)
+	params.SetTo("+1" + reversedCallerId)       // caller id must be set "to" because it is the first call that happens (where the call will be coming from)
+	params.SetFrom("+1" + reversedNumberToDial) // this number, the client's number, will be the number that is called to from the caller id's number
 	params.SetTwiml(twiML)
 	params.SetMethod("POST")
 	params.SetRecord(true)
