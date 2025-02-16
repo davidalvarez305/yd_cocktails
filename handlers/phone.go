@@ -128,10 +128,10 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	callerId := r.FormValue("from")
-	numberToDial := r.FormValue("to")
+	from := r.FormValue("from")
+	to := r.FormValue("to")
 
-	if numberToDial == "" || callerId == "" {
+	if to == "" || from == "" {
 		http.Error(w, "Missing required parameters (From, To)", http.StatusBadRequest)
 		return
 	}
@@ -139,9 +139,9 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 	twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 	<Response>
 		<Dial action="%s">%s</Dial>
-	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, "+1"+numberToDial)
+	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, "+1"+to)
 
-	outboundCall, err := services.InitiateOutboundCall(numberToDial, callerId, twiML)
+	outboundCall, err := services.InitiateOutboundCall(from, twiML)
 	if err != nil {
 		http.Error(w, "Failed to initiate phone call", http.StatusInternalServerError)
 		return
@@ -151,8 +151,8 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 		ExternalID:   helpers.SafeString(outboundCall.Sid),
 		CallDuration: 0,
 		DateCreated:  time.Now().Unix(),
-		CallFrom:     callerId,
-		CallTo:       numberToDial,
+		CallFrom:     from,
+		CallTo:       to,
 		IsInbound:    false,
 		RecordingURL: "",
 		Status:       helpers.SafeString(outboundCall.Status),
