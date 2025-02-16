@@ -25,7 +25,6 @@ func InitiateOutboundCall(from, twiML string) (openapi.ApiV2010Call, error) {
 	var call openapi.ApiV2010Call
 	var params openapi.CreateCallParams
 
-	params.SetTo("+1" + from)
 	params.SetFrom("+1" + from)
 	params.SetTwiml(twiML)
 	params.SetMethod("POST")
