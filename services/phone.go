@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	twilio "github.com/twilio/twilio-go"
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
@@ -31,6 +33,7 @@ func InitiateOutboundCall(to, from string) (openapi.ApiV2010Call, error) {
 	outboundCall, err := client.Api.CreateCall(&params)
 
 	if err != nil || outboundCall == nil {
+		fmt.Printf("ERROR INITIATING OUTBOUND CALL: %+v\n", err)
 		return call, err
 	}
 
