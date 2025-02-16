@@ -136,12 +136,7 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
-	<Response>
-		<Dial action="%s">%s</Dial>
-	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, "+1"+to)
-
-	outboundCall, err := services.InitiateOutboundCall(to, from, twiML)
+	outboundCall, err := services.InitiateOutboundCall(to, from)
 	if err != nil {
 		http.Error(w, "Failed to initiate phone call", http.StatusInternalServerError)
 		return
