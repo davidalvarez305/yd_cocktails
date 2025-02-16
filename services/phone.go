@@ -19,7 +19,7 @@ func SendTextMessage(to, from, body string) (*openapi.ApiV2010Message, error) {
 	return client.Api.CreateMessage(&params)
 }
 
-func InitiateOutboundCall(to, from string) (openapi.ApiV2010Call, error) {
+func InitiateOutboundCall(to, from, twiML string) (openapi.ApiV2010Call, error) {
 	client := twilio.NewRestClient()
 
 	var call openapi.ApiV2010Call
@@ -27,6 +27,7 @@ func InitiateOutboundCall(to, from string) (openapi.ApiV2010Call, error) {
 
 	params.SetTo("+1" + to)
 	params.SetFrom("+1" + from)
+	params.SetTwiml(twiML)
 	params.SetMethod("POST")
 	params.SetRecord(true)
 
