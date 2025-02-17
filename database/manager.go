@@ -2531,9 +2531,9 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 	LEFT JOIN "message" AS m ON l.phone_number IN (m.text_from, m.text_to)
 	LEFT JOIN "user" AS u2 ON u2.phone_number IN (m.text_from, m.text_to)
 	ORDER BY 
-		CASE WHEN u.latest_unread_message_id IS NOT NULL THEN 1 ELSE 0 END DESC,
-		u.latest_unread_message_id DESC NULLS LAST, 
-		l.lead_id;
+		l.lead_id,  -- Must match DISTINCT ON column
+		CASE WHEN u.latest_unread_message_id IS NOT NULL THEN 1 ELSE 0 END DESC,  -- Rank unread messages first
+		u.latest_unread_message_id DESC NULLS LAST;
 	`
 
 	rows, err := DB.Query(query)
