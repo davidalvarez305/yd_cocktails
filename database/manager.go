@@ -2536,7 +2536,10 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 			full_name, 
 			unread_messages
 		FROM temp_distinct_leads
-		ORDER BY latest_unread_message_id DESC, latest_message_id DESC NULLS LAST, lead_id DESC;
+		ORDER BY CASE WHEN unread_messages > 0 THEN 0 ELSE 1 END,
+		latest_unread_message_id DESC NULLS LAST,
+		latest_message_id DESC NULLS LAST,
+		lead_id DESC;
 	`)
 	if err != nil {
 		return messages, fmt.Errorf("error executing final query: %v", err)
