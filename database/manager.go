@@ -2509,29 +2509,17 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 func GetUsersWithMessages() ([]types.UserMessages, error) {
 	var messages []types.UserMessages
 
-	query := `SELECT DISTINCT ON (l.lead_id) 
+	query := `SELECT 
 		l.lead_id, 
 		l.full_name, 
-		COALESCE(COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END), 0) AS unread_messages
-	FROM (
-		SELECT 
-			l.lead_id,
-			m.message_id,
-			m.is_read,
-			m.is_inbound,
-			l.full_name,
-			m.date_created,
-			l.phone_number
-		FROM "message" AS m
-		JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
-		JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
-		ORDER BY m.message_id DESC
-	) AS m
-	JOIN "lead" AS l ON l.lead_id = m.lead_id
+		COALESCE(COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END), 0) AS unread_messages,
+		MAX(m.message_id) AS latest_unread_message_id
+	FROM "message" AS m
+	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
+	JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
+	WHERE m.is_read IS NOT TRUE AND m.is_inbound = TRUE
 	GROUP BY l.lead_id, l.full_name
-	ORDER BY 
-		l.lead_id, 
-		MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.message_id ELSE NULL END) DESC;
+	ORDER BY latest_unread_message_id DESC;
 	`
 
 	rows, err := DB.Query(query)
