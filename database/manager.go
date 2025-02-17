@@ -2545,7 +2545,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 
 	for rows.Next() {
 		var message types.UserMessages
-		var messageId int
+		var messageId sql.NullInt64
 		err := rows.Scan(
 			&message.LeadID,
 			&message.ClientName,
