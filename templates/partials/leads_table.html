@@ -142,35 +142,11 @@
 		if (search.value.length === 0) return;
 
 		// Default pageNum to 1 when new search happens
-		fetch(`/crm/lead?search=${search.value}&pageNum=1`, {
-			method: "GET",
-			credentials: "include",
-		})
-			.then((response) => {
-				const token = response.headers.get('X-Csrf-Token');
-				if (token) {
-					const tokens = document.querySelectorAll('[name="csrf_token"]');
-					tokens.forEach(csrf_token => csrf_token.value = token);
-				}
-				if (response.ok) {
-					return response.text();
-				} else {
-					return response.text().then((err) => {
-						throw new Error(err);
-					});
-				}
-			})
-			.then(html => {
-				const table = document.getElementById('leadsTable');
-				table.outerHTML = html;
-				handleBindPagination();
-				handleBindTableActions();
-			})
-			.catch(err => {
-				alertModal.outerHTML = err.message;
-			})
-			.finally(() => handleCloseAlertModal());
-	};
+		params.set("pageNum", 1);
+		params.set("search", search.value);
+
+		redirectUrl();
+	}
 
 	searchForm.addEventListener("keydown", handleFullTextSearch());
 </script>
