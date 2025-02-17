@@ -2485,8 +2485,7 @@ func GetUsersWithMessages() ([]types.MessageList, error) {
 	var messages []types.MessageList
 
 	query := `SELECT DISTINCT ON (l.lead_id) 
-		l.lead_id, 
-		l.full_name
+		l.lead_id, l.full_name
 	FROM "message" AS m
 	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
 	JOIN "user" AS u  ON u.phone_number IN (m.text_from, m.text_to)
@@ -2499,23 +2498,16 @@ func GetUsersWithMessages() ([]types.MessageList, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var dateCreated time.Time
-
 		var message types.MessageList
 		err := rows.Scan(
 			&message.LeadID,
 			&message.ClientName,
-			&message.UserName,
-			&message.Message,
-			&dateCreated,
-			&message.IsInbound,
 		)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
 			return messages, err
 		}
 
-		message.DateCreated = utils.FormatTimestamp(dateCreated.Unix())
 		messages = append(messages, message)
 	}
 
