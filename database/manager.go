@@ -2516,9 +2516,13 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 				l.full_name, 
 				COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END) AS unread_messages,
 				MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.message_id ELSE NULL END) AS latest_unread_message_id,
-				MAX(m.message_id) AS latest_message_id
+				MAX(m.message_id) AS latest_message_id,
+				ls.lead_status_id,
+				li.lead_interest_id
 			FROM "lead" AS l
 			LEFT JOIN "message" AS m ON l.phone_number IN (m.text_from, m.text_to)
+			LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
+			LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id
 			GROUP BY l.lead_id, l.full_name
 		),
 		temp_distinct_leads AS (
@@ -2536,11 +2540,13 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 			full_name, 
 			unread_messages
 		FROM temp_distinct_leads
+		WHERE 
+		(unread_messages > 0 OR lead_status_id != $1) OR (unread_messages > 0 OR lead_interest_id != $2)
 		ORDER BY CASE WHEN unread_messages > 0 THEN 0 ELSE 1 END,
 		latest_unread_message_id DESC NULLS LAST,
 		latest_message_id DESC NULLS LAST,
 		lead_id DESC;
-	`)
+	`, constants.ArchivedLeadStatusID, constants.NoInterestLeadInterestID)
 	if err != nil {
 		return messages, fmt.Errorf("error executing final query: %v", err)
 	}
