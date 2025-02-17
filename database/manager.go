@@ -2560,6 +2560,16 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 	}
 	defer rows.Close()
 
+	_, err = DB.Exec(`DROP TABLE IF EXISTS temp_leads;`)
+	if err != nil {
+		return messages, fmt.Errorf("error dropping temp_leads: %v", err)
+	}
+
+	_, err = DB.Exec(`DROP TABLE IF EXISTS temp_distinct_leads;`)
+	if err != nil {
+		return messages, fmt.Errorf("error dropping temp_distinct_leads: %v", err)
+	}
+
 	for rows.Next() {
 		var message types.UserMessages
 		err := rows.Scan(
