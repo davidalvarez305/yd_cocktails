@@ -2512,7 +2512,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 	query := `SELECT DISTINCT ON (l.lead_id) 
 		l.lead_id, 
 		l.full_name, 
-		COUNT(CASE WHEN m.is_read IS NOT TRUE THEN 1 ELSE NULL END) AS unread_messages
+		COUNT(CASE WHEN m.is_read IS NOT TRUE THEN 1 ELSE 0 END) AS unread_messages
 	FROM "message" AS m
 	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
 	JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
