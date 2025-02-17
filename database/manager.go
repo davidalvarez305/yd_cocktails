@@ -2537,9 +2537,8 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 			u.latest_unread_message_id,
 			CASE WHEN u.latest_unread_message_id IS NOT NULL THEN 1 ELSE 0 END AS unread_priority
 		FROM "lead" AS l
-		JOIN lead_status AS ls 
-			ON l.lead_status_id = ls.lead_status_id 
-			AND l.lead_status_id IS DISTINCT FROM $1
+		LEFT JOIN lead_status AS ls ON l.lead_status_id = ls.lead_status_id AND (l.lead_status_id IS DISTINCT FROM $1 OR l.lead_status_id IS NULL)
+		LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id AND (li.lead_interest_id IS DISTINCT FROM $2::INTEGER OR li.lead_interest_id IS NULL)
 		LEFT JOIN temp_unread_messages u ON l.lead_id = u.lead_id;
 	`, constants.ArchivedLeadStatusID)
 	if err != nil {
