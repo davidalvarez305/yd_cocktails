@@ -2527,7 +2527,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 		return messages, fmt.Errorf("error creating temp_unread_messages: %v", err)
 	}
 
-	// Step 2: Create temp_leads table (fix: include temp_unread_messages in FROM clause)
+	// Step 2: Create temp_leads table
 	_, err = DB.Exec(`
 		CREATE TEMP TABLE temp_leads AS
 		SELECT 
@@ -2555,9 +2555,9 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 			t.latest_unread_message_id
 		FROM temp_leads AS t
 		ORDER BY 
-			t.unread_priority DESC,  -- Rank unread messages first
-			t.latest_unread_message_id DESC NULLS LAST,
-			t.lead_id;
+			t.lead_id,
+			t.unread_priority DESC,  
+			t.latest_unread_message_id DESC NULLS LAST;
 	`)
 	if err != nil {
 		return messages, fmt.Errorf("error executing final query: %v", err)
