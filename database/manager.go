@@ -2516,7 +2516,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 	FROM "message" AS m
 	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
 	JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
-	GROUP BY l.lead_id, l.full_name, m.date_created
+	GROUP BY l.lead_id, l.full_name
 	ORDER BY 
 		l.lead_id, 
 		MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.date_created ELSE NULL END) DESC;
