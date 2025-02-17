@@ -2506,14 +2506,17 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 	return notes, nil
 }
 
-func GetUsersWithMessages() ([]types.FrontendMessage, error) {
-	var messages []types.FrontendMessage
+func GetUsersWithMessages() ([]types.UserMessages, error) {
+	var messages []types.UserMessages
 
 	query := `SELECT DISTINCT ON (l.lead_id) 
-		l.lead_id, l.full_name
+		l.lead_id, 
+		l.full_name, 
+		COUNT(CASE WHEN m.is_read IS NOT TRUE THEN 1 ELSE NULL END) AS unread_messages
 	FROM "message" AS m
 	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
-	JOIN "user" AS u  ON u.phone_number IN (m.text_from, m.text_to)
+	JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
+	GROUP BY l.lead_id, l.full_name
 	ORDER BY l.lead_id, m.date_created ASC;`
 
 	rows, err := DB.Query(query)
@@ -2523,10 +2526,11 @@ func GetUsersWithMessages() ([]types.FrontendMessage, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var message types.FrontendMessage
+		var message types.UserMessages
 		err := rows.Scan(
 			&message.LeadID,
 			&message.ClientName,
+			&message.UnreadMessages,
 		)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
@@ -2541,4 +2545,18 @@ func GetUsersWithMessages() ([]types.FrontendMessage, error) {
 	}
 
 	return messages, nil
+}
+
+func GetUnreadMessagesCount() (int, error) {
+	var unreadMessages int
+
+	query := `SELECT COUNT(1) FROM message WHERE is_read IS NOT TRUE;`
+	row := DB.QueryRow(query)
+
+	err := row.Scan(&unreadMessages)
+	if err != nil {
+		return unreadMessages, err
+	}
+
+	return unreadMessages, nil
 }

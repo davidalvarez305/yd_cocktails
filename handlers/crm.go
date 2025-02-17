@@ -38,6 +38,14 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 	ctx["PagePath"] = constants.RootDomain + r.URL.Path
 	path := r.URL.Path
 
+	unreadMessages, err := database.GetUnreadMessagesCount()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting unread messages from DB.", http.StatusInternalServerError)
+		return
+	}
+	ctx["UnreadMessages"] = unreadMessages
+
 	switch r.Method {
 	case http.MethodGet:
 		parts := strings.Split(path, "/")
