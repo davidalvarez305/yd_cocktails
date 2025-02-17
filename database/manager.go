@@ -2543,9 +2543,9 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 			unread_messages
 		FROM temp_distinct_leads
 		WHERE 
-			(unread_messages = 0 AND lead_status_id != $1)
+			(unread_messages > 0 AND lead_status_id != $1)
 			
-			OR (unread_messages = 0 AND lead_interest_id != $2)
+			OR (unread_messages > 0 AND lead_interest_id != $2)
 
 			OR (lead_status_id = $1 AND latest_message_time < CURRENT_DATE - INTERVAL '7 days')
 
