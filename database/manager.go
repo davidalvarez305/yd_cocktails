@@ -2515,7 +2515,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 		COALESCE(COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END), 0) AS unread_messages
 	FROM (
 		SELECT 
-			m.lead_id,
+			l.lead_id,
 			m.message_id,
 			m.is_read,
 			m.is_inbound,
