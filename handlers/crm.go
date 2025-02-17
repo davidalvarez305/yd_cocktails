@@ -2267,7 +2267,7 @@ func GetMessages(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	messages, err := database.GetMessages()
+	messages, err := database.GetUsersWithMessages()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting messages from DB.", http.StatusInternalServerError)
