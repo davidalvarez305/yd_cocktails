@@ -152,15 +152,34 @@ func MarkCSRFTokenAsUsed(token string) error {
 
 func SaveSMS(msg models.Message) error {
 	stmt, err := DB.Prepare(`
-		INSERT INTO message (external_id, text, date_created, text_from, text_to, is_inbound)
-		VALUES ($1, $2, to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York', $4, $5, $6)
+		INSERT INTO message (external_id, text, date_created, text_from, text_to, is_inbound, is_read)
+		VALUES ($1, $2, to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York', $4, $5, $6, $7)
 	`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(msg.ExternalID, msg.Text, msg.DateCreated, msg.TextFrom, msg.TextTo, msg.IsInbound)
+	_, err = stmt.Exec(msg.ExternalID, msg.Text, msg.DateCreated, msg.TextFrom, msg.TextTo, msg.IsInbound, msg.IsRead)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
+func SetSMSToRead(messageId int) error {
+	stmt, err := DB.Prepare(`
+		UPDATE message
+		SET is_read = true
+		WHERE message_id = $1
+	`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(messageId)
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
@@ -2377,7 +2396,10 @@ func GetMessagesByLeadID(leadId int) ([]types.FrontendMessage, error) {
 	CONCAT(u.first_name, ' ', u.last_name) as user_name,
 	m.text,
 	m.date_created,
-	m.is_inbound
+	m.is_inbound,
+	m.message_id,
+	l.lead_id,
+	m.is_read
 	FROM "message" AS m
 	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
 	JOIN "user" AS u  ON u.phone_number IN (m.text_from, m.text_to)
@@ -2401,6 +2423,9 @@ func GetMessagesByLeadID(leadId int) ([]types.FrontendMessage, error) {
 			&message.Message,
 			&dateCreated,
 			&message.IsInbound,
+			&message.MessageID,
+			&message.LeadID,
+			&message.IsRead,
 		)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
@@ -2481,8 +2506,8 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 	return notes, nil
 }
 
-func GetUsersWithMessages() ([]types.MessageList, error) {
-	var messages []types.MessageList
+func GetUsersWithMessages() ([]types.FrontendMessage, error) {
+	var messages []types.FrontendMessage
 
 	query := `SELECT DISTINCT ON (l.lead_id) 
 		l.lead_id, l.full_name
@@ -2498,7 +2523,7 @@ func GetUsersWithMessages() ([]types.MessageList, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var message types.MessageList
+		var message types.FrontendMessage
 		err := rows.Scan(
 			&message.LeadID,
 			&message.ClientName,

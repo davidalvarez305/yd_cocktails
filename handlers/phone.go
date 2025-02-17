@@ -207,6 +207,7 @@ func handleInboundSMS(w http.ResponseWriter, r *http.Request) {
 		IsInbound:   true,
 		DateCreated: time.Now().Unix(),
 		Status:      twilioMessage.SmsStatus,
+		IsRead:      false,
 	}
 
 	if err := database.SaveSMS(message); err != nil {
@@ -277,6 +278,7 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 		IsInbound:   false,
 		DateCreated: time.Now().Unix(),
 		Status:      messageStatus,
+		IsRead:      true,
 	}
 
 	err = database.SaveSMS(message)

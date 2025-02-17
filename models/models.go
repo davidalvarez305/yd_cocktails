@@ -91,6 +91,7 @@ type Message struct {
 	TextTo      string `json:"text_to"`
 	IsInbound   bool   `json:"is_inbound"`
 	Status      string `json:"status" form:"status" schema:"status"`
+	IsRead      bool   `json:"is_read"`
 }
 
 type PhoneCall struct {

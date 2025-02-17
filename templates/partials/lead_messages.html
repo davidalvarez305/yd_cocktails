@@ -3,8 +3,8 @@
     <div class="flex gap-4 rounded-lg bg-gray-100 p-5 dark:bg-gray-700/50">
         <div class="flex-grow">
             <h5 class="flex items-center gap-1 text-sm leading-relaxed">
-                <p
-                    class="font-semibold {{ if .IsInbound }}text-secondary-600 hover:text-secondary-400 dark:text-secondary-400 dark:hover:text-secondary-300{{ else }}text-primary-600 hover:text-primary-400 dark:text-primary-400 dark:hover:text-primary-300{{ end }}">
+                <p data-message-id="{{ .MessageID }}" data-is-read="{{ .IsRead }}" data-lead-id="{{ .LeadID }}"
+                    class="messageContent font-semibold {{ if .IsInbound }}text-secondary-600 hover:text-secondary-400 dark:text-secondary-400 dark:hover:text-secondary-300{{ else }}text-primary-600 hover:text-primary-400 dark:text-primary-400 dark:hover:text-primary-300{{ end }}">
                     {{ if .IsInbound }}
                         {{ .ClientName }}
                     {{ else }}

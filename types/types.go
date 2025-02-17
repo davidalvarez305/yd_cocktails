@@ -578,6 +578,9 @@ type FrontendMessage struct {
 	DateCreated string `json:"date_created"`
 	Message     string `json:"message"`
 	IsInbound   bool   `json:"is_inbound"`
+	MessageID   int    `json:"message_id"`
+	LeadID      int    `json:"lead_id"`
+	IsRead      bool   `json:"is_read"`
 }
 
 type FrontendNote struct {
@@ -586,11 +589,9 @@ type FrontendNote struct {
 	Note      string `json:"note"`
 }
 
-type MessageList struct {
-	LeadID      int    `json:"lead_id"`
-	ClientName  string `json:"client_name"`
-	UserName    string `json:"user_name"`
-	DateCreated string `json:"date_created"`
-	Message     string `json:"message"`
-	IsInbound   bool   `json:"is_inbound"`
+type SetSMSToReadForm struct {
+	MessageID *int    `json:"message_id" form:"message_id" schema:"message_id"`
+	LeadID    *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	IsRead    *bool   `json:"is_read" form:"is_read" schema:"is_read"`
+	CSRFToken *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
 }

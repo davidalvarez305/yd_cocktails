@@ -86,6 +86,13 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if strings.HasPrefix(path, "/crm/message/") {
+			if len(parts) >= 5 && parts[4] == "read" && helpers.IsNumeric(parts[3]) {
+				SetSMSToRead(w, r)
+				return
+			}
+		}
+
 		if strings.HasPrefix(path, "/crm/lead/") {
 			if len(path) > len("/crm/lead/") && strings.Contains(path, "archive") {
 				ArchiveLead(w, r)
@@ -2293,6 +2300,73 @@ func GetMessagesByLeadID(w http.ResponseWriter, r *http.Request, ctx map[string]
 	}
 
 	leadMessages, err := database.GetMessagesByLeadID(leadId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting lead messages from DB.", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "lead_messages.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_messages.html",
+		Data: map[string]any{
+			"LeadMessages": leadMessages,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+func SetSMSToRead(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to parse form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var form types.SetSMSToReadForm
+	err = decoder.Decode(&form, r.PostForm)
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.SetSMSToRead(helpers.SafeInt(form.MessageID))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error updating lead.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	leadMessages, err := database.GetMessagesByLeadID(helpers.SafeInt(form.LeadID))
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting lead messages from DB.", http.StatusInternalServerError)
