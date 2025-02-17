@@ -894,6 +894,11 @@ select{
   margin-bottom: 1px;
 }
 
+.my-80{
+  margin-top: 20rem;
+  margin-bottom: 20rem;
+}
+
 .-mr-20{
   margin-right: -5rem;
 }
@@ -1039,6 +1044,14 @@ select{
   height: 100%;
 }
 
+.h-80{
+  height: 20rem;
+}
+
+.h-\[80vh\]{
+  height: 80vh;
+}
+
 .max-h-72{
   max-height: 18rem;
 }
@@ -1047,8 +1060,16 @@ select{
   max-height: 4rem;
 }
 
+.max-h-full{
+  max-height: 100%;
+}
+
 .min-h-dvh{
   min-height: 100dvh;
+}
+
+.min-h-screen{
+  min-height: 100vh;
 }
 
 .w-1\/2{
@@ -1073,6 +1094,10 @@ select{
 
 .w-full{
   width: 100%;
+}
+
+.w-4\/5{
+  width: 80%;
 }
 
 .min-w-\[320px\]{

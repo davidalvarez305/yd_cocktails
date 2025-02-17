@@ -2309,7 +2309,5 @@ func GetMessagesByLeadID(w http.ResponseWriter, r *http.Request, ctx map[string]
 		},
 	}
 
-	fmt.Println(tmplCtx)
-
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
