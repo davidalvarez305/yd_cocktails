@@ -311,6 +311,8 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
 	tmplCtx := types.DynamicPartialTemplate{
 		TemplateName: "lead_messages.html",
 		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_messages.html",
