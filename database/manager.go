@@ -2543,13 +2543,13 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 			unread_messages
 		FROM temp_distinct_leads
 		WHERE 
-			NOT (unread_messages = 0 AND lead_status_id = $1)
+			(unread_messages = 0 AND lead_status_id != $1)
 			
-			OR NOT (unread_messages = 0 AND lead_interest_id = $2)
+			OR (unread_messages = 0 AND lead_interest_id != $2)
 
-			OR NOT (lead_status_id = $1 AND latest_message_time > CURRENT_DATE - INTERVAL '7 days')
+			OR (lead_status_id = $1 AND latest_message_time < CURRENT_DATE - INTERVAL '7 days')
 
-			OR NOT (lead_interest_id = $2 AND latest_message_time > CURRENT_DATE - INTERVAL '7 days')
+			OR (lead_interest_id = $2 AND latest_message_time < CURRENT_DATE - INTERVAL '7 days')
 		ORDER BY 
 			CASE WHEN unread_messages > 0 THEN 0 ELSE 1 END, latest_unread_message_id DESC NULLS LAST,
 			latest_message_id DESC NULLS LAST, lead_id DESC;
