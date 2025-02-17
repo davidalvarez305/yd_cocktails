@@ -57,11 +57,20 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if strings.HasPrefix(path, "/crm/message") {
+			if len(path) > len("/crm/message/") && helpers.IsNumeric(path[len("/crm/message/"):]) {
+				GetMessagesByLeadID(w, r, ctx)
+				return
+			}
+		}
+
 		switch path {
 		case "/crm/lead":
 			GetLeads(w, r, ctx)
 		case "/crm/service":
 			GetServices(w, r, ctx)
+		case "/crm/message":
+			GetMessages(w, r, ctx)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -2238,6 +2247,69 @@ func PostLeadNote(w http.ResponseWriter, r *http.Request) {
 			"LeadNotes": leadNotes,
 		},
 	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func GetMessages(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
+	baseFile := constants.CRM_TEMPLATES_DIR + "messages.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, baseFile}
+
+	nonce, ok := r.Context().Value("nonce").(string)
+	if !ok {
+		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
+		return
+	}
+
+	csrfToken, ok := r.Context().Value("csrf_token").(string)
+	if !ok {
+		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
+		return
+	}
+
+	messages, err := database.GetMessages()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting messages from DB.", http.StatusInternalServerError)
+		return
+	}
+
+	data := ctx
+	data["PageTitle"] = "Messages — " + constants.CompanyName
+	data["Nonce"] = nonce
+	data["CSRFToken"] = csrfToken
+	data["Messages"] = messages
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	helpers.ServeContent(w, files, data)
+}
+
+func GetMessagesByLeadID(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
+	leadId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/message/")
+	if err != nil {
+		http.Error(w, "Bad lead id.", http.StatusBadRequest)
+		return
+	}
+
+	leadMessages, err := database.GetMessagesByLeadID(leadId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting lead messages from DB.", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "lead_messages.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_messages.html",
+		Data: map[string]any{
+			"LeadMessages": leadMessages,
+		},
+	}
+
+	fmt.Println(tmplCtx)
 
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }

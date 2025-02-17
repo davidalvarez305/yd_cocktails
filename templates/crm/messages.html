@@ -1,0 +1,63 @@
+{{ define "content.html" }}
+<!-- Page Content -->
+<div id="page-content" class="flex max-w-full flex-auto flex-col lg:flex-row">
+<!-- Leads -->
+<div class="w-full flex-none flex-col p-4 lg:flex lg:w-80 lg:p-8 xl:w-96">
+    <div
+        class="flex flex-auto flex-col items-center justify-start rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 py-4 text-gray-400 dark:border-gray-700 dark:bg-gray-800">
+        <!-- Listbox -->
+        <ul class="h-full w-full flex flex-col overflow-auto" role="listbox">
+            {{ range .Messages }}
+            <li data-lead-id="{{ .LeadID }}"
+                class="clientName group flex cursor-pointer items-center justify-between gap-2 px-3 text-sm text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white"
+                role="option" tabindex="-1" aria-selected="false">
+                <div class="grow truncate py-1.5">{{ .ClientName }}</div>
+            </li>
+            {{ end }}
+        </ul>
+        <!-- END Listbox -->
+    </div>
+</div>
+<!-- END Leads -->
+
+<!-- Messages -->
+<div class="mx-auto flex w-full max-w-10xl grow flex-col p-4 lg:p-8">
+    <div id="messages"
+        class="flex items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 py-80 text-gray-400 dark:border-gray-700 dark:bg-gray-800">
+        Messages
+    </div>
+</div>
+<!-- END Messages -->
+</main>
+<!-- END Page Content -->
+
+<script nonce="{{ .Nonce }}">
+    const clients = document.querySelectorAll(".clientName");
+    const messages = document.getElementById("messages");
+
+    function handleGetClientMessages(leadId) {
+        fetch(`/crm/message/${leadId}`, {
+            method: "GET",
+            credentials: "include",
+        })
+            .then((response) => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    return response.text().then((err) => {
+                        throw new Error(err);
+                    });
+                }
+            })
+            .then(html => messages.innerHTML = html)
+            .catch(console.error);
+    };
+
+    clients.forEach(client => {
+        const leadId = client.dataset.leadId;
+        client.addEventListener("click", (e) => handleGetClientMessages(leadId));
+    });
+</script>
+
+<script src="{{ .StaticPath }}/main.js" nonce="{{ .Nonce }}"></script>
+{{ end }}

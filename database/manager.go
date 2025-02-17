@@ -2480,3 +2480,52 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 
 	return notes, nil
 }
+
+func GetMessages() ([]types.MessageList, error) {
+	var messages []types.MessageList
+
+	query := `SELECT l.lead_id,
+	l.full_name,
+	CONCAT(u.first_name, ' ', u.last_name),
+	m.text,
+	m.date_created,
+	m.is_inbound
+	FROM "message" AS m
+	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
+	JOIN "user" AS u  ON u.phone_number IN (m.text_from, m.text_to)
+	ORDER BY m.date_created DESC;`
+
+	rows, err := DB.Query(query)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		return messages, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var dateCreated time.Time
+
+		var message types.MessageList
+		err := rows.Scan(
+			&message.LeadID,
+			&message.ClientName,
+			&message.UserName,
+			&message.Message,
+			&dateCreated,
+			&message.IsInbound,
+		)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+			return messages, err
+		}
+
+		message.DateCreated = utils.FormatTimestamp(dateCreated.Unix())
+		messages = append(messages, message)
+	}
+
+	if err = rows.Err(); err != nil {
+		return messages, err
+	}
+
+	return messages, nil
+}
