@@ -2517,6 +2517,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 				COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END) AS unread_messages,
 				MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.message_id ELSE NULL END) AS latest_unread_message_id,
 				MAX(m.message_id) AS latest_message_id,
+				MAX(m.date_created) AS latest_message_time,
 				l.lead_status_id,
 				l.lead_interest_id
 			FROM "lead" AS l
@@ -2531,7 +2532,8 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 				t.latest_unread_message_id,
 				t.latest_message_id,
 				t.lead_status_id,
-				t.lead_interest_id
+				t.lead_interest_id,
+				t.latest_message_time
 			FROM temp_leads AS t
 			ORDER BY t.lead_id, t.latest_message_id DESC NULLS LAST
 		)
@@ -2540,11 +2542,22 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 			full_name, 
 			unread_messages
 		FROM temp_distinct_leads
-		WHERE (unread_messages > 0 OR lead_status_id != $1) OR (unread_messages > 0 OR lead_interest_id != $2)
-		ORDER BY CASE WHEN unread_messages > 0 THEN 0 ELSE 1 END,
-		latest_unread_message_id DESC NULLS LAST,
-		latest_message_id DESC NULLS LAST,
-		lead_id DESC;
+		WHERE 
+			-- Exclude leads with 0 unread messages AND lead_status_id = $1
+			NOT (unread_messages = 0 AND lead_status_id = $1)
+			
+			-- Exclude leads with 0 unread messages AND lead_interest_id = $2
+			NOT (unread_messages = 0 AND lead_interest_id = $2)
+
+			-- Exclude leads where lead_status_id = $1 AND latest_message_date_created > 7 days
+			AND NOT (lead_status_id = $1 AND latest_message_time > CURRENT_DATE - INTERVAL '7 days')
+
+			-- Exclude leads where lead_interest_id = $2 AND latest_message_date_created > 7 days
+			AND NOT (lead_interest_id = $2 AND latest_message_time > CURRENT_DATE - INTERVAL '7 days')
+
+		ORDER BY 
+			CASE WHEN unread_messages > 0 THEN 0 ELSE 1 END, latest_unread_message_id DESC NULLS LAST,
+			latest_message_id DESC NULLS LAST, lead_id DESC;
 	`, constants.ArchivedLeadStatusID, constants.NoInterestLeadInterestID)
 	if err != nil {
 		return messages, fmt.Errorf("error executing query: %v", err)
