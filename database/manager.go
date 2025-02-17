@@ -2530,6 +2530,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 		u.latest_unread_message_id,
 		CASE WHEN u.latest_unread_message_id IS NOT NULL THEN 1 ELSE 0 END AS unread_priority
 	FROM "lead" AS l
+	JOIN lead_status AS ls ON l.lead_status_id = ls.lead_status_id AND l.lead_status_id IS DISTINCT FROM $1::INTEGER
 	LEFT JOIN temp_unread_messages AS u ON l.lead_id = u.lead_id;
 
 	SELECT DISTINCT ON (t.lead_id)
@@ -2544,7 +2545,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 		t.latest_unread_message_id DESC NULLS LAST;
 	`
 
-	rows, err := DB.Query(query)
+	rows, err := DB.Query(query, constants.ArchivedLeadStatusID)
 	if err != nil {
 		return messages, fmt.Errorf("error executing query: %v", err)
 	}
