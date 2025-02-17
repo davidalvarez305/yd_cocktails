@@ -2523,7 +2523,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 			LEFT JOIN "message" AS m ON l.phone_number IN (m.text_from, m.text_to)
 			LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
 			LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id
-			GROUP BY l.lead_id, l.full_name
+			GROUP BY l.lead_id, l.full_name, l.lead_status_id, l.lead_interest_id
 		),
 		temp_distinct_leads AS (
 			SELECT DISTINCT ON (t.lead_id)
@@ -2540,15 +2540,14 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 			full_name, 
 			unread_messages
 		FROM temp_distinct_leads
-		WHERE 
-		(unread_messages > 0 OR lead_status_id != $1) OR (unread_messages > 0 OR lead_interest_id != $2)
+		WHERE (unread_messages > 0 OR lead_status_id != $1) OR (unread_messages > 0 OR lead_interest_id != $2)
 		ORDER BY CASE WHEN unread_messages > 0 THEN 0 ELSE 1 END,
 		latest_unread_message_id DESC NULLS LAST,
 		latest_message_id DESC NULLS LAST,
 		lead_id DESC;
 	`, constants.ArchivedLeadStatusID, constants.NoInterestLeadInterestID)
 	if err != nil {
-		return messages, fmt.Errorf("error executing final query: %v", err)
+		return messages, fmt.Errorf("error executing query: %v", err)
 	}
 	defer rows.Close()
 
