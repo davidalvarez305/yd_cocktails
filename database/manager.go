@@ -2542,13 +2542,14 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 		return messages, fmt.Errorf("error creating temp_distinct_leads: %v", err)
 	}
 
-	// Step 3: Query data from temp_distinct_leads and order by latest_unread_message_id DESC
+	// Step 3: Query data from temp_distinct_leads and order by latest_unread_message_id DESC, latest_message_id DESC, lead_id DESC
 	rows, err := DB.Query(`
 		SELECT 
 			lead_id, 
 			full_name, 
 			unread_messages
-		FROM temp_distinct_leads ORDER BY latest_unread_message_id DESC, latest_message_id DESC NULLS LAST;
+		FROM temp_distinct_leads 
+		ORDER BY latest_unread_message_id DESC, latest_message_id DESC NULLS LAST, lead_id DESC;
 	`)
 	if err != nil {
 		return messages, fmt.Errorf("error executing final query: %v", err)
