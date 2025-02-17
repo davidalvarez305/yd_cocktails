@@ -2382,7 +2382,7 @@ func GetMessagesByLeadID(leadId int) ([]types.FrontendMessage, error) {
 	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
 	JOIN "user" AS u  ON u.phone_number IN (m.text_from, m.text_to)
 	WHERE l.lead_id = $1
-	ORDER BY m.date_created DESC;`
+	ORDER BY m.date_created ASC;`
 
 	rows, err := DB.Query(query, leadId)
 	if err != nil {
@@ -2493,7 +2493,7 @@ func GetMessages() ([]types.MessageList, error) {
 	FROM "message" AS m
 	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
 	JOIN "user" AS u  ON u.phone_number IN (m.text_from, m.text_to)
-	ORDER BY m.date_created DESC;`
+	ORDER BY m.date_created ASC;`
 
 	rows, err := DB.Query(query)
 	if err != nil {
