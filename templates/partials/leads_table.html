@@ -141,11 +141,7 @@
 	function handleFullTextSearch() {
 		if (search.value.length === 0) return;
 
-		// Default pageNum to 1 when new search happens
-		params.set("pageNum", 1);
-		params.set("search", search.value);
-
-		redirectUrl();
+		window.location.href = `/crm/lead?search=${search.value}`;
 	}
 
 	searchForm.addEventListener("keydown", handleFullTextSearch());
