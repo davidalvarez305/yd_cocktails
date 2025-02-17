@@ -2509,69 +2509,46 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 func GetUsersWithMessages() ([]types.UserMessages, error) {
 	var messages []types.UserMessages
 
-	// Step 1: Create temp_unread_messages table
+	// Step 1: Create temp_leads table
 	_, err := DB.Exec(`
-		CREATE TEMP TABLE temp_unread_messages AS
-		SELECT 
-			l.lead_id, 
-			l.full_name, 
-			COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END) AS unread_messages,
-			MAX(m.message_id) AS latest_unread_message_id
-		FROM "message" AS m
-		JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
-		JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
-		WHERE m.is_read IS NOT TRUE AND m.is_inbound = TRUE
-		GROUP BY l.lead_id, l.full_name;
+	CREATE TEMP TABLE temp_leads AS
+	SELECT 
+		l.lead_id, 
+		l.full_name, 
+		COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END) AS unread_messages,
+		MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.message_id ELSE NULL END) AS latest_unread_message_id,
+		MAX(m.message_id) AS latest_message_id
+	FROM "lead" AS l
+	LEFT JOIN "message" AS m ON l.phone_number IN (m.text_from, m.text_to)
+	GROUP BY l.lead_id, l.full_name;
 	`)
-	if err != nil {
-		return messages, fmt.Errorf("error creating temp_unread_messages: %v", err)
-	}
-
-	// Step 2: Create temp_leads table
-	_, err = DB.Exec(`
-		CREATE TEMP TABLE temp_leads AS
-		SELECT 
-			l.lead_id, 
-			l.full_name, 
-			COALESCE(u.unread_messages, 0) AS unread_messages,
-			u.latest_unread_message_id,
-			CASE WHEN u.latest_unread_message_id IS NOT NULL THEN 1 ELSE 0 END AS unread_priority
-		FROM "lead" AS l
-		LEFT JOIN temp_unread_messages u ON l.lead_id = u.lead_id
-		WHERE l.lead_status_id IS DISTINCT FROM $1
-		  AND l.lead_interest_id IS DISTINCT FROM $2;
-	`, constants.ArchivedLeadStatusID, constants.NoInterestLeadInterestID)
 	if err != nil {
 		return messages, fmt.Errorf("error creating temp_leads: %v", err)
 	}
 
-	// Step 3: Create temp_distinct_leads table and insert distinct values
+	// Step 2: Create temp_distinct_leads table and insert distinct values
 	_, err = DB.Exec(`
 		CREATE TEMP TABLE temp_distinct_leads AS
 		SELECT DISTINCT ON (t.lead_id)
 			t.lead_id, 
-			t.full_name, 
+			t.full_name,
 			t.unread_messages,
-			t.latest_unread_message_id
+			t.latest_unread_message_id,
+			t.latest_message_id
 		FROM temp_leads AS t
-		ORDER BY 
-			t.lead_id,
-			t.unread_priority DESC,  
-			t.latest_unread_message_id DESC NULLS LAST;
+		ORDER BY t.lead_id, t.latest_message_id DESC NULLS LAST;
 	`)
 	if err != nil {
 		return messages, fmt.Errorf("error creating temp_distinct_leads: %v", err)
 	}
 
-	// Step 4: Query data from temp_distinct_leads and order by latest_unread_message_id DESC
+	// Step 3: Query data from temp_distinct_leads and order by latest_unread_message_id DESC
 	rows, err := DB.Query(`
 		SELECT 
 			lead_id, 
 			full_name, 
-			unread_messages,
-			latest_unread_message_id
-		FROM temp_distinct_leads
-		ORDER BY latest_unread_message_id DESC NULLS LAST;
+			unread_messages
+		FROM temp_distinct_leads ORDER BY latest_unread_message_id DESC, latest_message_id DESC NULLS LAST;
 	`)
 	if err != nil {
 		return messages, fmt.Errorf("error executing final query: %v", err)
@@ -2580,12 +2557,10 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 
 	for rows.Next() {
 		var message types.UserMessages
-		var messageId sql.NullInt64
 		err := rows.Scan(
 			&message.LeadID,
 			&message.ClientName,
 			&message.UnreadMessages,
-			&messageId,
 		)
 		if err != nil {
 			return messages, fmt.Errorf("error scanning row: %v", err)
