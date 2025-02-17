@@ -2518,8 +2518,8 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 	JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
 	GROUP BY l.lead_id, l.full_name, m.date_created
 	ORDER BY 
-		MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.date_created ELSE NULL END) DESC,
-		l.lead_id;
+		l.lead_id, 
+		MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.date_created ELSE NULL END) DESC;
 	`
 
 	rows, err := DB.Query(query)
