@@ -2530,10 +2530,12 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 
 	for rows.Next() {
 		var message types.UserMessages
+		var messageId int
 		err := rows.Scan(
 			&message.LeadID,
 			&message.ClientName,
 			&message.UnreadMessages,
+			&messageId,
 		)
 		if err != nil {
 			return messages, fmt.Errorf("error scanning row: %v", err)
