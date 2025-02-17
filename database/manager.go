@@ -2521,7 +2521,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 		WHERE m.is_read IS NOT TRUE AND m.is_inbound = TRUE
 		GROUP BY l.lead_id, l.full_name
 	)
-	SELECT DISTINCT ON (l.lead_id)  -- Ensures unique lead_id selection
+	SELECT DISTINCT ON (l.lead_id)
 		l.lead_id, 
 		l.full_name, 
 		COALESCE(u.unread_messages, 0) AS unread_messages,
@@ -2530,7 +2530,10 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 	LEFT JOIN unread_messages_cte AS u ON l.lead_id = u.lead_id
 	LEFT JOIN "message" AS m ON l.phone_number IN (m.text_from, m.text_to)
 	LEFT JOIN "user" AS u2 ON u2.phone_number IN (m.text_from, m.text_to)
-	ORDER BY l.lead_id, u.latest_unread_message_id DESC NULLS LAST;
+	ORDER BY 
+		CASE WHEN u.latest_unread_message_id IS NOT NULL THEN 1 ELSE 0 END DESC,
+		u.latest_unread_message_id DESC NULLS LAST, 
+		l.lead_id;
 	`
 
 	rows, err := DB.Query(query)
