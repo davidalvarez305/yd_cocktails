@@ -1,7 +1,7 @@
 {{ define "lead_messages.html" }}
     {{ range .LeadMessages }}
     <div class="flex gap-4 rounded-lg p-5 
-        {{ if and .IsInbound }}bg-red hover:bg-red dark:bg-red dark:hover:bg-red{{ else }}bg-gray-100 dark:bg-gray-700/50{{ end }}">
+        {{ if and .IsInbound (not .IsRead) }}bg-secondary-500 hover:bg-secondary-400 dark:bg-secondary-700 dark:hover:bg-secondary-600{{ else }}bg-gray-100 dark:bg-gray-700/50{{ end }}">
         <div class="flex-grow">
             <h5 class="flex items-center gap-1 text-sm leading-relaxed">
                 <p data-message-id="{{ .MessageID }}" data-is-read="{{ .IsRead }}" data-lead-id="{{ .LeadID }}"
