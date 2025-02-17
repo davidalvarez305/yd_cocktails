@@ -2509,17 +2509,32 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 func GetUsersWithMessages() ([]types.UserMessages, error) {
 	var messages []types.UserMessages
 
-	query := `SELECT 
+	query := `WITH unread_messages_cte AS (
+		SELECT 
+			l.lead_id, 
+			l.full_name, 
+			COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END) AS unread_messages,
+			MAX(m.message_id) AS latest_unread_message_id
+		FROM "message" AS m
+		JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
+		JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
+		WHERE m.is_read IS NOT TRUE AND m.is_inbound = TRUE
+		GROUP BY l.lead_id, l.full_name
+	)
+	SELECT 
 		l.lead_id, 
 		l.full_name, 
-		COALESCE(COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END), 0) AS unread_messages,
-		MAX(m.message_id) AS latest_unread_message_id
-	FROM "message" AS m
-	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
-	JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
-	WHERE m.is_read IS NOT TRUE AND m.is_inbound = TRUE
-	GROUP BY l.lead_id, l.full_name
-	ORDER BY latest_unread_message_id DESC;
+		COALESCE(u.unread_messages, 0) AS unread_messages,
+		u.latest_unread_message_id
+	FROM "lead" AS l
+	LEFT JOIN unread_messages_cte AS u ON l.lead_id = u.lead_id
+	LEFT JOIN "message" AS m 
+		ON l.phone_number IN (m.text_from, m.text_to)
+	LEFT JOIN "user" AS u2 
+		ON u2.phone_number IN (m.text_from, m.text_to)
+	ORDER BY 
+		u.latest_unread_message_id DESC NULLS LAST,
+		l.lead_id;
 	`
 
 	rows, err := DB.Query(query)
