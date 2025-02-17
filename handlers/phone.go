@@ -296,7 +296,7 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	messages, err := database.GetMessagesByLeadID(form.LeadID)
+	leadMessages, err := database.GetMessagesByLeadID(form.LeadID)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
@@ -315,7 +315,7 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 		TemplateName: "lead_messages.html",
 		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_messages.html",
 		Data: map[string]any{
-			"Messages": messages,
+			"LeadMessages": leadMessages,
 		},
 	}
 
