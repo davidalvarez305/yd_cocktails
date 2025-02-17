@@ -2509,7 +2509,6 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 func GetUsersWithMessages() ([]types.UserMessages, error) {
 	var messages []types.UserMessages
 
-	// Using CTEs to replicate the temp table logic
 	rows, err := DB.Query(`
 		WITH temp_leads AS (
 			SELECT 
