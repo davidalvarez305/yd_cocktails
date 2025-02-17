@@ -2512,17 +2512,19 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 	query := `SELECT DISTINCT ON (l.lead_id) 
 		l.lead_id, 
 		l.full_name, 
-		COALESCE(COUNT(CASE WHEN m.is_read IS NOT TRUE THEN 1 ELSE NULL END), 0) AS unread_messages
+		COALESCE(COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END), 0) AS unread_messages
 	FROM "message" AS m
 	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
 	JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
 	GROUP BY l.lead_id, l.full_name
-	ORDER BY l.lead_id, m.date_created ASC;
+	ORDER BY 
+		l.lead_id, 
+		MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.date_created ELSE NULL END) DESC;
 	`
 
 	rows, err := DB.Query(query)
 	if err != nil {
-		return messages, err
+		return messages, fmt.Errorf("error executing query: %v", err)
 	}
 	defer rows.Close()
 
@@ -2534,15 +2536,14 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 			&message.UnreadMessages,
 		)
 		if err != nil {
-			fmt.Printf("%+v\n", err)
-			return messages, err
+			return messages, fmt.Errorf("error scanning row: %v", err)
 		}
 
 		messages = append(messages, message)
 	}
 
 	if err = rows.Err(); err != nil {
-		return messages, err
+		return messages, fmt.Errorf("error iterating over rows: %v", err)
 	}
 
 	return messages, nil
