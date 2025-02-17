@@ -2513,9 +2513,21 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 		l.lead_id, 
 		l.full_name, 
 		COALESCE(COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END), 0) AS unread_messages
-	FROM "message" AS m
-	JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
-	JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
+	FROM (
+		SELECT 
+			m.lead_id,
+			m.message_id,
+			m.is_read,
+			m.is_inbound,
+			l.full_name,
+			m.date_created,
+			l.phone_number
+		FROM "message" AS m
+		JOIN "lead" AS l ON l.phone_number IN (m.text_from, m.text_to)
+		JOIN "user" AS u ON u.phone_number IN (m.text_from, m.text_to)
+		ORDER BY m.message_id DESC
+	) AS m
+	JOIN "lead" AS l ON l.lead_id = m.lead_id
 	GROUP BY l.lead_id, l.full_name
 	ORDER BY 
 		l.lead_id, 
