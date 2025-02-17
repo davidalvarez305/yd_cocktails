@@ -2545,9 +2545,9 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 		WHERE 
 			(unread_messages > 0) OR (lead_status_id != $1 OR lead_interest_id != $2)
 
-			OR (lead_status_id = $1 AND latest_message_time < CURRENT_DATE - INTERVAL '7 days')
+			OR (lead_status_id = $1 AND latest_message_time > CURRENT_DATE - INTERVAL '7 days')
 
-			OR (lead_interest_id = $2 AND latest_message_time < CURRENT_DATE - INTERVAL '7 days')
+			OR (lead_interest_id = $2 AND latest_message_time > CURRENT_DATE - INTERVAL '7 days')
 		ORDER BY 
 			CASE WHEN unread_messages > 0 THEN 0 ELSE 1 END, latest_unread_message_id DESC NULLS LAST,
 			latest_message_id DESC NULLS LAST, lead_id DESC;
