@@ -2519,7 +2519,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 	GROUP BY l.lead_id, l.full_name
 	ORDER BY 
 		l.lead_id, 
-		MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.date_created ELSE NULL END) DESC;
+		MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.message_id ELSE NULL END) DESC;
 	`
 
 	rows, err := DB.Query(query)
