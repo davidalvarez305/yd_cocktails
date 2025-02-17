@@ -2529,7 +2529,9 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 				t.full_name,
 				t.unread_messages,
 				t.latest_unread_message_id,
-				t.latest_message_id
+				t.latest_message_id,
+				t.lead_status_id,
+				t.lead_interest_id
 			FROM temp_leads AS t
 			ORDER BY t.lead_id, t.latest_message_id DESC NULLS LAST
 		)
