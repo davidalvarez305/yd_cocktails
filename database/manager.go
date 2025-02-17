@@ -2527,7 +2527,7 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 		return messages, fmt.Errorf("error creating temp_unread_messages: %v", err)
 	}
 
-	// Step 2: Create temp_leads table
+	// Step 2: Create temp_leads table (fix: include temp_unread_messages in FROM clause)
 	_, err = DB.Exec(`
 		CREATE TEMP TABLE temp_leads AS
 		SELECT 
@@ -2539,7 +2539,8 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 		FROM "lead" AS l
 		JOIN lead_status AS ls 
 			ON l.lead_status_id = ls.lead_status_id 
-			AND l.lead_status_id IS DISTINCT FROM $1;
+			AND l.lead_status_id IS DISTINCT FROM $1
+		LEFT JOIN temp_unread_messages u ON l.lead_id = u.lead_id;
 	`, constants.ArchivedLeadStatusID)
 	if err != nil {
 		return messages, fmt.Errorf("error creating temp_leads: %v", err)
