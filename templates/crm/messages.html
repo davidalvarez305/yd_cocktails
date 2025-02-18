@@ -313,6 +313,7 @@
 
 <script nonce="{{ .Nonce }}">
     const messages = document.getElementById("messages");
+    let clickedLead = null;
 
     function handleBindLeadActions() {
         const leads = document.querySelectorAll(".leadName");
@@ -323,13 +324,22 @@
         // Get Lead Messages
         leads.forEach(lead => {
             const leadId = lead.dataset.leadId;
-            lead.addEventListener("click", (e) => handleGetLeadMessages(leadId));
+
+            lead.addEventListener("click", (e) => {
+                handleGetLeadMessages(leadId);
+
+                // When lead is clicked -- begin polling for new messages
+                clickedLead = leadId;
+            });
         });
 
         // Archive leads
         archiveButtons.forEach(btn => {
             btn.addEventListener("click", () => {
                 handleArchiveLead(btn.dataset.leadId);
+                
+                // Whenever any action is called -- I must reset clicked lead
+                clickedLead = null;
             });
         });
 
@@ -337,6 +347,9 @@
         callButtons.forEach(btn => {
             btn.addEventListener("click", () => {
                 handleCallLead(btn.dataset.leadPhoneNumber, btn.dataset.leadId);
+                
+                // Whenever any action is called -- I must reset clicked lead
+                clickedLead = null;
             });
         });
 
@@ -344,6 +357,9 @@
         messageButtons.forEach(btn => {
             btn.addEventListener("click", () => {
                 handleMessageLead(btn.dataset.leadPhoneNumber, btn.dataset.leadId);
+                
+                // Whenever any action is called -- I must reset clicked lead
+                clickedLead = null;
             });
         });
     }
@@ -393,6 +409,15 @@
     };
 
     document.addEventListener("DOMContentLoaded", () => handleBindLeadActions());
+
+    // Check for messages every 30 seconds
+    const INTERVAL_SECONDS = 30000;
+    setInterval(handleGetLeadsWithMessages, INTERVAL_SECONDS);
+
+    // Check for lead messages every 30 seconds only if clickedLead is not null
+    setInterval(() => {
+        if (clickedLead) handleGetLeadMessages(clickedLead);
+    }, INTERVAL_SECONDS);
 </script>
 
 <script src="{{ .StaticPath }}/main.js" nonce="{{ .Nonce }}"></script>
