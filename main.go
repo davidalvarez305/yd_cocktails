@@ -34,6 +34,9 @@ func init() {
 
 	services.StartLeadChecker()
 	fmt.Println("Lead checker started.")
+
+	services.StartSMSNotifcationChecker()
+	fmt.Println("Unread messages checker started.")
 }
 
 func main() {

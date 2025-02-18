@@ -10,7 +10,6 @@ import (
 
 func checkSMS() {
 	unreadMessages, err := database.GetUnreadMessagesInLast5Minutes()
-
 	if err != nil {
 		fmt.Printf("ERROR TRYING TO GET UNREAD MESSAGES IN LAST 5 MINUTES: %+v\n", err)
 		return
