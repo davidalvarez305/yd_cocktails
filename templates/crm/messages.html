@@ -10,7 +10,7 @@
                     class="clientName group flex cursor-pointer items-center justify-between gap-2 px-3 text-sm text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white"
                     role="option" tabindex="-1" aria-selected="false">
                     <div class="grow truncate py-1.5">{{ .ClientName }}</div>
-                    <div id="icons">
+                    <div id="icons" class="flex items-center gap-4">
                         {{ if gt .UnreadMessages 0 }}
                         <span
                             class="inline-flex rounded-full border border-primary-200 bg-primary-100 px-1.5 py-0.5 text-xs font-semibold leading-4 text-primary-700 dark:border-primary-700 dark:bg-primary-700 dark:text-primary-50">
