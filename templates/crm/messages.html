@@ -183,8 +183,7 @@
 			.then(html => {
 				const table = document.getElementById('leadsTable');
 				table.outerHTML = html;
-				handleBindPagination();
-				handleBindTableActions();
+				handleBindMessageActions();
 			})
 			.catch(err => {
 				alertModal.outerHTML = err.message;
