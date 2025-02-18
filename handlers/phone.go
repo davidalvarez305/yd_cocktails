@@ -208,17 +208,25 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 
 	outboundCall, err := services.InitiateOutboundCall(from, twiML)
 	if err != nil {
+		fmt.Println("Error initiating phone call:", err)
 		http.Error(w, "Failed to initiate phone call", http.StatusInternalServerError)
 		return
 	}
+	fmt.Println("Outbound call initiated successfully:", outboundCall)
 
 	var recordingURL string
 	subResources := outboundCall.SubresourceUris
 
 	if subResources != nil {
+		fmt.Println("Subresource URIs found:", *subResources)
 		if recordings, ok := (*subResources)["recordings"].(string); ok {
 			recordingURL = recordings
+			fmt.Println("Recording URL extracted:", recordingURL)
+		} else {
+			fmt.Println("No recordings key found or type assertion failed")
 		}
+	} else {
+		fmt.Println("No subresource URIs available")
 	}
 
 	phoneCall := models.PhoneCall{
