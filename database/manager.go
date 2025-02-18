@@ -2514,6 +2514,7 @@ func GetLeadsWithMessages() ([]types.LeadsWithMessages, error) {
 			SELECT 
 				l.lead_id, 
 				l.full_name, 
+				l.phone_number,
 				COUNT(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN 1 ELSE NULL END) AS unread_messages,
 				MAX(CASE WHEN m.is_read IS NOT TRUE AND m.is_inbound = TRUE THEN m.message_id ELSE NULL END) AS latest_unread_message_id,
 				MAX(m.message_id) AS latest_message_id,
@@ -2528,6 +2529,7 @@ func GetLeadsWithMessages() ([]types.LeadsWithMessages, error) {
 			SELECT DISTINCT ON (t.lead_id)
 				t.lead_id, 
 				t.full_name,
+				t.phone_number,
 				t.unread_messages,
 				t.latest_unread_message_id,
 				t.latest_message_id,
@@ -2540,7 +2542,8 @@ func GetLeadsWithMessages() ([]types.LeadsWithMessages, error) {
 		SELECT 
 			lead_id, 
 			full_name, 
-			unread_messages
+			unread_messages,
+			phone_number
 		FROM temp_distinct_leads
 		WHERE 
 			(unread_messages > 0) OR (lead_status_id != $1 OR lead_interest_id != $2)
@@ -2563,6 +2566,7 @@ func GetLeadsWithMessages() ([]types.LeadsWithMessages, error) {
 			&message.LeadID,
 			&message.LeadName,
 			&message.UnreadMessages,
+			&message.LeadPhoneNumber,
 		)
 		if err != nil {
 			return messages, fmt.Errorf("error scanning row: %v", err)

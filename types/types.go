@@ -584,9 +584,10 @@ type FrontendMessage struct {
 }
 
 type LeadsWithMessages struct {
-	LeadName       string `json:"lead_name"`
-	LeadID         int    `json:"lead_id"`
-	UnreadMessages int    `json:"unread_messages"`
+	LeadName        string `json:"lead_name"`
+	LeadID          int    `json:"lead_id"`
+	UnreadMessages  int    `json:"unread_messages"`
+	LeadPhoneNumber string `json:"lead_phone_number"`
 }
 
 type FrontendNote struct {
