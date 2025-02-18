@@ -61,7 +61,6 @@ type OutboundMessageForm struct {
 	To        string `json:"to" form:"to" schema:"to"`
 	Body      string `json:"body" form:"body" schema:"body"`
 	From      string `json:"from" form:"from" schema:"from"`
-	UserID    int    `json:"user_id" form:"user_id" schema:"user_id"`
 	LeadID    int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
 	CSRFToken string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
 }

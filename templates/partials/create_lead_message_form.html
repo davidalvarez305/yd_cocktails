@@ -3,7 +3,6 @@
     <div>
         <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
         <input type="hidden" name="lead_id" value="{{ .Lead.LeadID }}" />
-        <input type="hidden" id="user_id" name="user_id" value="{{ .UserID }}" />
         <input type="hidden" id="from" name="from" value="{{ .CRMUserPhoneNumber }}" />
         <input type="hidden" id="to" name="to" value="{{ .Lead.PhoneNumber }}" />
         <textarea id="body" name="body" rows="4" placeholder="Write a message..."

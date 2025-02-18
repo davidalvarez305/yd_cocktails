@@ -398,19 +398,11 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	values, err := sessions.Get(r)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting user ID from session.", http.StatusInternalServerError)
-		return
-	}
-
 	data := ctx
 	data["PageTitle"] = "Lead Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["Lead"] = leadDetails
-	data["UserID"] = values.UserID
 	data["EventTypes"] = eventTypes
 	data["VenueTypes"] = venueTypes
 	data["Events"] = events
