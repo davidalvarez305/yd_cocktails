@@ -78,14 +78,14 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 		dateEventCreated := time.Now().Unix()
 		err = database.SetInvoiceStatusToPaid(invoice.ID, datePaid)
 		if err != nil {
-			log.Printf("Failed to get invoice by stripe invoice id: %v", err)
+			log.Printf("Failed to update invoice status to paid: %v", err)
 			http.Error(w, "Error updating invoice status to paid", http.StatusInternalServerError)
 			return
 		}
 
 		quote, err := database.GetQuoteDetailsByStripeInvoiceID(inv.StripeInvoiceID)
 		if err != nil {
-			log.Printf("Failed to get invoice by stripe invoice id: %v", err)
+			log.Printf("Failed to get quote details by stripe invoice id: %v", err)
 			http.Error(w, "Error creating event", http.StatusInternalServerError)
 			return
 		}

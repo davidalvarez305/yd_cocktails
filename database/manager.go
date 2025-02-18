@@ -2591,3 +2591,21 @@ func GetUnreadMessagesCount() (int, error) {
 
 	return unreadMessages, nil
 }
+
+func GetUnreadMessagesInLast5Minutes() (int, error) {
+	var unreadMessages int
+	fiveMinutesAgo := time.Now().Add(-5 * time.Minute)
+
+	query := `SELECT COUNT(1) FROM message WHERE is_read IS NOT TRUE AND date_created >= $1;`
+	row := DB.QueryRow(query, fiveMinutesAgo)
+
+	err := row.Scan(&unreadMessages)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, nil
+		}
+		return 0, err
+	}
+
+	return unreadMessages, nil
+}

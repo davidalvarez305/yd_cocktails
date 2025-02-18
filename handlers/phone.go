@@ -189,15 +189,12 @@ func handleInboundSMS(w http.ResponseWriter, r *http.Request) {
 	var twilioMessage types.TwilioMessage
 
 	twilioMessage.MessageSid = r.FormValue("MessageSid")
-	twilioMessage.AccountSid = r.FormValue("AccountSid")
-	twilioMessage.MessagingServiceSid = r.FormValue("MessagingServiceSid")
 	twilioMessage.From = r.FormValue("From")
 	twilioMessage.To = r.FormValue("To")
 	twilioMessage.Body = r.FormValue("Body")
 	twilioMessage.NumMedia = r.FormValue("NumMedia")
 	twilioMessage.NumSegments = r.FormValue("NumSegments")
 	twilioMessage.SmsStatus = r.FormValue("SmsStatus")
-	twilioMessage.ApiVersion = r.FormValue("ApiVersion")
 
 	message := models.Message{
 		ExternalID:  twilioMessage.MessageSid,
