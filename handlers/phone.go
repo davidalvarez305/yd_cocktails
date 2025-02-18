@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
@@ -123,15 +122,7 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	callFailedStatuses := []string{"busy", "no-answer", "failed"}
-
-	callMissed := false
-	for _, status := range callFailedStatuses {
-		if strings.EqualFold(status, dialStatus.DialCallStatus) {
-			callMissed = true
-			break
-		}
-	}
+	callMissed := phoneCall.CallDuration < 20
 
 	isFirstCall, err := database.CheckIsFirstLeadContact(phoneCall.CallTo)
 	if err != nil {
@@ -212,21 +203,14 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to initiate phone call", http.StatusInternalServerError)
 		return
 	}
-	fmt.Println("Outbound call initiated successfully:", outboundCall)
 
 	var recordingURL string
 	subResources := outboundCall.SubresourceUris
 
 	if subResources != nil {
-		fmt.Println("Subresource URIs found:", *subResources)
 		if recordings, ok := (*subResources)["recordings"].(string); ok {
 			recordingURL = recordings
-			fmt.Println("Recording URL extracted:", recordingURL)
-		} else {
-			fmt.Println("No recordings key found or type assertion failed")
 		}
-	} else {
-		fmt.Println("No subresource URIs available")
 	}
 
 	phoneCall := models.PhoneCall{
