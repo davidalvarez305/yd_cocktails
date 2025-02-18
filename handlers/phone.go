@@ -153,10 +153,33 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 			
 			Todos hablamos español perfecto!`)
 
-		_, err := services.SendTextMessage(phoneCall.CallTo, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+		sentMessage, err := services.SendTextMessage(phoneCall.CallTo, constants.CompanyPhoneNumber, textMessageTemplateNotification)
 
 		if err != nil {
 			fmt.Printf("ERROR SENDING MISSED CALL NOTIFICATION MSG: %+v\n", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		var externalID = helpers.SafeString(sentMessage.Sid)
+		var messageStatus = helpers.SafeString(sentMessage.Status)
+
+		msg := models.Message{
+			ExternalID:  externalID,
+			Text:        textMessageTemplateNotification,
+			TextFrom:    constants.CompanyPhoneNumber,
+			TextTo:      phoneCall.CallTo,
+			IsInbound:   false,
+			DateCreated: time.Now().Unix(),
+			Status:      messageStatus,
+			IsRead:      true,
+		}
+
+		err = database.SaveSMS(msg)
+		if err != nil {
+			fmt.Printf("ERROR SAVING MISSED CALL NOTIFICATION MSG: %+v\n", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 	}
 

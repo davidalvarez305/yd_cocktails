@@ -7,16 +7,25 @@ import (
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
 
-func SendTextMessage(to, from, body string) (*openapi.ApiV2010Message, error) {
+func SendTextMessage(to, from, body string) (openapi.ApiV2010Message, error) {
 	client := twilio.NewRestClient()
 
 	var params openapi.CreateMessageParams
+	var text openapi.ApiV2010Message
 
 	params.SetTo("+1" + to)
 	params.SetFrom("+1" + from)
 	params.SetBody(body)
 
-	return client.Api.CreateMessage(&params)
+	sentMessage, err := client.Api.CreateMessage(&params)
+
+	if err != nil || sentMessage == nil {
+		return text, err
+	}
+
+	text = *sentMessage
+
+	return text, nil
 }
 
 func InitiateOutboundCall(from, twiML string) (openapi.ApiV2010Call, error) {
