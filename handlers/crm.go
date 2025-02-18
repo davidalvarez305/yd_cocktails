@@ -85,6 +85,11 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				GetMessagesByLeadID(w, r, ctx)
 				return
 			}
+
+			if strings.HasPrefix(path, "/crm/message/leads") {
+				GetLeadsWithMessages(w, r, ctx)
+				return
+			}
 		}
 
 		switch path {
