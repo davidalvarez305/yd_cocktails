@@ -80,14 +80,14 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if strings.HasPrefix(path, "/crm/message/leads") {
+			GetLeadsWithMessages(w, r, ctx)
+			return
+		}
+
 		if strings.HasPrefix(path, "/crm/message") {
 			if len(path) > len("/crm/message/") && helpers.IsNumeric(path[len("/crm/message/"):]) {
 				GetMessagesByLeadID(w, r, ctx)
-				return
-			}
-
-			if strings.HasPrefix(path, "/crm/message/leads") {
-				GetLeadsWithMessages(w, r, ctx)
 				return
 			}
 		}
