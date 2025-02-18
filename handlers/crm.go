@@ -2411,8 +2411,8 @@ func GetLeadsWithMessages(w http.ResponseWriter, r *http.Request, ctx map[string
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "lead_with_messages_list.html",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_with_messages_list.html",
+		TemplateName: "leads_with_messages_list.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "leads_with_messages_list.html",
 		Data: map[string]any{
 			"LeadsWithMessages": leadsWithMessages,
 		},
