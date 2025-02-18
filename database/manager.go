@@ -2506,8 +2506,8 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 	return notes, nil
 }
 
-func GetUsersWithMessages() ([]types.UserMessages, error) {
-	var messages []types.UserMessages
+func GetLeadsWithMessages() ([]types.LeadsWithMessages, error) {
+	var messages []types.LeadsWithMessages
 
 	rows, err := DB.Query(`
 		WITH temp_leads AS (
@@ -2558,10 +2558,10 @@ func GetUsersWithMessages() ([]types.UserMessages, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var message types.UserMessages
+		var message types.LeadsWithMessages
 		err := rows.Scan(
 			&message.LeadID,
-			&message.ClientName,
+			&message.LeadName,
 			&message.UnreadMessages,
 		)
 		if err != nil {

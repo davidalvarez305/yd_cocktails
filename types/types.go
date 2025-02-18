@@ -583,8 +583,8 @@ type FrontendMessage struct {
 	IsRead      bool   `json:"is_read"`
 }
 
-type UserMessages struct {
-	ClientName     string `json:"client_name"`
+type LeadsWithMessages struct {
+	LeadName       string `json:"lead_name"`
 	LeadID         int    `json:"lead_id"`
 	UnreadMessages int    `json:"unread_messages"`
 }

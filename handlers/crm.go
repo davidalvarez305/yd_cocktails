@@ -46,6 +46,21 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx["UnreadMessages"] = unreadMessages
 
+	values, err := sessions.Get(r)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting user ID from session.", http.StatusInternalServerError)
+		return
+	}
+
+	phoneNumber, err := database.GetPhoneNumberFromUserID(values.UserID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting phone number from user ID.", http.StatusInternalServerError)
+		return
+	}
+	ctx["CRMUserPhoneNumber"] = phoneNumber
+
 	switch r.Method {
 	case http.MethodGet:
 		parts := strings.Split(path, "/")
@@ -303,20 +318,6 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	values, err := sessions.Get(r)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting user ID from session.", http.StatusInternalServerError)
-		return
-	}
-
-	phoneNumber, err := database.GetPhoneNumberFromUserID(values.UserID)
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting phone number from user ID.", http.StatusInternalServerError)
-		return
-	}
-
 	eventTypes, err := database.GetEventTypes()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -397,12 +398,18 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	values, err := sessions.Get(r)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting user ID from session.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Lead Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["Lead"] = leadDetails
-	data["CRMUserPhoneNumber"] = phoneNumber
 	data["UserID"] = values.UserID
 	data["EventTypes"] = eventTypes
 	data["VenueTypes"] = venueTypes
@@ -2268,7 +2275,8 @@ func PostLeadNote(w http.ResponseWriter, r *http.Request) {
 
 func GetMessages(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	baseFile := constants.CRM_TEMPLATES_DIR + "messages.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, baseFile}
+	leadsWithMessagesTemplate := constants.PARTIAL_TEMPLATES_DIR + "leads_with_messages_list.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, leadsWithMessagesTemplate, baseFile}
 
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
@@ -2282,7 +2290,7 @@ func GetMessages(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	messages, err := database.GetUsersWithMessages()
+	messages, err := database.GetLeadsWithMessages()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting messages from DB.", http.StatusInternalServerError)
@@ -2293,7 +2301,7 @@ func GetMessages(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["PageTitle"] = "Messages — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
-	data["Messages"] = messages
+	data["LeadsWithMessages"] = messages
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -2326,6 +2334,7 @@ func GetMessagesByLeadID(w http.ResponseWriter, r *http.Request, ctx map[string]
 
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }
+
 func SetSMSToRead(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -2388,6 +2397,27 @@ func SetSMSToRead(w http.ResponseWriter, r *http.Request) {
 		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_messages.html",
 		Data: map[string]any{
 			"LeadMessages": leadMessages,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func GetLeadsWithMessages(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
+	leadsWithMessages, err := database.GetLeadsWithMessages()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting leads with messages from DB.", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "lead_with_messages_list",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_with_messages_list.html",
+		Data: map[string]any{
+			"LeadsWithMessages": leadsWithMessages,
 		},
 	}
 
