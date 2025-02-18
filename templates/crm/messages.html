@@ -1,7 +1,7 @@
 {{ define "content.html" }}
 <div id="messages-content" class="flex w-4/5 max-w-full flex-auto flex-col lg:flex-row mx-auto h-[80vh]">
     <!-- Leads -->
-    <div class="w-full flex-none flex-col p-4 lg:flex lg:w-[480px] lg:p-8 h-full">
+    <div class="w-full flex-none flex-col p-4 lg:flex lg:w-120 lg:p-8 h-full">
         <div class="flex flex-auto flex-col items-center justify-start rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 py-4 text-gray-400 dark:border-gray-700 dark:bg-gray-800 overflow-y-auto h-full">
             <ul id="leadsWithMessages" class="overflow-auto w-full flex flex-col" role="listbox">
                 {{ template "leads_with_messages_list.html" . }}
