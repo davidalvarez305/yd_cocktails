@@ -10,21 +10,21 @@
                     class="clientName group flex cursor-pointer items-center justify-between gap-2 px-3 text-sm text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white"
                     role="option" tabindex="-1" aria-selected="false">
                     <div class="grow truncate py-1.5">{{ .ClientName }}</div>
-                    <div id="icons" class="flex items-center gap-2">
+                    <div id="icons">
                         {{ if gt .UnreadMessages 0 }}
                         <span
-                            class="inline-flex rounded-full border border-primary-200 bg-primary-100 px-1.5 py-0.5 text-xs font-semibold leading-4 text-primary-700 dark:border-primary-700 dark:bg-primary-700 dark:text-primary-50">
+                            class="m-2 inline-flex rounded-full border border-primary-200 bg-primary-100 px-1.5 py-0.5 text-xs font-semibold leading-4 text-primary-700 dark:border-primary-700 dark:bg-primary-700 dark:text-primary-50">
                             {{ .UnreadMessages }}
                         </span>
                         {{ end }}
                         <a href="/crm/lead/{{ .LeadID }}" target="_blank"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 font-semibold leading-6 text-gray-800 hover:z-1 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+                            class="m-2 inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 font-semibold leading-6 text-gray-800 hover:z-1 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="hi-micro hi-user-circle inline-block size-4">
                                 <path fill-rule="evenodd" d="M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0Zm-5-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM8 9c-1.825 0-3.422.977-4.295 2.437A5.49 5.49 0 0 0 8 13.5a5.49 5.49 0 0 0 4.294-2.063A4.997 4.997 0 0 0 8 9Z" clip-rule="evenodd"/>
                             </svg>
                         </a>
                         <button 
-                            class="archiveLead inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 font-semibold leading-6 text-gray-800 hover:z-1 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+                            class="archiveLead m-2 inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 font-semibold leading-6 text-gray-800 hover:z-1 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                             <svg data-lead-id="{{ .LeadID }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
                                 class="archiveLead hi-micro hi-x-circle inline-block size-4">
                                 <path fill-rule="evenodd"
