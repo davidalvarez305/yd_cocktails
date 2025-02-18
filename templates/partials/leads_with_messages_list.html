@@ -1,9 +1,8 @@
 {{ define "leads_with_messages_list.html" }}
     {{ range .LeadsWithMessages }}
-    <li data-lead-id="{{ .LeadID }}"
-        class="leadName group flex cursor-pointer items-center justify-between gap-2 px-3 text-sm text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white"
+    <li class="group flex cursor-pointer items-center justify-between gap-2 px-3 text-sm text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white"
         role="option" tabindex="-1" aria-selected="false">
-        <div class="grow truncate py-1.5">{{ .LeadName }}</div>
+        <div data-lead-id="{{ .LeadID }}" class="leadName grow truncate py-1.5">{{ .LeadName }}</div>
         <div id="icons">
             {{ if gt .UnreadMessages 0 }}
             <button class="inline-flex items-center justify-center gap-2 rounded-lg border border-primary-200 bg-white px-3 py-0.5 m-1 font-semibold leading-6 text-primary-800 hover:z-1 hover:border-primary-300 hover:text-primary-900 hover:shadow-sm focus:z-1 focus:ring focus:ring-gray-300/25 active:z-1 active:border-primary-200 active:shadow-none dark:border-primary-700 dark:bg-gray-800 dark:text-primary-300 dark:hover:border-primary-600 dark:hover:text-primary-200 dark:focus:ring-gray-600/40 dark:active:border-primary-700">
