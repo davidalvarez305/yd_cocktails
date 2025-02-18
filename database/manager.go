@@ -2613,3 +2613,39 @@ func GetUnreadMessagesInLast5Minutes() (int, error) {
 
 	return unreadMessages, nil
 }
+
+func CheckIsFirstLeadContact(to string) (bool, error) {
+	var callCount int
+	var textCount int
+
+	callQuery := `SELECT COUNT(1) FROM phone_call WHERE call_to = $1;`
+	row := DB.QueryRow(callQuery, to)
+
+	err := row.Scan(&callCount)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			callCount = 0
+		} else {
+			return false, err
+		}
+	}
+
+	textQuery := `SELECT COUNT(1) FROM message WHERE text_to = $1;`
+	row = DB.QueryRow(textQuery, to)
+
+	err = row.Scan(&textCount)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			textCount = 0
+		} else {
+			return false, err
+		}
+	}
+
+	// If either the call count or the text message count is greater than 0, return false
+	if callCount > 0 || textCount > 0 {
+		return false, nil
+	}
+
+	return true, nil
+}

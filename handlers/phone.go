@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
@@ -120,6 +121,43 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("FAILED TO UPDATE PREVIOUS PHONE CALL: %+v\n", dialStatus)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	callFailedStatuses := []string{"busy", "no-answer", "failed"}
+
+	callMissed := false
+	for _, status := range callFailedStatuses {
+		if strings.EqualFold(status, dialStatus.DialCallStatus) {
+			callMissed = true
+			break
+		}
+	}
+
+	isFirstCall, err := database.CheckIsFirstLeadContact(phoneCall.CallTo)
+	if err != nil {
+		fmt.Printf("ERROR CHECKING IF PHONE CALL IS FIRST LEAD CONTACT: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send 1st missed call text
+	if callMissed && isFirstCall && !phoneCall.IsInbound {
+		var textMessageTemplateNotification = fmt.Sprintf(
+			`We missed you!
+			%s
+			`, `Hey! This is David with YD Cocktails.
+			
+			We're reaching out to you about your bartending service inquiry. We tried giving you a call but couldn't connect.
+			
+			Please give us a call back when you have a chance or let us know how we can help you.
+			
+			Todos hablamos español perfecto!`)
+
+		_, err := services.SendTextMessage(phoneCall.CallTo, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+
+		if err != nil {
+			fmt.Printf("ERROR SENDING MISSED CALL NOTIFICATION MSG: %+v\n", err)
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/xml")
