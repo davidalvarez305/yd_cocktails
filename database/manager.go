@@ -725,8 +725,6 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 	SELECT 
 		COALESCE(referral_lead.lead_id, l.lead_id) AS lead_id,
 		COALESCE(referral_lead.phone_number, l.phone_number) AS phone_number,
-		COALESCE(referral_lead.full_name, l.full_name) AS full_name,
-		COALESCE(referral_events.total_revenue, 0) + COALESCE(lead_events.total_revenue, 0) AS total_revenue,
 		COALESCE(referral_lead.ad_campaign, lm.ad_campaign) AS ad_campaign,
 		COALESCE(referral_lead.landing_page, lm.landing_page) AS landing_page,
 		COALESCE(referral_lead.ip, lm.ip) AS ip,
@@ -738,7 +736,9 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 		COALESCE(referral_lead.click_id, lm.click_id) AS click_id,
 		COALESCE(referral_lead.google_client_id, lm.google_client_id) AS google_client_id,
 		COALESCE(referral_lead.campaign_id, lm.campaign_id) AS campaign_id,
-		COALESCE(referral_lead.instant_form_id, lm.instant_form_id) AS instant_form_id
+		COALESCE(referral_lead.instant_form_id, lm.instant_form_id) AS instant_form_id,
+		(SELECT e.event_id FROM event e WHERE e.lead_id = l.lead_id LIMIT 1) AS event_id,
+		COALESCE(referral_events.total_revenue, 0) + COALESCE(lead_events.total_revenue, 0) AS total_revenue
 	FROM lead l
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
 	LEFT JOIN referral_lead ON TRUE
@@ -750,6 +750,7 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 
 	row := DB.QueryRow(query, leadID)
 
+	// Define temporary variables for NULL handling
 	var adCampaign, landingPage, ip, email, facebookClickId, facebookClientId sql.NullString
 	var externalId, userAgent, clickId, googleClientId sql.NullString
 	var campaignId, instantFormleadId, eventId sql.NullInt64
@@ -780,42 +781,34 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 		return conversionReporting, fmt.Errorf("error scanning row: %w", err)
 	}
 
+	// Assign values from sql.Null types to struct fields
 	if revenue.Valid {
 		conversionReporting.Revenue = revenue.Float64
 	}
-
 	if instantFormleadId.Valid {
 		conversionReporting.InstantFormLeadID = instantFormleadId.Int64
 	}
-
 	if clickId.Valid {
 		conversionReporting.ClickID = clickId.String
 	}
-
 	if googleClientId.Valid {
 		conversionReporting.GoogleClientID = googleClientId.String
 	}
-
 	if externalId.Valid {
 		conversionReporting.ExternalID = externalId.String
 	}
-
 	if userAgent.Valid {
 		conversionReporting.UserAgent = userAgent.String
 	}
-
 	if facebookClickId.Valid {
 		conversionReporting.FacebookClickID = facebookClickId.String
 	}
-
 	if facebookClientId.Valid {
 		conversionReporting.FacebookClientID = facebookClientId.String
 	}
-
 	if email.Valid {
 		conversionReporting.Email = email.String
 	}
-
 	if adCampaign.Valid {
 		conversionReporting.CampaignName = adCampaign.String
 	}
@@ -825,11 +818,9 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 	if eventId.Valid {
 		conversionReporting.EventID = int(eventId.Int64)
 	}
-
 	if landingPage.Valid {
 		conversionReporting.LandingPage = landingPage.String
 	}
-
 	if ip.Valid {
 		conversionReporting.IP = ip.String
 	}
