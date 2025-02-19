@@ -176,12 +176,7 @@
 					});
 				}
 			})
-			.then(html => {
-				const table = document.getElementById('leadsTable');
-				table.outerHTML = html;
-				handleBindPagination();
-				handleBindTableActions();
-			})
+			.then(() => redirectUrl())
 			.catch(err => {
 				alertModal.outerHTML = err.message;
 			})
