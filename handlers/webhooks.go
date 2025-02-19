@@ -66,7 +66,6 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Printf("REAL ID in_1Qu11IH7U6DN7fCLZyfZeklI: INVOICE ID: %+v\n", invoice.ID)
 		inv, err := database.GetInvoiceByStripeInvoiceID(invoice.ID)
 		if err != nil {
 			log.Printf("Failed to get invoice by stripe invoice id: %v", err)

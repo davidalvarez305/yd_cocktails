@@ -1856,7 +1856,7 @@ func GetInvoiceByStripeInvoiceID(stripeInvoiceId string) (models.Invoice, error)
 
 	row := DB.QueryRow(query, stripeInvoiceId)
 
-	var datePaid, dueDate time.Time
+	var datePaid, dueDate sql.NullTime
 	var url sql.NullString
 
 	err := row.Scan(
@@ -1879,8 +1879,13 @@ func GetInvoiceByStripeInvoiceID(stripeInvoiceId string) (models.Invoice, error)
 		invoice.URL = url.String
 	}
 
-	invoice.DatePaid = datePaid.Unix()
-	invoice.DueDate = dueDate.Unix()
+	if datePaid.Valid {
+		invoice.DatePaid = datePaid.Time.Unix()
+	}
+
+	if dueDate.Valid {
+		invoice.DueDate = dueDate.Time.Unix()
+	}
 
 	return invoice, nil
 }
