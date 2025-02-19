@@ -1893,13 +1893,13 @@ func GetInvoiceByStripeInvoiceID(stripeInvoiceId string) (models.Invoice, error)
 func SetInvoiceStatusToPaid(stripeInvoiceId string, datePaid int64) error {
 	query := `
 		UPDATE invoice
-		SET date_paid = $2,
+		SET date_paid = to_timestamp($2)::timestamptz AT TIME ZONE 'America/New_York',
 		invoice_status_id = $3
 		WHERE stripe_invoice_id = $1
 	`
 	_, err := DB.Exec(query, stripeInvoiceId, datePaid, constants.PaidInvoiceStatusID)
 	if err != nil {
-		return fmt.Errorf("failed to assign stripe customer id to lead: %v", err)
+		return fmt.Errorf("failed to update invoice status to paid: %v", err)
 	}
 
 	return nil
