@@ -692,7 +692,19 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 			l.lead_id, 
 			l.phone_number, 
 			l.email, 
-			l.full_name
+			l.full_name,
+			lm.ad_campaign,
+			lm.landing_page,
+			lm.ip,
+			lm.email,
+			lm.facebook_click_id,
+			lm.facebook_client_id,
+			lm.external_id,
+			lm.user_agent,
+			lm.click_id,
+			lm.google_client_id,
+			lm.campaign_id,
+			lm.instant_form_id
 		FROM lead l
 		JOIN lead_marketing lm ON l.lead_id = lm.lead_id
 		WHERE lm.referral_lead_id = $1
@@ -714,10 +726,22 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 	SELECT 
 		COALESCE(referral_lead.lead_id, l.lead_id) AS lead_id,
 		COALESCE(referral_lead.phone_number, l.phone_number) AS phone_number,
-		COALESCE(referral_lead.email, l.email) AS email,
 		COALESCE(referral_lead.full_name, l.full_name) AS full_name,
-		COALESCE(referral_events.total_revenue, 0) + COALESCE(lead_events.total_revenue, 0) AS total_revenue
+		COALESCE(referral_events.total_revenue, 0) + COALESCE(lead_events.total_revenue, 0) AS total_revenue,
+		COALESCE(referral_lead.ad_campaign, lm.ad_campaign) AS ad_campaign,
+		COALESCE(referral_lead.landing_page, lm.landing_page) AS landing_page,
+		COALESCE(referral_lead.ip, lm.ip) AS ip,
+		COALESCE(referral_lead.email, lm.email) AS email,
+		COALESCE(referral_lead.facebook_click_id, lm.facebook_click_id) AS facebook_click_id,
+		COALESCE(referral_lead.facebook_client_id, lm.facebook_client_id) AS facebook_client_id,
+		COALESCE(referral_lead.external_id, lm.external_id) AS external_id,
+		COALESCE(referral_lead.user_agent, lm.user_agent) AS user_agent,
+		COALESCE(referral_lead.click_id, lm.click_id) AS click_id,
+		COALESCE(referral_lead.google_client_id, lm.google_client_id) AS google_client_id,
+		COALESCE(referral_lead.campaign_id, lm.campaign_id) AS campaign_id,
+		COALESCE(referral_lead.instant_form_id, lm.instant_form_id) AS instant_form_id
 	FROM lead l
+	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
 	LEFT JOIN referral_lead ON TRUE
 	LEFT JOIN lead_events ON TRUE
 	LEFT JOIN referral_events ON TRUE
