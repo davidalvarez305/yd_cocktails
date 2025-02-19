@@ -1926,7 +1926,8 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 		q.guests,
 		l.phone_number,
 		q.event_date,
-		q.quote_id
+		q.quote_id,
+		l.full_name
 	FROM invoice i
 	JOIN quote q ON i.quote_id = q.quote_id
 	JOIN lead l ON l.lead_id = q.lead_id
@@ -1938,7 +1939,7 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 
 	row := DB.QueryRow(query, stripeInvoiceId)
 
-	var eventTypeId, venueTypeId sql.NullInt64
+	var eventTypeId, venueTypeId, guests sql.NullInt64
 	var eventDate time.Time
 
 	err := row.Scan(
@@ -1946,10 +1947,11 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 		&eventTypeId,
 		&venueTypeId,
 		&invoiceQuoteDetails.Amount,
-		&invoiceQuoteDetails.Guests,
+		&guests,
 		&invoiceQuoteDetails.PhoneNumber,
 		&eventDate,
 		&invoiceQuoteDetails.QuoteID,
+		&invoiceQuoteDetails.FullName,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -1964,6 +1966,10 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 
 	if venueTypeId.Valid {
 		invoiceQuoteDetails.VenueTypeID = int(venueTypeId.Int64)
+	}
+
+	if guests.Valid {
+		invoiceQuoteDetails.Guests = int(guests.Int64)
 	}
 
 	invoiceQuoteDetails.EventDate = eventDate.Unix()
