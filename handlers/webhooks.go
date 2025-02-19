@@ -111,17 +111,8 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 			if constants.Production {
 				lead, err := database.GetConversionReporting(int(helpers.SafeInt(eventForm.LeadID)))
 				if err != nil {
-					fmt.Printf("Error getting conversion: %+v\n", err)
-					tmplCtx := types.DynamicPartialTemplate{
-						TemplateName: "error",
-						TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-						Data: map[string]any{
-							"Message": "Internal error reporting conversions to Google.",
-						},
-					}
-
-					w.WriteHeader(http.StatusBadRequest)
-					helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+					log.Printf("Error reporting getting conversion details: %v", err)
+					http.Error(w, "Error reporting getting conversion details.", http.StatusInternalServerError)
 					return
 				}
 

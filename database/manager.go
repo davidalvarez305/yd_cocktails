@@ -696,7 +696,6 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 			lm.ad_campaign,
 			lm.landing_page,
 			lm.ip,
-			l.email,
 			lm.facebook_click_id,
 			lm.facebook_client_id,
 			lm.external_id,
