@@ -1175,16 +1175,16 @@ func UpdateEvent(form types.EventForm) error {
 			bartender_id = COALESCE($2, bartender_id),
 			event_type_id = COALESCE($3, event_type_id),
 			venue_type_id = COALESCE($4, venue_type_id),
-			street_address = COALESCE($5, street_address),
-			city = COALESCE($6, city),
-			zip_code = COALESCE($7, zip_code),
-			start_time = COALESCE(to_timestamp($8)::timestamptz AT TIME ZONE 'America/New_York', start_time),
-			end_time = COALESCE(to_timestamp($9)::timestamptz AT TIME ZONE 'America/New_York', end_time),
+			street_address = $5,
+			city = $6,
+			zip_code = $7,
+			start_time = to_timestamp($8)::timestamptz AT TIME ZONE 'America/New_York',
+			end_time = to_timestamp($9)::timestamptz AT TIME ZONE 'America/New_York',
 			date_paid = to_timestamp($10)::timestamptz AT TIME ZONE 'America/New_York',
 			amount = $11,
 			tip = $12,
 			guests = $13
-		WHERE event_id = $1
+		WHERE event_id = $1;
 	`
 
 	_, err := DB.Exec(
@@ -1252,7 +1252,7 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 
 	for rows.Next() {
 		var event types.EventList
-		var eventStart, eventEnd time.Time
+		var eventStart, eventEnd sql.NullTime
 
 		err := rows.Scan(
 			&event.EventID,
@@ -1270,11 +1270,14 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 			return events, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		event.EventTime = fmt.Sprintf(
-			"%s - %s",
-			utils.FormatTimestampEST(eventStart.Unix()),
-			utils.FormatTimestampEST(eventEnd.Unix()),
-		)
+		if eventStart.Valid && eventEnd.Valid {
+			event.EventTime = fmt.Sprintf(
+				"%s - %s",
+				utils.FormatTimestampEST(eventStart.Time.Unix()),
+				utils.FormatTimestampEST(eventEnd.Time.Unix()),
+			)
+
+		}
 
 		events = append(events, event)
 	}
