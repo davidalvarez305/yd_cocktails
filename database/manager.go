@@ -1253,6 +1253,7 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 	for rows.Next() {
 		var event types.EventList
 		var eventStart, eventEnd sql.NullTime
+		var guests sql.NullInt64
 
 		err := rows.Scan(
 			&event.EventID,
@@ -1262,7 +1263,7 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 			&event.Bartender,
 			&event.EventType,
 			&event.VenueType,
-			&event.Guests,
+			&guests,
 			&eventStart,
 			&eventEnd,
 		)
@@ -1277,6 +1278,10 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 				utils.FormatTimestampEST(eventEnd.Time.Unix()),
 			)
 
+		}
+
+		if guests.Valid {
+			event.Guests = int(guests.Int64)
 		}
 
 		events = append(events, event)
