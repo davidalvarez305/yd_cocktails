@@ -103,7 +103,7 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 			}
 			err = database.CreateEvent(eventForm)
 			if err != nil {
-				log.Printf("Failed to get invoice by stripe invoice id: %v", err)
+				log.Printf("Failed to create event after successful payment: %v", err)
 				http.Error(w, "Error creating event", http.StatusInternalServerError)
 				return
 			}
