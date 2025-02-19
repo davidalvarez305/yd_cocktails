@@ -2174,7 +2174,6 @@ func PostLeadNote(w http.ResponseWriter, r *http.Request) {
 	}
 
 	leadIdForm := r.FormValue("lead_id")
-	userIdForm := r.FormValue("user_id")
 	note := r.FormValue("note")
 
 	leadID, err := strconv.Atoi(leadIdForm)
@@ -2192,18 +2191,10 @@ func PostLeadNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := strconv.Atoi(userIdForm)
+	values, err := sessions.Get(r)
 	if err != nil {
-		fmt.Printf("Error converting user_id to int: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Invalid user ID.",
-			},
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting user ID from session.", http.StatusInternalServerError)
 		return
 	}
 
@@ -2211,7 +2202,7 @@ func PostLeadNote(w http.ResponseWriter, r *http.Request) {
 		LeadID:        leadID,
 		Note:          note,
 		DateAdded:     time.Now().Unix(),
-		AddedByUserID: userID,
+		AddedByUserID: values.UserID,
 	}
 
 	if err != nil {
