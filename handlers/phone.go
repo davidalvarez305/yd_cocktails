@@ -122,7 +122,7 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	callMissed := phoneCall.CallDuration < 20
+	callMissed := phoneCall.CallDuration < 45
 
 	isFirstCall, err := database.CheckIsFirstLeadContact(phoneCall.CallTo)
 	if err != nil {
