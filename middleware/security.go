@@ -79,7 +79,7 @@ func CSRFProtectMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 
-		if utils.UrlsListHasCurrentPath([]string{"/static/", "/partials/"}, path) {
+		if utils.UrlsListHasCurrentPath([]string{"/static/", "/partials/", "/webhooks/stripe/"}, path) {
 			next.ServeHTTP(w, r)
 			return
 		}
