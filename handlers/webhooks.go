@@ -69,7 +69,7 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 		inv, err := database.GetInvoiceByStripeInvoiceID(invoice.ID)
 		if err != nil {
 			log.Printf("Failed to get invoice by stripe invoice id: %v", err)
-			http.Error(w, "Webhook processing error", http.StatusInternalServerError)
+			http.Error(w, "Failed to find invoice by stripe invoice id.", http.StatusInternalServerError)
 			return
 		}
 
