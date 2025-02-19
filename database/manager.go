@@ -692,16 +692,10 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 			l.lead_id, 
 			l.phone_number, 
 			l.email, 
-			l.first_name, 
-			l.last_name, 
-			l.city, 
-			l.state, 
-			l.zip_code
+			l.full_name
 		FROM lead l
 		JOIN lead_marketing lm ON l.lead_id = lm.lead_id
 		WHERE lm.referral_lead_id = $1
-		FROM lead_marketing
-		WHERE lead_id = $1
 	),
 	lead_events AS (
 		SELECT SUM(e.amount::NUMERIC + e.tip::NUMERIC) AS total_revenue
@@ -721,11 +715,7 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 		COALESCE(referral_lead.lead_id, l.lead_id) AS lead_id,
 		COALESCE(referral_lead.phone_number, l.phone_number) AS phone_number,
 		COALESCE(referral_lead.email, l.email) AS email,
-		COALESCE(referral_lead.first_name, l.first_name) AS first_name,
-		COALESCE(referral_lead.last_name, l.last_name) AS last_name,
-		COALESCE(referral_lead.city, l.city) AS city,
-		COALESCE(referral_lead.state, l.state) AS state,
-		COALESCE(referral_lead.zip_code, l.zip_code) AS zip_code,
+		COALESCE(referral_lead.full_name, l.full_name) AS full_name,
 		COALESCE(referral_events.total_revenue, 0) + COALESCE(lead_events.total_revenue, 0) AS total_revenue
 	FROM lead l
 	LEFT JOIN referral_lead ON TRUE
