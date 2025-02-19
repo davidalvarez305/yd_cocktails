@@ -1916,7 +1916,7 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 		q.event_date,
 		q.quote_id
 	FROM invoice i
-	JOIN quote q ON i.stripe_invoice_id = q.stripe_invoice_id
+	JOIN quote q ON i.quote_id = q.quote_id
 	JOIN lead l ON l.lead_id = q.lead_id
 	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	WHERE i.stripe_invoice_id = $1
