@@ -1258,13 +1258,14 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 		var event types.EventList
 		var eventStart, eventEnd sql.NullTime
 		var guests sql.NullInt64
+		var bartender sql.NullString
 
 		err := rows.Scan(
 			&event.EventID,
 			&event.LeadID,
 			&event.Amount,
 			&event.LeadName,
-			&event.Bartender,
+			&bartender,
 			&event.EventType,
 			&event.VenueType,
 			&guests,
@@ -1273,6 +1274,10 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 		)
 		if err != nil {
 			return events, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		if bartender.Valid {
+			event.Bartender = bartender.String
 		}
 
 		if eventStart.Valid && eventEnd.Valid {
