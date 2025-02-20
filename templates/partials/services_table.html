@@ -13,7 +13,7 @@
                 </th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
-					Delete
+					Save | Delete
 				</th>
             </tr>
         </thead>
@@ -113,7 +113,7 @@
                 const table = document.getElementById('servicesTable');
                 table.outerHTML = html;
                 handleBindPagination();
-				handleBindTableActions();
+				handleBindServiceTableActions();
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
@@ -171,7 +171,7 @@
             .finally(() => handleCloseAlertModal());
     }
 
-    function handleBindTableActions() {
+    function handleBindServiceTableActions() {
         const deleteButtons = document.querySelectorAll(".deleteService");
 
         deleteButtons.forEach(btn => {
@@ -189,6 +189,6 @@
         });
     }
 
-    document.addEventListener("DOMContentLoaded", () => handleBindTableActions());
+    document.addEventListener("DOMContentLoaded", () => handleBindServiceTableActions());
 </script>
 {{ end }}
