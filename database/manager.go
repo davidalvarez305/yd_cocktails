@@ -1283,8 +1283,8 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 		if eventStart.Valid && eventEnd.Valid {
 			event.EventTime = fmt.Sprintf(
 				"%s - %s",
-				utils.FormatTimestampEST(eventStart.Time.Unix()),
-				utils.FormatTimestampEST(eventEnd.Time.Unix()),
+				utils.FormatTimestamp(eventStart.Time.Unix()),
+				utils.FormatTimestamp(eventEnd.Time.Unix()),
 			)
 
 		}
