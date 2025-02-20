@@ -2677,3 +2677,9 @@ func CheckIsFirstLeadContact(to string) (bool, error) {
 
 	return true, nil
 }
+
+func UpdateCallRecordingURL(callSid string, recordingURL string) error {
+	query := `UPDATE phone_call SET recording_url = $1 WHERE external_id = $2`
+	_, err := DB.Exec(query, recordingURL, callSid)
+	return err
+}

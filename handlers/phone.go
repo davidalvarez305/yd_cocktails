@@ -25,6 +25,8 @@ func PhoneServiceHandler(w http.ResponseWriter, r *http.Request) {
 			handleOutboundCall(w, r)
 		case "/call/inbound/end":
 			handleInboundCallEnd(w, r)
+		case "/call/inbound/recording-callback":
+			handleInboundCallRecordingCallback(w, r)
 		case "/sms/inbound":
 			handleInboundSMS(w, r)
 		case "/sms/outbound":
@@ -60,11 +62,9 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 
 		twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 		<Response>
-			<Dial action="%s">%s</Dial>
+			<Dial record="true" recordingStatusCallback="%s" action="%s">%s</Dial>
 		</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, forwardPhoneNumber)
 
-		// A temporary solution to the way Twilio handles outbound phone calls
-		// The initial call is from itself to itself in order to call the client from the company number
 		phoneCall := models.PhoneCall{
 			ExternalID:   incomingPhoneCall.CallSid,
 			CallDuration: 0,
@@ -372,4 +372,27 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func handleInboundCallRecordingCallback(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
+		return
+	}
+
+	callSid := r.FormValue("CallSid")
+	recordingURL := r.FormValue("RecordingUrl")
+
+	if callSid == "" || recordingURL == "" {
+		http.Error(w, "Missing required parameters", http.StatusBadRequest)
+		return
+	}
+
+	if err := database.UpdateCallRecordingURL(callSid, recordingURL); err != nil {
+		fmt.Printf("Failed to update call recording: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

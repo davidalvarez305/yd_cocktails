@@ -53,6 +53,11 @@ const (
 
 	SocialMediaAdsMedium  = "paid"
 	SocialMediaAdsChannel = "social"
+
+	SessionName                    = "yd_vending_sessions"
+	LeadsPerPage                   = 10
+	TwilioCallbackWebhook          = "/call/inbound/end"
+	TwilioRecordingCallbackWebhook = "/call/inbound/recording-callback"
 )
 
 var (
@@ -88,11 +93,8 @@ var (
 	EncSecretKey                  string
 	TwilioAccountSID              string
 	TwilioAuthToken               string
-	TwilioCallbackWebhook         string
 	CompanyName                   string
 	SiteName                      string
-	SessionName                   string
-	LeadsPerPage                  int
 	CompanyPhoneNumber            string
 	SessionLength                 int
 	CSRFTokenLength               int
@@ -137,9 +139,6 @@ func Init() {
 	GoogleJSONPath = "./google.json"
 	DavidEmail = os.Getenv("DAVID_EMAIL")
 	YovaEmail = os.Getenv("YOVA_EMAIL")
-	SessionName = "yd_vending_sessions"
-	LeadsPerPage = 10
-	TwilioCallbackWebhook = "/call/inbound/end"
 	CompanyPhoneNumber = os.Getenv("COMPANY_PHONE_NUMBER")
 	SessionLength = 7
 	CSRFTokenLength = 1
