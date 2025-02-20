@@ -1233,7 +1233,7 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 		SELECT 
 		e.event_id,
 		e.lead_id,
-		COALESCE(e.amount::NUMERIC + e.tip::NUMERIC, 0) AS revenue,
+		COALESCE(e.amount::NUMERIC, 0) + COALESCE(e.tip::NUMERIC, 0) AS revenue,
 		l.full_name,
 		CONCAT(b.first_name, ' ', b.last_name) AS bartender,
 		et.name AS event_type,
