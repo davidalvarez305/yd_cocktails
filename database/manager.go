@@ -2182,7 +2182,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 
 	offset := (pageNum - 1) * int(constants.LeadsPerPage)
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC,
 			COUNT(*) OVER() AS total_rows
 			FROM "service"
 			OFFSET $1
