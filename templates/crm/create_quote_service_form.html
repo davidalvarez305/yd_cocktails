@@ -79,15 +79,34 @@
 <script nonce="{{ .Nonce }}">
 	const service = document.getElementById("service_id");
 	const pricePerUnit = document.getElementById("price_per_unit");
+	const units = document.getElementById("units");
 
 	function handleSelectService(e) {
-		const suggestedPrice = e.dataset.suggestedPrice;
+		const selectedOption = service.options[service.selectedIndex];
 
-		pricePerUnit.value = e.dataset.suggestedPrice;
+		const suggestedPrice = selectedOption.dataset.suggestedPrice || null;
+
+		if (suggestedPrice) pricePerUnit.value = suggestedPrice;
+
+		const rentalRegex = /\bRental\b/;
+
+		if (rentalRegex.test(selectedOption.text)) {
+			units.value = 1;
+		}
+
+		const bartenderRegex = /\bBartender\b/;
+
+		if (bartenderRegex.test(selectedOption.text)) {
+			const hours = parseInt(hoursInput.value, 10) || 0;
+			const bartenders = parseInt(bartendersInput.value, 10) || 0;
+			units.value = hours;
+			pricePerUnit.value = hours * bartenders;
+		}
 	}
 
-	service.addEventListener("change", (e) => handleSelectService(e));
+	service.addEventListener("change", handleSelectService);
 </script>
+
 
 <script nonce="{{ .Nonce }}">
 	const submitQuoteServiceForm = document.getElementById("submitQuoteServiceForm");
