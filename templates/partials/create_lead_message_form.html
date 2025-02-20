@@ -17,6 +17,17 @@
         </svg>
         <span>Send</span>
     </button>
+	<div class="space-y-1">
+		<label for="automated_follow_up" class="font-medium">Automated Follow-Up</label>
+		<select id="automated_follow_up" name="automated_follow_up" required
+			class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+			<option></option>
+			<option>First Follow Up (ENG)</option>
+			<option>Second Follow Up (ENG)</option>
+			<option>First Follow Up (ESP)</option>
+			<option>Second Follow Up (ESP)</option>
+		</select>
+	</div>
 </form>
 
 <script nonce="{{ .Nonce }}">
@@ -30,6 +41,8 @@
 		const alertModal = document.getElementById("alertModal");
 
 		for (const [key, value] of data.entries()) {
+			if (key === "automated_follow_up") continue;
+
 			if (value) body.append(key, value);
 		}
 
@@ -38,31 +51,61 @@
 			credentials: "include",
 			body: body,
 		})
-			.then((response) => {
-				const token = response.headers.get('X-Csrf-Token');
-				if (token) {
-					const tokens = document.querySelectorAll('[name="csrf_token"]');
-					tokens.forEach(csrf_token => csrf_token.value = token);
-				}
-				if (response.ok) {
-					return response.text();
-				} else {
-					return response.text().then((err) => {
-						throw new Error(err);
-					});
-				}
-			})
-			.then(html => {
-				const leadMessages = document.getElementById('leadMessages');
-				leadMessages.innerHTML = html;
-				createLeadMessageForm.reset();
-			})
-			.catch(err => {
-				alertModal.outerHTML = err.message;
-				handleCloseAlertModal();
-			})
+		.then((response) => {
+			const token = response.headers.get('X-Csrf-Token');
+			if (token) {
+				const tokens = document.querySelectorAll('[name="csrf_token"]');
+				tokens.forEach(csrf_token => csrf_token.value = token);
+			}
+			if (response.ok) {
+				return response.text();
+			} else {
+				return response.text().then((err) => {
+					throw new Error(err);
+				});
+			}
+		})
+		.then(html => {
+			const leadMessages = document.getElementById('leadMessages');
+			leadMessages.innerHTML = html;
+			createLeadMessageForm.reset();
+		})
+		.catch(err => {
+			alertModal.outerHTML = err.message;
+			handleCloseAlertModal();
+		})
     }
 
     createLeadMessageForm.addEventListener("submit", (e) => handleCreateLeadMessageForm(e));
+
+	const automatedFollowUpSelect = document.getElementById("automated_follow_up");
+
+	automatedFollowUpSelect.addEventListener("change", handleChangeAutomatedFollowUp);
+
+	function handleChangeAutomatedFollowUp(e) {
+		const selectedOption = automatedFollowUpSelect.options[automatedFollowUpSelect.selectedIndex];
+
+		fetch(`/crm/automated-follow-up?option=${selectedOption.text}&leadId={{ .Lead.LeadID }}`, {
+			method: "GET",
+			credentials: "include",
+		})
+		.then((response) => {
+			if (response.ok) {
+				return response.text();
+			} else {
+				return response.text().then((err) => {
+					throw new Error(err);
+				});
+			}
+		})
+		.then(msg => {
+			const messageBody = document.getElementById("body");
+			messageBody.value = msg;
+		})
+		.catch(err => {
+			alertModal.outerHTML = err.message;
+			handleCloseAlertModal();
+		});
+	}
 </script>
 {{ end }}

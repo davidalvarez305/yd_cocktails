@@ -601,3 +601,19 @@ type SetSMSToReadForm struct {
 	IsRead    *bool   `json:"is_read" form:"is_read" schema:"is_read"`
 	CSRFToken *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
 }
+
+type OpenAICompletionsRequest struct {
+	Model       string  `json:"model" form:"model" schema:"model"`
+	Prompt      string  `json:"prompt" form:"prompt" schema:"prompt"`
+	MaxTokens   int     `json:"max_tokens" form:"max_tokens" schema:"max_tokens"`
+	Temperature float64 `json:"temperature" form:"temperature" schema:"temperature"`
+}
+
+type OpenAIChatCompletionsResponse struct {
+	Choices []struct {
+		Message struct {
+			Role    string `json:"role" form:"role" schema:"role"`
+			Content string `json:"content" form:"content" schema:"content"`
+		} `json:"message" form:"message" schema:"message"`
+	} `json:"choices" form:"choices" schema:"choices"`
+}

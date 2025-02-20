@@ -107,6 +107,7 @@ var (
 	NotificationSubscribers       []string
 	FacebookLeadsSpreadsheetID    string
 	FacebookLeadsSpreadsheetRange string
+	OpenAIApiKey                  string
 )
 
 func Init() {
@@ -155,6 +156,7 @@ func Init() {
 	StripeWebhookSecret = os.Getenv("STRIPE_WEBHOOK_SECRET")
 	FacebookLeadsSpreadsheetID = os.Getenv("FACEBOOK_LEADS_SPREADSHEET_ID")
 	FacebookLeadsSpreadsheetRange = os.Getenv("FACEBOOK_LEADS_SPREADSHEET_RANGE")
+	OpenAIApiKey = os.Getenv("OPEN_AI_API_KEY")
 
 	NotificationSubscribers = []string{DavidPhoneNumber, YovaPhoneNumber}
 }

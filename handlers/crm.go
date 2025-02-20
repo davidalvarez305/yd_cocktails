@@ -99,6 +99,8 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			GetServices(w, r, ctx)
 		case "/crm/message":
 			GetMessages(w, r, ctx)
+		case "/crm/automated-follow-up":
+			GetAutomatedFollowUpMessage(w, r)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -2374,7 +2376,15 @@ func SetSMSToRead(w http.ResponseWriter, r *http.Request) {
 	leadMessages, err := database.GetMessagesByLeadID(helpers.SafeInt(form.LeadID))
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting lead messages from DB.", http.StatusInternalServerError)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting lead messages from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 		return
 	}
 
@@ -2410,4 +2420,102 @@ func GetLeadsWithMessages(w http.ResponseWriter, r *http.Request, ctx map[string
 	}
 
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func GetAutomatedFollowUpMessage(w http.ResponseWriter, r *http.Request) {
+	option := r.URL.Query().Get("option")
+	leadId := r.URL.Query().Get("leadId")
+
+	// Check for empty parameters
+	if option == "" || leadId == "" {
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Missing required parameters: option or leadId.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	lead, err := database.GetLeadDetails(leadId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting lead details from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var prompt string
+
+	// Define the prompts
+	firstFollowUpEnglishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. This is my first follow-up message.
+	Responding only with the message I'm going to send, write a follow up message to re-engage the lead about our bartending services. Address this person as cordially as possible while being professional.
+	The message should read like two friends talking to each other through text.
+	`, lead.FullName, lead.Message)
+
+	secondFollowUpEnglishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. This is my second follow-up message.
+	Responding only with the message I'm going to send, write a follow up message to re-engage the lead about our bartending services. Address this person as cordially as possible while being professional.
+	The message should read like two friends talking to each other through text. While being cordial, remind the person that we contacted them in the past and if they're not willing to move forward, we'll stop reaching out.
+	`, lead.FullName, lead.Message)
+
+	firstFollowUpSpanishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. This is my first follow-up message.
+	Responding only with the message I'm going to send, write a follow up message to re-engage the lead about our bartending services. Address this person as cordially as possible while being professional.
+	The message should read like two friends talking to each other through text, address the person by their first name, maintain an attitude of friendliness & professionality. Write this text in Spanish. Address this person using usted, which is a sign of respect.
+	`, lead.FullName, lead.Message)
+
+	secondFollowUpSpanishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. This is my second follow-up message.
+	Responding only with the message I'm going to send, write a follow up message to re-engage the lead about our bartending services. Address this person as cordially as possible while being professional.
+	The message should read like two friends talking to each other through text, address the person by their first name, maintain an attitude of friendliness & professionality. While being cordial, remind the person that we contacted them in the past and if they're not willing to move forward, we'll stop reaching out.
+	 Write this text in Spanish. Address this person using usted, which is a sign of respect.
+	`, lead.FullName, lead.Message)
+
+	switch option {
+	case "First Follow Up (ENG)":
+		prompt = firstFollowUpEnglishPrompt
+	case "Second Follow Up (ENG)":
+		prompt = secondFollowUpEnglishPrompt
+	case "First Follow Up (ESP)":
+		prompt = firstFollowUpSpanishPrompt
+	case "Second Follow Up (ESP)":
+		prompt = secondFollowUpSpanishPrompt
+	default:
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid prompt.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	response, err := services.GetOpenAICompletionsResponse(prompt)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting response from Open AI completions API.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write([]byte(response))
 }
