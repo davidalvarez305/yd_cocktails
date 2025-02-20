@@ -53,9 +53,7 @@
 			})
 			.then(html => {
 				const leadNotes = document.getElementById('leadNotes');
-				console.log(leadNotes);
 				leadNotes.innerHTML = html;
-				console.log(html);
 				createLeadNoteForm.reset();
 			})
 			.catch(err => {
