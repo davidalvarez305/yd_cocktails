@@ -1231,23 +1231,23 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 
 	rows, err := DB.Query(`
 		SELECT 
-			e.event_id,
-			e.lead_id,
-			e.amount::NUMERIC + e.tip::NUMERIC,
-			l.full_name,
-			CONCAT(b.first_name, ' ', b.last_name),
-			et.name,
-			vt.name,
-			e.guests,
-			e.start_time,
-			e.end_time
-		FROM event AS e
-		JOIN lead AS l ON l.lead_id = e.lead_id
-		LEFT JOIN "user" AS b ON b.user_id = e.bartender_id
-		JOIN event_type AS et ON et.event_type_id = e.event_type_id
-		JOIN venue_type AS vt ON vt.venue_type_id = e.venue_type_id
-		WHERE e.lead_id = $1
-		ORDER BY e.date_created ASC;
+		e.event_id,
+		e.lead_id,
+		COALESCE(e.amount::NUMERIC + e.tip::NUMERIC, 0) AS revenue,
+		l.full_name,
+		CONCAT(b.first_name, ' ', b.last_name) AS bartender,
+		et.name AS event_type,
+		vt.name AS venue_type,
+		e.guests,
+		e.start_time,
+		e.end_time
+	FROM event AS e
+	JOIN lead AS l ON l.lead_id = e.lead_id
+	LEFT JOIN "user" AS b ON b.user_id = e.bartender_id
+	JOIN event_type AS et ON et.event_type_id = e.event_type_id
+	JOIN venue_type AS vt ON vt.venue_type_id = e.venue_type_id
+	WHERE e.lead_id = $1
+	ORDER BY e.date_created ASC;
 	`, leadId)
 	if err != nil {
 		return events, fmt.Errorf("error executing query: %w", err)
