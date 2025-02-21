@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/models"
 	"github.com/davidalvarez305/yd_cocktails/services"
 	"github.com/davidalvarez305/yd_cocktails/types"
+	"github.com/google/uuid"
 )
 
 func PhoneServiceHandler(w http.ResponseWriter, r *http.Request) {
@@ -173,6 +175,132 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	// Transcribe phone call
+	go func() {
+		// Download the file from Twilio
+		fileName := uuid.New().String() + ".mp3"
+		localFilePath := constants.LOCAL_FILES_DIR + fileName
+		audioFileURL := phoneCall.RecordingURL
+		err := helpers.DownloadFileFromURL(audioFileURL, localFilePath)
+		if err != nil {
+			fmt.Printf("ERROR DOWNLOADING AUDIO FILE: %+v\n", err)
+			http.Error(w, "Failed to download audio file", http.StatusInternalServerError)
+			return
+		}
+
+		// Get file info before opening
+		fileInfo, err := os.Stat(localFilePath)
+		if err != nil {
+			fmt.Printf("ERROR GETTING FILE INFO: %+v\n", err)
+			http.Error(w, "Failed to get file info", http.StatusInternalServerError)
+			return
+		}
+
+		// Open the file before uploading to S3
+		file, err := os.Open(localFilePath)
+		if err != nil {
+			fmt.Printf("ERROR OPENING FILE: %+v\n", err)
+			http.Error(w, "Failed to open audio file", http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+
+		// Correct S3 file path (bucket name should not be part of the key)
+		s3FilePath := "/uploads/audio/" + fileName
+
+		// Upload audio file to S3
+		err = services.UploadFileToS3(file, fileInfo.Size(), s3FilePath)
+		if err != nil {
+			fmt.Printf("ERROR UPLOADING AUDIO TO S3: %+v\n", err)
+			http.Error(w, "Failed to upload audio file to S3", http.StatusInternalServerError)
+			return
+		}
+
+		// Transcribe audio file
+		transcriptionID, transcriptionText, err := services.TranscribeAudio(audioFileS3URL)
+		if err != nil {
+			fmt.Printf("ERROR TRANSCRIBING AUDIO: %+v\n", err)
+			http.Error(w, "Failed to transcribe audio", http.StatusInternalServerError)
+			return
+		}
+
+		// Save transcription in DB
+		transcription := models.PhoneCallTranscription{
+			PhoneCallID:           phoneCall.PhoneCallID,
+			TranscriptionID:       transcriptionID,
+			Transcription:         transcriptionText,
+			TranscriptionAudioURL: audioFileS3URL,
+		}
+
+		err = database.SavePhoneCallTranscription(transcription)
+		if err != nil {
+			fmt.Printf("ERROR SAVING TRANSCRIPTION: %+v\n", err)
+			http.Error(w, "Failed to save transcription", http.StatusInternalServerError)
+			return
+		}
+
+		// Upload transcription text to S3
+		transcriptionFileUUID := uuid.New().String() + ".txt"
+
+		// Define the local file path where the transcription text will be saved
+		localTranscriptionTextPath := constants.LOCAL_FILES_DIR + transcriptionFileUUID
+
+		// Create the local file and write the transcription text to it
+		transcriptionFile, err := os.Create(localTranscriptionTextPath)
+		if err != nil {
+			fmt.Printf("ERROR CREATING LOCAL FILE: %+v\n", err)
+			http.Error(w, "Failed to create transcription file", http.StatusInternalServerError)
+			return
+		}
+		defer transcriptionFile.Close()
+
+		_, err = transcriptionFile.Write([]byte(transcriptionText))
+		if err != nil {
+			fmt.Printf("ERROR WRITING TO LOCAL FILE: %+v\n", err)
+			http.Error(w, "Failed to write transcription to file", http.StatusInternalServerError)
+			return
+		}
+
+		// Open the file for uploading to S3
+		transcriptionFileToUpload, err := os.Open(localTranscriptionTextPath)
+		if err != nil {
+			fmt.Printf("ERROR OPENING FILE: %+v\n", err)
+			http.Error(w, "Failed to open transcription file", http.StatusInternalServerError)
+			return
+		}
+		defer transcriptionFileToUpload.Close()
+
+		// Determine file size
+		fileInfo, err = transcriptionFileToUpload.Stat()
+		if err != nil {
+			fmt.Printf("ERROR GETTING FILE INFO: %+v\n", err)
+			http.Error(w, "Failed to get file info", http.StatusInternalServerError)
+			return
+		}
+		fileSize := fileInfo.Size()
+
+		// S3 file path
+		s3TranscriptionFilePath := "uploads/transcriptions/" + transcriptionFileUUID
+
+		// Upload the file to S3
+		err = services.UploadFileToS3(transcriptionFileToUpload, fileSize, s3TranscriptionFilePath)
+		if err != nil {
+			fmt.Printf("ERROR UPLOADING TRANSCRIPTION TO S3: %+v\n", err)
+			http.Error(w, "Failed to upload transcription to S3", http.StatusInternalServerError)
+			return
+		}
+
+		// Save the transcription file URL in the database
+		transcription.TranscriptionTextURL = s3TranscriptionFilePath // The S3 path returned from the upload
+		err = database.UpdatePhoneCallTranscription(transcription)
+		if err != nil {
+			fmt.Printf("ERROR UPDATING TRANSCRIPTION URL: %+v\n", err)
+			http.Error(w, "Failed to update transcription URL", http.StatusInternalServerError)
+			return
+		}
+
+	}()
 
 	w.Header().Set("Content-Type", "application/xml")
 	w.WriteHeader(http.StatusOK)

@@ -11,6 +11,8 @@ const (
 
 	TimeZone string = "America/New_York"
 
+	StructSpreadsheetHeaderTag string = "spreadsheet_header"
+
 	LeadGeneratedEventName   string = "generate_lead"
 	EventConversionEventName string = "event"
 	LeadEventName            string = "Lead"
