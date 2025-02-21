@@ -2683,3 +2683,64 @@ func UpdateCallRecordingURL(callSid string, recordingURL string) error {
 	_, err := DB.Exec(query, recordingURL, callSid)
 	return err
 }
+
+func CreatePhoneCallTranscription(transcription models.PhoneCallTranscription) error {
+	query := `
+		INSERT INTO phone_call_transcription (
+			phone_call_id, 
+			text, 
+			audio_url, 
+			text_url
+		)
+		VALUES (
+			$1, $2, $3, $4
+		);
+	`
+
+	_, err := DB.Exec(
+		query,
+		transcription.PhoneCallID,
+		transcription.Text,
+		transcription.AudioURL,
+		transcription.TextURL,
+	)
+	if err != nil {
+		return fmt.Errorf("error inserting phone call transcription: %w", err)
+	}
+
+	return nil
+}
+
+func GetPhoneCallsWithoutTranscription() ([]models.PhoneCall, error) {
+	var phoneCalls []models.PhoneCall
+
+	query := `
+		SELECT p.phone_call_id, p.recording_url
+		FROM phone_call AS p
+		WHERE NOT EXISTS (
+			SELECT 1 FROM phone_call_transcription AS t 
+			WHERE t.phone_call_id = p.phone_call_id
+		) AND p.recording_url IS NOT NULL
+	`
+
+	rows, err := DB.Query(query)
+	if err != nil {
+		return phoneCalls, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var phoneCall models.PhoneCall
+		err := rows.Scan(&phoneCall.PhoneCallID, &phoneCall.RecordingURL)
+		if err != nil {
+			return phoneCalls, fmt.Errorf("error scanning row: %w", err)
+		}
+		phoneCalls = append(phoneCalls, phoneCall)
+	}
+
+	if err := rows.Err(); err != nil {
+		return phoneCalls, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return phoneCalls, nil
+}

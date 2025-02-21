@@ -244,3 +244,12 @@ type LeadNote struct {
 	DateAdded     int64  `json:"date_added" form:"date_added" schema:"date_added"`
 	AddedByUserID int    `json:"added_by_user_id" form:"added_by_user_id" schema:"added_by_user_id"`
 }
+
+type PhoneCallTranscription struct {
+	PhoneCallTranscriptionID int    `json:"phone_call_transcription_id" form:"phone_call_transcription_id" schema:"phone_call_transcription_id"`
+	PhoneCallID              int    `json:"phone_call_id" form:"phone_call_id" schema:"phone_call_id"`
+	ExternalID               string `json:"external_id" form:"external_id" schema:"external_id"`
+	Text                     string `json:"text" form:"text" schema:"text"`
+	AudioURL                 string `json:"audio_url" form:"audio_url" schema:"audio_url"`
+	TextURL                  string `json:"text_url" form:"text_url" schema:"text_url"`
+}

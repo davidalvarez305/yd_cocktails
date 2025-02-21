@@ -37,6 +37,9 @@ func init() {
 
 	services.StartSMSNotifcationChecker()
 	fmt.Println("Unread messages checker started.")
+
+	services.StartTranscriptionService()
+	fmt.Println("Transcription service started.")
 }
 
 func main() {
