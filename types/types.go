@@ -617,3 +617,11 @@ type OpenAIChatCompletionsResponse struct {
 		} `json:"message" form:"message" schema:"message"`
 	} `json:"choices" form:"choices" schema:"choices"`
 }
+
+type LeadNextActionForm struct {
+	CSRFToken        *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	LeadNextActionID *int    `json:"lead_next_action_id" form:"lead_next_action_id" schema:"lead_next_action_id"`
+	NextActionID     *int    `json:"next_action_id" form:"next_action_id" schema:"next_action_id"`
+	LeadID           *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	ActionDate       *int64  `json:"action_date" form:"action_date" schema:"action_date"`
+}

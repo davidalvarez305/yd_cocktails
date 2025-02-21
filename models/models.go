@@ -224,6 +224,13 @@ type NextAction struct {
 	Action       string `json:"action" form:"action" schema:"action"`
 }
 
+type LeadNextAction struct {
+	LeadNextActionID int   `json:"lead_next_action_id" form:"lead_next_action_id" schema:"lead_next_action_id"`
+	NextActionID     int   `json:"next_action_id" form:"next_action_id" schema:"next_action_id"`
+	LeadID           int   `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	ActionDate       int64 `json:"action_date" form:"action_date" schema:"action_date"`
+}
+
 type Service struct {
 	ServiceID      int     `json:"service_id" form:"service_id" schema:"service_id"`
 	Service        string  `json:"service" form:"service" schema:"service"`
@@ -231,10 +238,11 @@ type Service struct {
 }
 
 type QuoteService struct {
-	ServiceID    int     `json:"service_id" form:"service_id" schema:"service_id"`
-	QuoteID      int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	Units        int     `json:"units" form:"units" schema:"units"`
-	PricePerUnit float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
+	QuoteServiceID int     `json:"quote_service_id" form:"quote_service_id" schema:"quote_service_id"`
+	ServiceID      int     `json:"service_id" form:"service_id" schema:"service_id"`
+	QuoteID        int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	Units          int     `json:"units" form:"units" schema:"units"`
+	PricePerUnit   float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
 }
 
 type LeadNote struct {
