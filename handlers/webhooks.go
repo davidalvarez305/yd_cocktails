@@ -201,7 +201,7 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 	
 				Date: %s,
 				Full Name: %s
-			`, utils.FormatTimestampEST(quote.EventDate), quote.FullName)
+			`, utils.FormatTimestamp(quote.EventDate), quote.FullName)
 
 				_, err := services.SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
 
