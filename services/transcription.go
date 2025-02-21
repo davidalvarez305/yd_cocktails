@@ -52,7 +52,7 @@ func TranscribePhoneCall(phoneCall models.PhoneCall) error {
 	}
 
 	// Transcribe audio file
-	audioFileS3URL := constants.AWSStorageBucket + audioS3FilePath
+	audioFileS3URL := "s3://" + constants.AWSS3BucketName + audioS3FilePath
 	transcriptionID, transcriptionText, err := TranscribeAudio(audioFileS3URL)
 	if err != nil {
 		fmt.Printf("ERROR TRANSCRIBING AUDIO: %+v\n", err)
