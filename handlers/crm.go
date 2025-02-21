@@ -160,6 +160,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				DeleteEvent(w, r)
 				return
 			}
+			if len(parts) >= 5 && parts[4] == "next-action" && helpers.IsNumeric(parts[3]) {
+				DeleteLeadNextAction(w, r)
+				return
+			}
 		}
 		if strings.HasPrefix(path, "/crm/service/") {
 			DeleteService(w, r)
@@ -186,6 +190,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			if len(parts) >= 5 && parts[4] == "note" && helpers.IsNumeric(parts[3]) {
 				PostLeadNote(w, r)
+				return
+			}
+			if len(parts) >= 5 && parts[4] == "next-action" && helpers.IsNumeric(parts[3]) {
+				PostLeadNextAction(w, r)
 				return
 			}
 		}
@@ -303,7 +311,9 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	leadNotesTemplate := constants.PARTIAL_TEMPLATES_DIR + "lead_notes.html"
 	createLeadMessageForm := constants.PARTIAL_TEMPLATES_DIR + "create_lead_message_form.html"
 	leadMessagesTemplate := constants.PARTIAL_TEMPLATES_DIR + "lead_messages.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, eventForm, eventTable, leadQuoteForm, leadQuoteTable, createLeadMessageForm, leadMessagesTemplate, createLeadNoteForm, leadNotesTemplate}
+	createLeadNextActionForm := constants.PARTIAL_TEMPLATES_DIR + "create_lead_next_action_form.html"
+	leadNextActionsTable := constants.PARTIAL_TEMPLATES_DIR + "lead_next_actions_table.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, eventForm, eventTable, leadQuoteForm, leadQuoteTable, createLeadMessageForm, leadMessagesTemplate, createLeadNoteForm, leadNotesTemplate, createLeadNextActionForm, leadNextActionsTable}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -405,6 +415,13 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	leadNextActions, err := database.GetLeadNextActionsByLeadID(leadDetails.LeadID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting lead next actions.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Lead Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
@@ -421,6 +438,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["NextActionList"] = nextActionList
 	data["LeadNotes"] = leadNotes
 	data["LeadMessages"] = leadMessages
+	data["LeadNextActions"] = leadNextActions
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -2518,4 +2536,166 @@ func GetAutomatedFollowUpMessage(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte(response))
+}
+
+func PostLeadNextAction(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var form types.LeadNextActionForm
+	err = decoder.Decode(&form, r.PostForm)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.CreateLeadNextAction(form)
+	if err != nil {
+		fmt.Printf("Error creating lead next action: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while creating lead next action.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	leadNextActions, err := database.GetLeadNextActionsByLeadID(helpers.SafeInt(form.LeadID))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting lead next actions from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "lead_next_actions.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_next_actions.html",
+		Data: map[string]any{
+			"LeadNextActions": leadNextActions,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func DeleteLeadNextAction(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("Error parsing form: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	leadNextActionId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
+	if err != nil {
+		fmt.Printf("Error getting lead next action id from path: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to get lead next action id from path.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	leadId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/lead/")
+	if err != nil {
+		fmt.Printf("Error getting lead id from path: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to get lead id from path.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.DeleteLeadNextAction(leadNextActionId)
+	if err != nil {
+		fmt.Printf("Error deleting lead's next action: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to delete lead's next action.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	leadNextActions, err := database.GetLeadNextActionsByLeadID(leadId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting services from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "quote_services_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "quote_services_table.html",
+		Data: map[string]any{
+			"LeadNextActions": leadNextActions,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 }

@@ -625,3 +625,9 @@ type LeadNextActionForm struct {
 	LeadID           *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
 	ActionDate       *int64  `json:"action_date" form:"action_date" schema:"action_date"`
 }
+
+type LeadNextActionList struct {
+	LeadNextActionID int    `json:"lead_next_action_id" form:"lead_next_action_id" schema:"lead_next_action_id"`
+	NextAction       string `json:"next_action" form:"next_action" schema:"next_action"`
+	ActionDate       string `json:"action_date" form:"action_date" schema:"action_date"`
+}

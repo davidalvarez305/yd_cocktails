@@ -2744,3 +2744,78 @@ func GetPhoneCallsWithoutTranscription() ([]models.PhoneCall, error) {
 
 	return phoneCalls, nil
 }
+
+func CreateLeadNextAction(leadNextAction types.LeadNextActionForm) error {
+	query := `
+		INSERT INTO lead_next_action (
+			next_action_id,
+			lead_id,
+			action_date
+		)
+		VALUES (
+			$1, $2, to_timestamp($3)::timestamptz AT TIME ZONE 'America/New_York'
+		);
+	`
+
+	_, err := DB.Exec(
+		query,
+		leadNextAction.NextActionID,
+		leadNextAction.LeadID,
+		leadNextAction.ActionDate,
+	)
+	if err != nil {
+		return fmt.Errorf("error inserting lead next action: %w", err)
+	}
+
+	return nil
+}
+
+func GetLeadNextActionsByLeadID(leadId int) ([]types.LeadNextActionList, error) {
+	var leadNextActions []types.LeadNextActionList
+
+	query := `
+		SELECT lna.lead_next_action_id, na.action, lna.action_date
+		FROM lead_next_action AS lna
+		JOIN next_action AS na ON lna.next_action_id = na.next_action_id
+		WHERE lead_id = $1
+	`
+
+	rows, err := DB.Query(query, leadId)
+	if err != nil {
+		return leadNextActions, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var leadNextAction types.LeadNextActionList
+
+		var nextActionDate time.Time
+
+		err := rows.Scan(&leadNextAction.LeadNextActionID, &leadNextAction.NextAction, &nextActionDate)
+		if err != nil {
+			return leadNextActions, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		leadNextAction.ActionDate = utils.FormatTimestamp(nextActionDate.Unix())
+
+		leadNextActions = append(leadNextActions, leadNextAction)
+	}
+
+	if err := rows.Err(); err != nil {
+		return leadNextActions, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return leadNextActions, nil
+}
+
+func DeleteLeadNextAction(id int) error {
+	sqlStatement := `
+        DELETE FROM lead_next_action WHERE lead_next_action_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
