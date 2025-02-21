@@ -1,0 +1,68 @@
+{{ define "content.html" }}
+
+<!-- Hero Content -->
+{{ template "hero_image.html" . }}
+<!-- END Hero -->
+
+<!-- Team -->
+<div class="bg-white dark:bg-gray-900 dark:text-gray-100">
+    <div class="container mx-auto space-y-16 px-4 py-16 lg:px-8 lg:py-32 xl:max-w-7xl">
+        <div class="text-center">
+            <div class="mb-1 text-sm font-bold uppercase tracking-wider text-primary-600 dark:text-primary-500">
+                Who we are
+            </div>
+            <h2 class="mb-4 text-4xl font-black text-black dark:text-white">
+                The people under the hood
+            </h2>
+            <h3 class="mx-auto text-xl font-medium leading-relaxed text-gray-700 dark:text-gray-300 lg:w-2/3">
+                We're the ones burning the midnight oil to deliver premium bartending services.
+            </h3>
+        </div>
+
+        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 md:gap-16">
+            <div>
+                <div class="group relative mb-8 p-4">
+                    <div
+                        class="absolute inset-0 skew-y-2 rounded-lg bg-primary-100 transition duration-150 ease-out group-hover:-rotate-2 dark:bg-primary-900/50">
+                    </div>
+                    <img src="{{ .MediaPath }}/yovana.jpg" class="relative rounded-lg shadow" alt="User Avatar"
+                        loading="lazy" />
+                </div>
+                <h4 class="mb-0.5 text-xl font-bold">Yovana</h4>
+                <p class="mb-3 font-medium text-gray-600 dark:text-gray-400">
+                    Owner
+                </p>
+                <p class="leading-relaxed text-gray-600 dark:text-gray-400">
+                    Yovana is an entrepreneur and passionate bartender.
+                    She enjoys going to the gym, creating content, traveling, and trying out new recipes for cocktails.
+                    When not coming up with ideas for new business ventures or lifting weights, she can be found
+                    whipping up a delicious michelada.
+                </p>
+            </div>
+            <div>
+                <div class="group relative mb-8 p-4">
+                    <div
+                        class="absolute inset-0 skew-y-2 rounded-lg bg-primary-100 transition duration-150 ease-out group-hover:-rotate-2 dark:bg-primary-900/50">
+                    </div>
+                    <img src="{{ .MediaPath }}/abba.jpg" class="relative rounded-lg shadow" alt="User Avatar"
+                        loading="lazy" />
+                </div>
+                <h4 class="mb-0.5 text-xl font-bold">Abba</h4>
+                <p class="mb-3 font-medium text-gray-600 dark:text-gray-400">
+                    Chief Barks Officer
+                </p>
+                <p class="leading-relaxed text-gray-600 dark:text-gray-400">
+                    Abba is an energetic and protective German shepherd.
+                    She enjoys patrolling backyards deep into the night, barking at things,
+                    barking at critters, barking at people, and chewing on things.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END Team -->
+
+<div id="popUpModalOverlay" style="display: none;"></div>
+
+<script src="{{ .StaticPath }}/helpers/phoneConversions.js" nonce="{{ .Nonce }}"></script>
+{{ end }}

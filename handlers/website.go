@@ -81,6 +81,8 @@ func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 			GetRobots(w, r, ctx)
 		case "/":
 			GetHome(w, r, ctx)
+		case "/coffee":
+			GetCoffeeLP(w, r, ctx)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -155,6 +157,40 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 	data.CSRFToken = csrfToken
 	data.VenueTypes = venueTypes
 	data.EventTypes = eventTypes
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	helpers.ServeContent(w, files, data)
+}
+
+func GetCoffeeLP(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
+	heroImagePath := "hero_image_desktop.html"
+	headerPath := "header_desktop.html"
+	if ctx.IsMobile {
+		heroImagePath = "hero_image_mobile.html"
+		headerPath = "header_mobile.html"
+	}
+
+	fileName := "coffee_lp.html"
+	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
+	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + headerPath, constants.WEBSITE_TEMPLATES_DIR + heroImagePath, quoteForm, constants.WEBSITE_TEMPLATES_DIR + fileName}
+
+	nonce, ok := r.Context().Value("nonce").(string)
+	if !ok {
+		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
+		return
+	}
+
+	csrfToken, ok := r.Context().Value("csrf_token").(string)
+	if !ok {
+		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
+		return
+	}
+
+	data := ctx
+	data.PageTitle = "Miami Mobile Coffee Cart Catering for Events — " + constants.CompanyName
+	data.Nonce = nonce
+	data.CSRFToken = csrfToken
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
