@@ -7,22 +7,21 @@ import (
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
 	"github.com/davidalvarez305/yd_cocktails/database"
-	"github.com/davidalvarez305/yd_cocktails/helpers"
 	"github.com/davidalvarez305/yd_cocktails/models"
 	"github.com/google/uuid"
 )
 
 const (
-	audioTranscriptionS3Path = "/uploads/audio/"
-	textTranscriptionS3Path  = "/uploads/transcription/"
+	audioTranscriptionS3Path = "uploads/audio/"
+	textTranscriptionS3Path  = "uploads/transcription/"
 )
 
 func TranscribePhoneCall(phoneCall models.PhoneCall) error {
 	// Download the file from Twilio
 	audioFileName := uuid.New().String() + ".mp3"
 	localAudioFilePath := constants.LOCAL_FILES_DIR + audioFileName
-	audioFileURL := phoneCall.RecordingURL
-	err := helpers.DownloadFileFromURL(audioFileURL, localAudioFilePath)
+
+	err := DownloadFileFromTwilio(phoneCall.RecordingURL, localAudioFilePath)
 	if err != nil {
 		fmt.Printf("ERROR DOWNLOADING AUDIO FILE: %+v\n", err)
 		return err
@@ -52,7 +51,7 @@ func TranscribePhoneCall(phoneCall models.PhoneCall) error {
 	}
 
 	// Transcribe audio file
-	audioFileS3URL := "s3://" + constants.AWSS3BucketName + audioS3FilePath
+	audioFileS3URL := "s3://" + constants.AWSS3BucketName + "/" + audioS3FilePath
 	transcriptionID, transcriptionText, err := TranscribeAudio(audioFileS3URL)
 	if err != nil {
 		fmt.Printf("ERROR TRANSCRIBING AUDIO: %+v\n", err)

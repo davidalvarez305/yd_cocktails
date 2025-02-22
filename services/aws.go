@@ -89,16 +89,20 @@ func TranscribeAudio(audioFileURL string) (string, string, error) {
 
 	client := transcribe.NewFromConfig(cfg)
 
-	jobName := "transcription-" + uuid.New().String()
+	jobName := uuid.New().String()
 
-	_, err = client.StartTranscriptionJob(context.TODO(), &transcribe.StartTranscriptionJobInput{
-		TranscriptionJobName: aws.String(jobName),
-		LanguageCode:         types.LanguageCodeEnUs,
+	jobInput := &transcribe.StartTranscriptionJobInput{
+		TranscriptionJobName:      aws.String(jobName),
+		LanguageOptions:           []types.LanguageCode{types.LanguageCodeEsUs, types.LanguageCodeEnUs},
+		IdentifyMultipleLanguages: aws.Bool(true),
 		Media: &types.Media{
 			MediaFileUri: aws.String(audioFileURL),
 		},
 		OutputBucketName: aws.String(constants.AWSS3BucketName),
-	})
+		OutputKey:        aws.String("uploads/jobs/" + jobName + ".json"),
+	}
+
+	_, err = client.StartTranscriptionJob(context.TODO(), jobInput)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to start transcription job: %w", err)
 	}

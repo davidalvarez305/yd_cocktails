@@ -2,7 +2,11 @@ package services
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 
+	"github.com/davidalvarez305/yd_cocktails/constants"
 	twilio "github.com/twilio/twilio-go"
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
@@ -50,4 +54,53 @@ func InitiateOutboundCall(from, twiML string) (openapi.ApiV2010Call, error) {
 	call = *outboundCall
 
 	return call, nil
+}
+
+func ListCallRecordingsForPhoneCall(callSID string) ([]openapi.ApiV2010Recording, error) {
+	client := twilio.NewRestClient()
+
+	params := &openapi.ListRecordingParams{}
+	params.SetCallSid(callSID)
+
+	recordings, err := client.Api.ListRecording(params)
+	if err != nil {
+		fmt.Printf("ERROR FETCHING CALL RECORDINGS: %+v\n", err)
+		return nil, err
+	}
+
+	return recordings, nil
+}
+
+func DownloadFileFromTwilio(fileURL, localFilePath string) error {
+	req, err := http.NewRequest("GET", fileURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.SetBasicAuth(constants.TwilioAccountSID, constants.TwilioAuthToken)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to download file, status: %s", resp.Status)
+	}
+
+	outFile, err := os.Create(localFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to create local file: %w", err)
+	}
+	defer outFile.Close()
+
+	_, err = io.Copy(outFile, resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to save file: %w", err)
+	}
+
+	fmt.Println("File downloaded successfully:", localFilePath)
+	return nil
 }
