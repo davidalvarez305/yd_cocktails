@@ -196,9 +196,14 @@ func SavePhoneCall(phoneCall models.PhoneCall) error {
 	defer stmt.Close()
 
 	var callDuration sql.NullInt64
+	var recordingURL sql.NullString
 
 	if phoneCall.CallDuration != 0 {
 		callDuration = sql.NullInt64{Int64: int64(phoneCall.CallDuration), Valid: true}
+	}
+
+	if phoneCall.RecordingURL != "" {
+		recordingURL = sql.NullString{String: phoneCall.RecordingURL, Valid: true}
 	}
 
 	_, err = stmt.Exec(
@@ -208,7 +213,7 @@ func SavePhoneCall(phoneCall models.PhoneCall) error {
 		phoneCall.CallFrom,
 		phoneCall.CallTo,
 		phoneCall.IsInbound,
-		phoneCall.RecordingURL,
+		recordingURL,
 		phoneCall.Status,
 	)
 	if err != nil {
@@ -990,13 +995,11 @@ func UpdatePhoneCall(phoneCall models.PhoneCall) error {
 	query := `
 		UPDATE phone_call SET
 			call_duration = $1,
-			recording_url = $2,
-			status = $3
-		WHERE external_id = $4`
+			status = $2
+		WHERE external_id = $3`
 
 	args := []interface{}{
 		utils.CreateNullInt(&phoneCall.CallDuration),
-		utils.CreateNullString(&phoneCall.RecordingURL),
 		utils.CreateNullString(&phoneCall.Status),
 		phoneCall.ExternalID,
 	}

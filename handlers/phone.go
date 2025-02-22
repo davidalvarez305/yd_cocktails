@@ -25,8 +25,6 @@ func PhoneServiceHandler(w http.ResponseWriter, r *http.Request) {
 			handleOutboundCall(w, r)
 		case "/call/inbound/end":
 			handleInboundCallEnd(w, r)
-		case "/call/inbound/recording-callback":
-			handleInboundCallRecordingCallback(w, r)
 		case "/sms/inbound":
 			handleInboundSMS(w, r)
 		case "/sms/outbound":
@@ -65,14 +63,16 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 			<Dial record="true" recordingStatusCallback="%s" action="%s">%s</Dial>
 		</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, forwardPhoneNumber)
 
+		recordingURL := "https://api.twilio.com/Accounts/" + incomingPhoneCall.AccountSid + "/Calls/" + incomingPhoneCall.CallSid + "/Recordings.json"
+
 		phoneCall := models.PhoneCall{
 			ExternalID:   incomingPhoneCall.CallSid,
 			CallDuration: 0,
 			DateCreated:  time.Now().Unix(),
-			CallFrom:     incomingPhoneCall.From,
-			CallTo:       incomingPhoneCall.To,
+			CallFrom:     helpers.RemoveCountryCode(incomingPhoneCall.From),
+			CallTo:       helpers.RemoveCountryCode(incomingPhoneCall.To),
 			IsInbound:    true,
-			RecordingURL: "",
+			RecordingURL: recordingURL,
 			Status:       incomingPhoneCall.CallStatus,
 		}
 
@@ -113,7 +113,6 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	phoneCall.CallDuration = dialStatus.DialCallDuration
-	phoneCall.RecordingURL = dialStatus.RecordingURL
 	phoneCall.Status = dialStatus.DialCallStatus
 
 	if err := database.UpdatePhoneCall(phoneCall); err != nil {
@@ -205,12 +204,8 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var recordingURL string
-	subResources := outboundCall.SubresourceUris
-
-	if subResources != nil {
-		if recordings, ok := (*subResources)["recordings"].(string); ok {
-			recordingURL = recordings
-		}
+	if helpers.SafeString(outboundCall.ParentCallSid) != "" {
+		recordingURL = "https://api.twilio.com/Accounts/" + helpers.SafeString(outboundCall.AccountSid) + "/Calls/" + helpers.SafeString(outboundCall.ParentCallSid) + "/Recordings.json"
 	}
 
 	phoneCall := models.PhoneCall{
@@ -372,27 +367,4 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-}
-
-func handleInboundCallRecordingCallback(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
-		return
-	}
-
-	callSid := r.FormValue("CallSid")
-	recordingURL := r.FormValue("RecordingUrl")
-
-	if callSid == "" || recordingURL == "" {
-		http.Error(w, "Missing required parameters", http.StatusBadRequest)
-		return
-	}
-
-	if err := database.UpdateCallRecordingURL(callSid, recordingURL); err != nil {
-		fmt.Printf("Failed to update call recording: %+v\n", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
 }

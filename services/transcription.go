@@ -126,7 +126,7 @@ func TranscribePhoneCall(phoneCall models.PhoneCall) error {
 func checkPhoneCallTranscription() {
 	phoneCalls, err := database.GetPhoneCallsWithoutTranscription()
 	if err != nil {
-		fmt.Printf("ERROR SAVING TRANSCRIPTION: %+v\n", err)
+		fmt.Printf("ERROR GETTING PHONE CALLS WITHOUT TRANSCRIPTION: %+v\n", err)
 		return
 	}
 
