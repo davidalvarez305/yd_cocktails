@@ -631,3 +631,10 @@ type LeadNextActionList struct {
 	NextAction       string `json:"next_action" form:"next_action" schema:"next_action"`
 	ActionDate       string `json:"action_date" form:"action_date" schema:"action_date"`
 }
+
+type LeadConversation struct {
+	Type        string `json:"type" form:"type" schema:"type"`
+	Content     string `json:"content" form:"content" schema:"content"`
+	FullName    string `json:"full_name" form:"full_name" schema:"full_name"`
+	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+}

@@ -2473,29 +2473,65 @@ func GetAutomatedFollowUpMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	previousConversations, err := database.GetPreviousConversations(lead.LeadID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting lead conversations from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	// Build conversation history string
+	var conversationHistory string
+	for _, convo := range previousConversations {
+		conversationHistory += fmt.Sprintf("[%s] %s\n", convo.Type, convo.Content)
+	}
+
 	var prompt string
 
-	// Define the prompts
-	firstFollowUpEnglishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. This is my first follow-up message.
-	Responding only with the message I'm going to send, write a follow up message to re-engage the lead about our bartending services. Address this person as cordially as possible while being professional.
-	The message should read like two friends talking to each other through text.
-	`, lead.FullName, lead.Message)
+	// Define the prompts with previous conversations context
+	firstFollowUpEnglishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. 
+	These are our past conversations with this person:
+	%s
+	This is my first follow-up message. Responding only with the message I'm going to send, write a follow-up message to re-engage the lead about our bartending services. 
+	Address this person as cordially as possible while being professional. The message should read like two friends talking to each other through text.
+	`, lead.FullName, lead.Message, conversationHistory)
 
-	secondFollowUpEnglishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. This is my second follow-up message.
-	Responding only with the message I'm going to send, write a follow up message to re-engage the lead about our bartending services. Address this person as cordially as possible while being professional.
-	The message should read like two friends talking to each other through text. While being cordial, remind the person that we contacted them in the past and if they're not willing to move forward, we'll stop reaching out.
-	`, lead.FullName, lead.Message)
+	fmt.Println(firstFollowUpEnglishPrompt)
 
-	firstFollowUpSpanishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. This is my first follow-up message.
-	Responding only with the message I'm going to send, write a follow up message to re-engage the lead about our bartending services. Address this person as cordially as possible while being professional.
-	The message should read like two friends talking to each other through text, address the person by their first name, maintain an attitude of friendliness & professionality. Write this text in Spanish. Address this person using usted, which is a sign of respect.
-	`, lead.FullName, lead.Message)
+	secondFollowUpEnglishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. 
+	These are our past conversations with this person:
+	%s
+	This is my second follow-up message. Responding only with the message I'm going to send, write a follow-up message to re-engage the lead about our bartending services. 
+	Address this person as cordially as possible while being professional. The message should read like two friends talking to each other through text. 
+	While being cordial, remind the person that we contacted them in the past and if they're not willing to move forward, we'll stop reaching out.
+	`, lead.FullName, lead.Message, conversationHistory)
 
-	secondFollowUpSpanishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. This is my second follow-up message.
-	Responding only with the message I'm going to send, write a follow up message to re-engage the lead about our bartending services. Address this person as cordially as possible while being professional.
-	The message should read like two friends talking to each other through text, address the person by their first name, maintain an attitude of friendliness & professionality. While being cordial, remind the person that we contacted them in the past and if they're not willing to move forward, we'll stop reaching out.
-	 Write this text in Spanish. Address this person using usted, which is a sign of respect.
-	`, lead.FullName, lead.Message)
+	firstFollowUpSpanishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. 
+	These are our past conversations with this person:
+	%s
+	This is my first follow-up message. Responding only with the message I'm going to send, write a follow-up message to re-engage the lead about our bartending services. 
+	Address this person as cordially as possible while being professional. The message should read like two friends talking to each other through text, 
+	address the person by their first name, maintain an attitude of friendliness & professionalism. Write this text in Spanish. 
+	Address this person using "usted," which is a sign of respect.
+	`, lead.FullName, lead.Message, conversationHistory)
+
+	secondFollowUpSpanishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. 
+	These are our past conversations with this person:
+	%s
+	This is my second follow-up message. Responding only with the message I'm going to send, write a follow-up message to re-engage the lead about our bartending services. 
+	Address this person as cordially as possible while being professional. The message should read like two friends talking to each other through text, 
+	address the person by their first name, maintain an attitude of friendliness & professionalism. 
+	While being cordial, remind the person that we contacted them in the past and if they're not willing to move forward, we'll stop reaching out. 
+	Write this text in Spanish. Address this person using "usted," which is a sign of respect.
+	`, lead.FullName, lead.Message, conversationHistory)
 
 	switch option {
 	case "First Follow Up (ENG)":

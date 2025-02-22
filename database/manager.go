@@ -2822,3 +2822,58 @@ func DeleteLeadNextAction(id int) error {
 
 	return nil
 }
+
+func GetPreviousConversations(leadId int) ([]types.LeadConversation, error) {
+	var leadConversations []types.LeadConversation
+
+	query := `
+		SELECT 
+			'call' AS type,
+			t.text AS content,
+			l.full_name,
+			l.phone_number
+		FROM phone_call_transcription AS t
+		JOIN phone_call AS p ON t.phone_call_id = p.phone_call_id
+		JOIN lead AS l ON l.phone_number IN (p.call_to, p.call_from)
+		WHERE l.lead_id = $1
+
+		UNION ALL
+
+		SELECT 
+			'message' AS type,
+			m.text AS content,
+			l.full_name,
+			l.phone_number
+		FROM message AS m
+		JOIN lead AS l ON l.phone_number IN (m.text_to, m.text_from)
+		WHERE l.lead_id = $1;
+	`
+
+	rows, err := DB.Query(query, leadId)
+	if err != nil {
+		return leadConversations, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var leadConversation types.LeadConversation
+
+		err := rows.Scan(
+			&leadConversation.Type,
+			&leadConversation.Content,
+			&leadConversation.FullName,
+			&leadConversation.PhoneNumber,
+		)
+		if err != nil {
+			return leadConversations, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		leadConversations = append(leadConversations, leadConversation)
+	}
+
+	if err := rows.Err(); err != nil {
+		return leadConversations, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return leadConversations, nil
+}
