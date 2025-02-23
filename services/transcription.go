@@ -7,6 +7,7 @@ import (
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
 	"github.com/davidalvarez305/yd_cocktails/database"
+	"github.com/davidalvarez305/yd_cocktails/helpers"
 	"github.com/davidalvarez305/yd_cocktails/models"
 	"github.com/google/uuid"
 )
@@ -116,6 +117,12 @@ func TranscribePhoneCall(phoneCall models.PhoneCall) error {
 	err = database.CreatePhoneCallTranscription(transcription)
 	if err != nil {
 		fmt.Printf("ERROR SAVING TRANSCRIPTION: %+v\n", err)
+		return err
+	}
+
+	err = helpers.DeleteFilesInDirectory(constants.LOCAL_FILES_DIR)
+	if err != nil {
+		fmt.Printf("ERROR DELETING LOCAL FILES: %+v\n", err)
 		return err
 	}
 

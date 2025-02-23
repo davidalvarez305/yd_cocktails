@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func GetFileInfo(filePath string) (string, *multipart.FileHeader, error) {
@@ -59,5 +60,23 @@ func DownloadFileFromURL(url, localFilePath string) error {
 	}
 
 	fmt.Printf("File downloaded successfully to %s\n", localFilePath)
+	return nil
+}
+
+func DeleteFilesInDirectory(dirPath string) error {
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if !file.IsDir() && !strings.HasSuffix(file.Name(), ".md") {
+			err := os.Remove(dirPath + file.Name())
+			if err != nil {
+				fmt.Printf("ERROR DELETING FILE %s: %+v\n", file.Name(), err)
+			}
+		}
+	}
+
 	return nil
 }
