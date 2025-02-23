@@ -1012,6 +1012,25 @@ func UpdatePhoneCall(phoneCall models.PhoneCall) error {
 	return nil
 }
 
+func SetRecordingURLToPhoneCall(callSid, recordingURL string) error {
+	query := `
+		UPDATE phone_call
+		SET recording_url = $1
+		WHERE external_id = $2`
+
+	args := []interface{}{
+		recordingURL,
+		callSid,
+	}
+
+	_, err := DB.Exec(query, args...)
+	if err != nil {
+		return fmt.Errorf("error updating phone call: %w", err)
+	}
+
+	return nil
+}
+
 func GetSession(userKey string) (models.Session, error) {
 	var session models.Session
 	sqlStatement := `

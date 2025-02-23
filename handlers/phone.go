@@ -25,6 +25,8 @@ func PhoneServiceHandler(w http.ResponseWriter, r *http.Request) {
 			handleOutboundCall(w, r)
 		case "/call/inbound/end":
 			handleInboundCallEnd(w, r)
+		case "/call/inbound/recording-callback":
+			handleCallRecordingCallback(w, r)
 		case "/sms/inbound":
 			handleInboundSMS(w, r)
 		case "/sms/outbound":
@@ -58,12 +60,12 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		recordingCallbackURL := fmt.Sprintf("%s%s", constants.RootDomain, constants.TwilioRecordingCallbackWebhook)
+
 		twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 		<Response>
-			<Dial record="true" recordingStatusCallback="%s" action="%s">%s</Dial>
-		</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, forwardPhoneNumber)
-
-		recordingURL := "https://api.twilio.com/Accounts/" + incomingPhoneCall.AccountSid + "/Calls/" + incomingPhoneCall.CallSid + "/Recordings.json"
+			<Dial record="true" recordingStatusCallback="%s" recordingStatusCallbackEvent="completed" action="%s">%s</Dial>
+		</Response>`, recordingCallbackURL, constants.RootDomain+constants.TwilioCallbackWebhook, forwardPhoneNumber)
 
 		phoneCall := models.PhoneCall{
 			ExternalID:   incomingPhoneCall.CallSid,
@@ -72,7 +74,7 @@ func handleInboundCall(w http.ResponseWriter, r *http.Request) {
 			CallFrom:     helpers.RemoveCountryCode(incomingPhoneCall.From),
 			CallTo:       helpers.RemoveCountryCode(incomingPhoneCall.To),
 			IsInbound:    true,
-			RecordingURL: recordingURL,
+			RecordingURL: "",
 			Status:       incomingPhoneCall.CallStatus,
 		}
 
@@ -130,44 +132,10 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Send 1st missed call text
 	if callMissed && isFirstCall && !phoneCall.IsInbound {
-		var textMessageTemplateNotification = fmt.Sprintf(
-			`We missed you!
-			%s
-			`, `Hey! This is David with YD Cocktails.
-			
-			We're reaching out to you about your bartending service inquiry. We tried giving you a call but couldn't connect.
-			
-			Please give us a call back when you have a chance or let us know how we can help you.
-			
-			Todos hablamos español perfecto!`)
-
-		sentMessage, err := services.SendTextMessage(phoneCall.CallTo, constants.CompanyPhoneNumber, textMessageTemplateNotification)
-
+		err = services.MissedCallFollowUpText(phoneCall)
 		if err != nil {
-			fmt.Printf("ERROR SENDING MISSED CALL NOTIFICATION MSG: %+v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		var externalID = helpers.SafeString(sentMessage.Sid)
-		var messageStatus = helpers.SafeString(sentMessage.Status)
-
-		msg := models.Message{
-			ExternalID:  externalID,
-			Text:        textMessageTemplateNotification,
-			TextFrom:    constants.CompanyPhoneNumber,
-			TextTo:      phoneCall.CallTo,
-			IsInbound:   false,
-			DateCreated: time.Now().Unix(),
-			Status:      messageStatus,
-			IsRead:      true,
-		}
-
-		err = database.SaveSMS(msg)
-		if err != nil {
-			fmt.Printf("ERROR SAVING MISSED CALL NOTIFICATION MSG: %+v\n", err)
+			fmt.Printf("ERROR SENDING MISSED CALL TEXT: %+v\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -191,21 +159,18 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	recordingCallbackURL := fmt.Sprintf("%s%s", constants.RootDomain, constants.TwilioRecordingCallbackWebhook)
+
 	twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 	<Response>
-		<Dial action="%s">%s</Dial>
-	</Response>`, constants.RootDomain+constants.TwilioCallbackWebhook, "+1"+to)
+		<Dial record="true" recordingStatusCallback="%s" recordingStatusCallbackEvent="completed" action="%s">%s</Dial>
+	</Response>`, recordingCallbackURL, constants.RootDomain+constants.TwilioCallbackWebhook, "+1"+to)
 
 	outboundCall, err := services.InitiateOutboundCall(from, twiML)
 	if err != nil {
 		fmt.Println("Error initiating phone call:", err)
 		http.Error(w, "Failed to initiate phone call", http.StatusInternalServerError)
 		return
-	}
-
-	var recordingURL string
-	if helpers.SafeString(outboundCall.ParentCallSid) != "" {
-		recordingURL = "https://api.twilio.com/Accounts/" + helpers.SafeString(outboundCall.AccountSid) + "/Calls/" + helpers.SafeString(outboundCall.ParentCallSid) + "/Recordings.json"
 	}
 
 	phoneCall := models.PhoneCall{
@@ -215,7 +180,7 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 		CallFrom:     from,
 		CallTo:       to,
 		IsInbound:    false,
-		RecordingURL: recordingURL,
+		RecordingURL: "",
 		Status:       helpers.SafeString(outboundCall.Status),
 	}
 
@@ -367,4 +332,30 @@ func handleOutboundSMS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func handleCallRecordingCallback(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
+		return
+	}
+
+	callSID := r.FormValue("CallSid")
+	recordingSID := r.FormValue("RecordingSid")
+
+	if callSID == "" || recordingSID == "" {
+		http.Error(w, "Missing CallSid or RecordingSid", http.StatusBadRequest)
+		return
+	}
+
+	recordingURL := fmt.Sprintf("https://api.twilio.com/2010-04-01/Accounts/%s/Recordings/%s.mp3?RequestedChannels=2", constants.TwilioAccountSID, recordingSID)
+
+	if err := database.SetRecordingURLToPhoneCall(callSID, recordingURL); err != nil {
+		fmt.Printf("FAILED TO UPDATE PHONE CALL WITH RECORDING URL: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/xml")
+	w.WriteHeader(http.StatusOK)
 }

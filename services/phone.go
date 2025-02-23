@@ -5,8 +5,12 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/database"
+	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/models"
 	twilio "github.com/twilio/twilio-go"
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
@@ -56,21 +60,6 @@ func InitiateOutboundCall(from, twiML string) (openapi.ApiV2010Call, error) {
 	return call, nil
 }
 
-func ListCallRecordingsForPhoneCall(callSID string) ([]openapi.ApiV2010Recording, error) {
-	client := twilio.NewRestClient()
-
-	params := &openapi.ListRecordingParams{}
-	params.SetCallSid(callSID)
-
-	recordings, err := client.Api.ListRecording(params)
-	if err != nil {
-		fmt.Printf("ERROR FETCHING CALL RECORDINGS: %+v\n", err)
-		return nil, err
-	}
-
-	return recordings, nil
-}
-
 func DownloadFileFromTwilio(fileURL, localFilePath string) error {
 	req, err := http.NewRequest("GET", fileURL, nil)
 	if err != nil {
@@ -102,5 +91,46 @@ func DownloadFileFromTwilio(fileURL, localFilePath string) error {
 	}
 
 	fmt.Println("File downloaded successfully:", localFilePath)
+	return nil
+}
+
+func MissedCallFollowUpText(phoneCall models.PhoneCall) error {
+	var textMessageTemplateNotification = fmt.Sprintf(
+		`We missed you!
+		%s
+		`, `Hey! This is David with YD Cocktails.
+		
+		We're reaching out to you about your bartending service inquiry. We tried giving you a call but couldn't connect.
+		
+		Please give us a call back when you have a chance or let us know how we can help you.
+		
+		Todos hablamos español perfecto!`)
+
+	sentMessage, err := SendTextMessage(phoneCall.CallTo, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+
+	if err != nil {
+		fmt.Printf("ERROR SENDING MISSED CALL NOTIFICATION MSG: %+v\n", err)
+		return err
+	}
+
+	var externalID = helpers.SafeString(sentMessage.Sid)
+	var messageStatus = helpers.SafeString(sentMessage.Status)
+
+	msg := models.Message{
+		ExternalID:  externalID,
+		Text:        textMessageTemplateNotification,
+		TextFrom:    constants.CompanyPhoneNumber,
+		TextTo:      phoneCall.CallTo,
+		IsInbound:   false,
+		DateCreated: time.Now().Unix(),
+		Status:      messageStatus,
+		IsRead:      true,
+	}
+
+	err = database.SaveSMS(msg)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
