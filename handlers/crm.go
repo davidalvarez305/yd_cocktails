@@ -2504,8 +2504,6 @@ func GetAutomatedFollowUpMessage(w http.ResponseWriter, r *http.Request) {
 	Address this person as cordially as possible while being professional. The message should read like two friends talking to each other through text.
 	`, lead.FullName, lead.Message, conversationHistory)
 
-	fmt.Println(firstFollowUpEnglishPrompt)
-
 	secondFollowUpEnglishPrompt := fmt.Sprintf(`I have a lead whose full name is: %s. This person's original inquiry was: %s. 
 	These are our past conversations with this person:
 	%s
