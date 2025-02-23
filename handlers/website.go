@@ -164,10 +164,10 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 }
 
 func GetCoffeeLP(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
-	heroImagePath := "hero_image_desktop.html"
+	heroImagePath := "coffee_hero_image_desktop.html"
 	headerPath := "header_desktop.html"
 	if ctx.IsMobile {
-		heroImagePath = "hero_image_mobile.html"
+		heroImagePath = "coffee_hero_image_mobile.html"
 		headerPath = "header_mobile.html"
 	}
 
