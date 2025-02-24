@@ -51,6 +51,10 @@
 				</th>
 				<th
 					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
+					Next Action Date
+				</th>
+				<th
+					class="bg-gray-100/75 px-3 py-4 text-center font-semibold text-gray-900 dark:bg-gray-700/25 dark:text-gray-50">
 					Archive
 				</th>
 			</tr>
@@ -85,6 +89,9 @@
 				</td>
 				<td class="p-3 text-center">
 					<p class="font-medium">{{ .NextAction }}</p>
+				</td>
+				<td class="p-3 text-center">
+					<p class="font-medium">{{ .NextActionDate }}</p>
 				</td>
 				<td class="p-3 text-center">
 					<button data-lead-id="{{ .LeadID }}"
