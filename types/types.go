@@ -594,7 +594,6 @@ type FrontendNote struct {
 	UserName  string `json:"user_name"`
 	DateAdded string `json:"date_added"`
 	Note      string `json:"note"`
-	NoteID    int    `json:"note_id"`
 }
 
 type SetSMSToReadForm struct {

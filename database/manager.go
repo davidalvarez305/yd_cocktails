@@ -2531,8 +2531,7 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 
 	query := `SELECT u.username,
 	n.note,
-	n.date_added,
-	n.note_id
+	n.date_added
 	FROM "lead_note" AS n
 	JOIN "user" AS u ON u.user_id = n.added_by_user_id
 	WHERE n.lead_id = $1
@@ -2553,7 +2552,6 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 			&note.UserName,
 			&note.Note,
 			&dateAdded,
-			&note.NoteID,
 		)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
