@@ -10,7 +10,7 @@
                 <span class="opacity-25">•</span>
                 <span class="notesDateAdded text-gray-500 dark:text-gray-400">{{ .DateAdded }}</span>
             </h5>
-            <p class="mb-1 text-sm leading-relaxed" id="note-{{ .UserName }}">
+            <p class="note mb-1 text-sm leading-relaxed">
                 {{ .Note }}
             </p>
         </div>
@@ -20,15 +20,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js" nonce="{{ .Nonce }}"></script>
 
     <script nonce="{{ .Nonce }}">
-        document.addEventListener('DOMContentLoaded', function () {
-            {{ range .LeadNotes }}
-            const noteId = "note-{{ .UserName }}";
-            const content = `{{ .Note }}`;
-            const sanitizedContent = DOMPurify.sanitize(content);
-    
-            // Insert sanitized HTML into the element
-            document.getElementById(noteId).innerHTML = sanitizedContent;
-            {{ end }}
-        });
+        function handleSafelyInsertInnerHTML() {
+            const notes = document.querySelectorAll(".note");
+
+            notes.forEach(note => {
+                note.innerHTML = DOMPurify.sanitize(note.textContent.trim());
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => handleSafelyInsertInnerHTML());
     </script>
 {{ end }}
