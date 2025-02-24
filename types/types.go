@@ -623,13 +623,13 @@ type LeadNextActionForm struct {
 	LeadNextActionID *int    `json:"lead_next_action_id" form:"lead_next_action_id" schema:"lead_next_action_id"`
 	NextActionID     *int    `json:"next_action_id" form:"next_action_id" schema:"next_action_id"`
 	LeadID           *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	ActionDate       *int64  `json:"action_date" form:"action_date" schema:"action_date"`
+	NextActionDate   *int64  `json:"next_action_date" form:"next_action_date" schema:"next_action_date"`
 }
 
 type LeadNextActionList struct {
 	LeadNextActionID int    `json:"lead_next_action_id" form:"lead_next_action_id" schema:"lead_next_action_id"`
 	NextAction       string `json:"next_action" form:"next_action" schema:"next_action"`
-	ActionDate       string `json:"action_date" form:"action_date" schema:"action_date"`
+	NextActionDate   string `json:"next_action_date" form:"next_action_date" schema:"next_action_date"`
 }
 
 type LeadConversation struct {

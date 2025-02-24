@@ -2783,7 +2783,7 @@ func CreateLeadNextAction(leadNextAction types.LeadNextActionForm) error {
 		query,
 		leadNextAction.NextActionID,
 		leadNextAction.LeadID,
-		leadNextAction.ActionDate,
+		leadNextAction.NextActionDate,
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting lead next action: %w", err)
@@ -2818,7 +2818,7 @@ func GetLeadNextActionsByLeadID(leadId int) ([]types.LeadNextActionList, error) 
 			return leadNextActions, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		leadNextAction.ActionDate = utils.FormatTimestamp(nextActionDate.Unix())
+		leadNextAction.NextActionDate = utils.FormatTimestamp(nextActionDate.Unix())
 
 		leadNextActions = append(leadNextActions, leadNextAction)
 	}

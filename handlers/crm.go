@@ -2637,8 +2637,8 @@ func PostLeadNextAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "lead_next_actions.html",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_next_actions.html",
+		TemplateName: "lead_next_actions_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_next_actions_table.html",
 		Data: map[string]any{
 			"LeadNextActions": leadNextActions,
 		},
