@@ -6,6 +6,7 @@ import (
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
 	"github.com/davidalvarez305/yd_cocktails/database"
+	"github.com/davidalvarez305/yd_cocktails/types"
 )
 
 func UpdateInvoicesWorkflow(quoteId int, eventDate int64) error {
@@ -16,7 +17,45 @@ func UpdateInvoicesWorkflow(quoteId int, eventDate int64) error {
 		return err
 	}
 
+	isDepositPaid, err := database.IsDepositPaid(quoteId)
+	if err != nil {
+		fmt.Printf("ERROR CHECKING IF DEPOSIT IS PAID: %+v\n", err)
+		return err
+	}
+
+	var remainingInvoice types.LeadQuoteInvoice
+
+	if isDepositPaid {
+		remainingInvoice, err := database.GetRemainingInvoice(quoteId)
+		if err != nil {
+			fmt.Printf("ERROR GETTING REMAINING INVOICE: %+v\n", err)
+			return err
+		}
+
+		depositStripeInvoiceId, err := database.GetDepositStripeInvoiceID(quoteId)
+		if err != nil {
+			fmt.Printf("ERROR GETTING DEPOSIT STRIPE INVOICE ID: %+v\n", err)
+			return err
+		}
+
+		depositInvoice, err := GetStripeInvoice(depositStripeInvoiceId)
+		if err != nil {
+			fmt.Printf("ERROR GETTING STRIPE INVOICE: %+v\n", err)
+			return err
+		}
+
+		// Subtract from the invoice amount what was already deducted from the deposit
+		// This way the only thing that changes is the amount for which the invoice was updated by
+		// The customer now only has to pay the difference between the new invoice amount and the deposit that was paid
+		remainingInvoice.Amount = remainingInvoice.Amount - float64(depositInvoice.AmountPaid/100) // convert to cents before division
+	}
+
 	for _, leadQuoteInvoice := range leadQuoteInvoices {
+		// If deposit is paid, the remaining invoice will be handled differently using pre-calculated values
+		// In this way, we can continue this flow as usual, only changing the logic beforehand
+		if isDepositPaid {
+			leadQuoteInvoice = remainingInvoice
+		}
 
 		// Calculate new due date
 		dueDate := time.Now().Add(24 * time.Hour).Unix()

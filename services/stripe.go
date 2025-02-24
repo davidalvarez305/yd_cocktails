@@ -115,3 +115,20 @@ func UpdateStripeInvoice(leadQuoteInvoice types.LeadQuoteInvoice) (stripe.Invoic
 
 	return updatedInvoice, nil
 }
+
+func GetStripeInvoice(stripeInvoiceId string) (stripe.Invoice, error) {
+	var stripeInvoice stripe.Invoice
+
+	originalInvoice, err := invoice.Get(stripeInvoiceId, nil)
+	if err != nil {
+		return stripeInvoice, fmt.Errorf("failed to retrieve invoice: %v", err)
+	}
+
+	if originalInvoice == nil {
+		return stripeInvoice, fmt.Errorf("invoice with stripeInvoiceId %s not found", stripeInvoiceId)
+	}
+
+	stripeInvoice = *originalInvoice
+
+	return stripeInvoice, nil
+}

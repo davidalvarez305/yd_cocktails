@@ -218,6 +218,13 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 				fmt.Printf("ERROR SETTING INVOICES TO VOID: %+v\n", err)
 			}
 		}
+
+		if inv.InvoiceTypeID == constants.DepositInvoiceTypeID {
+			err = database.VoidFullInvoice(quote.QuoteID)
+			if err != nil {
+				fmt.Printf("ERROR SETTING FULL INVOICE TO VOID: %+v\n", err)
+			}
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)

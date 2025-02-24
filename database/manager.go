@@ -2030,7 +2030,8 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 			WHEN i.invoice_type_id = 2 THEN 0.75
 			ELSE 1.00
 		END AS invoice_multiplier,
-		i.invoice_type_id
+		i.invoice_type_id,
+		i.invoice_status_id
 	FROM quote AS q
 	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	JOIN invoice AS i ON i.quote_id = q.quote_id
@@ -2122,6 +2123,23 @@ func SetOpenInvoicesToVoid(quoteId int) error {
 		AND i.invoice_status_id <> $3;
 	`
 	_, err := DB.Exec(query, quoteId, constants.VoidInvoiceStatusID, constants.PaidInvoiceStatusID)
+	if err != nil {
+		return fmt.Errorf("failed to assign stripe customer id to lead: %v", err)
+	}
+
+	return nil
+}
+
+func VoidFullInvoice(quoteId int) error {
+	query := `
+		UPDATE invoice AS i
+		SET i.invoice_status_id = $2
+		FROM quote AS q
+		WHERE q.quote_id = i.quote_id
+		AND q.quote_id = $1
+		AND i.invoice_type_id = $3;
+	`
+	_, err := DB.Exec(query, quoteId, constants.VoidInvoiceStatusID, constants.FullInvoiceTypeID)
 	if err != nil {
 		return fmt.Errorf("failed to assign stripe customer id to lead: %v", err)
 	}
@@ -2913,4 +2931,97 @@ func GetPreviousConversations(leadId int) ([]types.LeadConversation, error) {
 	}
 
 	return leadConversations, nil
+}
+
+func IsDepositPaid(quoteId int) (bool, error) {
+	var isDepositPaid bool
+	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM lead WHERE quote_id = $1 AND invoice_status_id = $2 AND invoice_type_id = $3)",
+		quoteId,
+		constants.PaidInvoiceStatusID,
+		constants.DepositInvoiceTypeID).Scan(&isDepositPaid)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return isDepositPaid, nil
+}
+
+func GetRemainingInvoice(quoteId int) (types.LeadQuoteInvoice, error) {
+	var leadQuoteInvoice types.LeadQuoteInvoice
+
+	query := `SELECT 
+		i.stripe_invoice_id, 
+		l.stripe_customer_id, 
+		SUM(qs.units * qs.price_per_unit::NUMERIC) AS total_amount,
+		i.due_date,
+		1.00 AS invoice_multiplier,
+		i.invoice_type_id,
+		i.invoice_status_id
+	FROM quote AS q
+	JOIN quote_service qs ON qs.quote_id = q.quote_id
+	JOIN invoice AS i ON i.quote_id = q.quote_id
+	JOIN lead AS l ON l.lead_id = q.lead_id
+	WHERE q.quote_id = $1 AND i.invoice_status_id = $2 AND i.invoice_type_id = $3
+	GROUP BY 
+		i.stripe_invoice_id, 
+		l.stripe_customer_id, 
+		i.due_date, 
+		i.invoice_type_id;`
+
+	row := DB.QueryRow(query, quoteId, constants.OpenInvoiceStatusID, constants.RemainingInvoiceTypeID)
+
+	var invoiceDueDate time.Time
+	var stripeCustomerId sql.NullString
+	var amount sql.NullFloat64
+
+	err := row.Scan(
+		&leadQuoteInvoice.StripeInvoiceID,
+		&stripeCustomerId,
+		&amount,
+		&invoiceDueDate,
+		&leadQuoteInvoice.InvoiceTypeMultiplier,
+		&leadQuoteInvoice.InvoiceTypeID,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return leadQuoteInvoice, nil
+		}
+		return leadQuoteInvoice, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	if amount.Valid {
+		leadQuoteInvoice.Amount = amount.Float64
+	}
+
+	if stripeCustomerId.Valid {
+		leadQuoteInvoice.StripeCustomerID = stripeCustomerId.String
+	}
+
+	leadQuoteInvoice.DueDate = invoiceDueDate.Unix()
+
+	return leadQuoteInvoice, nil
+}
+
+func GetDepositStripeInvoiceID(quoteId int) (string, error) {
+	var depositInvoiceId string
+
+	query := `SELECT i.stripe_invoice_id
+	FROM invoice AS i
+	WHERE i.quote_id = $1 AND i.invoice_status_id = $2 AND i.invoice_type_id = $3;`
+
+	row := DB.QueryRow(query, quoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID)
+
+	err := row.Scan(&depositInvoiceId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil
+		}
+		return "", fmt.Errorf("error scanning row: %w", err)
+	}
+
+	return depositInvoiceId, nil
 }

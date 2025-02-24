@@ -544,6 +544,7 @@ type LeadQuoteInvoice struct {
 	DueDate               int64   `json:"due_date" form:"due_date" schema:"due_date"`
 	InvoiceTypeMultiplier float64 `json:"invoice_type_multiplier" form:"invoice_type_multiplier" schema:"invoice_type_multiplier"`
 	InvoiceTypeID         int     `json:"invoice_type_id" form:"invoice_type_id" schema:"invoice_type_id"`
+	InvoiceStatusID       int     `json:"invoice_status_id" form:"invoice_status_id" schema:"invoice_status_id"`
 }
 
 type QuoteServiceList struct {
