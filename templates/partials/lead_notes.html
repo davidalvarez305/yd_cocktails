@@ -23,7 +23,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             {{ range .LeadNotes }}
             const noteId = "note-{{ .UserName }}";
-            const content = `{{ .Note | js }}`;
+            const content = `{{ .Note }}`;
             const sanitizedContent = DOMPurify.sanitize(content);
     
             // Insert sanitized HTML into the element
