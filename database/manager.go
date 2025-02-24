@@ -2049,6 +2049,7 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 	defer rows.Close()
 
 	var invoiceDueDate time.Time
+	var stripeCustomerId sql.NullString
 
 	for rows.Next() {
 		var leadQuoteInvoice types.LeadQuoteInvoice
@@ -2056,7 +2057,7 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 
 		err := rows.Scan(
 			&leadQuoteInvoice.StripeInvoiceID,
-			&leadQuoteInvoice.StripeCustomerID,
+			&stripeCustomerId,
 			&amount,
 			&invoiceDueDate,
 			&leadQuoteInvoice.InvoiceTypeMultiplier,
@@ -2068,6 +2069,10 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 
 		if amount.Valid {
 			leadQuoteInvoice.Amount = amount.Float64
+		}
+
+		if stripeCustomerId.Valid {
+			leadQuoteInvoice.StripeCustomerID = stripeCustomerId.String
 		}
 
 		leadQuoteInvoice.DueDate = invoiceDueDate.Unix()
