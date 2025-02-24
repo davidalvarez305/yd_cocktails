@@ -372,7 +372,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
 	query := `SELECT l.lead_id, l.full_name, l.phone_number, 
-			l.created_at, lm.language, li.interest, ls.status, na.action, lna.action_date,
+			l.created_at, lm.language, li.interest, ls.status, COALESCE(nsa.action, na.action), lna.action_date,
 			COUNT(*) OVER() AS total_rows
 		FROM lead AS l
 		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
@@ -380,10 +380,11 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
 		LEFT JOIN next_action AS na ON na.next_action_id = l.next_action_id
 		LEFT JOIN (
-			SELECT DISTINCT ON (lead_id) lead_id, action_date
+			SELECT DISTINCT ON (lead_id) lead_id, action_date, next_action_id
 			FROM lead_next_action
 			ORDER BY lead_id, action_date DESC
 		) AS lna ON lna.lead_id = l.lead_id
+		LEFT JOIN next_action AS nsa ON nsa.next_action_id = lna.next_action_id
 		WHERE 
 			(
 				$5::TEXT IS NOT NULL 
