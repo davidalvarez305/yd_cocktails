@@ -140,8 +140,6 @@ func SummarizePhoneCall(phoneCall models.PhoneCall, transcriptionText string) er
 	 <p>
 	 <b>Caller:</b>
 	 Angie<br>
-	 <b>Company:</b>
-	 YD Cocktails<br>
 	 <b>Call Purpose:</b>
 	 Inquiry about bartending services for a graduation party on May 4th<br><br>
 	 <b>Key Details:</b><br>
