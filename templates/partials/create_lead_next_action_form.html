@@ -123,7 +123,7 @@
             .then(html => {
                 const table = document.getElementById('leadNextActionsTable');
                 table.outerHTML = html;
-				handleBindNextActionTableActions();
+				handleBindLeadNextActionTableActions();
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
