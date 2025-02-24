@@ -372,13 +372,18 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
 	query := `SELECT l.lead_id, l.full_name, l.phone_number, 
-			l.created_at, lm.language, li.interest, ls.status, na.action, 
+			l.created_at, lm.language, li.interest, ls.status, na.action, lna.action_date,
 			COUNT(*) OVER() AS total_rows
 		FROM lead AS l
 		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
 		LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id
 		LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
 		LEFT JOIN next_action AS na ON na.next_action_id = l.next_action_id
+		LEFT JOIN (
+			SELECT DISTINCT ON (lead_id) lead_id, action_date
+			FROM lead_next_action
+			ORDER BY lead_id, action_date DESC
+		) AS lna ON lna.lead_id = l.lead_id
 		WHERE 
 			(
 				$5::TEXT IS NOT NULL 
@@ -433,6 +438,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	for rows.Next() {
 		var lead types.LeadList
 		var createdAt time.Time
+		var nextActionDate sql.NullTime
 		var language, nextAction, leadInterest, leadStatus sql.NullString
 
 		err := rows.Scan(&lead.LeadID,
@@ -443,11 +449,17 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 			&leadInterest,
 			&leadStatus,
 			&nextAction,
+			&nextActionDate,
 			&totalRows)
 		if err != nil {
 			return nil, 0, fmt.Errorf("error scanning row: %w", err)
 		}
-		lead.CreatedAt = utils.FormatTimestampEST(createdAt.Unix())
+
+		lead.CreatedAt = utils.FormatTimestamp(createdAt.Unix())
+
+		if nextActionDate.Valid {
+			lead.NextActionDate = utils.FormatTimestamp(nextActionDate.Time.Unix())
+		}
 
 		if language.Valid {
 			lead.Language = language.String
