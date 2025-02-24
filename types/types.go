@@ -638,3 +638,10 @@ type LeadConversation struct {
 	FullName    string `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
 }
+
+type PhoneCallTranscription struct {
+	CallFrom      string `json:"call_from" form:"call_from" schema:"call_from"`
+	CallTo        string `json:"call_to" form:"call_to" schema:"call_to"`
+	IsInbound     bool   `json:"is_inbound" form:"is_inbound" schema:"is_inbound"`
+	Transcription string `json:"transcription" form:"transcription" schema:"transcription"`
+}

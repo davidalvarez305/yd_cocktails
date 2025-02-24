@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
@@ -189,20 +190,23 @@ func checkPhoneCallTranscription() {
 
 	// Not sure if it would be a good idea to do this concurrently...
 	for _, phoneCall := range phoneCalls {
-		err = TranscribePhoneCall(phoneCall)
-
+		if phoneCall.CallDuration > 60 {
+			err = TranscribePhoneCall(phoneCall)
+		}
 		if err != nil {
 			continue
 		}
 	}
 }
 
+var once sync.Once
+
 func StartTranscriptionService() {
 	go func() {
 		for {
 			checkPhoneCallTranscription()
 
-			// Sleep for one minute before the next run
+			// Sleep for five minutes before the next run
 			time.Sleep(5 * time.Minute)
 		}
 	}()
