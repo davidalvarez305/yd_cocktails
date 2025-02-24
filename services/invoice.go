@@ -12,6 +12,7 @@ func UpdateInvoicesWorkflow(quoteId int, eventDate int64) error {
 	// Get stripe invoices
 	leadQuoteInvoices, err := database.GetLeadQuoteInvoices(quoteId)
 	if err != nil {
+		fmt.Printf("ERROR GETTING QUOTE INVOICES: %+v\n", err)
 		return err
 	}
 
