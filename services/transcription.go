@@ -120,9 +120,60 @@ func TranscribePhoneCall(phoneCall models.PhoneCall) error {
 		return err
 	}
 
+	err = SummarizePhoneCall(phoneCall, transcriptionText)
+	if err != nil {
+		fmt.Printf("ERROR SAVING TRANSCRIPTION: %+v\n", err)
+		return err
+	}
+
 	err = helpers.DeleteFilesInDirectory(constants.LOCAL_FILES_DIR)
 	if err != nil {
 		fmt.Printf("ERROR DELETING LOCAL FILES: %+v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func SummarizePhoneCall(phoneCall models.PhoneCall, transcriptionText string) error {
+	summary, err := GetOpenAICompletionsResponse(fmt.Sprintf("This was a sales call for a bartending service. Summarize the key points in the following text: %s", transcriptionText))
+	if err != nil {
+		fmt.Printf("ERROR GENERATING CALL SUMMARY: %+v\n", err)
+		return err
+	}
+
+	crmUserPhoneNumber := phoneCall.CallFrom
+	if phoneCall.IsInbound {
+		crmUserPhoneNumber = phoneCall.CallTo
+	}
+
+	userId, err := database.GetUserIDFromPhoneNumber(crmUserPhoneNumber)
+	if err != nil {
+		fmt.Printf("ERROR GETTING USER ID FROM PHONE NUMBER: %+v\n", err)
+		return err
+	}
+
+	leadPhoneNumber := phoneCall.CallTo
+	if phoneCall.IsInbound {
+		leadPhoneNumber = phoneCall.CallFrom
+	}
+
+	leadId, err := database.GetLeadIDFromPhoneNumber(leadPhoneNumber)
+	if err != nil {
+		fmt.Printf("ERROR GETTING LEAD ID FROM PHONE NUMBER: %+v\n", err)
+		return err
+	}
+
+	leadNote := models.LeadNote{
+		Note:          summary,
+		LeadID:        leadId,
+		DateAdded:     time.Now().Unix(),
+		AddedByUserID: userId,
+	}
+
+	err = database.CreateLeadNote(leadNote)
+	if err != nil {
+		fmt.Printf("ERROR SAVING TRANSCRIPTION: %+v\n", err)
 		return err
 	}
 

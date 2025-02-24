@@ -223,7 +223,7 @@ func SavePhoneCall(phoneCall models.PhoneCall) error {
 	return nil
 }
 
-func GetUserIDFromPhoneNumber(from string) (int, error) {
+func GetUserIDFromPhoneNumber(phoneNumber string) (int, error) {
 	var userId int
 
 	stmt, err := DB.Prepare(`SELECT "user_id" FROM "user" WHERE "phone_number" = $1`)
@@ -232,7 +232,7 @@ func GetUserIDFromPhoneNumber(from string) (int, error) {
 	}
 	defer stmt.Close()
 
-	row := stmt.QueryRow(from)
+	row := stmt.QueryRow(phoneNumber)
 
 	err = row.Scan(&userId)
 	if err != nil {
@@ -833,7 +833,7 @@ func GetConversionReporting(leadID int) (types.ConversionReporting, error) {
 	return conversionReporting, nil
 }
 
-func GetLeadIDFromPhoneNumber(from string) (int, error) {
+func GetLeadIDFromPhoneNumber(phoneNumber string) (int, error) {
 	var leadId int
 
 	stmt, err := DB.Prepare(`SELECT "lead_id" FROM "lead" WHERE "phone_number" = $1`)
@@ -842,7 +842,7 @@ func GetLeadIDFromPhoneNumber(from string) (int, error) {
 	}
 	defer stmt.Close()
 
-	row := stmt.QueryRow(from)
+	row := stmt.QueryRow(phoneNumber)
 	err = row.Scan(&leadId)
 	if err != nil {
 		return leadId, fmt.Errorf("error scanning row: %w", err)
