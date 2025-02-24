@@ -122,7 +122,7 @@ func TranscribePhoneCall(phoneCall models.PhoneCall) error {
 
 	err = SummarizePhoneCall(phoneCall, transcriptionText)
 	if err != nil {
-		fmt.Printf("ERROR SAVING TRANSCRIPTION: %+v\n", err)
+		fmt.Printf("ERROR SAVING SUMMARY: %+v\n", err)
 		return err
 	}
 
@@ -198,7 +198,7 @@ func SummarizePhoneCall(phoneCall models.PhoneCall, transcriptionText string) er
 
 	err = database.CreateLeadNote(leadNote)
 	if err != nil {
-		fmt.Printf("ERROR SAVING TRANSCRIPTION: %+v\n", err)
+		fmt.Printf("ERROR SAVING LEAD NOTE: %+v\n", err)
 		return err
 	}
 
