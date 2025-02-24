@@ -2750,7 +2750,7 @@ func GetPhoneCallsWithoutTranscription() ([]models.PhoneCall, error) {
 	var phoneCalls []models.PhoneCall
 
 	query := `
-		SELECT p.phone_call_id, p.recording_url
+		SELECT p.phone_call_id, p.recording_url, p.call_from, p.call_to, p.is_inbound
 		FROM phone_call AS p
 		WHERE NOT EXISTS (
 			SELECT 1 FROM phone_call_transcription AS t 
@@ -2766,7 +2766,7 @@ func GetPhoneCallsWithoutTranscription() ([]models.PhoneCall, error) {
 
 	for rows.Next() {
 		var phoneCall models.PhoneCall
-		err := rows.Scan(&phoneCall.PhoneCallID, &phoneCall.RecordingURL)
+		err := rows.Scan(&phoneCall.PhoneCallID, &phoneCall.RecordingURL, &phoneCall.CallFrom, &phoneCall.CallTo, &phoneCall.IsInbound)
 		if err != nil {
 			return phoneCalls, fmt.Errorf("error scanning row: %w", err)
 		}
