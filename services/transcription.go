@@ -3,7 +3,6 @@ package services
 import (
 	"fmt"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
@@ -164,7 +163,7 @@ func SummarizePhoneCall(phoneCall models.PhoneCall, transcriptionText string) er
 	 - Follow up to see if she wants to proceed with booking.<br>
 	 </p> 
 	
-	The following transcript was a sales call for a bartending service. Summarize the key points in the following text while following the example above: %s`, transcriptionText))
+	The following transcript was a sales call for a bartending service. Summarize the key points in the following text while following the example above: %s`, transcriptionText), 5000)
 	if err != nil {
 		fmt.Printf("ERROR GENERATING CALL SUMMARY: %+v\n", err)
 		return err
@@ -224,41 +223,10 @@ func checkPhoneCallTranscription() {
 		}
 	}
 }
-
-func createPhoneCallSummaries() {
-	phoneCalls, err := database.GetPhoneCallTranscriptions()
-	if err != nil {
-		fmt.Printf("ERROR GETTING PHONE CALL TRANSCRIPTIONS: %+v\n", err)
-		return
-	}
-
-	for _, phoneCall := range phoneCalls {
-
-		call := models.PhoneCall{
-			CallFrom:  phoneCall.CallFrom,
-			CallTo:    phoneCall.CallTo,
-			IsInbound: phoneCall.IsInbound,
-		}
-
-		fmt.Println("SUMMARIZATION PHONE CALL...")
-		err = SummarizePhoneCall(call, phoneCall.Transcription)
-
-		if err != nil {
-			continue
-		}
-	}
-}
-
-var once sync.Once
-
 func StartTranscriptionService() {
 	go func() {
 		for {
 			checkPhoneCallTranscription()
-
-			once.Do(func() {
-				createPhoneCallSummaries()
-			})
 
 			// Sleep for five minutes before the next run
 			time.Sleep(5 * time.Minute)

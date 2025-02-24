@@ -2896,33 +2896,3 @@ func GetPreviousConversations(leadId int) ([]types.LeadConversation, error) {
 
 	return leadConversations, nil
 }
-
-func GetPhoneCallTranscriptions() ([]types.PhoneCallTranscription, error) {
-	var phoneCalls []types.PhoneCallTranscription
-
-	query := `
-		SELECT p.call_from, p.call_to, p.is_inbound, t."text" FROM phone_call AS p
-		JOIN phone_call_transcription AS t ON t.phone_call_id = p.phone_call_id;
-	`
-
-	rows, err := DB.Query(query)
-	if err != nil {
-		return phoneCalls, fmt.Errorf("error executing query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var phoneCall types.PhoneCallTranscription
-		err := rows.Scan(&phoneCall.CallFrom, &phoneCall.CallTo, &phoneCall.IsInbound, &phoneCall.Transcription)
-		if err != nil {
-			return phoneCalls, fmt.Errorf("error scanning row: %w", err)
-		}
-		phoneCalls = append(phoneCalls, phoneCall)
-	}
-
-	if err := rows.Err(); err != nil {
-		return phoneCalls, fmt.Errorf("error iterating rows: %w", err)
-	}
-
-	return phoneCalls, nil
-}

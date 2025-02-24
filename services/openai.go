@@ -12,11 +12,11 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/types"
 )
 
-func GetOpenAICompletionsResponse(prompt string) (string, error) {
+func GetOpenAICompletionsResponse(prompt string, maxTokens int) (string, error) {
 	requestBody, err := json.Marshal(map[string]interface{}{
 		"model":       "gpt-4o-mini",
 		"messages":    []map[string]interface{}{{"role": "user", "content": prompt}},
-		"max_tokens":  300,
+		"max_tokens":  maxTokens,
 		"temperature": 0.7,
 	})
 	if err != nil {

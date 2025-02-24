@@ -2553,7 +2553,7 @@ func GetAutomatedFollowUpMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := services.GetOpenAICompletionsResponse(prompt)
+	response, err := services.GetOpenAICompletionsResponse(prompt, 300)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
