@@ -176,6 +176,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if strings.HasPrefix(path, "/crm/lead/") {
 			parts := strings.Split(path, "/")
+			if strings.Contains(path, "quick-quote") {
+				PostQuickQuote(w, r)
+				return
+			}
 			if strings.Contains(path, "invoice") {
 				PostSendInvoice(w, r)
 				return
@@ -422,6 +426,27 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	alcoholQuoteServices, err := database.GetQuoteServiceListByType(constants.AlcoholQuoteServiceTypeID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting alcohol quote services.", http.StatusInternalServerError)
+		return
+	}
+
+	barRentalQuoteServices, err := database.GetQuoteServiceListByType(constants.BarRentalQuoteServiceTypeID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bar rental quote services.", http.StatusInternalServerError)
+		return
+	}
+
+	quickQuoteServices, err := database.GetQuickQuoteServices()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bar rental quote services.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Lead Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
@@ -439,6 +464,9 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["LeadNotes"] = leadNotes
 	data["LeadMessages"] = leadMessages
 	data["LeadNextActions"] = leadNextActions
+	data["BarRentalQuoteServices"] = barRentalQuoteServices
+	data["AlcoholQuoteServices"] = alcoholQuoteServices
+	data["QuickQuoteServices"] = quickQuoteServices
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 

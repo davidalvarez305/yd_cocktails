@@ -3029,3 +3029,65 @@ func GetDepositStripeInvoiceID(quoteId int) (string, error) {
 
 	return depositInvoiceId, nil
 }
+
+func GetQuoteServiceListByType(serviceTypeId int) ([]models.Service, error) {
+	var services []models.Service
+
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC
+				FROM "service"
+				WHERE service_type_id = $1`, serviceTypeId)
+	if err != nil {
+		return services, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var service models.Service
+		var suggestedPrice sql.NullFloat64
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice)
+		if err != nil {
+			return services, fmt.Errorf("error scanning row: %w", err)
+		}
+		if suggestedPrice.Valid {
+			service.SuggestedPrice = suggestedPrice.Float64
+		}
+		services = append(services, service)
+	}
+
+	if err := rows.Err(); err != nil {
+		return services, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return services, nil
+}
+
+func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
+	var services []types.QuickQuoteServiceList
+
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, CONCAT(LOWER(s.service), '_service') AS service_lower_case
+				FROM "service"
+				WHERE service_type_id = $1`, constants.QuickQuoteServiceTypeID)
+	if err != nil {
+		return services, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var service types.QuickQuoteServiceList
+		var suggestedPrice sql.NullFloat64
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceHTMLField)
+		if err != nil {
+			return services, fmt.Errorf("error scanning row: %w", err)
+		}
+		if suggestedPrice.Valid {
+			service.SuggestedPrice = suggestedPrice.Float64
+		}
+		services = append(services, service)
+	}
+
+	if err := rows.Err(); err != nil {
+		return services, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return services, nil
+}

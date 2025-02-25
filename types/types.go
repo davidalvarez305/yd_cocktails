@@ -547,14 +547,11 @@ type LeadQuoteInvoice struct {
 	InvoiceStatusID       int     `json:"invoice_status_id" form:"invoice_status_id" schema:"invoice_status_id"`
 }
 
-type QuoteServiceList struct {
-	QuoteServiceID int     `json:"quote_service_id" form:"quote_service_id" schema:"quote_service_id"`
-	ServiceID      int     `json:"service_id" form:"service_id" schema:"service_id"`
-	QuoteID        int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	Service        string  `json:"service" form:"service" schema:"service"`
-	Units          int     `json:"units" form:"units" schema:"units"`
-	PricePerUnit   float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
-	Total          float64 `json:"total" form:"total" schema:"total"`
+type QuickQuoteServiceList struct {
+	ServiceID        int     `json:"service_id" form:"service_id" schema:"service_id"`
+	Service          string  `json:"service" form:"service" schema:"service"`
+	SuggestedPrice   float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
+	ServiceHTMLField string  `json:"service_html_field" form:"service_html_field" schema:"service_html_field"`
 }
 
 type QuoteServiceForm struct {
