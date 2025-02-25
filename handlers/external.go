@@ -71,6 +71,7 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 		return
 	}
 
+	// I have to do this for now because I don't know if it's a good idea or not to save the quote as a column on invoices
 	if quote.IsDepositPaid {
 		inv, err := database.GetRemainingInvoice(quote.QuoteID)
 		if err != nil {
