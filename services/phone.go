@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/davidalvarez305/yd_cocktails/constants"
@@ -133,4 +134,30 @@ func MissedCallFollowUpText(phoneCall models.PhoneCall) error {
 	}
 
 	return nil
+}
+
+func DeleteCallRecording(callRecordingSid string) error {
+	client := twilio.NewRestClient()
+
+	err := client.Api.DeleteRecording(callRecordingSid, &openapi.DeleteRecordingParams{})
+	if err != nil {
+		return fmt.Errorf("failed to delete recording: %v", err)
+	}
+
+	fmt.Println("Recording deleted successfully")
+	return nil
+}
+
+func ExtractRecordingSid(recordingURL string) (string, error) {
+	// Define the regular expression pattern to extract the RecordingSid
+	re := regexp.MustCompile(`/Recordings/([A-Za-z0-9]+)\.mp3`)
+
+	// Find the match using the regular expression
+	matches := re.FindStringSubmatch(recordingURL)
+	if len(matches) < 2 {
+		return "", fmt.Errorf("RecordingSid not found in URL")
+	}
+
+	// The second element in the match array contains the RecordingSid
+	return matches[1], nil
 }
