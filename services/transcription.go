@@ -51,19 +51,6 @@ func TranscribePhoneCall(phoneCall models.PhoneCall) error {
 		return err
 	}
 
-	recordingSid, err := ExtractRecordingSid(phoneCall.RecordingURL)
-	if err != nil {
-		fmt.Printf("ERROR EXTRACTING RECORDING SID FROM RECORDING URL: %+v\n", err)
-		return err
-	}
-
-	// Delete audio recording from twilio
-	err = DeleteCallRecording(recordingSid)
-	if err != nil {
-		fmt.Printf("ERROR DELETING AUDIO FROM TWILIO: %+v\n", err)
-		return err
-	}
-
 	// Transcribe audio file
 	audioFileS3URL := "s3://" + constants.AWSS3BucketName + "/" + audioS3FilePath
 	transcriptionID, transcriptionText, err := TranscribeAudio(audioFileS3URL)
@@ -136,6 +123,19 @@ func TranscribePhoneCall(phoneCall models.PhoneCall) error {
 	err = SummarizePhoneCall(phoneCall, transcriptionText)
 	if err != nil {
 		fmt.Printf("ERROR SAVING SUMMARY: %+v\n", err)
+		return err
+	}
+
+	recordingSid, err := ExtractRecordingSid(phoneCall.RecordingURL)
+	if err != nil {
+		fmt.Printf("ERROR EXTRACTING RECORDING SID FROM RECORDING URL: %+v\n", err)
+		return err
+	}
+
+	// Delete audio recording from twilio
+	err = DeleteCallRecording(recordingSid)
+	if err != nil {
+		fmt.Printf("ERROR DELETING AUDIO FROM TWILIO: %+v\n", err)
 		return err
 	}
 
