@@ -281,9 +281,56 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Duplicate phone number logic
+	phoneNumber := helpers.GetStringPointerFromForm(r, "phone_number")
+	cleanedPhoneNumber := helpers.ExtractPhoneNumber(helpers.SafeString(phoneNumber))
+
+	if cleanedPhoneNumber == "" {
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Phone number field cannot be empty.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	phoneNumberExists, err := database.IsPhoneNumberInDB(cleanedPhoneNumber)
+	if err != nil {
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error checking if phone number exists in database.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	if phoneNumberExists {
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "We already have a request with this phone number.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
 	var form types.QuoteForm
 	form.FullName = helpers.GetStringPointerFromForm(r, "full_name")
-	form.PhoneNumber = helpers.GetStringPointerFromForm(r, "phone_number")
+	form.PhoneNumber = &cleanedPhoneNumber
 	form.Message = helpers.GetStringPointerFromForm(r, "message")
 	form.Source = helpers.GetStringPointerFromForm(r, "source")
 	form.Medium = helpers.GetStringPointerFromForm(r, "medium")
