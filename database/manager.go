@@ -1593,7 +1593,7 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 		hours,
 		event_type_id,
 		venue_type_id,
-		event_date,
+		event_date AT TIME ZONE 'America/New_York' AT TIME ZONE 'UTC',
 		quote_id
 	FROM quote 
 	WHERE quote_id = $1`
