@@ -466,7 +466,6 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}()
-		return
 	}
 
 	tmplCtx := types.DynamicPartialTemplate{
