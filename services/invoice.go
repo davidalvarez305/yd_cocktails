@@ -26,7 +26,7 @@ func UpdateInvoicesWorkflow(quoteId int, eventDate int64) error {
 	var remainingInvoice types.LeadQuoteInvoice
 
 	if isDepositPaid {
-		remainingInvoice, err := database.GetRemainingInvoice(quoteId)
+		remainingInvoice, err = database.GetRemainingInvoice(quoteId)
 		if err != nil {
 			fmt.Printf("ERROR GETTING REMAINING INVOICE: %+v\n", err)
 			return err

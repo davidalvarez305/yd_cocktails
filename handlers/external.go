@@ -9,6 +9,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/constants"
 	"github.com/davidalvarez305/yd_cocktails/database"
 	"github.com/davidalvarez305/yd_cocktails/helpers"
+	"github.com/davidalvarez305/yd_cocktails/services"
 )
 
 func createExternalViewContext() map[string]any {
@@ -68,6 +69,24 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 		fmt.Printf("ERROR GETTING QUOTE DETAILS: %+v\n", err)
 		http.Error(w, "Error retrieving quote details.", http.StatusInternalServerError)
 		return
+	}
+
+	if quote.IsDepositPaid {
+		inv, err := database.GetRemainingInvoice(quote.QuoteID)
+		if err != nil {
+			fmt.Printf("ERROR GETTING REMAINING INVOICE FROM DB: %+v\n", err)
+			http.Error(w, "Error retrieving quote details.", http.StatusInternalServerError)
+			return
+		}
+
+		remainingInvoice, err := services.GetStripeInvoice(inv.StripeInvoiceID)
+		if err != nil {
+			fmt.Printf("ERROR GETTING REMAINING INVOICE FROM STRIPE: %+v\n", err)
+			http.Error(w, "Error retrieving quote details.", http.StatusInternalServerError)
+			return
+		}
+
+		quote.RemainingAmount = float64(remainingInvoice.AmountDue / 100)
 	}
 
 	quoteServices, err := database.GetQuoteServices(quote.QuoteID)

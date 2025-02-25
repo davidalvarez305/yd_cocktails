@@ -117,6 +117,7 @@ func UpdateStripeInvoice(leadQuoteInvoice types.LeadQuoteInvoice) (stripe.Invoic
 }
 
 func GetStripeInvoice(stripeInvoiceId string) (stripe.Invoice, error) {
+	stripe.Key = constants.StrikeAPIKey
 	var stripeInvoice stripe.Invoice
 
 	originalInvoice, err := invoice.Get(stripeInvoiceId, nil)

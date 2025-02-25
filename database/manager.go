@@ -1797,7 +1797,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		l.email,
 		i.url AS deposit_invoice_url,
 		SUM(qs.units * qs.price_per_unit::NUMERIC) * it.amount_percentage AS deposit_amount,
-		SUM(qs.units * qs.price_per_unit::NUMERIC) * (1 - it.amount_percentage) AS remaining_amount,
+		0.00 AS remaining_amount,
 		(
 			SELECT i2.url
 			FROM invoice AS i2
@@ -2041,7 +2041,8 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 		i.stripe_invoice_id, 
 		l.stripe_customer_id, 
 		i.due_date, 
-		i.invoice_type_id;`
+		i.invoice_type_id,
+		i.invoice_status_id;`
 
 	rows, err := DB.Query(query, quoteId, constants.OpenInvoiceStatusID)
 	if err != nil {
@@ -2063,6 +2064,7 @@ func GetLeadQuoteInvoices(quoteId int) ([]types.LeadQuoteInvoice, error) {
 			&invoiceDueDate,
 			&leadQuoteInvoice.InvoiceTypeMultiplier,
 			&leadQuoteInvoice.InvoiceTypeID,
+			&leadQuoteInvoice.InvoiceStatusID,
 		)
 		if err != nil {
 			return leadQuoteInvoices, fmt.Errorf("error scanning row: %w", err)
@@ -2935,7 +2937,7 @@ func GetPreviousConversations(leadId int) ([]types.LeadConversation, error) {
 
 func IsDepositPaid(quoteId int) (bool, error) {
 	var isDepositPaid bool
-	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM lead WHERE quote_id = $1 AND invoice_status_id = $2 AND invoice_type_id = $3)",
+	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM invoice WHERE quote_id = $1 AND invoice_status_id = $2 AND invoice_type_id = $3)",
 		quoteId,
 		constants.PaidInvoiceStatusID,
 		constants.DepositInvoiceTypeID).Scan(&isDepositPaid)
@@ -2970,7 +2972,8 @@ func GetRemainingInvoice(quoteId int) (types.LeadQuoteInvoice, error) {
 		i.stripe_invoice_id, 
 		l.stripe_customer_id, 
 		i.due_date, 
-		i.invoice_type_id;`
+		i.invoice_type_id,
+		i.invoice_status_id;`
 
 	row := DB.QueryRow(query, quoteId, constants.OpenInvoiceStatusID, constants.RemainingInvoiceTypeID)
 
@@ -2985,6 +2988,7 @@ func GetRemainingInvoice(quoteId int) (types.LeadQuoteInvoice, error) {
 		&invoiceDueDate,
 		&leadQuoteInvoice.InvoiceTypeMultiplier,
 		&leadQuoteInvoice.InvoiceTypeID,
+		&leadQuoteInvoice.InvoiceStatusID,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -3013,7 +3017,7 @@ func GetDepositStripeInvoiceID(quoteId int) (string, error) {
 	FROM invoice AS i
 	WHERE i.quote_id = $1 AND i.invoice_status_id = $2 AND i.invoice_type_id = $3;`
 
-	row := DB.QueryRow(query, quoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID)
+	row := DB.QueryRow(query, quoteId, constants.PaidInvoiceStatusID, constants.DepositInvoiceTypeID)
 
 	err := row.Scan(&depositInvoiceId)
 	if err != nil {
