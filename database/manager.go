@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -1557,7 +1558,7 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
-		lead.EventDate = utils.FormatTimestampEST(eventDate.Unix())
+		lead.EventDate = utils.FormatTimestamp(eventDate.Unix())
 
 		if venueType.Valid {
 			lead.VenueType = venueType.String
@@ -1657,7 +1658,7 @@ func UpdateLeadQuote(form types.LeadQuoteForm) error {
 			hours = COALESCE($4, hours),
 			event_type_id = COALESCE($5, event_type_id),
 			venue_type_id = COALESCE($6, venue_type_id),
-			event_date = COALESCE(to_timestamp($7)::timestamp AT TIME ZONE 'America/New_York', event_date)
+			event_date = COALESCE(to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York', event_date)
 		WHERE quote_id = $1
 	`
 
@@ -3090,4 +3091,140 @@ func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 	}
 
 	return services, nil
+}
+
+func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []types.QuickQuoteServiceList) error {
+	var form types.LeadQuoteForm
+	var quoteId int
+
+	form.LeadID = quickQuote.LeadID
+	form.EventDate = quickQuote.EventDate
+	form.EventTypeID = quickQuote.EventTypeID
+	form.ExternalID = quickQuote.ExternalID
+	form.Guests = quickQuote.Guests
+	form.Hours = quickQuote.Hours
+	form.NumberOfBartenders = quickQuote.NumberOfBartenders
+	form.VenueTypeID = quickQuote.VenueTypeID
+
+	// Start a new transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		return fmt.Errorf("error starting transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	query := `
+		INSERT INTO quote (
+			lead_id, 
+			number_of_bartenders, 
+			guests, 
+			hours, 
+			event_type_id, 
+			venue_type_id, 
+			event_date, 
+			external_id
+		)
+		VALUES (
+			$1, $2, $3, $4, 
+			$5, $6, to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York', 
+			$8
+		)
+		RETURNING quote_id;
+	`
+
+	err = tx.QueryRow(
+		query,
+		utils.CreateNullInt(form.LeadID),
+		utils.CreateNullInt(form.NumberOfBartenders),
+		utils.CreateNullInt(form.Guests),
+		utils.CreateNullInt(form.Hours),
+		utils.CreateNullInt(form.EventTypeID),
+		utils.CreateNullInt(form.VenueTypeID),
+		utils.CreateNullInt64(form.EventDate),
+		uuid.New().String(),
+	).Scan(&quoteId)
+
+	if err != nil {
+		return fmt.Errorf("error inserting lead quote data: %w", err)
+	}
+
+	// Now that we have the quoteId, prepare to insert services
+	val := reflect.ValueOf(quickQuote).Elem()
+
+	var services []types.QuoteServiceForm
+
+	// Collect all services
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		fieldType := val.Type().Field(i)
+
+		if field.Kind() == reflect.Ptr && field.Type().Elem().Kind() == reflect.Bool {
+			if field.IsNil() {
+				continue
+			}
+
+			serviceEnabled := field.Interface().(*bool)
+
+			for _, quickQuoteService := range quickQuoteServices {
+				if *serviceEnabled && quickQuoteService.ServiceHTMLField == fieldType.Tag.Get("form") {
+					service := types.QuoteServiceForm{
+						ServiceID:    &quickQuoteService.ServiceID,
+						QuoteID:      &quoteId,
+						Units:        quickQuote.Guests,
+						PricePerUnit: &quickQuoteService.SuggestedPrice,
+					}
+					services = append(services, service)
+				}
+			}
+		}
+	}
+
+	// Insert all collected services in a single transaction
+	for _, service := range services {
+		err = CreateQuoteServiceTx(tx, service)
+		if err != nil {
+			return fmt.Errorf("error inserting quote service: %w", err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("error committing transaction: %w", err)
+	}
+
+	return nil
+}
+
+func DeleteLeadQuote(id int) error {
+	sqlStatement := `
+        DELETE FROM quote WHERE quote_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CreateQuoteServiceTx(tx *sql.Tx, form types.QuoteServiceForm) error {
+	stmt, err := tx.Prepare(`
+ 	   INSERT INTO quote_service (service_id, quote_id, units, price_per_unit) 
+ 	   VALUES ($1, $2, $3, $4)
+    `)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		utils.CreateNullInt(form.ServiceID),
+		utils.CreateNullInt(form.QuoteID),
+		utils.CreateNullInt(form.Units),
+		utils.CreateNullFloat64(form.PricePerUnit),
+	)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
 }

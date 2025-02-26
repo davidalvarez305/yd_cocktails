@@ -201,7 +201,7 @@
 		})
 		.then(html => {
 			alertModal.outerHTML = html;
-			createQuickQuoteForm.reset();
+			form.reset();
 		})
 		.catch(err => {
 			alertModal.outerHTML = err.message;
