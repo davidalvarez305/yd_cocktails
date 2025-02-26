@@ -176,10 +176,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if strings.HasPrefix(path, "/crm/lead/") {
 			parts := strings.Split(path, "/")
-			if strings.Contains(path, "quick-quote") {
+			/* if strings.Contains(path, "quick-quote") {
 				PostQuickQuote(w, r)
 				return
-			}
+			} */
 			if strings.Contains(path, "invoice") {
 				PostSendInvoice(w, r)
 				return
@@ -317,7 +317,8 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	leadMessagesTemplate := constants.PARTIAL_TEMPLATES_DIR + "lead_messages.html"
 	createLeadNextActionForm := constants.PARTIAL_TEMPLATES_DIR + "create_lead_next_action_form.html"
 	leadNextActionsTable := constants.PARTIAL_TEMPLATES_DIR + "lead_next_actions_table.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, eventForm, eventTable, leadQuoteForm, leadQuoteTable, createLeadMessageForm, leadMessagesTemplate, createLeadNoteForm, leadNotesTemplate, createLeadNextActionForm, leadNextActionsTable}
+	createQuickQuoteForm := constants.PARTIAL_TEMPLATES_DIR + "create_quick_quote_form.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, eventForm, eventTable, leadQuoteForm, leadQuoteTable, createLeadMessageForm, leadMessagesTemplate, createLeadNoteForm, leadNotesTemplate, createLeadNextActionForm, leadNextActionsTable, createQuickQuoteForm}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -426,14 +427,14 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	alcoholQuoteServices, err := database.GetQuoteServiceListByType(constants.AlcoholQuoteServiceTypeID)
+	alcoholQuoteServices, err := database.GetServiceListByType(constants.AlcoholServiceTypeID)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting alcohol quote services.", http.StatusInternalServerError)
 		return
 	}
 
-	barRentalQuoteServices, err := database.GetQuoteServiceListByType(constants.BarRentalQuoteServiceTypeID)
+	barRentalQuoteServices, err := database.GetServiceListByType(constants.BarRentalServiceTypeID)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting bar rental quote services.", http.StatusInternalServerError)
@@ -443,7 +444,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	quickQuoteServices, err := database.GetQuickQuoteServices()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting bar rental quote services.", http.StatusInternalServerError)
+		http.Error(w, "Error getting quick quote services.", http.StatusInternalServerError)
 		return
 	}
 

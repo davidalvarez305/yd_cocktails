@@ -24,20 +24,6 @@ const (
 
 	CallConversionDuration int = 15
 
-	PerGuestBartendingRatio       float64 = 70.00
-	PerCoolerRentalFee            float64 = 50.00
-	BartendingRate                float64 = 70.00
-	PerPersonAlcoholFee           float64 = 10.00
-	PerPersonWineFee              float64 = 2.00
-	PerPersonBeerFee              float64 = 3.00
-	PerPersonMixersFee            float64 = 3.00
-	PerPersonGarnishFee           float64 = 1.00
-	PerPersonJuicesFee            float64 = 1.00
-	PerPersonSoftDrinksFee        float64 = 2.00
-	PerPersonCupsStrawsNapkinsFee float64 = 2.00
-	PerPersonIceFee               float64 = 2.00
-	PerPersonGlasswareFee         float64 = 3.00
-
 	DepositInvoiceTypeID   int = 1
 	RemainingInvoiceTypeID int = 2
 	FullInvoiceTypeID      int = 3
@@ -45,6 +31,11 @@ const (
 	OpenInvoiceStatusID int = 1
 	VoidInvoiceStatusID int = 2
 	PaidInvoiceStatusID int = 3
+
+	AlcoholServiceTypeID      int = 1
+	BarRentalServiceTypeID    int = 2
+	CoolerRentalServiceTypeID int = 3
+	GeneralServiceTypeID      int = 4
 
 	NoInterestLeadInterestID int = 4
 

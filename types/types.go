@@ -547,6 +547,16 @@ type LeadQuoteInvoice struct {
 	InvoiceStatusID       int     `json:"invoice_status_id" form:"invoice_status_id" schema:"invoice_status_id"`
 }
 
+type QuoteServiceList struct {
+	QuoteServiceID int     `json:"quote_service_id" form:"quote_service_id" schema:"quote_service_id"`
+	ServiceID      int     `json:"service_id" form:"service_id" schema:"service_id"`
+	QuoteID        int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	Service        string  `json:"service" form:"service" schema:"service"`
+	Units          int     `json:"units" form:"units" schema:"units"`
+	PricePerUnit   float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
+	Total          float64 `json:"total" form:"total" schema:"total"`
+}
+
 type QuickQuoteServiceList struct {
 	ServiceID        int     `json:"service_id" form:"service_id" schema:"service_id"`
 	Service          string  `json:"service" form:"service" schema:"service"`
@@ -636,4 +646,29 @@ type LeadConversation struct {
 	Content     string `json:"content" form:"content" schema:"content"`
 	FullName    string `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+}
+
+type QuickQuoteForm struct {
+	CSRFToken                *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	LeadID                   *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventDate                *int64  `json:"event_date_service" form:"event_date_service" schema:"event_date_service"`
+	EventDuration            *int    `json:"event_duration_service" form:"event_duration_service" schema:"event_duration_service"`
+	Guests                   *int    `json:"guests_service" form:"guests_service" schema:"guests_service"`
+	NumberOfBartenders       *int    `json:"number_of_bartenders_service" form:"number_of_bartenders_service" schema:"number_of_bartenders_service"`
+	BarRental                *bool   `json:"bar_rental_service" form:"bar_rental_service" schema:"bar_rental_service"`
+	TypeOfBar                *int    `json:"type_of_bar_service" form:"type_of_bar_service" schema:"type_of_bar_service"`
+	NumBars                  *int    `json:"num_bars_service" form:"num_bars_service" schema:"num_bars_service"`
+	BringAlcohol             *bool   `json:"bring_alcohol_service" form:"bring_alcohol_service" schema:"bring_alcohol_service"`
+	AlcoholQuality           *int    `json:"alcohol_quality_service" form:"alcohol_quality_service" schema:"alcohol_quality_service"`
+	BeerService              *bool   `json:"beer_service_service" form:"beer_service_service" schema:"beer_service_service"`
+	WineService              *bool   `json:"wine_service_service" form:"wine_service_service" schema:"wine_service_service"`
+	IceService               *bool   `json:"ice_service_service" form:"ice_service_service" schema:"ice_service_service"`
+	GarnishService           *bool   `json:"garnish_service_service" form:"garnish_service_service" schema:"garnish_service_service"`
+	FruitsService            *bool   `json:"fruits_service_service" form:"fruits_service_service" schema:"fruits_service_service"`
+	MixersService            *bool   `json:"mixers_service_service" form:"mixers_service_service" schema:"mixers_service_service"`
+	CupsStrawsNapkinsService *bool   `json:"cups_straws_napkins_service_service" form:"cups_straws_napkins_service_service" schema:"cups_straws_napkins_service_service"`
+	GlasswareRentalsService  *bool   `json:"glassware_rentals_service_service" form:"glassware_rentals_service_service" schema:"glassware_rentals_service_service"`
+	SoftDrinksService        *bool   `json:"soft_drinks_service_service" form:"soft_drinks_service_service" schema:"soft_drinks_service_service"`
+	JuicesService            *bool   `json:"juices_service_service" form:"juices_service_service" schema:"juices_service_service"`
+	BartendingHourlyService  *bool   `json:"bartending_hourly_service" form:"bartending_hourly_service" schema:"bartending_hourly_service"`
 }

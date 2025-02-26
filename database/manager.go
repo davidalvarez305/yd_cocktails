@@ -3030,11 +3030,11 @@ func GetDepositStripeInvoiceID(quoteId int) (string, error) {
 	return depositInvoiceId, nil
 }
 
-func GetQuoteServiceListByType(serviceTypeId int) ([]models.Service, error) {
+func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 	var services []models.Service
 
 	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC
-				FROM "service"
+				FROM service
 				WHERE service_type_id = $1`, serviceTypeId)
 	if err != nil {
 		return services, fmt.Errorf("error executing query: %w", err)
@@ -3064,9 +3064,9 @@ func GetQuoteServiceListByType(serviceTypeId int) ([]models.Service, error) {
 func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 	var services []types.QuickQuoteServiceList
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, CONCAT(LOWER(s.service), '_service') AS service_lower_case
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, CONCAT(LOWER(service), '_service') AS service_lower_case
 				FROM "service"
-				WHERE service_type_id = $1`, constants.QuickQuoteServiceTypeID)
+				WHERE service_type_id = $1`, constants.GeneralServiceTypeID)
 	if err != nil {
 		return services, fmt.Errorf("error executing query: %w", err)
 	}

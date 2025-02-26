@@ -105,6 +105,7 @@
 <script nonce="{{ .Nonce }}">
     const cancelQuoteFormModal = document.getElementById("cancelQuoteFormModal");
     const closeQuoteFormModal = document.getElementById("closeQuoteFormModal");
+    const submitQuoteForm = document.getElementById("submitQuoteForm");
 
     function handleCloseQuoteFormModal() {
         const modal = document.getElementById('leadQuoteModalContainer');
@@ -113,16 +114,7 @@
 
     closeQuoteFormModal.addEventListener("click", () => handleCloseQuoteFormModal());
     cancelQuoteFormModal.addEventListener("click", () => handleCloseQuoteFormModal());
-
-</script>
-
-<script nonce="{{ .Nonce }}">
-    function handleCloseQuoteFormModal() {
-        const modal = document.getElementById('leadQuoteModalContainer');
-        modal.style.display = 'none';
-    }
-
-    const submitQuoteForm = document.getElementById("submitQuoteForm");
+    submitQuoteForm.addEventListener("click", () => handleSubmitQuoteForm());
 
     function handleSubmitQuoteForm() {
         const form = document.getElementById("quoteForm");
@@ -171,7 +163,5 @@
                 form.reset();
             });
     }
-
-    submitQuoteForm.addEventListener("click", () => handleSubmitQuoteForm());
 </script>
 {{ end }}

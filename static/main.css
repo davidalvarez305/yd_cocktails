@@ -1095,6 +1095,10 @@ select{
   max-width: 42rem;
 }
 
+.max-w-\[150px\]{
+  max-width: 150px;
+}
+
 .max-w-\[320px\]{
   max-width: 320px;
 }
@@ -3740,6 +3744,10 @@ select{
     flex-direction: row;
   }
 
+  .sm\:flex-col{
+    flex-direction: column;
+  }
+
   .sm\:items-center{
     align-items: center;
   }
@@ -3880,6 +3888,10 @@ select{
 
   .md\:flex-row{
     flex-direction: row;
+  }
+
+  .md\:items-start{
+    align-items: flex-start;
   }
 
   .md\:justify-end{

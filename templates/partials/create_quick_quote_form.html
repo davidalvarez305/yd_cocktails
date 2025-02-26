@@ -1,119 +1,184 @@
 {{ define "create_quick_quote_form.html" }}
-<form id="createQuickQuoteForm" class="space-y-4">
-    <div>
-        <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
-        <input type="hidden" name="lead_id" value="{{ .Lead.LeadID }}" />
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div class="grow space-y-1">
-                <label for="event_date" class="font-medium">Cual sería la hora y fecha del evento?</label>
-                <input type="datetime-local" id="event_date" name="event_date"
-                    class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
-            </div>
-            <div class="grow space-y-1">
-                <label for="event_date" class="font-medium">Cúantas horas será el evento?</label>
-                <input type="datetime-local" id="event_date" name="event_date"
-                    class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
-            </div>
-        </div>
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div class="grow space-y-1">
-                <label for="guests" class="font-medium">Cúantos adultos estarán en el evento?</label>
-                <input type="number" id="guests" name="guests"
-                    class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
-            </div>
-            <div class="grow space-y-1">
-                <label for="number_of_bartenders" class="font-medium">Número de bartenders</label>
-                <input type="number" id="number_of_bartenders" name="number_of_bartenders" required
-                    class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
-            </div>
-        </div>
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <label for="bar_rental"
-                class="group relative inline-flex items-center gap-3">
-                <input type="checkbox" class="peer sr-only" id="bar_rental" name="bar_rental" />
-                <span
-                    class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                <span class="font-medium">Necesita que llevemos barra(s)?</span>
-            </label>
-            <div class="grow space-y-1">
-                <label for="num_bars" class="font-medium">Cuantas barras?</label>
-                <input type="number" id="num_bars" name="num_bars"
-                    class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
-            </div>
-        </div>
-        <div id="typeOfBar" class="grow space-y-1">
-            <label for="type_of_bar" class="font-medium">Selecciona el tipo de barra</label>
-            <select id="type_of_bar" name="type_of_bar"
-                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                <option></option>
-                {{ range .BarRentalQuoteServices }}
-                <option value="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}">
-                    {{ .Service }} - ${{ .SuggestedPrice }}
-                </option>
-                {{ end }}
-            </select>
-        </div>
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div class="grow space-y-1">
-                <label for="bring_alcohol" class="group relative inline-flex items-center gap-3">
-                    <input type="checkbox" class="peer sr-only" id="bring_alcohol" name="bring_alcohol" />
-                    <span
-                        class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                    <span class="font-medium">Tenemos que llevar alcohol?</span>
-                </label>
-            </div>
-            <div id="alcoholQuality" class="grow space-y-1">
-                <label for="alcohol_quality" class="font-medium">Selecciona la calidad del alcohol</label>
-                <select id="alcohol_quality" name="alcohol_quality"
-                    class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                    <option></option>
-                    {{ range .AlcoholQuoteServices }}
-                    <option value="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}">
-                        {{ .Service }} - ${{ .SuggestedPrice }}
-                    </option>
-                    {{ end }}
-                </select>
-            </div>
-        </div>
-        {{ range .QuickQuoteServices }}
-        <div class="grow space-y-1">
-            <label for="{{ .ServiceHTMLField }}" class="group relative inline-flex items-center gap-3">
-                <input type="checkbox" class="peer sr-only" id="{{ .ServiceHTMLField }}" name="{{ .ServiceHTMLField }}" />
-                <span
-                    class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                <span class="font-medium">Tenemos que llevar {{ .Service }} - ${{ .SuggestedPrice }} / persona?</span>
-            </label>
-        </div>
-        {{ end }}
-    </div>
-    <button type="submit"
-        class="inline-flex items-center justify-center gap-2 rounded-lg border border-primary-700 bg-primary-700 px-3 py-2 text-sm font-semibold leading-5 text-white hover:border-primary-600 hover:bg-primary-600 hover:text-white focus:ring focus:ring-primary-400/50 active:border-primary-700 active:bg-primary-700 dark:focus:ring-primary-400/90">
-        <svg class="bi bi-send-fill inline-block size-5" xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-            <path
-                d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z" />
-        </svg>
-        <span>Crear Cotización</span>
-    </button>
-</form>
+<!-- Modal Container -->
+<div id="createQuickQuoteFormModalContainer" style="display: none;">
+	<div>
+		<div tabindex="-1" role="dialog"
+			class="fixed inset-0 z-90 overflow-y-auto overflow-x-hidden bg-gray-900/75 p-4 backdrop-blur-sm lg:p-8">
+			<div role="document"
+				class="mx-auto flex w-full md:w-1/2 flex-col overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800 dark:text-gray-100">
+				<div class="flex items-center justify-between bg-gray-50 px-5 py-4 dark:bg-gray-700/50">
+					<h3 class="flex items-center gap-2 font-medium">
+						<span>Create Quick Quote</span>
+					</h3>
+					<div class="-my-4">
+						<button type="button" id="closeQuickQuoteForm"
+							class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+							<svg class="hi-solid hi-x -mx-1 inline-block size-4" fill="currentColor" viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd"
+									d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+									clip-rule="evenodd"></path>
+							</svg>
+						</button>
+					</div>
+				</div>
+				<div class="grow p-5">
+					<div
+						class="flex flex-col overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800 dark:text-gray-100">
+						<div class="grow p-5 md:px-16 md:py-12">
+							<form id="createQuickQuoteForm" class="space-y-4">
+                                    <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
+                                    <input type="hidden" name="lead_id" value="{{ .Lead.LeadID }}" />
+                                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                        <div class="grow space-y-1">
+                                            <label for="event_date_service" class="font-medium">Cual sería la hora y fecha del evento?</label>
+                                            <input type="datetime-local" id="event_date_service" name="event_date_service"
+                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                                        </div>
+                                        <div class="grow space-y-1">
+                                            <label for="hours_service" class="font-medium">Cúantas horas será el evento?</label>
+                                            <input type="number" id="hours_service" name="hours_service"
+                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                        <div class="grow space-y-1">
+                                            <label for="guests_service" class="font-medium">Cúantos adultos estarán en el evento?</label>
+                                            <input type="number" id="guests_service" name="guests_service"
+                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                                        </div>
+                                        <div class="grow space-y-1">
+                                            <label for="number_of_bartenders_service" class="font-medium">Número de bartenders</label>
+                                            <input type="number" id="number_of_bartenders_service" name="number_of_bartenders_service" required
+                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                                        </div>
+                                    </div>
+                                    <div class="grow space-y-1">
+                                        <label for="bar_rental_service"
+                                            class="group relative inline-flex items-center gap-3">
+                                            <input type="checkbox" class="peer sr-only" id="bar_rental_service" name="bar_rental_service" />
+                                            <span
+                                                class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
+                                            <span class="font-medium">Necesita que llevemos barra(s)?</span>
+                                        </label>
+                                    </div>
+                                    <div id="typeOfBar" class="grid grid-cols-1 gap-6 sm:grid-cols-2" style="display: none;">
+                                        <div class="grow space-y-1">
+                                            <label for="type_of_bar_service" class="font-medium">Selecciona el tipo de barra</label>
+                                            <select id="type_of_bar_service" name="type_of_bar_service"
+                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                                                <option></option>
+                                                {{ range .BarRentalQuoteServices }}
+                                                <option value="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}">
+                                                    {{ .Service }} - ${{ .SuggestedPrice }}
+                                                </option>
+                                                {{ end }}
+                                            </select>
+                                        </div>
+                                        <div class="grow space-y-1">
+                                            <label for="num_bars_service" class="font-medium">Cuantas barras?</label>
+                                            <input type="number" id="num_bars_service" name="num_bars_service"
+                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                                        </div>
+                                    </div>
+                                    <div class="grow space-y-1">
+                                        <label for="bring_alcohol_service" class="group relative inline-flex items-center gap-3">
+                                            <input type="checkbox" class="peer sr-only" id="bring_alcohol_service" name="bring_alcohol_service" />
+                                            <span
+                                                class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
+                                            <span class="font-medium">Tenemos que llevar alcohol?</span>
+                                        </label>
+                                    </div>
+                                    <div id="alcoholQuality" class="space-y-1" style="display: none;">
+                                        <label for="alcohol_quality_service" class="font-medium">Selecciona la calidad del alcohol</label>
+                                        <select id="alcohol_quality_service" name="alcohol_quality_service"
+                                            class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                                            <option></option>
+                                            {{ range .AlcoholQuoteServices }}
+                                            <option value="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}">
+                                                {{ .Service }} - ${{ .SuggestedPrice }}
+                                            </option>
+                                            {{ end }}
+                                        </select>
+                                    </div>
+                                    {{ range .QuickQuoteServices }}
+                                    <div class="grow space-y-1">
+                                        <label for="{{ .ServiceHTMLField }}" class="group relative inline-flex items-center gap-3">
+                                            <input type="checkbox" class="peer sr-only" id="{{ .ServiceHTMLField }}" name="{{ .ServiceHTMLField }}" />
+                                            <span
+                                                class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
+                                            <span class="font-medium">{{ .Service }} - ${{ .SuggestedPrice }} / persona?</span>
+                                        </label>
+                                    </div>
+                                    {{ end }}
+                            </form>
+						</div>
+					</div>
+				</div>
+				<div class="space-x-1 bg-gray-50 px-5 py-4 text-right dark:bg-gray-700/50">
+					<button type="button" id="cancelQuickQuoteForm"
+						class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold leading-5 text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm focus:ring focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+						Cancel
+					</button>
+					<button type="button" id="submitQuickQuoteForm"
+						class="inline-flex items-center justify-center gap-2 rounded-lg border border-primary-700 bg-primary-700 px-3 py-2 text-sm font-semibold leading-5 text-white hover:border-primary-600 hover:bg-primary-600 hover:text-white focus:ring focus:ring-primary-400/50 active:border-primary-700 active:bg-primary-700 dark:focus:ring-primary-400/90">
+						Submit
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END Modals: With Form -->
+</div>
+<!-- END Modal Container -->
+
+<div id="alertModal"></div>
 
 <script nonce="{{ .Nonce }}">
-    const createQuickQuoteForm = document.getElementById("createQuickQuoteForm");
+    const cancelQuickQuoteForm = document.getElementById("cancelQuickQuoteForm");
+    const closeQuickQuoteForm = document.getElementById("closeQuickQuoteForm");
+    const submitQuickQuoteForm = document.getElementById("submitQuickQuoteForm");
 
-    function handleCreateQuickQuote(e) {
-		e.preventDefault();
+    function handleCloseQuickQuoteFormModal() {
+        const modal = document.getElementById('createQuickQuoteFormModalContainer');
+        modal.style.display = 'none';
+    }
+
+    closeQuickQuoteForm.addEventListener("click", () => handleCloseQuickQuoteFormModal());
+    cancelQuickQuoteForm.addEventListener("click", () => handleCloseQuickQuoteFormModal());
+    submitQuickQuoteForm.addEventListener("click", () => handleSubmitQuickQuoteForm());
+
+    function handleSubmitQuickQuoteForm() {
 		const alertModal = document.getElementById("alertModal");
+        const form = document.getElementById("createQuickQuoteForm");
 
-        alert("Implement form submission logic!");
-
-        return;
-
-		const data = new FormData(e.target);
+		const data = new FormData(form);
 		const body = new FormData();
 
-		for (const [key, value] of data.entries()) {
-			if (value) body.append(key, value);
-		}
+		const setValueKeys = [
+            "csrf_token", 
+            "lead_id", 
+            "hours_service", 
+            "guests_service", 
+            "number_of_bartenders_service", 
+            "num_bars_service", 
+            "alcohol_quality_service",
+            "type_of_bar_service"
+        ];
+
+        for (const [key, value] of data.entries()) {
+            if (setValueKeys.includes(key) && value) {
+                body.set(key, value);
+                continue;
+            }
+
+            if (key === "event_date_service" && value) {
+                data.set(key, new Date(value).getTime() / 1000);
+                continue;
+            }
+
+            if (value) body.set(key, value === "on");
+        }
 
 		fetch("/crm/lead/{{ .Lead.LeadID }}/quick-quote", {
 			method: "POST",
@@ -141,39 +206,45 @@
 		.catch(err => {
 			alertModal.outerHTML = err.message;
 		})
-        .finaly(() => handleCloseAlertModal());
+        .finaly(() => {
+            handleCloseAlertModal();
+            handleCloseQuickQuoteFormModal();
+        });
     }
 
-    createQuickQuoteForm.addEventListener("submit", (e) => handleCreateQuickQuote(e));
+    const bartenders = document.getElementById("number_of_bartenders_service");
+    const numBars = document.getElementById("num_bars_service");
+    const guests = document.getElementById("guests_service");
+    const barRental = document.getElementById("bar_rental_service");
+    const bringAlcohol = document.getElementById("bring_alcohol_service");
 
-    const bartenders = document.getElementById("number_of_bartenders");
-    const numBars = document.getElementById("num_bars");
-    const guests = document.getElementById("guests");
-    const barRental = document.getElementById("bar_rental");
+    // Conditional elements
     const typeOfBar = document.getElementById("typeOfBar");
-    const bringAlcohol = document.getElementById("bring_alcohol");
     const alcoholQuality = document.getElementById("alcoholQuality");
 
     function handleCalculateBartenders(guests) {
-        bartenders.value = Math.ceil(guests / 50);
+        guests = Number(guests);
+        if (guests && !isNaN(guests)) {
+            bartenders.value = Math.ceil(guests / 50);
+        } else {
+            bartenders.value = 0;
+        }
     }
 
     function handleBarRental(event) {
         if (event.target.checked) {
             numBars.value = bartenders.value;
-
-            typeOfBar.style.display = "";
         }
+
+        shouldShowElement(typeOfBar, event.target.checked);
     }
 
-    function handleBringAlcohol(event) {
-        if (event.target.checked) alcoholQuality.style.display = "";
+    function shouldShowElement(el, condition) {
+        el.style.display = condition ? "" : "none";
     }
 
-    guests.addEventListener("change", (e) => handleCalculateBartenders(e.target.value));
-
+    guests.addEventListener("input", (e) => handleCalculateBartenders(e.target.value));
     barRental.addEventListener("change", (e) => handleBarRental(e));
-
-    bringAlcohol.addEventListener("change", (e) => handleBringAlcohol(e));
+    bringAlcohol.addEventListener("change", (e) => shouldShowElement(alcoholQuality, e.target.checked));
 </script>
 {{ end }}
