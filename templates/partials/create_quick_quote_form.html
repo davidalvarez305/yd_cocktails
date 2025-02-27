@@ -127,6 +127,21 @@
                                             {{ end }}
                                         </select>
                                     </div>
+                                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                        <div class="grow space-y-1">
+                                            <label for="bring_cooler_service" class="group relative inline-flex items-center gap-3">
+                                                <input type="checkbox" class="peer sr-only" id="bring_cooler_service" name="bring_cooler_service" />
+                                                <span
+                                                    class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
+                                                <span class="font-medium">Tenemos que llevar coolers?</span>
+                                            </label>
+                                        </div>
+                                        <div id="coolerRentalService" class="grow space-y-1" style="display: none;">
+                                            <label for="cooler_rental_service" class="font-medium">Cuantos coolers?</label>
+                                            <input type="number" id="cooler_rental_service" name="cooler_rental_service"
+                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                                        </div>
+                                    </div>
                                     {{ range .QuickQuoteServices }}
                                     <div class="grow space-y-1">
                                         <label for="{{ .ServiceHTMLField }}" class="group relative inline-flex items-center gap-3">
@@ -191,7 +206,8 @@
             "alcohol_quality_service",
             "type_of_bar_service",
             "event_type_id_service",
-            "venue_type_id_service"
+            "venue_type_id_service",
+            "cooler_rental_service"
         ];
 
         for (const [key, value] of data.entries()) {
@@ -245,10 +261,12 @@
     const guests = document.getElementById("guests_service");
     const barRental = document.getElementById("bar_rental_service");
     const bringAlcohol = document.getElementById("bring_alcohol_service");
+    const bringCoolers = document.getElementById("bring_cooler_service");
 
     // Conditional elements
     const typeOfBar = document.getElementById("typeOfBar");
     const alcoholQuality = document.getElementById("alcoholQuality");
+    const coolerRentalService = document.getElementById("coolerRentalService");
 
     function handleCalculateBartenders(guests) {
         guests = Number(guests);
@@ -274,5 +292,6 @@
     guests.addEventListener("input", (e) => handleCalculateBartenders(e.target.value));
     barRental.addEventListener("change", (e) => handleBarRental(e));
     bringAlcohol.addEventListener("change", (e) => shouldShowElement(alcoholQuality, e.target.checked));
+    bringCoolers.addEventListener("change", (e) => shouldShowElement(coolerRentalService, e.target.checked));
 </script>
 {{ end }}

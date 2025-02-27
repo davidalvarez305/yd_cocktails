@@ -3100,7 +3100,7 @@ func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 	return services, nil
 }
 
-func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []types.QuickQuoteServiceList) error {
+func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []types.QuickQuoteServiceList) (string, error) {
 	var form types.LeadQuoteForm
 	var quoteId int
 	quoteExternalId := uuid.New().String()
@@ -3117,7 +3117,7 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []type
 	// Start a new transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return fmt.Errorf("error starting transaction: %w", err)
+		return quoteExternalId, fmt.Errorf("error starting transaction: %w", err)
 	}
 	defer tx.Rollback()
 
@@ -3153,7 +3153,7 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []type
 	).Scan(&quoteId)
 
 	if err != nil {
-		return fmt.Errorf("error inserting lead quote data: %w", err)
+		return quoteExternalId, fmt.Errorf("error inserting lead quote data: %w", err)
 	}
 
 	// Now that we have the quoteId, prepare to insert services
@@ -3196,15 +3196,15 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []type
 	for _, service := range services {
 		err = CreateQuoteServiceTx(tx, service)
 		if err != nil {
-			return fmt.Errorf("error inserting quote service: %w", err)
+			return quoteExternalId, fmt.Errorf("error inserting quote service: %w", err)
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("error committing transaction: %w", err)
+		return quoteExternalId, fmt.Errorf("error committing transaction: %w", err)
 	}
 
-	return nil
+	return quoteExternalId, nil
 }
 
 func DeleteLeadQuote(id int) error {

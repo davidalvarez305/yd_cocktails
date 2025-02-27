@@ -2817,14 +2817,14 @@ func PostQuickQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.CreateQuickQuote(form, quickQuoteServices)
+	quoteExternalId, err := database.CreateQuickQuote(form, quickQuoteServices)
 	if err != nil {
-		fmt.Printf("Error creating lead quote: %+v\n", err)
+		fmt.Printf("Error creating quick quote: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
 			TemplateName: "error",
 			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 			Data: map[string]any{
-				"Message": "Server error while creating lead quote.",
+				"Message": "Server error while creating quick quote.",
 			},
 		}
 
@@ -2833,16 +2833,9 @@ func PostQuickQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmplCtx := types.DynamicPartialTemplate{
-		TemplateName: "modal",
-		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
-		Data: map[string]any{
-			"AlertHeader":  "Success!",
-			"AlertMessage": "Quick quote has been created.",
-		},
-	}
+	redirectURL := fmt.Sprintf("%s/external/%s", constants.RootDomain, quoteExternalId)
 
-	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+	http.Redirect(w, r, redirectURL, http.StatusFound)
 }
 
 func DeleteLeadQuote(w http.ResponseWriter, r *http.Request) {
