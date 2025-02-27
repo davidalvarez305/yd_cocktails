@@ -661,13 +661,14 @@ type QuickQuoteForm struct {
 	EventTypeID *int `json:"event_type_id_service" form:"event_type_id_service" schema:"event_type_id_service"`
 	VenueTypeID *int `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
 
-	BarRental                *bool `json:"bar_rental_service" form:"bar_rental_service" schema:"bar_rental_service"`
-	TypeOfBar                *int  `json:"type_of_bar_service" form:"type_of_bar_service" schema:"type_of_bar_service"`
-	NumBars                  *int  `json:"num_bars_service" form:"num_bars_service" schema:"num_bars_service"`
-	BringCoolers             *bool `json:"bring_cooler_service" form:"bring_cooler_service" schema:"bring_cooler_service"`
-	CoolerRentalService      *int  `json:"cooler_rental_service" form:"cooler_rental_service" schema:"cooler_rental_service"`
-	BringAlcohol             *bool `json:"bring_alcohol_service" form:"bring_alcohol_service" schema:"bring_alcohol_service"`
-	AlcoholQuality           *int  `json:"alcohol_quality_service" form:"alcohol_quality_service" schema:"alcohol_quality_service"`
+	BarRental           *bool `json:"bar_rental_service" form:"bar_rental_service" schema:"bar_rental_service"`
+	TypeOfBar           *int  `json:"type_of_bar_service" form:"type_of_bar_service" schema:"type_of_bar_service"`
+	NumBars             *int  `json:"num_bars_service" form:"num_bars_service" schema:"num_bars_service"`
+	BringCoolers        *bool `json:"bring_cooler_service" form:"bring_cooler_service" schema:"bring_cooler_service"`
+	CoolerRentalService *int  `json:"cooler_rental_service" form:"cooler_rental_service" schema:"cooler_rental_service"`
+	BringAlcohol        *bool `json:"bring_alcohol_service" form:"bring_alcohol_service" schema:"bring_alcohol_service"`
+	AlcoholQuality      *int  `json:"alcohol_quality_service" form:"alcohol_quality_service" schema:"alcohol_quality_service"`
+
 	BeerService              *bool `json:"beer_service" form:"beer_service" schema:"beer_service"`
 	WineService              *bool `json:"wine_service" form:"wine_service" schema:"wine_service"`
 	IceService               *bool `json:"ice_service" form:"ice_service" schema:"ice_service"`
