@@ -649,12 +649,13 @@ type LeadConversation struct {
 }
 
 type QuickQuoteForm struct {
-	CSRFToken          *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	LeadID             *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	EventDate          *int64  `json:"event_date_service" form:"event_date_service" schema:"event_date_service"`
-	Hours              *int    `json:"hours_service" form:"hours_service" schema:"hours_service"`
-	Guests             *int    `json:"guests_service" form:"guests_service" schema:"guests_service"`
-	NumberOfBartenders *int    `json:"number_of_bartenders_service" form:"number_of_bartenders_service" schema:"number_of_bartenders_service"`
+	CSRFToken               *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	LeadID                  *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventDate               *int64  `json:"event_date_service" form:"event_date_service" schema:"event_date_service"`
+	Hours                   *int    `json:"hours_service" form:"hours_service" schema:"hours_service"`
+	Guests                  *int    `json:"guests_service" form:"guests_service" schema:"guests_service"`
+	NumberOfBartenders      *int    `json:"number_of_bartenders_service" form:"number_of_bartenders_service" schema:"number_of_bartenders_service"`
+	BartendingHourlyService *int    `json:"bartending_hourly_service" form:"bartending_hourly_service" schema:"bartending_hourly_service"`
 
 	EventTypeID *int `json:"event_type_id_service" form:"event_type_id_service" schema:"event_type_id_service"`
 	VenueTypeID *int `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
@@ -676,5 +677,4 @@ type QuickQuoteForm struct {
 	GlasswareRentalsService  *bool `json:"glassware_rentals_service" form:"glassware_rentals_service" schema:"glassware_rentals_service"`
 	SoftDrinksService        *bool `json:"soft_drinks_service" form:"soft_drinks_service" schema:"soft_drinks_service"`
 	JuicesService            *bool `json:"juices_service" form:"juices_service" schema:"juices_service"`
-	BartendingHourlyService  *bool `json:"bartending_hourly_service" form:"bartending_hourly_service" schema:"bartending_hourly_service"`
 }

@@ -269,18 +269,17 @@
     const coolerRentalService = document.getElementById("coolerRentalService");
 
     function handleCalculateBartenders(guests) {
+        let numBartenders = 0;
+
         guests = Number(guests);
-        if (guests && !isNaN(guests)) {
-            bartenders.value = Math.ceil(guests / 50);
-        } else {
-            bartenders.value = 0;
-        }
+        if (guests && !isNaN(guests)) numBartenders = Math.ceil(guests / 50);
+
+        bartenders.value = numBartenders;
+        coolerRentalService.value = numBartenders;
     }
 
     function handleBarRental(event) {
-        if (event.target.checked) {
-            numBars.value = bartenders.value;
-        }
+        if (event.target.checked) numBars.value = bartenders.value;
 
         shouldShowElement(typeOfBar, event.target.checked);
     }
