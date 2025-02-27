@@ -89,3 +89,56 @@ func UpdateInvoicesWorkflow(quoteId int, eventDate int64) error {
 
 	return nil
 }
+
+func CreateInvoiceWorkflow(quote types.QuoteDetails) error {
+	invoiceTypes, err := database.GetInvoiceTypes()
+	if err != nil {
+		fmt.Printf("ERROR DURING INVOICE WORKFLOW: %+v\n", err)
+		return err
+	}
+
+	stripeCustomerId := quote.StripeCustomerID
+
+	for _, invoiceType := range invoiceTypes {
+		invoiceDueDate := time.Now().Add(24 * time.Hour).Unix()
+
+		// Remaining Invoice (0.75% due 48 hours prior to event)
+		if invoiceType.InvoiceTypeID == constants.RemainingInvoiceTypeID {
+			t := time.Unix(quote.EventDate, 0)
+			invoiceDueDate = t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
+		}
+
+		createInvoiceParams := types.CreateInvoiceParams{
+			Email:            quote.Email,
+			StripeCustomerID: stripeCustomerId,
+			FullName:         quote.FullName,
+			DueDate:          invoiceDueDate,
+			Quote:            quote.Amount * invoiceType.AmountPercentage,
+		}
+
+		createdInvoice, err := CreateStripeInvoice(createInvoiceParams)
+		if err != nil {
+			fmt.Printf("ERROR DURING INVOICE WORKFLOW: %+v\n", err)
+			return err
+		}
+
+		err = database.CreateQuoteInvoice(createdInvoice.ID, createdInvoice.HostedInvoiceURL, quote.QuoteID, invoiceType.InvoiceTypeID, invoiceDueDate)
+		if err != nil {
+			fmt.Printf("ERROR DURING INVOICE WORKFLOW: %+v\n", err)
+			return err
+		}
+
+		// This is only true when a new customer is created
+		if stripeCustomerId == "" {
+			stripeCustomerId = createdInvoice.Customer.ID
+		}
+	}
+
+	err = database.AssignStripeCustomerIDToLead(stripeCustomerId, quote.LeadID)
+	if err != nil {
+		fmt.Printf("ERROR DURING INVOICE WORKFLOW: %+v\n", err)
+		return err
+	}
+
+	return nil
+}

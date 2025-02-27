@@ -493,6 +493,7 @@ type QuoteDetails struct {
 	EventDate        int64   `json:"event_date" form:"event_date" schema:"event_date"`
 	InvoiceID        int     `json:"invoice_id" form:"invoice_id" schema:"invoice_id"`
 	Amount           float64 `json:"amount" form:"amount" schema:"amount"`
+	QuoteID          int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
 }
 
 type ExternalQuoteDetails struct {

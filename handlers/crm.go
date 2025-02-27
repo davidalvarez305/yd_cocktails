@@ -445,7 +445,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	quickQuoteServices, err := database.GetQuickQuoteServices()
+	quickQuoteServices, err := database.GetQuickQuoteServices(false)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting quick quote services.", http.StatusInternalServerError)
@@ -1386,85 +1386,15 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 
 	// Do not create invoice if quote has invoice already
 	if quote.InvoiceID == 0 {
+		err = services.CreateInvoiceWorkflow(quote)
 
-		invoiceTypes, err := database.GetInvoiceTypes()
 		if err != nil {
 			fmt.Printf("%+v\n", err)
 			tmplCtx := types.DynamicPartialTemplate{
 				TemplateName: "error",
 				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
 				Data: map[string]any{
-					"Message": "Error getting invoice types.",
-				},
-			}
-			w.WriteHeader(http.StatusBadRequest)
-			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-			return
-		}
-
-		stripeCustomerId := quote.StripeCustomerID
-
-		for _, invoiceType := range invoiceTypes {
-			invoiceDueDate := time.Now().Add(24 * time.Hour).Unix()
-
-			// Remaining Invoice (0.75% due 48 hours prior to event)
-			if invoiceType.InvoiceTypeID == constants.RemainingInvoiceTypeID {
-				t := time.Unix(quote.EventDate, 0)
-				invoiceDueDate = t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
-			}
-
-			createInvoiceParams := types.CreateInvoiceParams{
-				Email:            quote.Email,
-				StripeCustomerID: stripeCustomerId,
-				FullName:         quote.FullName,
-				DueDate:          invoiceDueDate,
-				Quote:            quote.Amount * invoiceType.AmountPercentage,
-			}
-
-			createdInvoice, err := services.CreateStripeInvoice(createInvoiceParams)
-			if err != nil {
-				fmt.Printf("%+v\n", err)
-				tmplCtx := types.DynamicPartialTemplate{
-					TemplateName: "error",
-					TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-					Data: map[string]any{
-						"Message": "Error sending stripe invoice.",
-					},
-				}
-				w.WriteHeader(http.StatusBadRequest)
-				helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-				return
-			}
-
-			err = database.CreateQuoteInvoice(createdInvoice.ID, createdInvoice.HostedInvoiceURL, quoteId, invoiceType.InvoiceTypeID, invoiceDueDate)
-			if err != nil {
-				fmt.Printf("%+v\n", err)
-				tmplCtx := types.DynamicPartialTemplate{
-					TemplateName: "error",
-					TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-					Data: map[string]any{
-						"Message": "Error assigning stripe invoice ID to quote.",
-					},
-				}
-				w.WriteHeader(http.StatusBadRequest)
-				helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-				return
-			}
-
-			// This is only true when a new customer is created
-			if stripeCustomerId == "" {
-				stripeCustomerId = createdInvoice.Customer.ID
-			}
-		}
-
-		err = database.AssignStripeCustomerIDToLead(stripeCustomerId, quote.LeadID)
-		if err != nil {
-			fmt.Printf("%+v\n", err)
-			tmplCtx := types.DynamicPartialTemplate{
-				TemplateName: "error",
-				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-				Data: map[string]any{
-					"Message": "Error assigning stripe customer ID to lead.",
+					"Message": "Error creating invoice.",
 				},
 			}
 			w.WriteHeader(http.StatusBadRequest)
@@ -2801,7 +2731,7 @@ func PostQuickQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quickQuoteServices, err := database.GetQuickQuoteServices()
+	quickQuoteServices, err := database.GetQuickQuoteServices(true)
 	if err != nil {
 		fmt.Printf("Error creating lead quote: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
@@ -2817,7 +2747,7 @@ func PostQuickQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quoteExternalId, err := database.CreateQuickQuote(form, quickQuoteServices)
+	quoteId, quoteExternalId, err := database.CreateQuickQuote(form, quickQuoteServices)
 	if err != nil {
 		fmt.Printf("Error creating quick quote: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
@@ -2833,7 +2763,73 @@ func PostQuickQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	leadId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/lead/")
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to parse lead id.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	quote, err := database.GetLeadQuoteInvoiceDetails(fmt.Sprint(leadId), fmt.Sprint(quoteId))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting quote details.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = services.CreateInvoiceWorkflow(quote)
+	if err != nil {
+		fmt.Printf("Error creating quick quote: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while creating quote invoice.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
 	redirectURL := fmt.Sprintf("%s/external/%s", constants.RootDomain, quoteExternalId)
+
+	var textMessageTemplateNotification = fmt.Sprintf(
+		`BARTENDING QUOTE:
+		Here's the link to your estimate: %s
+	`, redirectURL)
+
+	_, err = services.SendTextMessage(quote.PhoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error sending invoice via text.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
 
 	http.Redirect(w, r, redirectURL, http.StatusFound)
 }

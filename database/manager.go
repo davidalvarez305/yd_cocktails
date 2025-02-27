@@ -1734,13 +1734,14 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 		q.event_date AT TIME ZONE 'America/New_York' AT TIME ZONE 'UTC' AS event_date_utc,
 		q.external_id,
 		i.invoice_id,
-		SUM(qs.units * qs.price_per_unit::NUMERIC)
+		SUM(qs.units * qs.price_per_unit::NUMERIC),
+		q.quote_id
 	FROM lead l
 	JOIN quote AS q ON q.lead_id = l.lead_id
 	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	LEFT JOIN invoice AS i ON i.quote_id = q.quote_id
 	WHERE l.lead_id = $1 AND q.quote_id = $2
-	GROUP BY l.lead_id, l.full_name, l.phone_number, l.email, l.stripe_customer_id, q.event_date, q.external_id, i.invoice_id`
+	GROUP BY l.lead_id, l.full_name, l.phone_number, l.email, l.stripe_customer_id, q.event_date, q.external_id, i.invoice_id, q.quote_id`
 
 	var quote types.QuoteDetails
 
@@ -1749,6 +1750,7 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 	var email, stripeCustomerId sql.NullString
 	var eventDate time.Time
 	var invoiceId sql.NullInt64
+	var amount sql.NullFloat64
 
 	err := row.Scan(
 		&quote.LeadID,
@@ -1759,7 +1761,8 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 		&eventDate,
 		&quote.ExternalID,
 		&invoiceId,
-		&quote.Amount,
+		&amount,
+		&quote.QuoteID,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -1776,6 +1779,9 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 	}
 	if stripeCustomerId.Valid {
 		quote.StripeCustomerID = stripeCustomerId.String
+	}
+	if amount.Valid {
+		quote.Amount = amount.Float64
 	}
 
 	quote.EventDate = eventDate.Unix()
@@ -1839,6 +1845,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	var bartenders, guests, hours sql.NullInt64
 	var eventDate sql.NullTime
 	var eventType, venueType, email sql.NullString
+	var amount, depositAmount, remainingAmount sql.NullFloat64
 
 	row := DB.QueryRow(query, externalQuoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID, constants.FullInvoiceTypeID, constants.RemainingInvoiceTypeID, constants.PaidInvoiceStatusID)
 
@@ -1850,13 +1857,13 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		&eventType,
 		&venueType,
 		&eventDate,
-		&quoteDetails.Amount,
+		&amount,
 		&quoteDetails.FullName,
 		&quoteDetails.PhoneNumber,
 		&email,
 		&quoteDetails.DepositInvoiceURL,
-		&quoteDetails.Deposit,
-		&quoteDetails.RemainingAmount,
+		&depositAmount,
+		&remainingAmount,
 		&quoteDetails.FullInvoiceURL,
 		&quoteDetails.RemainingInvoiceURL,
 		&quoteDetails.IsDepositPaid,
@@ -1889,6 +1896,15 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	}
 	if email.Valid {
 		quoteDetails.Email = email.String
+	}
+	if amount.Valid {
+		quoteDetails.Amount = amount.Float64
+	}
+	if depositAmount.Valid {
+		quoteDetails.Deposit = depositAmount.Float64
+	}
+	if remainingAmount.Valid {
+		quoteDetails.RemainingAmount = remainingAmount.Float64
 	}
 
 	return quoteDetails, nil
@@ -3062,7 +3078,7 @@ func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 	return services, nil
 }
 
-func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
+func GetQuickQuoteServices(shouldGetAll bool) ([]types.QuickQuoteServiceList, error) {
 	var services []types.QuickQuoteServiceList
 
 	rows, err := DB.Query(`SELECT service_id, 
@@ -3073,8 +3089,8 @@ func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 			ELSE REPLACE(CONCAT(LOWER(service), '_service'), ' ', '_')
 		END AS service_lower_case
 	FROM "service"
-	WHERE service_type_id = $1;
-	`, constants.GeneralServiceTypeID, constants.CupsStrawsNapkinsServiceID)
+	WHERE $3 IS TRUE OR service_type_id = $1;
+	`, constants.GeneralServiceTypeID, constants.CupsStrawsNapkinsServiceID, shouldGetAll)
 	if err != nil {
 		return services, fmt.Errorf("error executing query: %w", err)
 	}
@@ -3100,7 +3116,7 @@ func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 	return services, nil
 }
 
-func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []types.QuickQuoteServiceList) (string, error) {
+func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []types.QuickQuoteServiceList) (int, string, error) {
 	var form types.LeadQuoteForm
 	var quoteId int
 	quoteExternalId := uuid.New().String()
@@ -3117,7 +3133,7 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []type
 	// Start a new transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return quoteExternalId, fmt.Errorf("error starting transaction: %w", err)
+		return quoteId, quoteExternalId, fmt.Errorf("error starting transaction: %w", err)
 	}
 	defer tx.Rollback()
 
@@ -3149,11 +3165,11 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []type
 		utils.CreateNullInt(form.EventTypeID),
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),
-		utils.CreateNullString(form.ExternalID),
+		quoteExternalId,
 	).Scan(&quoteId)
 
 	if err != nil {
-		return quoteExternalId, fmt.Errorf("error inserting lead quote data: %w", err)
+		return quoteId, quoteExternalId, fmt.Errorf("error inserting lead quote data: %w", err)
 	}
 
 	// Now that we have the quoteId, prepare to insert services
@@ -3196,15 +3212,16 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []type
 	for _, service := range services {
 		err = CreateQuoteServiceTx(tx, service)
 		if err != nil {
-			return quoteExternalId, fmt.Errorf("error inserting quote service: %w", err)
+			tx.Rollback()
+			return quoteId, quoteExternalId, fmt.Errorf("error inserting quote service: %w", err)
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return quoteExternalId, fmt.Errorf("error committing transaction: %w", err)
+		return quoteId, quoteExternalId, fmt.Errorf("error committing transaction: %w", err)
 	}
 
-	return quoteExternalId, nil
+	return quoteId, quoteExternalId, nil
 }
 
 func DeleteLeadQuote(id int) error {
