@@ -656,20 +656,23 @@ type QuickQuoteForm struct {
 	Guests             *int    `json:"guests_service" form:"guests_service" schema:"guests_service"`
 	NumberOfBartenders *int    `json:"number_of_bartenders_service" form:"number_of_bartenders_service" schema:"number_of_bartenders_service"`
 
+	EventTypeID *int `json:"event_type_id_service" form:"event_type_id_service" schema:"event_type_id_service"`
+	VenueTypeID *int `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
+
 	BarRental                *bool `json:"bar_rental_service" form:"bar_rental_service" schema:"bar_rental_service"`
 	TypeOfBar                *int  `json:"type_of_bar_service" form:"type_of_bar_service" schema:"type_of_bar_service"`
 	NumBars                  *int  `json:"num_bars_service" form:"num_bars_service" schema:"num_bars_service"`
 	BringAlcohol             *bool `json:"bring_alcohol_service" form:"bring_alcohol_service" schema:"bring_alcohol_service"`
 	AlcoholQuality           *int  `json:"alcohol_quality_service" form:"alcohol_quality_service" schema:"alcohol_quality_service"`
-	BeerService              *bool `json:"beer_service_service" form:"beer_service_service" schema:"beer_service_service"`
-	WineService              *bool `json:"wine_service_service" form:"wine_service_service" schema:"wine_service_service"`
-	IceService               *bool `json:"ice_service_service" form:"ice_service_service" schema:"ice_service_service"`
-	GarnishService           *bool `json:"garnish_service_service" form:"garnish_service_service" schema:"garnish_service_service"`
-	FruitsService            *bool `json:"fruits_service_service" form:"fruits_service_service" schema:"fruits_service_service"`
-	MixersService            *bool `json:"mixers_service_service" form:"mixers_service_service" schema:"mixers_service_service"`
-	CupsStrawsNapkinsService *bool `json:"cups_straws_napkins_service_service" form:"cups_straws_napkins_service_service" schema:"cups_straws_napkins_service_service"`
-	GlasswareRentalsService  *bool `json:"glassware_rentals_service_service" form:"glassware_rentals_service_service" schema:"glassware_rentals_service_service"`
-	SoftDrinksService        *bool `json:"soft_drinks_service_service" form:"soft_drinks_service_service" schema:"soft_drinks_service_service"`
-	JuicesService            *bool `json:"juices_service_service" form:"juices_service_service" schema:"juices_service_service"`
+	BeerService              *bool `json:"beer_service" form:"beer_service" schema:"beer_service"`
+	WineService              *bool `json:"wine_service" form:"wine_service" schema:"wine_service"`
+	IceService               *bool `json:"ice_service" form:"ice_service" schema:"ice_service"`
+	GarnishService           *bool `json:"garnish_service" form:"garnish_service" schema:"garnish_service"`
+	FruitsService            *bool `json:"fruits_service" form:"fruits_service" schema:"fruits_service"`
+	MixersService            *bool `json:"mixers_service" form:"mixers_service" schema:"mixers_service"`
+	CupsStrawsNapkinsService *bool `json:"cups_straws_napkins_service" form:"cups_straws_napkins_service" schema:"cups_straws_napkins_service"`
+	GlasswareRentalsService  *bool `json:"glassware_rentals_service" form:"glassware_rentals_service" schema:"glassware_rentals_service"`
+	SoftDrinksService        *bool `json:"soft_drinks_service" form:"soft_drinks_service" schema:"soft_drinks_service"`
+	JuicesService            *bool `json:"juices_service" form:"juices_service" schema:"juices_service"`
 	BartendingHourlyService  *bool `json:"bartending_hourly_service" form:"bartending_hourly_service" schema:"bartending_hourly_service"`
 }

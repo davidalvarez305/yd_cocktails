@@ -3065,9 +3065,16 @@ func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 	var services []types.QuickQuoteServiceList
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, CONCAT(LOWER(service), '_service') AS service_lower_case
-				FROM "service"
-				WHERE service_type_id = $1`, constants.GeneralServiceTypeID)
+	rows, err := DB.Query(`SELECT service_id, 
+		service, 
+		suggested_price::NUMERIC, 
+		CASE 
+			WHEN service_id = $2 THEN 'cups_straws_napkins_service'
+			ELSE REPLACE(CONCAT(LOWER(service), '_service'), ' ', '_')
+		END AS service_lower_case
+	FROM "service"
+	WHERE service_type_id = $1
+	`, constants.GeneralServiceTypeID, constants.CupsStrawsNapkinsServiceID)
 	if err != nil {
 		return services, fmt.Errorf("error executing query: %w", err)
 	}
@@ -3096,11 +3103,12 @@ func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []types.QuickQuoteServiceList) error {
 	var form types.LeadQuoteForm
 	var quoteId int
+	quoteExternalId := uuid.New().String()
 
 	form.LeadID = quickQuote.LeadID
 	form.EventDate = quickQuote.EventDate
 	form.EventTypeID = quickQuote.EventTypeID
-	form.ExternalID = quickQuote.ExternalID
+	form.ExternalID = &quoteExternalId
 	form.Guests = quickQuote.Guests
 	form.Hours = quickQuote.Hours
 	form.NumberOfBartenders = quickQuote.NumberOfBartenders
@@ -3141,7 +3149,7 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []type
 		utils.CreateNullInt(form.EventTypeID),
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),
-		uuid.New().String(),
+		utils.CreateNullString(form.ExternalID),
 	).Scan(&quoteId)
 
 	if err != nil {
@@ -3149,7 +3157,7 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []type
 	}
 
 	// Now that we have the quoteId, prepare to insert services
-	val := reflect.ValueOf(quickQuote).Elem()
+	val := reflect.ValueOf(&quickQuote).Elem()
 
 	var services []types.QuoteServiceForm
 
@@ -3158,22 +3166,27 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []type
 		field := val.Field(i)
 		fieldType := val.Type().Field(i)
 
-		if field.Kind() == reflect.Ptr && field.Type().Elem().Kind() == reflect.Bool {
+		if field.Kind() == reflect.Ptr {
 			if field.IsNil() {
 				continue
 			}
 
-			serviceEnabled := field.Interface().(*bool)
+			if field.Type().Elem().Kind() == reflect.Bool {
+				serviceEnabled, ok := field.Interface().(*bool)
+				if !ok || serviceEnabled == nil || !*serviceEnabled {
+					continue
+				}
 
-			for _, quickQuoteService := range quickQuoteServices {
-				if *serviceEnabled && quickQuoteService.ServiceHTMLField == fieldType.Tag.Get("form") {
-					service := types.QuoteServiceForm{
-						ServiceID:    &quickQuoteService.ServiceID,
-						QuoteID:      &quoteId,
-						Units:        quickQuote.Guests,
-						PricePerUnit: &quickQuoteService.SuggestedPrice,
+				for _, quickQuoteService := range quickQuoteServices {
+					if quickQuoteService.ServiceHTMLField == fieldType.Tag.Get("form") {
+						service := types.QuoteServiceForm{
+							ServiceID:    &quickQuoteService.ServiceID,
+							QuoteID:      &quoteId,
+							Units:        quickQuote.Guests,
+							PricePerUnit: &quickQuoteService.SuggestedPrice,
+						}
+						services = append(services, service)
 					}
-					services = append(services, service)
 				}
 			}
 		}

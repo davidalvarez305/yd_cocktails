@@ -37,6 +37,8 @@ const (
 	CoolerRentalServiceTypeID int = 3
 	GeneralServiceTypeID      int = 4
 
+	CupsStrawsNapkinsServiceID int = 14
+
 	NoInterestLeadInterestID int = 4
 
 	NewLeadStatusID      int = 1

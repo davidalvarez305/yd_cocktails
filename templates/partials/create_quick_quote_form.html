@@ -53,6 +53,32 @@
                                                 class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                         </div>
                                     </div>
+                                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                        <div class="grow space-y-1">
+                                            <label for="event_type_id_service" class="font-medium">Event Type*</label>
+                                            <select id="event_type_id_service" name="event_type_id_service" required
+                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                                                <option></option>
+                                                {{ range .EventTypes }}
+                                                <option value="{{ .EventTypeID }}">
+                                                    {{ .Name }}
+                                                </option>
+                                                {{ end }}
+                                            </select>
+                                        </div>
+                                        <div class="grow space-y-1">
+                                            <label for="venue_type_id_service" class="font-medium">Venue Type*</label>
+                                            <select id="venue_type_id_service" name="venue_type_id_service" required
+                                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                                                <option></option>
+                                                {{ range .VenueTypes }}
+                                                <option value="{{ .VenueTypeID }}">
+                                                    {{ .Name }}
+                                                </option>
+                                                {{ end }}
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div class="grow space-y-1">
                                         <label for="bar_rental_service"
                                             class="group relative inline-flex items-center gap-3">
@@ -163,7 +189,9 @@
             "number_of_bartenders_service", 
             "num_bars_service", 
             "alcohol_quality_service",
-            "type_of_bar_service"
+            "type_of_bar_service",
+            "event_type_id_service",
+            "venue_type_id_service"
         ];
 
         for (const [key, value] of data.entries()) {
@@ -173,7 +201,7 @@
             }
 
             if (key === "event_date_service" && value) {
-                data.set(key, new Date(value).getTime() / 1000);
+                body.set(key, new Date(value).getTime() / 1000);
                 continue;
             }
 
@@ -206,7 +234,7 @@
 		.catch(err => {
 			alertModal.outerHTML = err.message;
 		})
-        .finaly(() => {
+        .finally(() => {
             handleCloseAlertModal();
             handleCloseQuickQuoteFormModal();
         });
