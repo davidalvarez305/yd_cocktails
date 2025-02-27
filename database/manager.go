@@ -3073,7 +3073,7 @@ func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 			ELSE REPLACE(CONCAT(LOWER(service), '_service'), ' ', '_')
 		END AS service_lower_case
 	FROM "service"
-	WHERE service_type_id = $1
+	WHERE service_type_id = $1;
 	`, constants.GeneralServiceTypeID, constants.CupsStrawsNapkinsServiceID)
 	if err != nil {
 		return services, fmt.Errorf("error executing query: %w", err)
