@@ -29,6 +29,7 @@
 							<form id="createQuickQuoteForm" class="space-y-4">
                                     <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
                                     <input type="hidden" name="lead_id" value="{{ .Lead.LeadID }}" />
+                                    <input type="hidden" name="bartending_hourly_service" />
                                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                         <div class="grow space-y-1">
                                             <label for="event_date_service" class="font-medium">Cual sería la hora y fecha del evento?</label>
@@ -207,7 +208,8 @@
             "type_of_bar_service",
             "event_type_id_service",
             "venue_type_id_service",
-            "cooler_rental_service"
+            "cooler_rental_service",
+            "bartending_hourly_service"
         ];
 
         for (const [key, value] of data.entries()) {
@@ -256,6 +258,8 @@
         });
     }
 
+    const hours = document.getElementById("hours_service");
+    const bartendingHourlyService = document.getElementById("bartending_hourly_service");
     const bartenders = document.getElementById("number_of_bartenders_service");
     const numBars = document.getElementById("num_bars_service");
     const guests = document.getElementById("guests_service");
@@ -288,6 +292,7 @@
         el.style.display = condition ? "" : "none";
     }
 
+    hours.addEventListener("change", (e) => bartendingHourlyService.value = e.target.value);
     guests.addEventListener("input", (e) => handleCalculateBartenders(e.target.value));
     barRental.addEventListener("change", (e) => handleBarRental(e));
     bringAlcohol.addEventListener("change", (e) => shouldShowElement(alcoholQuality, e.target.checked));
