@@ -72,10 +72,15 @@ func UpdateStripeInvoice(leadQuoteInvoice types.LeadQuoteInvoice) (stripe.Invoic
 		return updatedInvoice, fmt.Errorf("failed to retrieve invoice: %v", err)
 	}
 
-	// Void the existing invoice
-	_, err = invoice.VoidInvoice(originalInvoice.ID, nil)
-	if err != nil {
-		return updatedInvoice, fmt.Errorf("failed to void invoice: %v", err)
+	// Check if the invoice is already voided
+	if originalInvoice.Status != stripe.InvoiceStatusVoid {
+		// Void the existing invoice
+		_, err := invoice.VoidInvoice(originalInvoice.ID, nil)
+
+		// If there's still an error, return it
+		if err != nil {
+			return updatedInvoice, fmt.Errorf("failed to void invoice: %v", err)
+		}
 	}
 
 	// Create New Invoice
