@@ -61,8 +61,14 @@ func UpdateInvoicesWorkflow(quoteId int, eventDate int64) error {
 		dueDate := time.Now().Add(24 * time.Hour).Unix()
 		if leadQuoteInvoice.InvoiceTypeID == constants.RemainingInvoiceTypeID {
 			t := time.Unix(eventDate, 0)
-			dueDate = t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
+			newDueDate := t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
+
+			// Only update if the new due date is more than 72 hours from now
+			if newDueDate > time.Now().Add(72*time.Hour).Unix() {
+				dueDate = newDueDate
+			}
 		}
+
 		leadQuoteInvoice.DueDate = dueDate
 
 		// Void old invoice and copy over to new invoice on stripe
