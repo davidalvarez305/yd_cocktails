@@ -97,11 +97,21 @@ func GetExternalQuoteDetails(w http.ResponseWriter, r *http.Request, ctx map[str
 		return
 	}
 
+	isWithin48Hours := false
+	t := time.Unix(quote.EventDateTimestamp, 0)
+	currentTime := time.Now()
+
+	// Check if the event date is within 48 hours from now
+	if t.Sub(currentTime) <= 48*time.Hour && t.After(currentTime) {
+		isWithin48Hours = true
+	}
+
 	data := ctx
 	data["PageTitle"] = "Quote View — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["Quote"] = quote
 	data["QuoteServices"] = quoteServices
+	data["IsWithin48Hours"] = isWithin48Hours
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 

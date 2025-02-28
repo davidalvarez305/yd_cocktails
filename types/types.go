@@ -507,6 +507,7 @@ type ExternalQuoteDetails struct {
 	Guests              int     `json:"guests" form:"guests" schema:"guests"`
 	Hours               int     `json:"hours" form:"hours" schema:"hours"`
 	EventDate           string  `json:"event_date" form:"event_date" schema:"event_date"`
+	EventDateTimestamp  int64   `json:"event_date_timestamp" form:"event_date_timestamp" schema:"event_date_timestamp"`
 	NumberOfBartenders  int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
 	FullName            string  `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber         string  `json:"phone_number" form:"phone_number" schema:"phone_number"`

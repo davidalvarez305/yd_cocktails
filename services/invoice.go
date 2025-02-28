@@ -105,7 +105,12 @@ func CreateInvoiceWorkflow(quote types.QuoteDetails) error {
 		// Remaining Invoice (0.75% due 48 hours prior to event)
 		if invoiceType.InvoiceTypeID == constants.RemainingInvoiceTypeID {
 			t := time.Unix(quote.EventDate, 0)
-			invoiceDueDate = t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
+			currentTime := time.Now()
+
+			// Only change the invoice due date if the event date is more than 72 hours away
+			if t.Sub(currentTime) > 72*time.Hour {
+				invoiceDueDate = t.Add(-time.Duration(constants.InvoicePaymentDueInHours) * time.Hour).Unix()
+			}
 		}
 
 		createInvoiceParams := types.CreateInvoiceParams{
