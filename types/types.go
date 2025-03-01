@@ -113,6 +113,7 @@ type LeadList struct {
 	LeadStatus      string `json:"lead_status" form:"lead_status" schema:"lead_status"`
 	TotalRows       int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
 	LastContactDate string `json:"last_contact_date" form:"last_contact_date" schema:"last_contact_date"`
+	EventDate       string `json:"event_date" form:"event_date" schema:"event_date"`
 }
 
 type Referral struct {

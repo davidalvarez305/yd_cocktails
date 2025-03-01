@@ -397,6 +397,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		COALESCE(nsa.action, na.action) AS next_action,
 		lna.action_date, 
 		lc.date_created AS last_contact_date,
+		MAX(q.event_date) as event_date,
 		COUNT(*) OVER() AS total_rows
 	FROM lead AS l
 	JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
@@ -410,6 +411,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	) AS lna ON lna.lead_id = l.lead_id
 	LEFT JOIN next_action AS nsa ON nsa.next_action_id = lna.next_action_id
 	LEFT JOIN latest_communication AS lc ON lc.phone_number = l.phone_number
+	LEFT JOIN quote as q ON q.lead_id = l.lead_id
 	WHERE 
 		(
 			$5::TEXT IS NOT NULL 
@@ -476,7 +478,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	for rows.Next() {
 		var lead types.LeadList
 		var createdAt time.Time
-		var nextActionDate, lastContactDate sql.NullTime
+		var nextActionDate, lastContactDate, eventDate sql.NullTime
 		var language, nextAction, leadInterest, leadStatus sql.NullString
 
 		err := rows.Scan(&lead.LeadID,
@@ -489,12 +491,13 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 			&nextAction,
 			&nextActionDate,
 			&lastContactDate,
+			&eventDate,
 			&totalRows)
 		if err != nil {
 			return nil, 0, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		lead.CreatedAt = utils.FormatTimestamp(createdAt.Unix())
+		lead.CreatedAt = utils.FormatDateMMDDYYYY(createdAt.Unix())
 
 		if nextActionDate.Valid {
 			lead.NextActionDate = utils.FormatTimestamp(nextActionDate.Time.Unix())
@@ -502,6 +505,10 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 
 		if lastContactDate.Valid {
 			lead.LastContactDate = utils.FormatTimestamp(lastContactDate.Time.Unix())
+		}
+
+		if eventDate.Valid {
+			lead.EventDate = utils.FormatDateMMDDYYYY(eventDate.Time.Unix())
 		}
 
 		if language.Valid {
