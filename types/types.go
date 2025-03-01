@@ -102,16 +102,17 @@ type LeadDetails struct {
 }
 
 type LeadList struct {
-	LeadID         int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	FullName       string `json:"full_name" form:"full_name" schema:"full_name"`
-	PhoneNumber    string `json:"phone_number" form:"phone_number" schema:"phone_number"`
-	CreatedAt      string `json:"created_at" form:"created_at" schema:"created_at"`
-	Language       string `json:"language" form:"language" schema:"language"`
-	NextAction     string `json:"next_action" form:"next_action" schema:"next_action"`
-	NextActionDate string `json:"next_action_date" form:"next_action_date" schema:"next_action_date"`
-	LeadInterest   string `json:"lead_interest" form:"lead_interest" schema:"lead_interest"`
-	LeadStatus     string `json:"lead_status" form:"lead_status" schema:"lead_status"`
-	TotalRows      int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
+	LeadID          int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	FullName        string `json:"full_name" form:"full_name" schema:"full_name"`
+	PhoneNumber     string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	CreatedAt       string `json:"created_at" form:"created_at" schema:"created_at"`
+	Language        string `json:"language" form:"language" schema:"language"`
+	NextAction      string `json:"next_action" form:"next_action" schema:"next_action"`
+	NextActionDate  string `json:"next_action_date" form:"next_action_date" schema:"next_action_date"`
+	LeadInterest    string `json:"lead_interest" form:"lead_interest" schema:"lead_interest"`
+	LeadStatus      string `json:"lead_status" form:"lead_status" schema:"lead_status"`
+	TotalRows       int    `json:"total_rows" form:"total_rows" schema:"total_rows"`
+	LastContactDate string `json:"last_contact_date" form:"last_contact_date" schema:"last_contact_date"`
 }
 
 type Referral struct {

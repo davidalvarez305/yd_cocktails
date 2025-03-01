@@ -372,48 +372,84 @@ func GetVenueTypes() ([]models.VenueType, error) {
 func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
-	query := `SELECT l.lead_id, l.full_name, l.phone_number, 
-			l.created_at, lm.language, li.interest, ls.status, COALESCE(nsa.action, na.action), lna.action_date,
-			COUNT(*) OVER() AS total_rows
-		FROM lead AS l
-		JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
-		LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id
-		LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
-		LEFT JOIN next_action AS na ON na.next_action_id = l.next_action_id
-		LEFT JOIN (
-			SELECT DISTINCT ON (lead_id) lead_id, action_date, next_action_id
-			FROM lead_next_action
-			ORDER BY lead_id, action_date DESC
-		) AS lna ON lna.lead_id = l.lead_id
-		LEFT JOIN next_action AS nsa ON nsa.next_action_id = lna.next_action_id
-		WHERE 
-			(
-				$5::TEXT IS NOT NULL 
-				AND (
-					l.search_vector @@ plainto_tsquery('english', $5::TEXT)
-					OR l.full_name ILIKE '%' || $5 || '%'
-					OR l.phone_number ILIKE '%' || $5 || '%'
-				)
+	query := `WITH combined_communications AS (
+		SELECT text_from AS phone_number, date_created FROM message
+		UNION ALL
+		SELECT text_to AS phone_number, date_created FROM message
+		UNION ALL
+		SELECT call_from AS phone_number, date_created FROM phone_call
+		UNION ALL
+		SELECT call_to AS phone_number, date_created FROM phone_call
+	),
+	latest_communication AS (
+		SELECT DISTINCT ON (phone_number) phone_number, date_created
+		FROM combined_communications
+		ORDER BY phone_number, date_created DESC
+	)
+	SELECT 
+		l.lead_id, 
+		l.full_name, 
+		l.phone_number, 
+		l.created_at, 
+		lm.language, 
+		li.interest, 
+		ls.status, 
+		COALESCE(nsa.action, na.action) AS next_action,
+		lna.action_date, 
+		lc.date_created AS last_contact_date,
+		COUNT(*) OVER() AS total_rows
+	FROM lead AS l
+	JOIN lead_marketing AS lm ON lm.lead_id = l.lead_id
+	LEFT JOIN lead_interest AS li ON li.lead_interest_id = l.lead_interest_id
+	LEFT JOIN lead_status AS ls ON ls.lead_status_id = l.lead_status_id
+	LEFT JOIN next_action AS na ON na.next_action_id = l.next_action_id
+	LEFT JOIN (
+		SELECT DISTINCT ON (lead_id) lead_id, action_date, next_action_id
+		FROM lead_next_action
+		ORDER BY lead_id, action_date DESC
+	) AS lna ON lna.lead_id = l.lead_id
+	LEFT JOIN next_action AS nsa ON nsa.next_action_id = lna.next_action_id
+	LEFT JOIN latest_communication AS lc ON lc.phone_number = l.phone_number
+	WHERE 
+		(
+			$5::TEXT IS NOT NULL 
+			AND (
+				l.search_vector @@ plainto_tsquery('english', $5::TEXT)
+				OR l.full_name ILIKE '%' || $5 || '%'
+				OR l.phone_number ILIKE '%' || $5 || '%'
 			)
-			OR 
-			(
-				$5 IS NULL 
-				AND (
-					($6::INTEGER IS NOT NULL AND ls.lead_status_id = $6::INTEGER) 
-					OR 
-					($6::INTEGER IS NULL AND (ls.lead_status_id IS DISTINCT FROM $3::INTEGER OR ls.lead_status_id IS NULL))
-				)
-				AND 
-				(
-					($7::INTEGER IS NOT NULL AND li.lead_interest_id = $7::INTEGER) 
-					OR 
-					($7::INTEGER IS NULL AND (li.lead_interest_id IS DISTINCT FROM $4::INTEGER OR li.lead_interest_id IS NULL))
-				)
-				AND 
-				($8::INTEGER IS NULL OR na.next_action_id = $8::INTEGER)
+		)
+		OR 
+		(
+			$5 IS NULL 
+			AND (
+				($6::INTEGER IS NOT NULL AND ls.lead_status_id = $6::INTEGER) 
+				OR 
+				($6::INTEGER IS NULL AND (ls.lead_status_id IS DISTINCT FROM $3::INTEGER OR ls.lead_status_id IS NULL))
 			)
-		ORDER BY l.created_at DESC
-		LIMIT $1 OFFSET $2;`
+			AND 
+			(
+				($7::INTEGER IS NOT NULL AND li.lead_interest_id = $7::INTEGER) 
+				OR 
+				($7::INTEGER IS NULL AND (li.lead_interest_id IS DISTINCT FROM $4::INTEGER OR li.lead_interest_id IS NULL))
+			)
+			AND 
+			($8::INTEGER IS NULL OR na.next_action_id = $8::INTEGER)
+		)
+	GROUP BY 
+		l.lead_id, 
+		l.full_name, 
+		l.phone_number, 
+		l.created_at, 
+		lm.language, 
+		li.interest, 
+		ls.status, 
+		nsa.action, 
+		na.action, 
+		lna.action_date, 
+		lc.date_created
+	ORDER BY l.created_at DESC
+	LIMIT $1 OFFSET $2;`
 
 	var offset int
 
@@ -440,7 +476,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	for rows.Next() {
 		var lead types.LeadList
 		var createdAt time.Time
-		var nextActionDate sql.NullTime
+		var nextActionDate, lastContactDate sql.NullTime
 		var language, nextAction, leadInterest, leadStatus sql.NullString
 
 		err := rows.Scan(&lead.LeadID,
@@ -452,6 +488,7 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 			&leadStatus,
 			&nextAction,
 			&nextActionDate,
+			&lastContactDate,
 			&totalRows)
 		if err != nil {
 			return nil, 0, fmt.Errorf("error scanning row: %w", err)
@@ -461,6 +498,10 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 
 		if nextActionDate.Valid {
 			lead.NextActionDate = utils.FormatTimestamp(nextActionDate.Time.Unix())
+		}
+
+		if lastContactDate.Valid {
+			lead.LastContactDate = utils.FormatTimestamp(lastContactDate.Time.Unix())
 		}
 
 		if language.Valid {
