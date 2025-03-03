@@ -192,15 +192,15 @@ func GetCoffeeLP(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContex
 	data.Nonce = nonce
 	data.CSRFToken = csrfToken
 	data.Features = []string{
-		"We'll work with you to create a custom menu that features our signature drinks + your favorites.",
-		"We'll always be early to setup & make sure everything that's necessary is ready for use.",
-		"We have high standards of service to make sure your guests are able to enjoy their time with crafty & delicious drinks.",
-		"We will DEFINITELY clean up after ourselves and leave your area as clean as it was before we got there.",
-		"Our team can dress to the occasion in the event that you require a specific outfit or a certain theme.",
-		"We're very flexible in terms of capacity for number of attendees, and can serve small as well as larger events.",
-		"We offer highly detailed & customized quotes so that you know 100% what you're paying for, and what we agree to.",
-		"Your guests are first, and it's our priority to put forth an incredible service so that their experience at your event is awesome.",
-		"Our baristas are highly skilled with years of experience so that your coffee comes out delish.",
+		"We collaborate with you to design a custom event plan, including themed décor, catering, and entertainment.",
+		"Our team arrives early to set up and ensure everything is perfectly in place before your guests arrive.",
+		"We uphold the highest standards of service, ensuring your guests enjoy a seamless and memorable experience.",
+		"We will put together a list of highly qualified & vetted vendors to make your dreams a reality.",
+		"Our staff can dress to match your event’s theme, ensuring a cohesive and stylish atmosphere.",
+		"We cater to events of all sizes, from intimate gatherings to large celebrations, with ease and efficiency.",
+		"Our detailed and transparent quotes ensure you know exactly what’s included, with no hidden fees.",
+		"Your guests’ experience is our top priority—we go above and beyond to create an unforgettable event.",
+		"Our team consists of experienced professionals who bring creativity and expertise to every event we plan.",
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
