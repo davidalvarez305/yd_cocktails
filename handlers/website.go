@@ -81,8 +81,8 @@ func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 			GetRobots(w, r, ctx)
 		case "/":
 			GetHome(w, r, ctx)
-		case "/coffee":
-			GetCoffeeLP(w, r, ctx)
+		case "/planning":
+			GetPlanningLP(w, r, ctx)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -163,15 +163,15 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 	helpers.ServeContent(w, files, data)
 }
 
-func GetCoffeeLP(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
-	heroImagePath := "coffee_hero_image_desktop.html"
+func GetPlanningLP(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
+	heroImagePath := "planning_hero_image_desktop.html"
 	headerPath := "header_desktop.html"
 	if ctx.IsMobile {
-		heroImagePath = "coffee_hero_image_mobile.html"
+		heroImagePath = "planning_hero_image_mobile.html"
 		headerPath = "header_mobile.html"
 	}
 
-	fileName := "coffee_lp.html"
+	fileName := "planning_lp.html"
 	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
 	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + headerPath, constants.WEBSITE_TEMPLATES_DIR + heroImagePath, quoteForm, constants.WEBSITE_TEMPLATES_DIR + fileName}
 
@@ -188,7 +188,7 @@ func GetCoffeeLP(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContex
 	}
 
 	data := ctx
-	data.PageTitle = "Miami Mobile Coffee Cart Catering for Events — " + constants.CompanyName
+	data.PageTitle = "Miami Party Planning Service — " + constants.CompanyName
 	data.Nonce = nonce
 	data.CSRFToken = csrfToken
 	data.Features = []string{
