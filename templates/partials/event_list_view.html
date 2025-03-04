@@ -164,18 +164,6 @@
             .finally(() => handleCloseAlertModal());
     }
 
-    function handleBindEventTableActions() {
-        const deleteButtons = document.querySelectorAll(".deleteEvent");
-
-        deleteButtons.forEach(btn => {
-            btn.addEventListener("click", () => {
-                handleDeleteEvent(btn.dataset.eventId);
-            });
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => handleBindEventTableActions());
-
 	function handleSendInvoiceReminder(leadId, quoteId) {
 		const alertModal = document.getElementById("alertModal");
 		const csrfToken = document.getElementById("csrf_token");
@@ -211,12 +199,24 @@
 			.finally(() => handleCloseAlertModal());
 	}
 
-	const reminders = document.querySelectorAll(".sendReminder");
+	function handleBindEventTableActions() {
+		const deleteButtons = document.querySelectorAll(".deleteEvent");
 
-	reminders.forEach(reminder => {
-		reminder.addEventListener("click", () => {
-			handleSendInvoiceReminder(reminder.dataset.leadId, reminder.dataset.quoteId);
-		})
-	});
+		deleteButtons.forEach(btn => {
+			btn.addEventListener("click", () => {
+				handleDeleteEvent(btn.dataset.eventId);
+			});
+		});
+
+		const reminders = document.querySelectorAll(".sendReminder");
+
+		reminders.forEach(reminder => {
+			reminder.addEventListener("click", () => {
+				handleSendInvoiceReminder(reminder.dataset.leadId, reminder.dataset.quoteId);
+			})
+		});
+	}
+
+document.addEventListener("DOMContentLoaded", () => handleBindEventTableActions());
 </script>
 {{  end }}
