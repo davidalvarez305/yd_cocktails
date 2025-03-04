@@ -2371,14 +2371,14 @@ func GetServices() ([]models.Service, error) {
 
 func CreateService(form types.ServiceForm) error {
 	stmt, err := DB.Prepare(`
-		INSERT INTO service (service, suggested_price) VALUES ($1, $2)
+		INSERT INTO service (service, suggested_price, service_type_id) VALUES ($1, $2, $3)
 	`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice))
+	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice), utils.CreateNullInt(form.ServiceTypeID))
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
@@ -2389,15 +2389,17 @@ func CreateService(form types.ServiceForm) error {
 func UpdateService(form types.ServiceForm) error {
 	stmt, err := DB.Prepare(`
 		UPDATE service
-		SET service = COALESCE($1, service), suggested_price = $2
-		WHERE service_id = $3
+		SET service = COALESCE($1, service),
+		suggested_price = $2,
+		service_type_id = COALESCE($3, service_type_id)
+		WHERE service_id = $4
 	`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice), utils.CreateNullInt(form.ServiceID))
+	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice), utils.CreateNullInt(form.ServiceTypeID), utils.CreateNullInt(form.ServiceID))
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
@@ -3414,4 +3416,29 @@ func GetPaginatedEventList(pageNum int) ([]types.EventListView, int, error) {
 	}
 
 	return events, totalRows, nil
+}
+
+func GetServiceTypes() ([]models.ServiceType, error) {
+	var serviceTypes []models.ServiceType
+
+	rows, err := DB.Query(`SELECT service_type_id, type FROM "service_type"`)
+	if err != nil {
+		return serviceTypes, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var st models.ServiceType
+		err := rows.Scan(&st.ServiceTypeID, &st.Type)
+		if err != nil {
+			return serviceTypes, fmt.Errorf("error scanning row: %w", err)
+		}
+		serviceTypes = append(serviceTypes, st)
+	}
+
+	if err := rows.Err(); err != nil {
+		return serviceTypes, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return serviceTypes, nil
 }

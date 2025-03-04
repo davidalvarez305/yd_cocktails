@@ -1444,7 +1444,7 @@ func PostSendInvoice(w http.ResponseWriter, r *http.Request) {
 
 func GetServices(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	baseFile := constants.CRM_TEMPLATES_DIR + "services.html"
-	createServiceForm := constants.CRM_TEMPLATES_DIR + "create_service_form.html"
+	createServiceForm := constants.PARTIAL_TEMPLATES_DIR + "create_service_form.html"
 	table := constants.PARTIAL_TEMPLATES_DIR + "services_table.html"
 	files := []string{crmBaseFilePath, crmFooterFilePath, baseFile, table, createServiceForm}
 
@@ -1477,11 +1477,19 @@ func GetServices(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	serviceTypes, err := database.GetServiceTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting service types from DB.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Services — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["Services"] = services
+	data["ServiceTypes"] = serviceTypes
 	data["MaxPages"] = helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage)
 	data["CurrentPage"] = pageNum
 
@@ -1713,7 +1721,7 @@ func DeleteService(w http.ResponseWriter, r *http.Request) {
 func GetLeadQuoteDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	fileName := "lead_quote_detail.html"
 	quoteServicesTable := constants.PARTIAL_TEMPLATES_DIR + "quote_services_table.html"
-	createQuoteServiceForm := constants.CRM_TEMPLATES_DIR + "create_quote_service_form.html"
+	createQuoteServiceForm := constants.PARTIAL_TEMPLATES_DIR + "create_quote_service_form.html"
 	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, quoteServicesTable, createQuoteServiceForm}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {

@@ -71,8 +71,7 @@
                                 class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
                                 <option></option>
                                 {{ range .LeadInterestList }}
-                                <option value="{{ .LeadInterestID }}" {{ if eq .LeadInterestID $.Lead.LeadInterestID
-                                    }}selected{{ end }}>
+                                <option value="{{ .LeadInterestID }}" {{ if eq .LeadInterestID $.Lead.LeadInterestID }}selected{{ end }}>
                                     {{ .Interest }}
                                 </option>
                                 {{ end }}

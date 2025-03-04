@@ -38,6 +38,18 @@
 									<input type="number" id="suggested_price" name="suggested_price" required
 										class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
 								</div>
+								<div class="grow space-y-1">
+									<label for="service_type_id" class="font-medium">Service Type*</label>
+									<select id="service_type_id" name="service_type_id" required
+										class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+										<option></option>
+										{{ range .ServiceTypes }}
+										<option value="{{ .ServiceTypeID }}">
+											{{ .Type }}
+										</option>
+										{{ end }}
+									</select>
+								</div>
 							</form>
 						</div>
 					</div>

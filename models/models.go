@@ -237,6 +237,11 @@ type Service struct {
 	SuggestedPrice float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
 }
 
+type ServiceType struct {
+	ServiceTypeID int    `json:"service_type_id" form:"service_type_id" schema:"service_type_id"`
+	Type          string `json:"type" form:"type" schema:"type"`
+}
+
 type QuoteService struct {
 	QuoteServiceID int     `json:"quote_service_id" form:"quote_service_id" schema:"quote_service_id"`
 	ServiceID      int     `json:"service_id" form:"service_id" schema:"service_id"`
