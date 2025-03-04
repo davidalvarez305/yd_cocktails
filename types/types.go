@@ -562,10 +562,9 @@ type QuoteServiceList struct {
 }
 
 type QuickQuoteServiceList struct {
-	ServiceID        int     `json:"service_id" form:"service_id" schema:"service_id"`
-	Service          string  `json:"service" form:"service" schema:"service"`
-	SuggestedPrice   float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
-	ServiceHTMLField string  `json:"service_html_field" form:"service_html_field" schema:"service_html_field"`
+	ServiceID      int     `json:"service_id" form:"service_id" schema:"service_id"`
+	Service        string  `json:"service" form:"service" schema:"service"`
+	SuggestedPrice float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
 }
 
 type QuoteServiceForm struct {

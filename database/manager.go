@@ -3177,10 +3177,6 @@ func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 	rows, err := DB.Query(`SELECT service_id, 
 		service, 
 		suggested_price::NUMERIC, 
-		CASE 
-			WHEN service_id = $2 THEN 'cups_straws_napkins_service'
-			ELSE REPLACE(CONCAT(LOWER(service), '_service'), ' ', '_')
-		END AS service_lower_case
 	FROM "service"
 	WHERE service_type_id = $1;
 	`, constants.GeneralServiceTypeID, constants.CupsStrawsNapkinsServiceID)
@@ -3192,7 +3188,7 @@ func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 	for rows.Next() {
 		var service types.QuickQuoteServiceList
 		var suggestedPrice sql.NullFloat64
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceHTMLField)
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice)
 		if err != nil {
 			return services, fmt.Errorf("error scanning row: %w", err)
 		}
