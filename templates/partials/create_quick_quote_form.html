@@ -44,7 +44,7 @@
                                 </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
-                                        <label for="guests_service" class="font-medium">Cúantos adultos estarán en el evento?</label>
+                                        <label for="guests_service" class="font-medium">Cúantos invitados estarán en el evento?</label>
                                         <input type="number" id="guests_service" name="guests_service"
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                     </div>
@@ -88,7 +88,7 @@
                                         {{ range .BarRentalQuoteServices }}
                                         <label class="group relative flex">
                                             <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" name="type_of_bar_service"
-                                                class="peer absolute top-0 left-0 appearance-none opacity-0" />
+                                                class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="absolute top-0 right-0 bottom-0 z-1 flex scale-50 cursor-pointer items-center px-4 text-primary-600 opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100 sm:bottom-auto sm:h-14">
                                                 <svg class="hi-mini hi-check-circle inline-block size-5"
@@ -118,7 +118,7 @@
                                         {{ range .BarRentalQuoteServices }}
                                         <label class="group relative flex">
                                             <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" name="type_of_bar_service"
-                                                class="peer absolute top-0 left-0 appearance-none opacity-0" />
+                                                class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="relative flex grow cursor-pointer rounded-lg border border-gray-200 p-4 group-hover:border-primary-500 peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-focus:ring-3 peer-focus:ring-primary-100 dark:border-gray-700 dark:group-hover:border-primary-600 dark:peer-checked:border-primary-600 dark:peer-checked:bg-primary-800/10 dark:peer-focus:ring-primary-900">
                                                 <span class="grow pr-8 text-sm">
@@ -159,7 +159,7 @@
                                         {{ range .AlcoholQuoteServices }}
                                         <label class="group relative flex">
                                             <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" name="alcohol_quality_service"
-                                                class="peer absolute top-0 left-0 appearance-none opacity-0" />
+                                                class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="absolute top-0 right-0 bottom-0 z-1 flex scale-50 cursor-pointer items-center px-4 text-primary-600 opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100 sm:bottom-auto sm:h-14">
                                                 <svg class="hi-mini hi-check-circle inline-block size-5"
@@ -185,7 +185,7 @@
                                     <div class="grow space-y-1">
                                         <label for="bring_cooler_service"
                                             class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="peer sr-only" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}"
+                                            <input type="checkbox" class="customField peer sr-only" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}"
                                                 name="bring_cooler_service" />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
@@ -195,7 +195,7 @@
                                     <div id="coolerRentalService" class="grow space-y-1" style="display: none;">
                                         <label for="cooler_rental_service" class="font-medium">Cuantos coolers?</label>
                                         <input type="number" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" name="cooler_rental_service"
-                                            class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                                            class="customField block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                     </div>
                                 </div>
                                 <!-- Quick Quote Services -->
@@ -204,7 +204,7 @@
                                 <div class="space-y-2 dark:text-gray-100">
                                     <div class="grid grid-cols-1 gap-2">
                                         <label class="group relative flex">
-                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" class="peer absolute top-0 left-0 appearance-none opacity-0" />
+                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="absolute top-0 right-0 bottom-0 z-1 flex scale-50 cursor-pointer items-center px-4 text-primary-600 opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100">
                                                 <svg class="hi-mini hi-check-circle inline-block size-5"
@@ -269,34 +269,37 @@
         const data = new FormData(form);
         const body = new FormData();
 
-        const setValueKeys = [
-            "csrf_token",
-            "lead_id",
-            "hours_service",
-            "guests_service",
-            "number_of_bartenders_service",
-            "num_bars_service",
-            "alcohol_quality_service",
-            "type_of_bar_service",
-            "event_type_id_service",
-            "venue_type_id_service",
-            "cooler_rental_service",
-            "bartending_hourly_service"
-        ];
 
         for (const [key, value] of data.entries()) {
-            if (setValueKeys.includes(key) && value) {
-                body.set(key, value);
-                continue;
-            }
-
             if (key === "event_date_service" && value) {
                 body.set(key, new Date(value).getTime() / 1000);
                 continue;
             }
 
-            if (value) body.set(key, value === "on");
+            body.set(key, value);
         }
+
+        let quoteServices = [];
+
+        const customFields = document.querySelectorAll(".customFields");
+
+        customFields.forEach(field => {
+
+            const leadId = "{{ .Lead.LeadID }}";
+            const serviceId = field.dataset.serviceId;
+            const suggestedPrice = field.dataset.suggestedPrice;
+
+            // handle coolers
+            const units = guests || "";
+
+            quoteServices.push({ service_id: serviceId, price_per_unit: suggestedPrice, lead_id: leadId });
+        });
+
+        body.set("quote_services", JSON.stringify(quoteServices));
+
+        console.log(Object.fromEntries(body.entries()));
+
+        return;
 
         fetch("/crm/lead/{{ .Lead.LeadID }}/quick-quote", {
             method: "POST",
@@ -330,19 +333,10 @@
             });
     }
 
-    const hours = document.getElementById("hours_service");
     const bartendingHourlyService = document.getElementById("bartending_hourly_service");
     const bartenders = document.getElementById("number_of_bartenders_service");
-    const numBars = document.getElementById("num_bars_service");
     const guests = document.getElementById("guests_service");
-    const barRental = document.getElementById("bar_rental_service");
-    const bringAlcohol = document.getElementById("bring_alcohol_service");
-    const bringCoolers = document.getElementById("bring_cooler_service");
-
-    // Conditional elements
-    const typeOfBar = document.getElementById("typeOfBar");
-    const alcoholQuality = document.getElementById("alcoholQuality");
-    const coolerRentalService = document.getElementById("coolerRentalService");
+    const hours = document.getElementById("hours_service");
 
     function handleCalculateBartenders(guests) {
         let numBartenders = 0;
@@ -351,23 +345,9 @@
         if (guests && !isNaN(guests)) numBartenders = Math.ceil(guests / 50);
 
         bartenders.value = numBartenders;
-        coolerRentalService.value = numBartenders;
-    }
-
-    function handleBarRental(event) {
-        if (event.target.checked) numBars.value = bartenders.value;
-
-        shouldShowElement(typeOfBar, event.target.checked);
-    }
-
-    function shouldShowElement(el, condition) {
-        el.style.display = condition ? "" : "none";
     }
 
     hours.addEventListener("change", (e) => bartendingHourlyService.value = e.target.value);
-    guests.addEventListener("input", (e) => handleCalculateBartenders(e.target.value));
-    barRental.addEventListener("change", (e) => handleBarRental(e));
-    bringAlcohol.addEventListener("change", (e) => shouldShowElement(alcoholQuality, e.target.checked));
-    bringCoolers.addEventListener("change", (e) => shouldShowElement(coolerRentalService, e.target.checked));
+    guests.addEventListener("change", (e) => handleCalculateBartenders(e.target.value));
 </script>
 {{ end }}
