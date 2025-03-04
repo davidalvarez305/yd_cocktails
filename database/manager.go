@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -2310,7 +2309,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 
 	offset := (pageNum - 1) * int(constants.LeadsPerPage)
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id,
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio
 			COUNT(*) OVER() AS total_rows
 			FROM "service"
 			OFFSET $1
@@ -2323,12 +2322,17 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 	for rows.Next() {
 		var service models.Service
 		var suggestedPrice sql.NullFloat64
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &totalRows)
+		var guestRatio sql.NullInt32
+
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &guestRatio, &totalRows)
 		if err != nil {
 			return services, totalRows, fmt.Errorf("error scanning row: %w", err)
 		}
 		if suggestedPrice.Valid {
 			service.SuggestedPrice = suggestedPrice.Float64
+		}
+		if guestRatio.Valid {
+			service.GuestRatio = int(guestRatio.Int32)
 		}
 		services = append(services, service)
 	}
@@ -2343,7 +2347,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 func GetServices() ([]models.Service, error) {
 	var services []models.Service
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC FROM "service";`)
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio FROM "service";`)
 	if err != nil {
 		return services, fmt.Errorf("error executing query: %w", err)
 	}
@@ -2352,12 +2356,16 @@ func GetServices() ([]models.Service, error) {
 	for rows.Next() {
 		var service models.Service
 		var suggestedPrice sql.NullFloat64
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice)
+		var guestRatio sql.NullInt32
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceID, &guestRatio)
 		if err != nil {
 			return services, fmt.Errorf("error scanning row: %w", err)
 		}
 		if suggestedPrice.Valid {
 			service.SuggestedPrice = suggestedPrice.Float64
+		}
+		if guestRatio.Valid {
+			service.GuestRatio = int(guestRatio.Int32)
 		}
 		services = append(services, service)
 	}
@@ -2371,14 +2379,14 @@ func GetServices() ([]models.Service, error) {
 
 func CreateService(form types.ServiceForm) error {
 	stmt, err := DB.Prepare(`
-		INSERT INTO service (service, suggested_price, service_type_id) VALUES ($1, $2, $3)
+		INSERT INTO service (service, suggested_price, service_type_id, guest_ratio) VALUES ($1, $2, $3, $4)
 	`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice), utils.CreateNullInt(form.ServiceTypeID))
+	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice), utils.CreateNullInt(form.ServiceTypeID), utils.CreateNullInt(form.GuestRatio))
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
@@ -2392,14 +2400,15 @@ func UpdateService(form types.ServiceForm) error {
 		SET service = COALESCE($1, service),
 		suggested_price = $2,
 		service_type_id = COALESCE($3, service_type_id)
-		WHERE service_id = $4
+		guest_ratio = $4
+		WHERE service_id = $5
 	`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice), utils.CreateNullInt(form.ServiceTypeID), utils.CreateNullInt(form.ServiceID))
+	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice), utils.CreateNullInt(form.ServiceTypeID), utils.CreateNullInt(form.GuestRatio), utils.CreateNullInt(form.ServiceID))
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
@@ -2480,6 +2489,33 @@ func CreateQuoteService(form types.QuoteServiceForm) error {
 	)
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
+func CreateQuoteServicesMany(tx *sql.Tx, services []types.QuoteServiceForm) error {
+	// Prepare the SQL statement for batch insert
+	stmt, err := tx.Prepare(`
+		INSERT INTO quote_service (service_id, quote_id, units, price_per_unit) 
+		VALUES ($1, $2, $3, $4)
+	`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	// Loop through the services and insert each one
+	for _, service := range services {
+		_, err = stmt.Exec(
+			utils.CreateNullInt(service.ServiceID),
+			utils.CreateNullInt(service.QuoteID),
+			utils.CreateNullInt(service.Units),
+			utils.CreateNullFloat64(service.PricePerUnit),
+		)
+		if err != nil {
+			return fmt.Errorf("error inserting quote service: %w", err)
+		}
 	}
 
 	return nil
@@ -3103,7 +3139,7 @@ func GetDepositStripeInvoiceID(quoteId int) (string, error) {
 func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 	var services []models.Service
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio
 				FROM service
 				WHERE service_type_id = $1`, serviceTypeId)
 	if err != nil {
@@ -3114,12 +3150,16 @@ func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 	for rows.Next() {
 		var service models.Service
 		var suggestedPrice sql.NullFloat64
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice)
+		var guestRatio sql.NullInt32
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceID, &guestRatio)
 		if err != nil {
 			return services, fmt.Errorf("error scanning row: %w", err)
 		}
 		if suggestedPrice.Valid {
 			service.SuggestedPrice = suggestedPrice.Float64
+		}
+		if guestRatio.Valid {
+			service.GuestRatio = int(guestRatio.Int32)
 		}
 		services = append(services, service)
 	}
@@ -3131,7 +3171,7 @@ func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 	return services, nil
 }
 
-func GetQuickQuoteServices(shouldGetAll bool) ([]types.QuickQuoteServiceList, error) {
+func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 	var services []types.QuickQuoteServiceList
 
 	rows, err := DB.Query(`SELECT service_id, 
@@ -3142,8 +3182,8 @@ func GetQuickQuoteServices(shouldGetAll bool) ([]types.QuickQuoteServiceList, er
 			ELSE REPLACE(CONCAT(LOWER(service), '_service'), ' ', '_')
 		END AS service_lower_case
 	FROM "service"
-	WHERE $3 IS TRUE OR service_type_id = $1;
-	`, constants.GeneralServiceTypeID, constants.CupsStrawsNapkinsServiceID, shouldGetAll)
+	WHERE service_type_id = $1;
+	`, constants.GeneralServiceTypeID, constants.CupsStrawsNapkinsServiceID)
 	if err != nil {
 		return services, fmt.Errorf("error executing query: %w", err)
 	}
@@ -3169,114 +3209,6 @@ func GetQuickQuoteServices(shouldGetAll bool) ([]types.QuickQuoteServiceList, er
 	return services, nil
 }
 
-func CreateQuickQuote(quickQuote types.QuickQuoteForm, quickQuoteServices []types.QuickQuoteServiceList) (int, string, error) {
-	var form types.LeadQuoteForm
-	var quoteId int
-	quoteExternalId := uuid.New().String()
-
-	form.LeadID = quickQuote.LeadID
-	form.EventDate = quickQuote.EventDate
-	form.EventTypeID = quickQuote.EventTypeID
-	form.ExternalID = &quoteExternalId
-	form.Guests = quickQuote.Guests
-	form.Hours = quickQuote.Hours
-	form.NumberOfBartenders = quickQuote.NumberOfBartenders
-	form.VenueTypeID = quickQuote.VenueTypeID
-
-	// Start a new transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		return quoteId, quoteExternalId, fmt.Errorf("error starting transaction: %w", err)
-	}
-	defer tx.Rollback()
-
-	query := `
-		INSERT INTO quote (
-			lead_id, 
-			number_of_bartenders, 
-			guests, 
-			hours, 
-			event_type_id, 
-			venue_type_id, 
-			event_date, 
-			external_id
-		)
-		VALUES (
-			$1, $2, $3, $4, 
-			$5, $6, to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York', 
-			$8
-		)
-		RETURNING quote_id;
-	`
-
-	err = tx.QueryRow(
-		query,
-		utils.CreateNullInt(form.LeadID),
-		utils.CreateNullInt(form.NumberOfBartenders),
-		utils.CreateNullInt(form.Guests),
-		utils.CreateNullInt(form.Hours),
-		utils.CreateNullInt(form.EventTypeID),
-		utils.CreateNullInt(form.VenueTypeID),
-		utils.CreateNullInt64(form.EventDate),
-		quoteExternalId,
-	).Scan(&quoteId)
-
-	if err != nil {
-		return quoteId, quoteExternalId, fmt.Errorf("error inserting lead quote data: %w", err)
-	}
-
-	// Now that we have the quoteId, prepare to insert services
-	val := reflect.ValueOf(&quickQuote).Elem()
-
-	var services []types.QuoteServiceForm
-
-	// Collect all services
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
-		fieldType := val.Type().Field(i)
-
-		if field.Kind() == reflect.Ptr {
-			if field.IsNil() {
-				continue
-			}
-
-			if field.Type().Elem().Kind() == reflect.Bool {
-				serviceEnabled, ok := field.Interface().(*bool)
-				if !ok || serviceEnabled == nil || !*serviceEnabled {
-					continue
-				}
-
-				for _, quickQuoteService := range quickQuoteServices {
-					if quickQuoteService.ServiceHTMLField == fieldType.Tag.Get("form") {
-						service := types.QuoteServiceForm{
-							ServiceID:    &quickQuoteService.ServiceID,
-							QuoteID:      &quoteId,
-							Units:        quickQuote.Guests,
-							PricePerUnit: &quickQuoteService.SuggestedPrice,
-						}
-						services = append(services, service)
-					}
-				}
-			}
-		}
-	}
-
-	// Insert all collected services in a single transaction
-	for _, service := range services {
-		err = CreateQuoteServiceTx(tx, service)
-		if err != nil {
-			tx.Rollback()
-			return quoteId, quoteExternalId, fmt.Errorf("error inserting quote service: %w", err)
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return quoteId, quoteExternalId, fmt.Errorf("error committing transaction: %w", err)
-	}
-
-	return quoteId, quoteExternalId, nil
-}
-
 func DeleteLeadQuote(id int) error {
 	sqlStatement := `
         DELETE FROM quote WHERE quote_id = $1
@@ -3284,29 +3216,6 @@ func DeleteLeadQuote(id int) error {
 	_, err := DB.Exec(sqlStatement, id)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func CreateQuoteServiceTx(tx *sql.Tx, form types.QuoteServiceForm) error {
-	stmt, err := tx.Prepare(`
- 	   INSERT INTO quote_service (service_id, quote_id, units, price_per_unit) 
- 	   VALUES ($1, $2, $3, $4)
-    `)
-	if err != nil {
-		return fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(
-		utils.CreateNullInt(form.ServiceID),
-		utils.CreateNullInt(form.QuoteID),
-		utils.CreateNullInt(form.Units),
-		utils.CreateNullFloat64(form.PricePerUnit),
-	)
-	if err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
 	}
 
 	return nil
@@ -3441,4 +3350,57 @@ func GetServiceTypes() ([]models.ServiceType, error) {
 	}
 
 	return serviceTypes, nil
+}
+
+func CreateQuickQuote(quickQuote types.QuickQuoteForm) (int, string, error) {
+	var quoteId int
+	quoteExternalId := uuid.New().String()
+
+	// Start a new transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		return quoteId, quoteExternalId, fmt.Errorf("error starting transaction: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	// Insert into quote table
+	query := `
+		INSERT INTO quote (lead_id, number_of_bartenders, guests, hours, event_type_id, venue_type_id, event_date, external_id)
+		VALUES ($1, $2, $3, $4, $5, $6, to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York', $8)
+		RETURNING quote_id;
+	`
+
+	err = tx.QueryRow(
+		query,
+		utils.CreateNullInt(quickQuote.LeadID),
+		utils.CreateNullInt(quickQuote.NumberOfBartenders),
+		utils.CreateNullInt(quickQuote.Guests),
+		utils.CreateNullInt(quickQuote.Hours),
+		utils.CreateNullInt(quickQuote.EventTypeID),
+		utils.CreateNullInt(quickQuote.VenueTypeID),
+		utils.CreateNullInt64(quickQuote.EventDate),
+		quoteExternalId,
+	).Scan(&quoteId)
+
+	if err != nil {
+		return quoteId, quoteExternalId, fmt.Errorf("error inserting quote: %w", err)
+	}
+
+	// Insert QuoteServices
+	for i := range quickQuote.QuoteServices {
+		quickQuote.QuoteServices[i].QuoteID = &quoteId
+	}
+
+	err = CreateQuoteServicesMany(tx, quickQuote.QuoteServices)
+	if err != nil {
+		return quoteId, quoteExternalId, fmt.Errorf("error inserting quote services: %w", err)
+	}
+
+	return quoteId, quoteExternalId, tx.Commit()
 }

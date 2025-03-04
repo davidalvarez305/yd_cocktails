@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -451,7 +452,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	quickQuoteServices, err := database.GetQuickQuoteServices(false)
+	quickQuoteServices, err := database.GetQuickQuoteServices()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting quick quote services.", http.StatusInternalServerError)
@@ -2745,23 +2746,25 @@ func PostQuickQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quickQuoteServices, err := database.GetQuickQuoteServices(true)
-	if err != nil {
-		fmt.Printf("Error creating lead quote: %+v\n", err)
-		tmplCtx := types.DynamicPartialTemplate{
-			TemplateName: "error",
-			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
-			Data: map[string]any{
-				"Message": "Error getting quick quote services.",
-			},
+	quoteServices := r.PostForm.Get("quote_services")
+	if quoteServices != "" {
+		err = json.Unmarshal([]byte(quoteServices), &form.QuoteServices)
+		if err != nil {
+			fmt.Printf("Error parsing quote_services JSON: %+v\n", err)
+			tmplCtx := types.DynamicPartialTemplate{
+				TemplateName: "error",
+				TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+				Data: map[string]any{
+					"Message": "Error parsing quote services data.",
+				},
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+			return
 		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
-		return
 	}
 
-	quoteId, quoteExternalId, err := database.CreateQuickQuote(form, quickQuoteServices)
+	quoteId, quoteExternalId, err := database.CreateQuickQuote(form)
 	if err != nil {
 		fmt.Printf("Error creating quick quote: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{

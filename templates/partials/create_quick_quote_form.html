@@ -212,9 +212,7 @@
                                 <div class="space-y-2 dark:text-gray-100">
                                     <div class="grid grid-cols-1 gap-2">
                                         <label class="group relative flex">
-                                            <input type="radio"
-                                                class="peer absolute top-0 left-0 appearance-none opacity-0"
-                                                id="{{ .ServiceHTMLField }}" name="{{ .ServiceHTMLField }}" />
+                                            <input type="radio" id="{{ .ServiceHTMLField }}" name="{{ .ServiceHTMLField }}" class="peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="absolute top-0 right-0 bottom-0 z-1 flex scale-50 cursor-pointer items-center px-4 text-primary-600 opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100">
                                                 <svg class="hi-mini hi-check-circle inline-block size-5"
@@ -225,11 +223,9 @@
                                                         clip-rule="evenodd" />
                                                 </svg>
                                             </span>
-                                            <span
-                                                class="relative flex grow cursor-pointer rounded-lg border border-gray-200 p-4 group-hover:border-primary-500 peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-focus:ring-3 peer-focus:ring-primary-100 dark:border-gray-700 dark:group-hover:border-primary-600 dark:peer-checked:border-primary-600 dark:peer-checked:bg-primary-800/10 dark:peer-focus:ring-primary-900">
+                                            <span class="relative flex grow cursor-pointer rounded-lg border border-gray-200 p-4 group-hover:border-primary-500 peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-focus:ring-3 peer-focus:ring-primary-100 dark:border-gray-700 dark:group-hover:border-primary-600 dark:peer-checked:border-primary-600 dark:peer-checked:bg-primary-800/10 dark:peer-focus:ring-primary-900">
                                                 <span class="grow pr-8 text-sm">
-                                                    <span class="block font-semibold">{{ .Service }} - ${{
-                                                        .SuggestedPrice }} / persona</span>
+                                                    <span class="block font-semibold">{{ .Service }} - ${{ .SuggestedPrice }} / persona</span>
                                                 </span>
                                             </span>
                                         </label>

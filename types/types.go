@@ -583,6 +583,7 @@ type ServiceForm struct {
 	ServiceTypeID  *int     `json:"service_type_id" form:"service_type_id" schema:"service_type_id"`
 	Service        *string  `json:"service" form:"service" schema:"service"`
 	SuggestedPrice *float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
+	GuestRatio     *int     `json:"guest_ratio" form:"guest_ratio" schema:"guest_ratio"`
 }
 
 type FrontendMessage struct {
@@ -661,28 +662,11 @@ type QuickQuoteForm struct {
 	Guests                  *int    `json:"guests_service" form:"guests_service" schema:"guests_service"`
 	NumberOfBartenders      *int    `json:"number_of_bartenders_service" form:"number_of_bartenders_service" schema:"number_of_bartenders_service"`
 	BartendingHourlyService *int    `json:"bartending_hourly_service" form:"bartending_hourly_service" schema:"bartending_hourly_service"`
+	EventTypeID             *int    `json:"event_type_id_service" form:"event_type_id_service" schema:"event_type_id_service"`
+	VenueTypeID             *int    `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
 
-	EventTypeID *int `json:"event_type_id_service" form:"event_type_id_service" schema:"event_type_id_service"`
-	VenueTypeID *int `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
-
-	BarRental           *bool `json:"bar_rental_service" form:"bar_rental_service" schema:"bar_rental_service"`
-	TypeOfBar           *int  `json:"type_of_bar_service" form:"type_of_bar_service" schema:"type_of_bar_service"`
-	NumBars             *int  `json:"num_bars_service" form:"num_bars_service" schema:"num_bars_service"`
-	BringCoolers        *bool `json:"bring_cooler_service" form:"bring_cooler_service" schema:"bring_cooler_service"`
-	CoolerRentalService *int  `json:"cooler_rental_service" form:"cooler_rental_service" schema:"cooler_rental_service"`
-	BringAlcohol        *bool `json:"bring_alcohol_service" form:"bring_alcohol_service" schema:"bring_alcohol_service"`
-	AlcoholQuality      *int  `json:"alcohol_quality_service" form:"alcohol_quality_service" schema:"alcohol_quality_service"`
-
-	BeerService              *bool `json:"beer_service" form:"beer_service" schema:"beer_service"`
-	WineService              *bool `json:"wine_service" form:"wine_service" schema:"wine_service"`
-	IceService               *bool `json:"ice_service" form:"ice_service" schema:"ice_service"`
-	GarnishService           *bool `json:"garnish_service" form:"garnish_service" schema:"garnish_service"`
-	FruitsService            *bool `json:"fruits_service" form:"fruits_service" schema:"fruits_service"`
-	MixersService            *bool `json:"mixers_service" form:"mixers_service" schema:"mixers_service"`
-	CupsStrawsNapkinsService *bool `json:"cups_straws_napkins_service" form:"cups_straws_napkins_service" schema:"cups_straws_napkins_service"`
-	GlasswareRentalsService  *bool `json:"glassware_rentals_service" form:"glassware_rentals_service" schema:"glassware_rentals_service"`
-	SoftDrinksService        *bool `json:"soft_drinks_service" form:"soft_drinks_service" schema:"soft_drinks_service"`
-	JuicesService            *bool `json:"juices_service" form:"juices_service" schema:"juices_service"`
+	// Must be parsed from JSON
+	QuoteServices []QuoteServiceForm `json:"quote_services" form:"quote_services" schema:"quote_services"`
 }
 
 type EventListView struct {
