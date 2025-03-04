@@ -214,11 +214,8 @@
 	const reminders = document.querySelectorAll(".sendReminder");
 
 	reminders.forEach(reminder => {
-		const leadId = reminder.dataset.leadId;
-		const quoteId = reminder.dataset.quoteId;
-
 		reminder.addEventListener("click", () => {
-			handleSendInvoiceReminder(leadId, quoteId);
+			handleSendInvoiceReminder(reminder.dataset.leadId, reminder.dataset.quoteId);
 		})
 	});
 </script>
