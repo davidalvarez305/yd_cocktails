@@ -2310,7 +2310,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 
 	offset := (pageNum - 1) * int(constants.LeadsPerPage)
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC,
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id,
 			COUNT(*) OVER() AS total_rows
 			FROM "service"
 			OFFSET $1
@@ -2323,7 +2323,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 	for rows.Next() {
 		var service models.Service
 		var suggestedPrice sql.NullFloat64
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &totalRows)
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &totalRows)
 		if err != nil {
 			return services, totalRows, fmt.Errorf("error scanning row: %w", err)
 		}

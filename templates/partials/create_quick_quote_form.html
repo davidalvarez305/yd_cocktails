@@ -32,28 +32,24 @@
                                 <input type="hidden" name="bartending_hourly_service" />
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
-                                        <label for="event_date_service" class="font-medium">Cual sería la hora y fecha
-                                            del evento?</label>
+                                        <label for="event_date_service" class="font-medium">Cual sería la hora y fecha del evento?</label>
                                         <input type="datetime-local" id="event_date_service" name="event_date_service"
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                     </div>
                                     <div class="grow space-y-1">
-                                        <label for="hours_service" class="font-medium">Cúantas horas será el
-                                            evento?</label>
+                                        <label for="hours_service" class="font-medium">Cúantas horas será el evento?</label>
                                         <input type="number" id="hours_service" name="hours_service"
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
-                                        <label for="guests_service" class="font-medium">Cúantos adultos estarán en el
-                                            evento?</label>
+                                        <label for="guests_service" class="font-medium">Cúantos adultos estarán en el evento?</label>
                                         <input type="number" id="guests_service" name="guests_service"
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                     </div>
                                     <div class="grow space-y-1">
-                                        <label for="number_of_bartenders_service" class="font-medium">Número de
-                                            bartenders</label>
+                                        <label for="number_of_bartenders_service" class="font-medium">Número de bartenders</label>
                                         <input type="number" id="number_of_bartenders_service"
                                             name="number_of_bartenders_service" required
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
@@ -61,8 +57,7 @@
                                 </div>
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
-                                        <label for="event_type_id_service" class="font-medium">Que tipo de evento está
-                                            planificando?</label>
+                                        <label for="event_type_id_service" class="font-medium">Que tipo de evento está planificando?</label>
                                         <select id="event_type_id_service" name="event_type_id_service" required
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
                                             <option></option>
@@ -74,8 +69,7 @@
                                         </select>
                                     </div>
                                     <div class="grow space-y-1">
-                                        <label for="venue_type_id_service" class="font-medium">En que tipo de venue será
-                                            el evento?</label>
+                                        <label for="venue_type_id_service" class="font-medium">En que tipo de venue será el evento?</label>
                                         <select id="venue_type_id_service" name="venue_type_id_service" required
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
                                             <option></option>
@@ -165,8 +159,9 @@
                                     </div>
                                 </div>
                                 <!-- Quick Quote Services -->
+                                <div class="font-medium">Seleccione todo los que aplica:</div>
+                                {{ range .QuickQuoteServices }}
                                 <div class="space-y-2 dark:text-gray-100">
-                                    <div class="font-medium">Dark Mode</div>
                                     <div class="grid grid-cols-1 gap-2">
                                         <label class="group relative flex">
                                             <input type="radio" class="peer absolute top-0 left-0 appearance-none opacity-0"
@@ -190,6 +185,7 @@
                                         </label>
                                     </div>
                                 </div>
+                                {{ end }}
                                 <!-- END Quick Quote Services -->
                             </form>
                         </div>
