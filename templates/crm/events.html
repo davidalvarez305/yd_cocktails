@@ -1,0 +1,10 @@
+{{ define "content.html" }}
+
+{{ template "event_list_view.html" . }}
+
+{{ template "event_form.html" . }}
+
+<script src="{{ .StaticPath }}/main.js" nonce="{{ .Nonce }}"></script>
+<script src="{{ .StaticPath }}/pagination.js" nonce="{{ .Nonce }}"></script>
+
+{{ end }}

@@ -3309,3 +3309,109 @@ func CreateQuoteServiceTx(tx *sql.Tx, form types.QuoteServiceForm) error {
 
 	return nil
 }
+
+func GetPaginatedEventList(pageNum int) ([]types.EventListView, int, error) {
+	var events []types.EventListView
+	var totalRows int
+
+	offset := (pageNum - 1) * int(constants.LeadsPerPage)
+
+	rows, err := DB.Query(`
+		SELECT 
+		e.event_id,
+		e.lead_id,
+		COALESCE(e.amount::NUMERIC, 0) + COALESCE(e.tip::NUMERIC, 0) AS revenue,
+		l.full_name,
+		CONCAT(b.first_name, ' ', b.last_name) AS bartender,
+		et.name AS event_type,
+		vt.name AS venue_type,
+		e.guests,
+		e.start_time,
+		e.end_time,
+		EXISTS (
+			SELECT 1 FROM invoice AS inv
+			WHERE inv.quote_id = q.quote_id
+			AND inv.invoice_type_id = $3
+		) 
+		AND NOT EXISTS (
+			SELECT 1 FROM invoice AS inv
+			WHERE inv.quote_id = q.quote_id
+			AND inv.invoice_type_id IN ($4, $5)
+			AND inv.invoice_status_id = $6
+		) AS is_deposit_paid,
+		q.quote_id,
+		COUNT(*) OVER() AS total_rows
+	FROM event AS e
+	JOIN lead AS l ON l.lead_id = e.lead_id
+	LEFT JOIN "user" AS b ON b.user_id = e.bartender_id
+	JOIN event_type AS et ON et.event_type_id = e.event_type_id
+	JOIN venue_type AS vt ON vt.venue_type_id = e.venue_type_id
+	LEFT JOIN quote AS q ON q.lead_id = l.lead_id
+	ORDER BY e.start_time DESC
+	OFFSET $1
+	LIMIT $2;`, offset, constants.LeadsPerPage, constants.DepositInvoiceTypeID, constants.FullInvoiceTypeID, constants.RemainingInvoiceTypeID, constants.PaidInvoiceStatusID)
+	if err != nil {
+		return events, totalRows, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var event types.EventListView
+		var eventStart, eventEnd sql.NullTime
+		var guests sql.NullInt64
+		var bartender sql.NullString
+		var shouldSendReminder sql.NullBool
+		var quoteId sql.NullInt32
+
+		err := rows.Scan(
+			&event.EventID,
+			&event.LeadID,
+			&event.Amount,
+			&event.LeadName,
+			&bartender,
+			&event.EventType,
+			&event.VenueType,
+			&guests,
+			&eventStart,
+			&eventEnd,
+			&shouldSendReminder,
+			&quoteId,
+			&totalRows,
+		)
+		if err != nil {
+			return events, totalRows, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		if bartender.Valid {
+			event.Bartender = bartender.String
+		}
+
+		if quoteId.Valid {
+			event.QuoteID = int(quoteId.Int32)
+		}
+
+		if shouldSendReminder.Valid {
+			event.ShouldSendReminder = shouldSendReminder.Bool
+		}
+
+		if eventStart.Valid && eventEnd.Valid {
+			event.EventTime = fmt.Sprintf(
+				"%s - %s",
+				utils.FormatTimestamp(eventStart.Time.Unix()),
+				utils.FormatTimestamp(eventEnd.Time.Unix()),
+			)
+		}
+
+		if guests.Valid {
+			event.Guests = int(guests.Int64)
+		}
+
+		events = append(events, event)
+	}
+
+	if err := rows.Err(); err != nil {
+		return events, totalRows, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return events, totalRows, nil
+}

@@ -99,6 +99,8 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			GetServices(w, r, ctx)
 		case "/crm/message":
 			GetMessages(w, r, ctx)
+		case "/crm/event":
+			GetEvents(w, r, ctx)
 		case "/crm/automated-follow-up":
 			GetAutomatedFollowUpMessage(w, r)
 		default:
@@ -182,6 +184,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			parts := strings.Split(path, "/")
 			if strings.Contains(path, "quick-quote") {
 				PostQuickQuote(w, r)
+				return
+			}
+			if strings.Contains(path, "invoice-reminder") {
+				PostSendInvoiceReminder(w, r)
 				return
 			}
 			if strings.Contains(path, "invoice") {
@@ -2915,6 +2921,133 @@ func DeleteLeadQuote(w http.ResponseWriter, r *http.Request) {
 		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "lead_quotes_table.html",
 		Data: map[string]any{
 			"LeadQuotes": leadQuotes,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func GetEvents(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
+	baseFile := constants.CRM_TEMPLATES_DIR + "events.html"
+	createEventForm := constants.PARTIAL_TEMPLATES_DIR + "event_form.html"
+	table := constants.PARTIAL_TEMPLATES_DIR + "event_list_view.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, baseFile, table, createEventForm}
+
+	nonce, ok := r.Context().Value("nonce").(string)
+	if !ok {
+		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
+		return
+	}
+
+	csrfToken, ok := r.Context().Value("csrf_token").(string)
+	if !ok {
+		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
+		return
+	}
+
+	pageNum := 1
+	hasPageNum := r.URL.Query().Has("page_num")
+
+	if hasPageNum {
+		num, err := strconv.Atoi(r.URL.Query().Get("page_num"))
+		if err == nil && num > 1 {
+			pageNum = num
+		}
+	}
+
+	events, totalRows, err := database.GetPaginatedEventList(pageNum)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting services from DB.", http.StatusInternalServerError)
+		return
+	}
+
+	data := ctx
+	data["PageTitle"] = "Events — " + constants.CompanyName
+	data["Nonce"] = nonce
+	data["CSRFToken"] = csrfToken
+	data["Events"] = events
+	data["MaxPages"] = helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage)
+	data["CurrentPage"] = pageNum
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	helpers.ServeContent(w, files, data)
+}
+
+func PostSendInvoiceReminder(w http.ResponseWriter, r *http.Request) {
+	leadId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/lead/")
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to parse lead id.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	quoteId, err := helpers.GetSecondIDFromPath(r, "/crm/lead/")
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to parse quote id.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	quote, err := database.GetLeadQuoteInvoiceDetails(fmt.Sprint(leadId), fmt.Sprint(quoteId))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting quote details.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var externalQuoteView = fmt.Sprintf("%s/external/%s", constants.RootDomain, quote.ExternalID)
+	var textMessageTemplateNotification = fmt.Sprintf(
+		`BARTENDING FINAL PAYMENT REMINDER:
+		Here's the link to the invoice: %s
+	`, externalQuoteView)
+
+	_, err = services.SendTextMessage(quote.PhoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error sending invoice via text.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "modal",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "modal.html",
+		Data: map[string]any{
+			"AlertHeader":  "Success!",
+			"AlertMessage": "Reminder has been sent.",
 		},
 	}
 

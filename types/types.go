@@ -683,3 +683,17 @@ type QuickQuoteForm struct {
 	SoftDrinksService        *bool `json:"soft_drinks_service" form:"soft_drinks_service" schema:"soft_drinks_service"`
 	JuicesService            *bool `json:"juices_service" form:"juices_service" schema:"juices_service"`
 }
+
+type EventListView struct {
+	LeadID             int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	QuoteID            int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	EventID            int     `json:"event_id" form:"event_id" schema:"event_id"`
+	Amount             float64 `json:"amount" form:"amount" schema:"amount"`
+	EventTime          string  `json:"event_time" form:"event_time" schema:"event_time"`
+	LeadName           string  `json:"lead_name" form:"lead_name" schema:"lead_name"`
+	Bartender          string  `json:"bartender" form:"bartender" schema:"bartender"`
+	EventType          string  `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType          string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	Guests             int     `json:"guests" form:"guests" schema:"guests"`
+	ShouldSendReminder bool    `json:"should_send_reminder" form:"should_send_reminder" schema:"should_send_reminder"`
+}
