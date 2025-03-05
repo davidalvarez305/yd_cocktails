@@ -307,8 +307,6 @@
 
         console.log(quoteServices);
 
-        return;
-
         body.set("quote_services", JSON.stringify(quoteServices));
 
         fetch("/crm/lead/{{ .Lead.LeadID }}/quick-quote", {
