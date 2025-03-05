@@ -2357,7 +2357,7 @@ func GetServices() ([]models.Service, error) {
 		var service models.Service
 		var suggestedPrice sql.NullFloat64
 		var guestRatio sql.NullInt32
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceID, &guestRatio)
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &guestRatio)
 		if err != nil {
 			return services, fmt.Errorf("error scanning row: %w", err)
 		}
