@@ -2184,12 +2184,12 @@ func GetInvoiceTypes() ([]models.InvoiceType, error) {
 
 func SetOpenInvoicesToVoid(quoteId int) error {
 	query := `
-		UPDATE invoice AS i
-		SET i.invoice_status_id = $2
-		FROM quote AS q
-		WHERE q.quote_id = i.quote_id
-		AND q.quote_id = $1
-		AND i.invoice_status_id <> $3;
+		UPDATE invoice
+		SET invoice_status_id = $2
+		FROM quote
+		WHERE quote.quote_id = invoice.quote_id
+		AND quote.quote_id = $1
+		AND invoice.invoice_status_id IS DISTINCT FROM $3;
 	`
 	_, err := DB.Exec(query, quoteId, constants.VoidInvoiceStatusID, constants.PaidInvoiceStatusID)
 	if err != nil {
