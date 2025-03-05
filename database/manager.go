@@ -3348,7 +3348,7 @@ func GetServiceTypes() ([]models.ServiceType, error) {
 	return serviceTypes, nil
 }
 
-func CreateQuickQuote(quickQuote types.QuickQuoteForm) (int, string, error) {
+func CreateQuickQuote(quickQuote types.QuickQuoteForm, quoteServices []types.QuoteServiceForm) (int, string, error) {
 	var quoteId int
 	quoteExternalId := uuid.New().String()
 
@@ -3389,11 +3389,11 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm) (int, string, error) {
 	}
 
 	// Insert QuoteServices
-	for i := range quickQuote.QuoteServices {
-		quickQuote.QuoteServices[i].QuoteID = &quoteId
+	for i := range quoteServices {
+		quoteServices[i].QuoteID = &quoteId
 	}
 
-	err = CreateQuoteServicesMany(tx, quickQuote.QuoteServices)
+	err = CreateQuoteServicesMany(tx, quoteServices)
 	if err != nil {
 		return quoteId, quoteExternalId, fmt.Errorf("error inserting quote services: %w", err)
 	}

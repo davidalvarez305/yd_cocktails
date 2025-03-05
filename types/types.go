@@ -665,7 +665,7 @@ type QuickQuoteForm struct {
 	VenueTypeID             *int    `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
 
 	// Must be parsed from JSON
-	QuoteServices []QuoteServiceForm `json:"quote_services" form:"quote_services" schema:"quote_services"`
+	QuoteServices *string `json:"quote_services" form:"quote_services" schema:"quote_services"`
 }
 
 type EventListView struct {

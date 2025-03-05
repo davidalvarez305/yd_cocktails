@@ -452,6 +452,13 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	coolerRentalQuoteServices, err := database.GetServiceListByType(constants.CoolerRentalServiceTypeID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bar rental quote services.", http.StatusInternalServerError)
+		return
+	}
+
 	quickQuoteServices, err := database.GetQuickQuoteServices()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -477,6 +484,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["LeadMessages"] = leadMessages
 	data["LeadNextActions"] = leadNextActions
 	data["BarRentalQuoteServices"] = barRentalQuoteServices
+	data["CoolerRentalQuoteServices"] = coolerRentalQuoteServices
 	data["AlcoholQuoteServices"] = alcoholQuoteServices
 	data["QuickQuoteServices"] = quickQuoteServices
 
@@ -2746,9 +2754,10 @@ func PostQuickQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var quoteServiceForm []types.QuoteServiceForm
 	quoteServices := r.PostForm.Get("quote_services")
 	if quoteServices != "" {
-		err = json.Unmarshal([]byte(quoteServices), &form.QuoteServices)
+		err = json.Unmarshal([]byte(quoteServices), &quoteServiceForm)
 		if err != nil {
 			fmt.Printf("Error parsing quote_services JSON: %+v\n", err)
 			tmplCtx := types.DynamicPartialTemplate{
@@ -2764,7 +2773,7 @@ func PostQuickQuote(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	quoteId, quoteExternalId, err := database.CreateQuickQuote(form)
+	quoteId, quoteExternalId, err := database.CreateQuickQuote(form, quoteServiceForm)
 	if err != nil {
 		fmt.Printf("Error creating quick quote: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
