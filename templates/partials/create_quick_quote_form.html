@@ -330,7 +330,7 @@
     const decreaseRentals = document.querySelectorAll(".decreaseRental");
 
     function handleChangeInRentalUnits(isIncrease, target) {
-        const rentalElements = document.querySelectorAll(target.dataset.selector);
+        const rentalElements = document.querySelectorAll("." + target.dataset.selector);
 
         rentalElements.forEach(rental => {
             // Skip if not the same service id
@@ -350,7 +350,7 @@
     });
 
     function handleFindRentalUnitsByServiceId(serviceId, selector) {
-        const rentalElements = document.querySelectorAll(selector);
+        const rentalElements = document.querySelectorAll("." + selector);
     
         let numRentals = 0;
         rentalElements.forEach(el => {
