@@ -317,7 +317,7 @@
                 }
             })
             .then(quoteId => {
-                window.href = `/crm/lead/{{ .Lead.LeadID }}/${quoteId}`;
+                window.href = `/crm/lead/{{ .Lead.LeadID }}/quote/${quoteId}`;
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;

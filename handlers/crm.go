@@ -2857,7 +2857,8 @@ func PostQuickQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, redirectURL, http.StatusFound)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprint(quoteId)))
 }
 
 func DeleteLeadQuote(w http.ResponseWriter, r *http.Request) {
