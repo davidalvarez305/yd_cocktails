@@ -466,6 +466,13 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	bartendingService, err := database.GetServiceListByType(constants.BartendingServiceTypeID)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting bartending service.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Lead Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
@@ -487,6 +494,7 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["CoolerRentalQuoteServices"] = coolerRentalQuoteServices
 	data["AlcoholQuoteServices"] = alcoholQuoteServices
 	data["QuickQuoteServices"] = quickQuoteServices
+	data["BartendingService"] = bartendingService[0]
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 

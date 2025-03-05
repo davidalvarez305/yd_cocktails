@@ -655,15 +655,14 @@ type LeadConversation struct {
 }
 
 type QuickQuoteForm struct {
-	CSRFToken               *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	LeadID                  *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	EventDate               *int64  `json:"event_date_service" form:"event_date_service" schema:"event_date_service"`
-	Hours                   *int    `json:"hours_service" form:"hours_service" schema:"hours_service"`
-	Guests                  *int    `json:"guests_service" form:"guests_service" schema:"guests_service"`
-	NumberOfBartenders      *int    `json:"number_of_bartenders_service" form:"number_of_bartenders_service" schema:"number_of_bartenders_service"`
-	BartendingHourlyService *int    `json:"bartending_hourly_service" form:"bartending_hourly_service" schema:"bartending_hourly_service"`
-	EventTypeID             *int    `json:"event_type_id_service" form:"event_type_id_service" schema:"event_type_id_service"`
-	VenueTypeID             *int    `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
+	CSRFToken          *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	LeadID             *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventDate          *int64  `json:"event_date_service" form:"event_date_service" schema:"event_date_service"`
+	Hours              *int    `json:"hours_service" form:"hours_service" schema:"hours_service"`
+	Guests             *int    `json:"guests_service" form:"guests_service" schema:"guests_service"`
+	NumberOfBartenders *int    `json:"number_of_bartenders_service" form:"number_of_bartenders_service" schema:"number_of_bartenders_service"`
+	EventTypeID        *int    `json:"event_type_id_service" form:"event_type_id_service" schema:"event_type_id_service"`
+	VenueTypeID        *int    `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
 
 	// Must be parsed from JSON
 	QuoteServices *string `json:"quote_services" form:"quote_services" schema:"quote_services"`

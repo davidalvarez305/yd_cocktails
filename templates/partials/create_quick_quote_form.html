@@ -29,7 +29,7 @@
                             <form id="createQuickQuoteForm" class="space-y-4">
                                 <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
                                 <input type="hidden" name="lead_id" value="{{ .Lead.LeadID }}" />
-                                <input type="hidden" id="bartending_hourly_service" name="bartending_hourly_service" />
+                                <input type="hidden" class=".customField" data-service-id="{{ .BartendingService.ServiceID }}" data-suggested-price="{{ .BartendingService.SuggestedPrice }}" id="bartending_hourly_service" />
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
                                         <label for="event_date_service" class="font-medium">Cual sería la hora y fecha del evento?</label>
@@ -291,6 +291,8 @@
             }
 
             if (field.dataset.selector) units = handleFindRentalUnitsByServiceId(serviceId, field.dataset.selector);
+    
+            if (field.dataset.hourly) units = hours.value;
 
             quoteServices.push({ service_id: serviceId, price_per_unit: suggestedPrice, lead_id: leadId, units: units });
         });

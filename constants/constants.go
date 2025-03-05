@@ -36,6 +36,7 @@ const (
 	BarRentalServiceTypeID    int = 2
 	CoolerRentalServiceTypeID int = 3
 	GeneralServiceTypeID      int = 4
+	BartendingServiceTypeID   int = 5
 
 	CupsStrawsNapkinsServiceID int = 14
 
