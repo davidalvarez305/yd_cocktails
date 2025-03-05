@@ -87,7 +87,7 @@
                                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
                                         {{ range .BarRentalQuoteServices }}
                                         <label class="group relative flex">
-                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-rental="bar"
+                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-selector="numBars"
                                                 class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="relative flex grow cursor-pointer rounded-lg border border-gray-200 p-4 group-hover:border-primary-500 peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-focus:ring-3 peer-focus:ring-primary-100 dark:border-gray-700 dark:group-hover:border-primary-600 dark:peer-checked:border-primary-600 dark:peer-checked:bg-primary-800/10 dark:peer-focus:ring-primary-900">
@@ -96,7 +96,7 @@
                                                 </span>
                                                 <div class="flex items-center justify-between">
                                                     <div class="inline-flex items-center">
-                                                        <button type="button" data-service-id="{{ .ServiceID }}"
+                                                        <button type="button" data-service-id="{{ .ServiceID }}" data-selector="numBars"
                                                             class="decreaseRental inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:bg-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                                                             <svg class="hi-mini hi-minus-small -mx-1 inline-block size-5"
                                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -105,7 +105,7 @@
                                                             </svg>
                                                         </button>
                                                         <span data-service-id="{{ .ServiceID }}" class="numBars px-2.5 text-sm">0</span>
-                                                        <button type="button" data-service-id="{{ .ServiceID }}"
+                                                        <button type="button" data-service-id="{{ .ServiceID }}" data-selector="numBars"
                                                             class="increaseRental inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:bg-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                                                             <svg class="hi-mini hi-plus-small -mx-1 inline-block size-5"
                                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -128,7 +128,7 @@
                                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
                                         {{ range .CoolerRentalQuoteServices }}
                                         <label class="group relative flex">
-                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-rental="bar"
+                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-rental="numCoolers"
                                                 class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="relative flex grow cursor-pointer rounded-lg border border-gray-200 p-4 group-hover:border-primary-500 peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-focus:ring-3 peer-focus:ring-primary-100 dark:border-gray-700 dark:group-hover:border-primary-600 dark:peer-checked:border-primary-600 dark:peer-checked:bg-primary-800/10 dark:peer-focus:ring-primary-900">
@@ -137,7 +137,7 @@
                                                 </span>
                                                 <div class="flex items-center justify-between">
                                                     <div class="inline-flex items-center">
-                                                        <button type="button" data-service-id="{{ .ServiceID }}"
+                                                        <button type="button" data-service-id="{{ .ServiceID }}" data-selector="numCoolers"
                                                             class="decreaseRental inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:bg-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                                                             <svg class="hi-mini hi-minus-small -mx-1 inline-block size-5"
                                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -146,7 +146,7 @@
                                                             </svg>
                                                         </button>
                                                         <span data-service-id="{{ .ServiceID }}" class="numCoolers px-2.5 text-sm">0</span>
-                                                        <button type="button" data-service-id="{{ .ServiceID }}"
+                                                        <button type="button" data-service-id="{{ .ServiceID }}" data-selector="numCoolers"
                                                             class="increaseRental inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:bg-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                                                             <svg class="hi-mini hi-plus-small -mx-1 inline-block size-5"
                                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -290,16 +290,7 @@
                 return;
             }
 
-            if (field.dataset.rental) {
-                switch (field.dataset.rental) {
-                    case "bar":
-                        units = handleFindRentalUnitsByServiceId(serviceId, ".numBars");
-                        break;
-                    case "cooler":
-                        units = handleFindRentalUnitsByServiceId(serviceId, ".numCoolers");
-                        break;
-                }
-            }
+            if (field.dataset.selector) units = handleFindRentalUnitsByServiceId(serviceId, field.dataset.selector);
 
             quoteServices.push({ service_id: serviceId, price_per_unit: suggestedPrice, lead_id: leadId, units: units });
         });
@@ -340,19 +331,20 @@
 
     const increaseRentals = document.querySelectorAll(".increaseRental");
     const decreaseRentals = document.querySelectorAll(".decreaseRental");
-    const numBars = document.querySelectorAll(".numBars");
 
     function handleChangeInRentalUnits(isIncrease, target) {
-        numBars.forEach(barRental => {
-            // Skip if not the same service id
-            if (barRental.dataset.serviceId !== target.dataset.serviceId) return;
+        const rentalElements = document.querySelectorAll(target.dataset.selector);
 
-            let numBarRentals = parseInt(barRental.textContent);
+        rentalElements.forEach(rental => {
+            // Skip if not the same service id
+            if (rental.dataset.serviceId !== target.dataset.serviceId) return;
+
+            let numRentals = parseInt(rental.textContent);
 
             // Prevent negative count
-            if (!isIncrease && numBarRentals === 0) return;
+            if (!isIncrease && numRentals === 0) return;
 
-            barRental.textContent = Math.max(0, numBarRentals + (isIncrease ? 1 : -1));
+            rental.textContent = Math.max(0, numRentals + (isIncrease ? 1 : -1));
         });
     }
 
