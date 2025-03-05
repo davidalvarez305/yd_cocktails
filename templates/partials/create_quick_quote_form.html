@@ -263,7 +263,6 @@
         const data = new FormData(form);
         const body = new FormData();
 
-
         for (const [key, value] of data.entries()) {
             if (key === "event_date_service" && value) {
                 body.set(key, new Date(value).getTime() / 1000);
@@ -301,10 +300,6 @@
         });
 
         body.set("quote_services", JSON.stringify(quoteServices));
-
-        console.log(Object.fromEntries(body.entries()));
-
-        return;
 
         fetch("/crm/lead/{{ .Lead.LeadID }}/quick-quote", {
             method: "POST",
