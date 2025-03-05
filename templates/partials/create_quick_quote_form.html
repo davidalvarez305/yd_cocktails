@@ -151,23 +151,47 @@
                                     </div>
                                 </div>
                                 <!-- END Form Alcohol Service -->
-                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                    <div class="grow space-y-1">
-                                        <label for="bring_cooler_service"
-                                            class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="customField peer sr-only" data-rental="cooler" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}"
-                                                name="bring_cooler_service" />
+                                <!-- Cooler Alternative -->
+                                <div class="space-y-2 dark:text-gray-100">
+                                    <div class="font-medium">Necesita que llevemos cooler(s)?</div>
+                                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                        {{ range .BarRentalQuoteServices }}
+                                        <label class="group relative flex">
+                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-rental="bar"
+                                                class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
-                                                class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
-                                            <span class="font-medium">Tenemos que llevar coolers?</span>
+                                                class="relative flex grow cursor-pointer rounded-lg border border-gray-200 p-4 group-hover:border-primary-500 peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-focus:ring-3 peer-focus:ring-primary-100 dark:border-gray-700 dark:group-hover:border-primary-600 dark:peer-checked:border-primary-600 dark:peer-checked:bg-primary-800/10 dark:peer-focus:ring-primary-900">
+                                                <span class="grow pr-8 text-sm">
+                                                    <span class="block font-semibold">{{ .Service }} - ${{ .SuggestedPrice }}</span>
+                                                </span>
+                                                <div class="flex items-center justify-between">
+                                                    <div class="inline-flex items-center">
+                                                        <button type="button" data-service-id="{{ .ServiceID }}"
+                                                            class="decreaseRental inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:bg-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+                                                            <svg class="hi-mini hi-minus-small -mx-1 inline-block size-5"
+                                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                fill="currentColor" aria-hidden="true">
+                                                                <path d="M6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" />
+                                                            </svg>
+                                                        </button>
+                                                        <span data-service-id="{{ .ServiceID }}" class="numBars px-2.5 text-sm">0</span>
+                                                        <button type="button" data-service-id="{{ .ServiceID }}"
+                                                            class="increaseRental inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:bg-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+                                                            <svg class="hi-mini hi-plus-small -mx-1 inline-block size-5"
+                                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                fill="currentColor" aria-hidden="true">
+                                                                <path
+                                                                    d="M10.75 6.75a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </span>
                                         </label>
-                                    </div>
-                                    <div id="coolerRentalService" class="grow space-y-1" style="display: none;">
-                                        <label for="cooler_rental_service" class="font-medium">Cuantos coolers?</label>
-                                        <input type="number" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" name="cooler_rental_service"
-                                            class="customField block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
+                                        {{ end }}
                                     </div>
                                 </div>
+                                <!-- END Cooler Alternative -->
                                 <!-- Quick Quote Services -->
                                 <div class="font-medium">Seleccione todo los que aplica:</div>
                                 {{ range .QuickQuoteServices }}
