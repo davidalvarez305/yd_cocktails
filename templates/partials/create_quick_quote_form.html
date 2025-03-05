@@ -29,7 +29,7 @@
                             <form id="createQuickQuoteForm" class="space-y-4">
                                 <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
                                 <input type="hidden" name="lead_id" value="{{ .Lead.LeadID }}" />
-                                <input type="hidden" name="bartending_hourly_service" />
+                                <input type="hidden" id="bartending_hourly_service" name="bartending_hourly_service" />
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
                                         <label for="event_date_service" class="font-medium">Cual sería la hora y fecha del evento?</label>
@@ -81,62 +81,32 @@
                                         </select>
                                     </div>
                                 </div>
-                                <!-- Form Bar Rental Service -->
-                                <div class="space-y-2 dark:text-gray-100">
-                                    <div class="font-medium">Necesita que llevemos barra(s)?</div>
-                                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                                        {{ range .BarRentalQuoteServices }}
-                                        <label class="group relative flex">
-                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" name="type_of_bar_service"
-                                                class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
-                                            <span
-                                                class="absolute top-0 right-0 bottom-0 z-1 flex scale-50 cursor-pointer items-center px-4 text-primary-600 opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100 sm:bottom-auto sm:h-14">
-                                                <svg class="hi-mini hi-check-circle inline-block size-5"
-                                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                    fill="currentColor" aria-hidden="true">
-                                                    <path fill-rule="evenodd"
-                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
-                                            </span>
-                                            <span
-                                                class="relative flex grow cursor-pointer rounded-lg border border-gray-200 p-4 group-hover:border-primary-500 peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-focus:ring-3 peer-focus:ring-primary-100 dark:border-gray-700 dark:group-hover:border-primary-600 dark:peer-checked:border-primary-600 dark:peer-checked:bg-primary-800/10 dark:peer-focus:ring-primary-900">
-                                                <span class="grow pr-8 text-sm">
-                                                    <span class="block font-semibold">{{ .Service }} - {{ .SuggestedPrice }}</span>
-                                                </span>
-                                            </span>
-                                        </label>
-                                        {{ end }}
-                                    </div>
-                                </div>
-                                <!-- END Form Bar Rental Service -->
-
                                 <!-- Bar Rental Alternative -->
                                 <div class="space-y-2 dark:text-gray-100">
                                     <div class="font-medium">Necesita que llevemos barra(s)?</div>
                                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
                                         {{ range .BarRentalQuoteServices }}
                                         <label class="group relative flex">
-                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" name="type_of_bar_service"
+                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-rental="bar"
                                                 class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="relative flex grow cursor-pointer rounded-lg border border-gray-200 p-4 group-hover:border-primary-500 peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-focus:ring-3 peer-focus:ring-primary-100 dark:border-gray-700 dark:group-hover:border-primary-600 dark:peer-checked:border-primary-600 dark:peer-checked:bg-primary-800/10 dark:peer-focus:ring-primary-900">
                                                 <span class="grow pr-8 text-sm">
-                                                    <span class="block font-semibold">{{ .Service }} - {{ .SuggestedPrice }}</span>
+                                                    <span class="block font-semibold">{{ .Service }} - ${{ .SuggestedPrice }}</span>
                                                 </span>
                                                 <div class="flex items-center justify-between">
                                                     <div class="inline-flex items-center">
-                                                        <button type="button"
-                                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:bg-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+                                                        <button type="button" data-service-id="{{ .ServiceID }}"
+                                                            class="decreaseRental inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:bg-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                                                             <svg class="hi-mini hi-minus-small -mx-1 inline-block size-5"
                                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                                                 fill="currentColor" aria-hidden="true">
                                                                 <path d="M6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" />
                                                             </svg>
                                                         </button>
-                                                        <span class="px-2.5 text-sm">0</span>
-                                                        <button type="button"
-                                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:bg-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
+                                                        <span data-service-id="{{ .ServiceID }}" class="numBars px-2.5 text-sm">0</span>
+                                                        <button type="button" data-service-id="{{ .ServiceID }}"
+                                                            class="increaseRental inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-transparent dark:bg-transparent dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700">
                                                             <svg class="hi-mini hi-plus-small -mx-1 inline-block size-5"
                                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                                                 fill="currentColor" aria-hidden="true">
@@ -154,11 +124,11 @@
                                 <!-- END Bar Rental Alternative -->
                                 <!-- Form Alcohol Service -->
                                 <div class="space-y-2 dark:text-gray-100">
-                                    <div class="font-medium">Necesita que llevemos barra(s)?</div>
+                                    <div class="font-medium">Necesita que llevemos alcohol?</div>
                                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
                                         {{ range .AlcoholQuoteServices }}
                                         <label class="group relative flex">
-                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" name="alcohol_quality_service"
+                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" name="alcohol_service"
                                                 class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="absolute top-0 right-0 bottom-0 z-1 flex scale-50 cursor-pointer items-center px-4 text-primary-600 opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100 sm:bottom-auto sm:h-14">
@@ -173,7 +143,7 @@
                                             <span
                                                 class="relative flex grow cursor-pointer rounded-lg border border-gray-200 p-4 group-hover:border-primary-500 peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-focus:ring-3 peer-focus:ring-primary-100 dark:border-gray-700 dark:group-hover:border-primary-600 dark:peer-checked:border-primary-600 dark:peer-checked:bg-primary-800/10 dark:peer-focus:ring-primary-900">
                                                 <span class="grow pr-8 text-sm">
-                                                    <span class="block font-semibold">{{ .Service }} - {{ .SuggestedPrice }}</span>
+                                                    <span class="block font-semibold">{{ .Service }} - ${{ .SuggestedPrice }}</span>
                                                 </span>
                                             </span>
                                         </label>
@@ -185,7 +155,7 @@
                                     <div class="grow space-y-1">
                                         <label for="bring_cooler_service"
                                             class="group relative inline-flex items-center gap-3">
-                                            <input type="checkbox" class="customField peer sr-only" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}"
+                                            <input type="checkbox" class="customField peer sr-only" data-rental="cooler" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}"
                                                 name="bring_cooler_service" />
                                             <span
                                                 class="hover:cursor-pointer relative h-7 w-12 flex-none rounded-full bg-gray-300 transition-all duration-150 ease-out before:absolute before:left-1 before:top-1 before:size-5 before:rounded-full before:bg-white before:transition-transform before:duration-150 before:ease-out before:content-[''] peer-checked:bg-primary-500 peer-checked:before:translate-x-full peer-focus:ring peer-focus:ring-primary-500/50 peer-focus:ring-offset-2 peer-focus:ring-offset-white peer-disabled:cursor-not-allowed peer-disabled:opacity-75 dark:bg-gray-700 dark:peer-checked:bg-primary-500 dark:peer-focus:ring-offset-gray-900"></span>
@@ -281,18 +251,29 @@
 
         let quoteServices = [];
 
-        const customFields = document.querySelectorAll(".customFields");
+        const customFields = document.querySelectorAll(".customField");
 
         customFields.forEach(field => {
+            if (!field.checked) return;
 
             const leadId = "{{ .Lead.LeadID }}";
             const serviceId = field.dataset.serviceId;
             const suggestedPrice = field.dataset.suggestedPrice;
 
-            // handle coolers
-            const units = guests || "";
+            let units = guests.value || 0;
 
-            quoteServices.push({ service_id: serviceId, price_per_unit: suggestedPrice, lead_id: leadId });
+            if (field.dataset.rental) {
+                switch (field.dataset.rental) {
+                    case "bar":
+                        units = handleFindRentalUnitsByServiceId(serviceId, ".numBars");
+                        break;
+                    case "cooler":
+                        units = handleFindRentalUnitsByServiceId(serviceId, ".numCoolers");
+                        break;
+                }
+            }
+
+            quoteServices.push({ service_id: serviceId, price_per_unit: suggestedPrice, lead_id: leadId, units: units });
         });
 
         body.set("quote_services", JSON.stringify(quoteServices));
@@ -331,6 +312,41 @@
                 handleCloseAlertModal();
                 handleCloseQuickQuoteFormModal();
             });
+    }
+
+    const increaseRentals = document.querySelectorAll(".increaseRental");
+    const decreaseRentals = document.querySelectorAll(".decreaseRental");
+    const numBars = document.querySelectorAll(".numBars");
+
+    function handleChangeInRentalUnits(isIncrease, target) {
+        numBars.forEach(barRental => {
+            // Skip if not the same service id
+            if (barRental.dataset.serviceId !== target.dataset.serviceId) return;
+
+            let numBarRentals = parseInt(barRental.textContent);
+
+            // Prevent negative count
+            if (!isIncrease && numBarRentals === 0) return;
+
+            barRental.textContent = Math.max(0, numBarRentals + (isIncrease ? 1 : -1));
+        });
+    }
+
+    [increaseRentals, decreaseRentals].forEach((buttons, isIncrease) => {
+        buttons.forEach(btn => btn.addEventListener("click", () => handleChangeInRentalUnits(isIncrease === 0, btn)));
+    });
+
+    function handleFindRentalUnitsByServiceId(serviceId, selector) {
+        const rentalElements = document.querySelectorAll(selector);
+    
+        let numRentals = 0;
+        rentalElements.forEach(el => {
+            if (el.dataset.serviceId === serviceId) {
+                numRentals = parseInt(el.textContent);
+            }
+        });
+
+        return numRentals;
     }
 
     const bartendingHourlyService = document.getElementById("bartending_hourly_service");
