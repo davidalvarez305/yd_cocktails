@@ -287,12 +287,12 @@
             let units = parseInt(guests.value, 10) || 0;
 
             // Ensure serviceId and suggestedPrice are valid numbers
-            if (isNaN(serviceId) || isNaN(suggestedPrice)) {
-                console.error(`Invalid service_id (${field.dataset.serviceId}) or price_per_unit (${field.dataset.suggestedPrice})`);
-                return;
-            }
+            if (isNaN(serviceId) || isNaN(suggestedPrice)) return;
 
             if (field.dataset.selector) units = handleFindRentalUnitsByServiceId(serviceId, field.dataset.selector);
+
+            // Units can not be zero
+            if (units === 0) return;
     
             quoteServices.push({ service_id: serviceId, price_per_unit: suggestedPrice, lead_id: leadId, units: units });
         });
@@ -304,6 +304,10 @@
             lead_id: leadId,
             units: parseInt(bartenders.value * hours.value)
         });
+
+        console.log(quoteServices);
+
+        return;
 
         body.set("quote_services", JSON.stringify(quoteServices));
 
