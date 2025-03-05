@@ -29,7 +29,7 @@
                             <form id="createQuickQuoteForm" class="space-y-4">
                                 <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
                                 <input type="hidden" name="lead_id" value="{{ .Lead.LeadID }}" />
-                                <input type="hidden" class=".customField" data-service-id="{{ .BartendingService.ServiceID }}" data-suggested-price="{{ .BartendingService.SuggestedPrice }}" id="bartending_hourly_service" />
+                                <input type="hidden"  id="bartending_hourly_service" />
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
                                         <label for="event_date_service" class="font-medium">Cual sería la hora y fecha del evento?</label>
@@ -50,8 +50,8 @@
                                     </div>
                                     <div class="grow space-y-1">
                                         <label for="number_of_bartenders_service" class="font-medium">Número de bartenders</label>
-                                        <input type="number" id="number_of_bartenders_service"
-                                            name="number_of_bartenders_service" required
+                                        <input type="number" id="number_of_bartenders_service" name="number_of_bartenders_service" required
+                                            data-service-id="{{ .BartendingService.ServiceID }}" data-suggested-price="{{ .BartendingService.SuggestedPrice }}"
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                     </div>
                                 </div>
@@ -259,6 +259,11 @@
     function handleSubmitQuickQuoteForm() {
         const alertModal = document.getElementById("alertModal");
         const form = document.getElementById("createQuickQuoteForm");
+        const leadId = "{{ .Lead.LeadID }}";
+        const customFields = document.querySelectorAll(".customField");
+        const bartenders = document.getElementById("number_of_bartenders_service");
+        const guests = document.getElementById("guests_service");
+        const hours = document.getElementById("hours_service");
 
         const data = new FormData(form);
         const body = new FormData();
@@ -269,17 +274,14 @@
                 continue;
             }
 
-            body.set(key, value);
+            if (value) body.set(key, value);
         }
 
         let quoteServices = [];
 
-        const customFields = document.querySelectorAll(".customField");
-
         customFields.forEach(field => {
-            if (!field.checked) return;
+            if (!field.dataset.selector && !field.checked) return;
 
-            const leadId = "{{ .Lead.LeadID }}";
             const serviceId = parseInt(field.dataset.serviceId, 10);
             const suggestedPrice = parseFloat(field.dataset.suggestedPrice);
             let units = parseInt(guests.value, 10) || 0;
@@ -292,9 +294,15 @@
 
             if (field.dataset.selector) units = handleFindRentalUnitsByServiceId(serviceId, field.dataset.selector);
     
-            if (field.dataset.hourly) units = hours.value;
-
             quoteServices.push({ service_id: serviceId, price_per_unit: suggestedPrice, lead_id: leadId, units: units });
+        });
+
+        // Push bartending service
+        quoteServices.push({
+            service_id: parseInt(bartenders.dataset.serviceId, 10),
+            price_per_unit: parseFloat(bartenders.dataset.suggestedPrice),
+            lead_id: leadId,
+            units: parseInt(bartenders.value * hours.value)
         });
 
         body.set("quote_services", JSON.stringify(quoteServices));
@@ -319,7 +327,7 @@
                 }
             })
             .then(quoteId => {
-                window.href = `/crm/lead/{{ .Lead.LeadID }}/quote/${quoteId}`;
+                window.location.href = `/crm/lead/{{ .Lead.LeadID }}/quote/${quoteId}`;
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
@@ -363,22 +371,5 @@
 
         return numRentals;
     }
-
-    const bartendingHourlyService = document.getElementById("bartending_hourly_service");
-    const bartenders = document.getElementById("number_of_bartenders_service");
-    const guests = document.getElementById("guests_service");
-    const hours = document.getElementById("hours_service");
-
-    function handleCalculateBartenders(guests) {
-        let numBartenders = 0;
-
-        guests = Number(guests);
-        if (guests && !isNaN(guests)) numBartenders = Math.ceil(guests / 50);
-
-        bartenders.value = numBartenders;
-    }
-
-    hours.addEventListener("change", (e) => bartendingHourlyService.value = e.target.value);
-    guests.addEventListener("change", (e) => handleCalculateBartenders(e.target.value));
 </script>
 {{ end }}
