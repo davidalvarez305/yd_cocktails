@@ -316,14 +316,11 @@
                     });
                 }
             })
-            .then(html => {
-                alertModal.outerHTML = html;
-                form.reset();
+            .then(quoteId => {
+                window.href = `/crm/lead/{{ .Lead.LeadID }}/${quoteId}`;
             })
             .catch(err => {
                 alertModal.outerHTML = err.message;
-            })
-            .finally(() => {
                 handleCloseAlertModal();
                 handleCloseQuickQuoteFormModal();
             });
