@@ -523,6 +523,7 @@ type ExternalQuoteDetails struct {
 type CreateInvoiceParams struct {
 	StripeCustomerID string
 	Email            string
+	PhoneNumber      string
 	FullName         string
 	DueDate          int64
 	Quote            float64

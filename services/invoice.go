@@ -123,6 +123,7 @@ func CreateInvoiceWorkflow(quote types.QuoteDetails) error {
 			Email:            quote.Email,
 			StripeCustomerID: stripeCustomerId,
 			FullName:         quote.FullName,
+			PhoneNumber:      quote.PhoneNumber,
 			DueDate:          invoiceDueDate,
 			Quote:            quote.Amount * invoiceType.AmountPercentage,
 		}

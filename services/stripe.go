@@ -17,9 +17,18 @@ func CreateStripeInvoice(params types.CreateInvoiceParams) (stripe.Invoice, erro
 	// Create a new customer if needed
 	if len(params.StripeCustomerID) == 0 {
 		custParams := &stripe.CustomerParams{
-			Email: stripe.String(params.Email),
-			Name:  stripe.String(params.FullName),
+			Name: stripe.String(params.FullName),
 		}
+
+		// Only add the email if it's not empty
+		if params.Email != "" {
+			custParams.Email = stripe.String(params.Email)
+		}
+
+		if params.PhoneNumber != "" {
+			custParams.Phone = stripe.String(params.PhoneNumber)
+		}
+
 		cust, err := customer.New(custParams)
 		if err != nil {
 			return stripe.Invoice{}, fmt.Errorf("failed to create customer: %v", err)
