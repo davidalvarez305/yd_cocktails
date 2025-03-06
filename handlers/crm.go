@@ -153,12 +153,14 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
 	case http.MethodDelete:
+		parts := strings.Split(path, "/")
+
 		if strings.HasPrefix(path, "/crm/quote-service/") {
 			DeleteQuoteService(w, r)
 			return
 		}
+
 		if strings.HasPrefix(path, "/crm/lead/") {
-			parts := strings.Split(path, "/")
 			if len(parts) >= 5 && parts[4] == "event" && helpers.IsNumeric(parts[3]) {
 				DeleteEvent(w, r)
 				return
@@ -172,6 +174,14 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+
+		if strings.HasPrefix(path, "/crm/event/") {
+			if len(parts) >= 5 && parts[4] == "staff" && helpers.IsNumeric(parts[3]) {
+				DeleteEventStaff(w, r)
+				return
+			}
+		}
+
 		if strings.HasPrefix(path, "/crm/service/") {
 			DeleteService(w, r)
 			return
