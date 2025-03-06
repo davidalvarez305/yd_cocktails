@@ -1,0 +1,10 @@
+{{ define "content.html" }}
+
+{{ template "users_table.html" . }}
+
+{{ template "create_user_form.html" . }}
+
+<script src="{{ .StaticPath }}/main.js" nonce="{{ .Nonce }}"></script>
+<script src="{{ .StaticPath }}/pagination.js" nonce="{{ .Nonce }}"></script>
+
+{{ end }}

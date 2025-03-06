@@ -1,0 +1,10 @@
+{{ define "content.html" }}
+
+{{ template "cocktails_table.html" . }}
+
+{{ template "create_cocktail_form.html" . }}
+
+<script src="{{ .StaticPath }}/main.js" nonce="{{ .Nonce }}"></script>
+<script src="{{ .StaticPath }}/pagination.js" nonce="{{ .Nonce }}"></script>
+
+{{ end }}
