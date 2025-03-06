@@ -3434,3 +3434,90 @@ func ArchivedLeadsWithLastContactOverTwoWeeks() error {
 
 	return nil
 }
+
+func GetEventStaff(eventId int) ([]types.EventStaffList, error) {
+	var eventStaffList []types.EventStaffList
+
+	query := `SELECT s.event_staff_id, u.first_name, u.last_name, r.role
+	FROM "user" AS u
+	JOIN user_role AS r ON r.user_role_id = u.user_role_id
+	JOIN event_staff AS s ON s.user_id = u.user_id AND s.event_id = $1;`
+	rows, err := DB.Query(query, eventId)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var eventStaff types.EventStaffList
+		if err := rows.Scan(
+			&eventStaff.EventStaffID,
+			&eventStaff.FirstName,
+			&eventStaff.LastName,
+			&eventStaff.Role,
+		); err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+		eventStaffList = append(eventStaffList, eventStaff)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return eventStaffList, nil
+}
+
+func GetUserRoles() ([]models.UserRole, error) {
+	var userRoles []models.UserRole
+
+	stmt, err := DB.Prepare(`SELECT role_id, role FROM role`)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var role models.UserRole
+		err := rows.Scan(
+			&role.RoleID,
+			&role.Role,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		userRoles = append(userRoles, role)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error with rows: %w", err)
+	}
+
+	return userRoles, nil
+}
+
+func CreateEventStaff(form types.EventStaffForm) error {
+	query := `
+		INSERT INTO event_staff (event_id, user_id, user_role_id)
+		VALUES ($1, $2, $3)
+	`
+
+	_, err := DB.Exec(
+		query,
+		utils.CreateNullInt(form.EventID),
+		utils.CreateNullInt(form.UserID),
+		utils.CreateNullInt(form.UserRoleID),
+	)
+	if err != nil {
+		return fmt.Errorf("error inserting event data: %w", err)
+	}
+
+	return nil
+}

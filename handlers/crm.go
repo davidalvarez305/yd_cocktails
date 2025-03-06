@@ -177,12 +177,21 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case http.MethodPost:
+		parts := strings.Split(path, "/")
+
 		if strings.HasPrefix(path, "/crm/quote-service") {
 			PostQuoteService(w, r)
 			return
 		}
+
+		if strings.HasPrefix(path, "/crm/event/") {
+			if len(parts) >= 5 && parts[4] == "staff" && helpers.IsNumeric(parts[3]) {
+				PostEventStaff(w, r)
+				return
+			}
+		}
+
 		if strings.HasPrefix(path, "/crm/lead/") {
-			parts := strings.Split(path, "/")
 			if strings.Contains(path, "quick-quote") {
 				PostQuickQuote(w, r)
 				return
@@ -898,7 +907,9 @@ func PostEvent(w http.ResponseWriter, r *http.Request) {
 
 func GetEventDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	fileName := "event_detail.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName}
+	createEventStaffForm := constants.PARTIAL_TEMPLATES_DIR + "create_event_staff_form.html"
+	eventStaffTable := constants.PARTIAL_TEMPLATES_DIR + "event_staff_table.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, createEventStaffForm, eventStaffTable}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -925,10 +936,17 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) 
 		return
 	}
 
-	bartenders, err := database.GetUsers()
+	eventStaff, err := database.GetEventStaff(eventId)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting bartenders.", http.StatusInternalServerError)
+		http.Error(w, "Error getting event staff.", http.StatusInternalServerError)
+		return
+	}
+
+	users, err := database.GetUsers()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting users.", http.StatusInternalServerError)
 		return
 	}
 
@@ -946,14 +964,23 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) 
 		return
 	}
 
+	userRoles, err := database.GetUserRoles()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting user roles.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Event Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["Event"] = eventDetails
-	data["Bartenders"] = bartenders
+	data["EventStaff"] = eventStaff
 	data["EventTypes"] = eventTypes
 	data["VenueTypes"] = venueTypes
+	data["Users"] = users
+	data["UserRoles"] = userRoles
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -3077,6 +3104,82 @@ func PostSendInvoiceReminder(w http.ResponseWriter, r *http.Request) {
 		Data: map[string]any{
 			"AlertHeader":  "Success!",
 			"AlertMessage": "Reminder has been sent.",
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func PostEventStaff(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var form types.EventStaffForm
+	err = decoder.Decode(&form, r.PostForm)
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.CreateEventStaff(form)
+	if err != nil {
+		fmt.Printf("Error creating event: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while creating event.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	eventStaff, err := database.GetEventStaff(helpers.SafeInt(form.EventID))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting event staff from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "event_staff_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "event_staff_table.html",
+		Data: map[string]any{
+			"EventStaff": eventStaff,
 		},
 	}
 

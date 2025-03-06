@@ -681,3 +681,17 @@ type EventListView struct {
 	Guests             int     `json:"guests" form:"guests" schema:"guests"`
 	ShouldSendReminder bool    `json:"should_send_reminder" form:"should_send_reminder" schema:"should_send_reminder"`
 }
+
+type EventStaffList struct {
+	EventStaffID int    `json:"event_staff_id" form:"event_staff_id" schema:"event_staff_id"`
+	FirstName    string `json:"first_name" form:"first_name" schema:"first_name"`
+	LastName     string `json:"last_name" form:"last_name" schema:"last_name"`
+	Role         string `json:"role" form:"role" schema:"role"`
+}
+
+type EventStaffForm struct {
+	CSRFToken  *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	EventID    *int    `json:"event_id" form:"event_id" schema:"event_id"`
+	UserID     *int    `json:"user_id"`
+	UserRoleID *int    `json:"user_role_id" form:"user_role_id" schema:"user_role_id"`
+}
