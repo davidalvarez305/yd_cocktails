@@ -91,6 +91,14 @@ func checkSpreadsheets() {
 	}
 }
 
+func archiveUnresponsiveLeads() {
+	err := database.ArchivedLeadsWithLastContactOverTwoWeeks()
+
+	if err != nil {
+		fmt.Printf("ERROR ARCHIVING UNRESPONSIVE LEADS: %+v\n", err)
+	}
+}
+
 func StartLeadChecker() {
 	go func() {
 		for {
@@ -98,6 +106,14 @@ func StartLeadChecker() {
 
 			// Sleep for one minute before the next run
 			time.Sleep(1 * time.Minute)
+		}
+	}()
+
+	go func() {
+		for {
+			archiveUnresponsiveLeads()
+
+			time.Sleep(24 * time.Hour)
 		}
 	}()
 }
