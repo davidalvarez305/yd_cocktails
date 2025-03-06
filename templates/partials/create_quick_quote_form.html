@@ -289,7 +289,9 @@
             // Ensure serviceId and suggestedPrice are valid numbers
             if (isNaN(serviceId) || isNaN(suggestedPrice)) return;
 
-            if (field.dataset.selector) units = handleFindRentalUnitsByServiceId(serviceId, field.dataset.selector);
+            if (field.dataset.selector) {
+                units = handleFindRentalUnitsByServiceId(serviceId, field.dataset.selector);
+            }
 
             // Units can not be zero
             if (units === 0) return;
@@ -304,8 +306,6 @@
             lead_id: leadId,
             units: parseInt(bartenders.value * hours.value)
         });
-
-        console.log(quoteServices);
 
         body.set("quote_services", JSON.stringify(quoteServices));
 
@@ -366,7 +366,7 @@
     
         let numRentals = 0;
         rentalElements.forEach(el => {
-            if (el.dataset.serviceId === serviceId) {
+            if (parseInt(el.dataset.serviceId) === serviceId) {
                 numRentals = parseInt(el.textContent);
             }
         });
