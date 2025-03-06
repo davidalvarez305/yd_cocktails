@@ -3533,3 +3533,98 @@ func DeleteEventStaff(id int) error {
 
 	return nil
 }
+
+func GetEventCocktails(eventId int) ([]types.EventCocktailList, error) {
+	var eventCocktailList []types.EventCocktailList
+
+	query := `SELECT ec.event_cocktail_id, c.name
+	FROM cocktail AS c
+	JOIN event_cocktail AS ec ON ec.cocktail_id = c.cocktail_id AND ec.event_id = $1;`
+	rows, err := DB.Query(query, eventId)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var eventCocktail types.EventCocktailList
+		if err := rows.Scan(
+			&eventCocktail.EventCocktailID,
+			&eventCocktail.Name,
+		); err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+		eventCocktailList = append(eventCocktailList, eventCocktail)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return eventCocktailList, nil
+}
+
+func GetCocktails() ([]models.Cocktail, error) {
+	var cocktails []models.Cocktail
+
+	stmt, err := DB.Prepare(`SELECT cocktail_id, name FROM cocktail`)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cocktail models.Cocktail
+		err := rows.Scan(
+			&cocktail.CocktailID,
+			&cocktail.Name,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		cocktails = append(cocktails, cocktail)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error with rows: %w", err)
+	}
+
+	return cocktails, nil
+}
+
+func CreateEventCocktail(form types.EventCocktailForm) error {
+	query := `
+		INSERT INTO event_cocktail (event_id, cocktail_id)
+		VALUES ($1, $2)
+	`
+
+	_, err := DB.Exec(
+		query,
+		utils.CreateNullInt(form.EventID),
+		utils.CreateNullInt(form.CocktailID),
+	)
+	if err != nil {
+		return fmt.Errorf("error inserting event cocktail: %w", err)
+	}
+
+	return nil
+}
+
+func DeleteEventCocktail(id int) error {
+	sqlStatement := `
+        DELETE FROM event_cocktail WHERE event_cocktail_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

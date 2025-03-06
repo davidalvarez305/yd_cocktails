@@ -695,3 +695,14 @@ type EventStaffForm struct {
 	UserID     *int    `json:"user_id"`
 	UserRoleID *int    `json:"user_role_id" form:"user_role_id" schema:"user_role_id"`
 }
+
+type EventCocktailList struct {
+	EventCocktailID int    `json:"event_cocktail_id" form:"event_cocktail_id" schema:"event_cocktail_id"`
+	Name            string `json:"name" form:"name" schema:"name"`
+}
+
+type EventCocktailForm struct {
+	CSRFToken  *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	EventID    *int    `json:"event_id" form:"event_id" schema:"event_id"`
+	CocktailID *int    `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
+}

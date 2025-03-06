@@ -919,7 +919,9 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) 
 	fileName := "event_detail.html"
 	createEventStaffForm := constants.PARTIAL_TEMPLATES_DIR + "create_event_staff_form.html"
 	eventStaffTable := constants.PARTIAL_TEMPLATES_DIR + "event_staff_table.html"
-	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, createEventStaffForm, eventStaffTable}
+	createEventCocktailsForm := constants.PARTIAL_TEMPLATES_DIR + "create_event_cocktails_form.html"
+	eventCocktailsTable := constants.PARTIAL_TEMPLATES_DIR + "event_cocktails_table.html"
+	files := []string{crmBaseFilePath, crmFooterFilePath, constants.CRM_TEMPLATES_DIR + fileName, createEventStaffForm, eventStaffTable, createEventCocktailsForm, eventCocktailsTable}
 	nonce, ok := r.Context().Value("nonce").(string)
 	if !ok {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
@@ -981,6 +983,20 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) 
 		return
 	}
 
+	eventCocktails, err := database.GetEventCocktails(eventId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting event cocktails.", http.StatusInternalServerError)
+		return
+	}
+
+	cocktails, err := database.GetCocktails()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting cocktails.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Event Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
@@ -991,6 +1007,8 @@ func GetEventDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) 
 	data["VenueTypes"] = venueTypes
 	data["Users"] = users
 	data["UserRoles"] = userRoles
+	data["EventCocktails"] = eventCocktails
+	data["Cocktails"] = cocktails
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -3277,6 +3295,169 @@ func DeleteEventStaff(w http.ResponseWriter, r *http.Request) {
 		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "event_staff_table.html",
 		Data: map[string]any{
 			"EventStaff": eventStaff,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func PostEventCocktail(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	var form types.EventCocktailForm
+	err = decoder.Decode(&form, r.PostForm)
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error decoding form data.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.CreateEventCocktail(form)
+	if err != nil {
+		fmt.Printf("Error creating event: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Server error while creating event cocktail.",
+			},
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	eventCocktails, err := database.GetEventCocktails(helpers.SafeInt(form.EventID))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting event cocktails from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "event_cocktails_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "event_cocktails_table.html",
+		Data: map[string]any{
+			"EventCocktails": eventCocktails,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func DeleteEventCocktail(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("Error parsing form: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	eventCocktailId, err := helpers.GetSecondIDFromPath(r, "/crm/event/")
+	if err != nil {
+		fmt.Printf("Error getting event cocktail id from path: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to get event cocktail id from path.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	eventId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/event/")
+	if err != nil {
+		fmt.Printf("Error getting event id from path: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to get event id from path.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.DeleteEventStaff(eventCocktailId)
+	if err != nil {
+		fmt.Printf("Error deleting event cocktail: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to delete event cocktail.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	eventCocktails, err := database.GetEventCocktails(eventId)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting event cocktails from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "event_cocktails_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "event_cocktails_table.html",
+		Data: map[string]any{
+			"EventCocktails": eventCocktails,
 		},
 	}
 
