@@ -1201,13 +1201,13 @@ func DeleteLead(id int) error {
 	return nil
 }
 
-func ArchiveLead(id int) error {
+func UpdateLeadStatus(id, leadStatusId int) error {
 	sqlStatement := `
         UPDATE lead
 		SET lead_status_id = $2
 		WHERE lead_id = $1
     `
-	_, err := DB.Exec(sqlStatement, id, constants.ArchivedLeadStatusID)
+	_, err := DB.Exec(sqlStatement, id, leadStatusId)
 	if err != nil {
 		return err
 	}
@@ -3517,6 +3517,18 @@ func CreateEventStaff(form types.EventStaffForm) error {
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting event data: %w", err)
+	}
+
+	return nil
+}
+
+func DeleteEventStaff(id int) error {
+	sqlStatement := `
+        DELETE FROM event_staff WHERE event_staff_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -670,7 +670,7 @@ func ArchiveLead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.ArchiveLead(leadId)
+	err = database.UpdateLeadStatus(leadId, constants.ArchivedLeadStatusID)
 	if err != nil {
 		fmt.Printf("Error archiving lead: %+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
@@ -3161,6 +3161,93 @@ func PostEventStaff(w http.ResponseWriter, r *http.Request) {
 	}
 
 	eventStaff, err := database.GetEventStaff(helpers.SafeInt(form.EventID))
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Error getting event staff from DB.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	tmplCtx := types.DynamicPartialTemplate{
+		TemplateName: "event_staff_table.html",
+		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "event_staff_table.html",
+		Data: map[string]any{
+			"EventStaff": eventStaff,
+		},
+	}
+
+	helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+}
+
+func DeleteEventStaff(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("Error parsing form: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Invalid request.",
+			},
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	eventStaffId, err := helpers.GetSecondIDFromPath(r, "/crm/event/")
+	if err != nil {
+		fmt.Printf("Error getting event staff id from path: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to get event staff id from path.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	eventId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/event/")
+	if err != nil {
+		fmt.Printf("Error getting event id from path: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to get event id from path.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	err = database.DeleteEventStaff(eventStaffId)
+	if err != nil {
+		fmt.Printf("Error deleting lead's quote: %+v\n", err)
+		tmplCtx := types.DynamicPartialTemplate{
+			TemplateName: "error",
+			TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "error_banner.html",
+			Data: map[string]any{
+				"Message": "Failed to delete lead's quote.",
+			},
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
+		return
+	}
+
+	eventStaff, err := database.GetEventStaff(eventId)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		tmplCtx := types.DynamicPartialTemplate{
