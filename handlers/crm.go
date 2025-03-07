@@ -3620,7 +3620,7 @@ func GetUserDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	}
 
 	data := ctx
-	data["PageTitle"] = "Event Detail — " + constants.CompanyName
+	data["PageTitle"] = "User Detail — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["User"] = userDetails

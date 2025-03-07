@@ -706,3 +706,25 @@ type EventCocktailForm struct {
 	EventID    *int    `json:"event_id" form:"event_id" schema:"event_id"`
 	CocktailID *int    `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
 }
+
+type UserList struct {
+	UserID      int    `json:"user_id" form:"user_id" schema:"user_id"`
+	Username    string `json:"username" form:"username" schema:"username"`
+	PhoneNumber string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	Role        string `json:"role" form:"role" schema:"role"`
+	FirstName   string `json:"first_name" form:"first_name" schema:"first_name"`
+	LastName    string `json:"last_name" form:"last_name" schema:"last_name"`
+}
+
+type UserForm struct {
+	CSRFToken          *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	UserID             *int    `json:"user_id" form:"user_id" schema:"user_id"`
+	Username           *string `json:"username" form:"username" schema:"username"`
+	PhoneNumber        *string `json:"phone_number" form:"phone_number" schema:"phone_number"`
+	Email              *string `json:"email" form:"email" schema:"email"`
+	ForwardPhoneNumber *string `json:"forward_phone_number" form:"forward_phone_number" schema:"forward_phone_number"`
+	Password           *string `json:"password" form:"password" schema:"password"`
+	UserRoleID         *int    `json:"user_role_id" form:"user_role_id" schema:"user_role_id"`
+	FirstName          *string `json:"first_name" form:"first_name" schema:"first_name"`
+	LastName           *string `json:"last_name" form:"last_name" schema:"last_name"`
+}

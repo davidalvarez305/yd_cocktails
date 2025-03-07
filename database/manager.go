@@ -11,6 +11,7 @@ import (
 	"github.com/davidalvarez305/yd_cocktails/types"
 	"github.com/davidalvarez305/yd_cocktails/utils"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func InsertCSRFToken(token models.CSRFToken) error {
@@ -3627,4 +3628,199 @@ func DeleteEventCocktail(id int) error {
 	}
 
 	return nil
+}
+
+func GetPaginatedUserList(pageNum int) ([]types.UserList, int, error) {
+	var users []types.UserList
+	var totalRows int
+
+	offset := (pageNum - 1) * int(constants.LeadsPerPage)
+
+	rows, err := DB.Query(`SELECT u.user_id, u.username, u.phone_number, u.first_name, u.last_name, r.role, COUNT(*) OVER() AS total_rows
+			FROM "user" as u
+			JOIN user_role AS r ON u.user_role_id = r.user_role_id
+			OFFSET $1
+			LIMIT $2`, offset, constants.LeadsPerPage)
+	if err != nil {
+		return users, totalRows, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user types.UserList
+
+		err := rows.Scan(&user.UserID, &user.Username, &user.FirstName, &user.LastName, &user.Role, &totalRows)
+		if err != nil {
+			return users, totalRows, fmt.Errorf("error scanning row: %w", err)
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return users, totalRows, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return users, totalRows, nil
+}
+
+func CreateUser(form types.UserForm) error {
+	if form.Password == nil {
+		return fmt.Errorf("password cannot be nil")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*form.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("error hashing password: %w", err)
+	}
+
+	stringPassword := string(hashedPassword)
+
+	query := `
+		INSERT INTO "user" (user_id, username, first_name, last_name, email, phone_number, forward_phone_number, password, user_role_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	`
+
+	_, err = DB.Exec(
+		query,
+		utils.CreateNullInt(form.UserID),
+		utils.CreateNullString(form.Username),
+		utils.CreateNullString(form.FirstName),
+		utils.CreateNullString(form.LastName),
+		utils.CreateNullString(form.Email),
+		utils.CreateNullString(form.PhoneNumber),
+		utils.CreateNullString(form.PhoneNumber),
+		utils.CreateNullString(&stringPassword),
+		utils.CreateNullInt(form.UserRoleID),
+	)
+	if err != nil {
+		return fmt.Errorf("error inserting user: %w", err)
+	}
+
+	return nil
+}
+
+func DeleteUser(id int) error {
+	sqlStatement := `
+        DELETE FROM "user" WHERE user_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateUser(form types.UserForm) error {
+	var hashedPassword *string
+	if form.Password != nil {
+		hashed, err := bcrypt.GenerateFromPassword([]byte(*form.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return fmt.Errorf("error hashing password: %w", err)
+		}
+		hashedStr := string(hashed)
+		hashedPassword = &hashedStr
+	}
+
+	query := `
+		UPDATE "user"
+		SET 
+			username = COALESCE($2, username),
+			first_name = COALESCE($3, first_name),
+			last_name = COALESCE($4, last_name),
+			email = COALESCE($5, email),
+			phone_number = COALESCE($6, phone_number),
+			forward_phone_number = COALESCE($7, forward_phone_number),
+			password = COALESCE($8, password),
+			user_role_id = COALESCE($9, user_role_id)
+		WHERE user_id = $1;
+	`
+
+	_, err := DB.Exec(
+		query,
+		utils.CreateNullInt(form.UserID),
+		utils.CreateNullString(form.Username),
+		utils.CreateNullString(form.FirstName),
+		utils.CreateNullString(form.LastName),
+		utils.CreateNullString(form.Email),
+		utils.CreateNullString(form.PhoneNumber),
+		utils.CreateNullString(form.PhoneNumber),
+		utils.CreateNullString(hashedPassword), // Only update if password is provided
+		utils.CreateNullInt(form.UserRoleID),
+	)
+	if err != nil {
+		return fmt.Errorf("error updating user: %w", err)
+	}
+
+	return nil
+}
+
+func GetUserDetails(userID string) (models.User, error) {
+	query := `SELECT 
+		user_id, 
+		username, 
+		first_name, 
+		last_name, 
+		email, 
+		phone_number, 
+		forward_phone_number, 
+		password, 
+		user_role_id
+	FROM "user"
+	WHERE user_id = $1`
+
+	var userDetails models.User
+
+	// Declare nullable SQL variables for fields that might be NULL in the database
+	var username, firstName, lastName, email, phoneNumber, forwardPhoneNumber, password sql.NullString
+	var userRoleID sql.NullInt64
+
+	row := DB.QueryRow(query, userID)
+
+	err := row.Scan(
+		&userDetails.UserID,
+		&username,
+		&firstName,
+		&lastName,
+		&email,
+		&phoneNumber,
+		&forwardPhoneNumber,
+		&password,
+		&userRoleID,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return userDetails, fmt.Errorf("no user found with ID %s", userID)
+		}
+		return userDetails, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	// Map nullable SQL variables to the User struct
+	if username.Valid {
+		userDetails.Username = username.String
+	}
+	if firstName.Valid {
+		userDetails.FirstName = firstName.String
+	}
+	if lastName.Valid {
+		userDetails.LastName = lastName.String
+	}
+	if email.Valid {
+		userDetails.Email = email.String
+	}
+	if phoneNumber.Valid {
+		userDetails.PhoneNumber = phoneNumber.String
+	}
+	if forwardPhoneNumber.Valid {
+		userDetails.ForwardPhoneNumber = forwardPhoneNumber.String
+	}
+	if password.Valid {
+		userDetails.Password = password.String
+	}
+	if userRoleID.Valid {
+		userDetails.UserRoleID = int(userRoleID.Int64)
+	}
+
+	return userDetails, nil
 }
