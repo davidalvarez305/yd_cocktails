@@ -728,3 +728,15 @@ type UserForm struct {
 	FirstName          *string `json:"first_name" form:"first_name" schema:"first_name"`
 	LastName           *string `json:"last_name" form:"last_name" schema:"last_name"`
 }
+
+type CreateCocktailForm struct {
+	CSRFToken  *string   `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	CocktailID *int      `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
+	Name       *[]string `json:"name" form:"name" schema:"name"`
+}
+
+type CocktailForm struct {
+	CSRFToken  *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	CocktailID *int    `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
+	Name       *string `json:"name" form:"name" schema:"name"`
+}

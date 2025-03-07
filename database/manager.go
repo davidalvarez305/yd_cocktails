@@ -3824,3 +3824,119 @@ func GetUserDetails(userID string) (models.User, error) {
 
 	return userDetails, nil
 }
+
+func GetPaginatedCocktailList(pageNum int) ([]models.Cocktail, int, error) {
+	var cocktails []models.Cocktail
+	var totalRows int
+
+	offset := (pageNum - 1) * int(constants.LeadsPerPage)
+
+	rows, err := DB.Query(`SELECT cocktail_id, name, COUNT(*) OVER() AS total_rows
+	FROM cocktail
+	OFFSET $1
+	LIMIT $2`, offset, constants.LeadsPerPage)
+	if err != nil {
+		return cocktails, totalRows, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cocktail models.Cocktail
+
+		err := rows.Scan(&cocktail.CocktailID, &cocktail.Name, &totalRows)
+		if err != nil {
+			return cocktails, totalRows, fmt.Errorf("error scanning row: %w", err)
+		}
+		cocktails = append(cocktails, cocktail)
+	}
+
+	if err := rows.Err(); err != nil {
+		return cocktails, totalRows, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return cocktails, totalRows, nil
+}
+
+func CreateCocktailMany(form types.CreateCocktailForm) error {
+	if form.Name == nil {
+		return fmt.Errorf("cocktail list cannot be nil")
+	}
+
+	tx, err := DB.Begin()
+	if err != nil {
+		return fmt.Errorf("error starting transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare("INSERT INTO cocktail (name) VALUES ($1)")
+	if err != nil {
+		return fmt.Errorf("error preparing insert statement: %w", err)
+	}
+	defer stmt.Close()
+
+	for _, name := range *form.Name {
+		_, err := stmt.Exec(utils.CreateNullString(&name))
+		if err != nil {
+			return fmt.Errorf("error inserting cocktail: %w", err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("error committing transaction: %w", err)
+	}
+
+	return nil
+}
+
+func DeleteCocktail(id int) error {
+	sqlStatement := `
+        DELETE FROM cocktail WHERE cocktail_id = $1
+    `
+	_, err := DB.Exec(sqlStatement, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateCocktail(form types.CocktailForm) error {
+	query := `
+		UPDATE cocktail
+		SET name = COALESCE($2, name)
+		WHERE user_id = $1;
+	`
+
+	_, err := DB.Exec(
+		query,
+		utils.CreateNullInt(form.CocktailID),
+		utils.CreateNullString(form.Name),
+	)
+	if err != nil {
+		return fmt.Errorf("error updating user: %w", err)
+	}
+
+	return nil
+}
+
+func GetCocktailDetails(cocktailId string) (models.Cocktail, error) {
+	query := `SELECT cocktail_id, name FROM cocktail WHERE cocktail_id = $1`
+
+	var cocktailDetails models.Cocktail
+
+	row := DB.QueryRow(query, cocktailId)
+
+	err := row.Scan(
+		&cocktailDetails.CocktailID,
+		&cocktailDetails.Name,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return cocktailDetails, fmt.Errorf("no cocktail found with ID %s", cocktailId)
+		}
+		return cocktailDetails, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	return cocktailDetails, nil
+}
