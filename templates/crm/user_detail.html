@@ -20,7 +20,7 @@
 			<div class="md:w-2/3 md:pl-24">
 				<form id="userForm" class="space-y-6 xl:w-2/3">
 					<input type="hidden" id="csrf_token" name="csrf_token" value="{{ .CSRFToken }}" />
-					<input type="hidden" id="user__id" name="user__id" value="{{ .User.UserID }}" />
+					<input type="hidden" id="user_id" name="user_id" value="{{ .User.UserID }}" />
 					<div class="grow space-y-1">
 						<label for="username" class="font-medium">Username</label>
 						<input type="text" id="username" name="username" value="{{ .User.Username }}"
