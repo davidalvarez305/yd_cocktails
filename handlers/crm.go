@@ -65,6 +65,21 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		parts := strings.Split(path, "/")
+
+		if strings.HasPrefix(path, "/crm/user/") {
+			if len(path) > len("/crm/user/") && helpers.IsNumeric(path[len("/crm/user/"):]) {
+				GetUserDetail(w, r, ctx)
+				return
+			}
+		}
+
+		if strings.HasPrefix(path, "/crm/cocktail/") {
+			if len(path) > len("/crm/cocktail/") && helpers.IsNumeric(path[len("/crm/cocktail/"):]) {
+				GetCocktailDetail(w, r, ctx)
+				return
+			}
+		}
+
 		if strings.HasPrefix(path, "/crm/lead/") {
 			if len(path) > len("/crm/lead/") && helpers.IsNumeric(path[len("/crm/lead/"):]) {
 				GetLeadDetail(w, r, ctx)
@@ -96,6 +111,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 		switch path {
 		case "/crm/lead":
 			GetLeads(w, r, ctx)
+		case "/crm/user":
+			GetUsers(w, r, ctx)
+		case "/crm/cocktail":
+			GetCocktails(w, r, ctx)
 		case "/crm/service":
 			GetServices(w, r, ctx)
 		case "/crm/message":
@@ -122,6 +141,20 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(path, "/crm/message/") {
 			if len(parts) >= 5 && parts[4] == "read" && helpers.IsNumeric(parts[3]) {
 				SetSMSToRead(w, r)
+				return
+			}
+		}
+
+		if strings.HasPrefix(path, "/crm/user/") {
+			if len(path) > len("/crm/user/") && helpers.IsNumeric(path[len("/crm/user/"):]) {
+				PutUser(w, r)
+				return
+			}
+		}
+
+		if strings.HasPrefix(path, "/crm/cocktail/") {
+			if len(path) > len("/crm/cocktail/") && helpers.IsNumeric(path[len("/crm/cocktail/"):]) {
+				PutCocktail(w, r)
 				return
 			}
 		}
@@ -158,6 +191,20 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(path, "/crm/quote-service/") {
 			DeleteQuoteService(w, r)
 			return
+		}
+
+		if strings.HasPrefix(path, "/crm/user/") {
+			if len(path) > len("/crm/user/") && helpers.IsNumeric(path[len("/crm/user/"):]) {
+				DeleteUser(w, r)
+				return
+			}
+		}
+
+		if strings.HasPrefix(path, "/crm/cocktail/") {
+			if len(path) > len("/crm/cocktail/") && helpers.IsNumeric(path[len("/crm/cocktail/"):]) {
+				DeleteCocktail(w, r)
+				return
+			}
 		}
 
 		if strings.HasPrefix(path, "/crm/lead/") {
@@ -234,6 +281,10 @@ func CRMHandler(w http.ResponseWriter, r *http.Request) {
 		switch path {
 		case "/crm/service":
 			PostService(w, r)
+		case "/crm/user":
+			PostUser(w, r)
+		case "/crm/cocktail":
+			PostCocktail(w, r)
 		case "/crm/quote-service":
 			PostSendInvoice(w, r)
 		default:
