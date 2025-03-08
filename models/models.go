@@ -268,3 +268,16 @@ type PhoneCallTranscription struct {
 	AudioURL                 string `json:"audio_url" form:"audio_url" schema:"audio_url"`
 	TextURL                  string `json:"text_url" form:"text_url" schema:"text_url"`
 }
+
+type EventRole struct {
+	EventRoleID int    `json:"event_role_id" form:"event_role_id" schema:"event_role_id"`
+	Role        string `json:"role" form:"role" schema:"role"`
+}
+
+type EventStaff struct {
+	EventStaffID int     `json:"event_staff_id" form:"event_staff_id" schema:"event_staff_id"`
+	UserID       int     `json:"user_id" form:"user_id" schema:"user_id"`
+	EventID      int     `json:"event_id" form:"event_id" schema:"event_id"`
+	EventRoleID  int     `json:"event_role_id" form:"event_role_id" schema:"event_role_id"`
+	HourlyRate   float64 `json:"hourly_rate" form:"hourly_rate" schema:"hourly_rate"`
+}
