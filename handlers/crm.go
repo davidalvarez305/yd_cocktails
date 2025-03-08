@@ -3550,11 +3550,19 @@ func GetUsers(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	userRoles, err := database.GetUserRoles()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting user roles from DB.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Users — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["Users"] = users
+	data["UserRoles"] = userRoles
 	data["MaxPages"] = helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage)
 	data["CurrentPage"] = pageNum
 
@@ -3649,10 +3657,10 @@ func GetUserDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	userId, err := helpers.GetSecondIDFromPath(r, "/crm/user/")
+	userId, err := helpers.GetFirstIDAfterPrefix(r, "/crm/user/")
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting event id from path.", http.StatusInternalServerError)
+		http.Error(w, "Error getting user id from path.", http.StatusInternalServerError)
 		return
 	}
 

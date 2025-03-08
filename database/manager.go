@@ -3472,7 +3472,7 @@ func GetEventStaff(eventId int) ([]types.EventStaffList, error) {
 func GetUserRoles() ([]models.UserRole, error) {
 	var userRoles []models.UserRole
 
-	stmt, err := DB.Prepare(`SELECT role_id, role FROM role`)
+	stmt, err := DB.Prepare(`SELECT user_role_id, role FROM user_role`)
 	if err != nil {
 		return nil, fmt.Errorf("error preparing statement: %w", err)
 	}
@@ -3487,7 +3487,7 @@ func GetUserRoles() ([]models.UserRole, error) {
 	for rows.Next() {
 		var role models.UserRole
 		err := rows.Scan(
-			&role.RoleID,
+			&role.UserRoleID,
 			&role.Role,
 		)
 		if err != nil {
@@ -3649,7 +3649,7 @@ func GetPaginatedUserList(pageNum int) ([]types.UserList, int, error) {
 	for rows.Next() {
 		var user types.UserList
 
-		err := rows.Scan(&user.UserID, &user.Username, &user.FirstName, &user.LastName, &user.Role, &totalRows)
+		err := rows.Scan(&user.UserID, &user.Username, &user.PhoneNumber, &user.FirstName, &user.LastName, &user.Role, &totalRows)
 		if err != nil {
 			return users, totalRows, fmt.Errorf("error scanning row: %w", err)
 		}
@@ -3676,17 +3676,15 @@ func CreateUser(form types.UserForm) error {
 	stringPassword := string(hashedPassword)
 
 	query := `
-		INSERT INTO "user" (user_id, username, first_name, last_name, email, phone_number, forward_phone_number, password, user_role_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO "user" (username, first_name, last_name, phone_number, forward_phone_number, password, user_role_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
 	_, err = DB.Exec(
 		query,
-		utils.CreateNullInt(form.UserID),
 		utils.CreateNullString(form.Username),
 		utils.CreateNullString(form.FirstName),
 		utils.CreateNullString(form.LastName),
-		utils.CreateNullString(form.Email),
 		utils.CreateNullString(form.PhoneNumber),
 		utils.CreateNullString(form.PhoneNumber),
 		utils.CreateNullString(&stringPassword),
@@ -3728,11 +3726,10 @@ func UpdateUser(form types.UserForm) error {
 			username = COALESCE($2, username),
 			first_name = COALESCE($3, first_name),
 			last_name = COALESCE($4, last_name),
-			email = COALESCE($5, email),
-			phone_number = COALESCE($6, phone_number),
-			forward_phone_number = COALESCE($7, forward_phone_number),
-			password = COALESCE($8, password),
-			user_role_id = COALESCE($9, user_role_id)
+			phone_number = COALESCE($5, phone_number),
+			forward_phone_number = COALESCE($6, forward_phone_number),
+			password = COALESCE($7, password),
+			user_role_id = COALESCE($8, user_role_id)
 		WHERE user_id = $1;
 	`
 
@@ -3742,10 +3739,9 @@ func UpdateUser(form types.UserForm) error {
 		utils.CreateNullString(form.Username),
 		utils.CreateNullString(form.FirstName),
 		utils.CreateNullString(form.LastName),
-		utils.CreateNullString(form.Email),
 		utils.CreateNullString(form.PhoneNumber),
 		utils.CreateNullString(form.PhoneNumber),
-		utils.CreateNullString(hashedPassword), // Only update if password is provided
+		utils.CreateNullString(hashedPassword),
 		utils.CreateNullInt(form.UserRoleID),
 	)
 	if err != nil {
@@ -3761,10 +3757,8 @@ func GetUserDetails(userID string) (models.User, error) {
 		username, 
 		first_name, 
 		last_name, 
-		email, 
 		phone_number, 
-		forward_phone_number, 
-		password, 
+		forward_phone_number,
 		user_role_id
 	FROM "user"
 	WHERE user_id = $1`
@@ -3772,7 +3766,7 @@ func GetUserDetails(userID string) (models.User, error) {
 	var userDetails models.User
 
 	// Declare nullable SQL variables for fields that might be NULL in the database
-	var username, firstName, lastName, email, phoneNumber, forwardPhoneNumber, password sql.NullString
+	var username, firstName, lastName, phoneNumber, forwardPhoneNumber sql.NullString
 	var userRoleID sql.NullInt64
 
 	row := DB.QueryRow(query, userID)
@@ -3782,10 +3776,8 @@ func GetUserDetails(userID string) (models.User, error) {
 		&username,
 		&firstName,
 		&lastName,
-		&email,
 		&phoneNumber,
 		&forwardPhoneNumber,
-		&password,
 		&userRoleID,
 	)
 
@@ -3806,17 +3798,11 @@ func GetUserDetails(userID string) (models.User, error) {
 	if lastName.Valid {
 		userDetails.LastName = lastName.String
 	}
-	if email.Valid {
-		userDetails.Email = email.String
-	}
 	if phoneNumber.Valid {
 		userDetails.PhoneNumber = phoneNumber.String
 	}
 	if forwardPhoneNumber.Valid {
 		userDetails.ForwardPhoneNumber = forwardPhoneNumber.String
-	}
-	if password.Valid {
-		userDetails.Password = password.String
 	}
 	if userRoleID.Valid {
 		userDetails.UserRoleID = int(userRoleID.Int64)
