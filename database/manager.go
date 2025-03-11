@@ -597,7 +597,8 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	lm.referral_lead_id,
 	li.lead_interest_id,
 	ls.lead_status_id,
-	na.next_action_id
+	na.next_action_id,
+	l.stripe_customer_id
 	FROM lead l
 	JOIN lead_marketing lm ON l.lead_id = lm.lead_id
 	LEFT JOIN lead_interest li ON l.lead_interest_id = li.lead_interest_id
@@ -610,7 +611,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	row := DB.QueryRow(query, leadID)
 
 	var adCampaign, medium, source, referrer, landingPage, ip, keyword, channel, language, email, facebookClickId, facebookClientId sql.NullString
-	var message, externalId, userAgent, clickId, googleClientId sql.NullString
+	var message, externalId, userAgent, clickId, googleClientId, stripeCustomerId sql.NullString
 	var campaignId, instantFormleadId, instantFormId, referralLeadId, leadInterestId, leadStatusId, nextActionId sql.NullInt64
 
 	var buttonClicked, instantFormName sql.NullString
@@ -645,6 +646,7 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 		&leadInterestId,
 		&leadStatusId,
 		&nextActionId,
+		&stripeCustomerId,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -654,6 +656,9 @@ func GetLeadDetails(leadID string) (types.LeadDetails, error) {
 	}
 
 	// Map the nullable fields to your struct
+	if stripeCustomerId.Valid {
+		leadDetails.StripeCustomerID = stripeCustomerId.String
+	}
 	if leadInterestId.Valid {
 		leadDetails.LeadInterestID = int(leadInterestId.Int64)
 	}
