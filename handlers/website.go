@@ -320,7 +320,7 @@ func PostQuote(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		helpers.ServeDynamicPartialTemplate(w, tmplCtx)
 		return
 	}
