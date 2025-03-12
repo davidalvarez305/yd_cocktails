@@ -3428,7 +3428,8 @@ func ArchivedLeadsWithLastContactOverTwoWeeks() error {
 		SELECT l.lead_id
 		FROM lead AS l
 		LEFT JOIN latest_communication AS lc ON lc.phone_number = l.phone_number
-		WHERE lc.date_created <= NOW() - INTERVAL '14 days'
+		WHERE (lc.date_created <= NOW() - INTERVAL '14 days'
+		OR (lc.date_created IS NULL AND l.date_created <= NOW() - INTERVAL '7 days'))
 	);
 	`
 
