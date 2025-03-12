@@ -83,6 +83,8 @@ func WebsiteHandler(w http.ResponseWriter, r *http.Request) {
 			GetHome(w, r, ctx)
 		case "/planning":
 			GetPlanningLP(w, r, ctx)
+		case "/staffing":
+			GetStaffingLP(w, r, ctx)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -201,6 +203,51 @@ func GetPlanningLP(w http.ResponseWriter, r *http.Request, ctx types.WebsiteCont
 		"Our detailed and transparent quotes ensure you know exactly what’s included, with no hidden fees.",
 		"Your guests’ experience is our top priority—we go above and beyond to create an unforgettable event.",
 		"Our team consists of experienced professionals who bring creativity and expertise to every event we plan.",
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	helpers.ServeContent(w, files, data)
+}
+
+func GetStaffingLP(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
+	heroImagePath := "staffing_hero_image_desktop.html"
+	headerPath := "header_desktop.html"
+	if ctx.IsMobile {
+		heroImagePath = "staffing_hero_image_mobile.html"
+		headerPath = "header_mobile.html"
+	}
+
+	fileName := "staffing_lp.html"
+	quoteForm := constants.WEBSITE_TEMPLATES_DIR + "quote_form.html"
+	files := []string{websiteBaseFilePath, websiteFooterFilePath, constants.WEBSITE_TEMPLATES_DIR + headerPath, constants.WEBSITE_TEMPLATES_DIR + heroImagePath, quoteForm, constants.WEBSITE_TEMPLATES_DIR + fileName}
+
+	nonce, ok := r.Context().Value("nonce").(string)
+	if !ok {
+		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
+		return
+	}
+
+	csrfToken, ok := r.Context().Value("csrf_token").(string)
+	if !ok {
+		http.Error(w, "Error retrieving CSRF token.", http.StatusInternalServerError)
+		return
+	}
+
+	data := ctx
+	data.PageTitle = "Miami Event Staff for Hire — " + constants.CompanyName
+	data.Nonce = nonce
+	data.CSRFToken = csrfToken
+	data.Features = []string{
+		"We work with you to bring your event vision to life—whether it’s the vibe, the crew, or the full setup.",
+		"Our team shows up early to set up, handle the details, and make sure everything runs smoothly before guests arrive.",
+		"Top-tier service is our thing—we make sure your guests feel taken care of and have an amazing time.",
+		"We’ve got a network of trusted vendors to hook you up with everything from food to décor to entertainment.",
+		"Our staff can dress to match your event theme, so everything looks seamless and on point.",
+		"Big or small, we’ve got the crew to handle it all—intimate gatherings, huge parties, and everything in between.",
+		"No surprises here—our pricing is clear and upfront, so you know exactly what you’re getting.",
+		"Your guests’ experience is our top priority—we go the extra mile to make your event unforgettable.",
+		"Our team is packed with experienced pros who bring creativity, energy, and expertise to every event.",
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
