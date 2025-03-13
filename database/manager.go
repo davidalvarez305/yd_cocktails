@@ -3410,6 +3410,27 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quoteServices []types.Quo
 func ArchivedLeadsWithLastContactOverTwoWeeks() error {
 	query := `
 		WITH latest_communication AS (
+			SELECT DISTINCT ON (phone_number) phone_number, date_created
+			FROM (
+				SELECT text_from AS phone_number, date_created FROM message
+				UNION ALL
+				SELECT text_to AS phone_number, date_created FROM message
+				UNION ALL
+				SELECT call_from AS phone_number, date_created FROM phone_call
+				UNION ALL
+				SELECT call_to AS phone_number, date_created FROM phone_call
+			) AS combined_communications
+			ORDER BY phone_number, date_created DESC
+		)
+		UPDATE lead
+		SET lead_status_id = $1
+		WHERE lead_id IN (
+			SELECT l.lead_id
+			FROM lead AS l
+			LEFT JOIN latest_communication AS lc ON lc.phone_number = l.phone_number
+			WHERE (lc.date_created IS NULL AND l.created_at <= NOW() - INTERVAL '7 days')
+			OR lc.date_created <= NOW() - INTERVAL '14 days'
+		);
 		SELECT DISTINCT ON (phone_number) phone_number, date_created
 		FROM (
 			SELECT text_from AS phone_number, date_created FROM message
