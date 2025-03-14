@@ -473,16 +473,16 @@ type LeadQuoteList struct {
 }
 
 type LeadQuoteForm struct {
-	CSRFToken          *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	QuoteID            *int    `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	LeadID             *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	ExternalID         *string `json:"external_id" form:"external_id" schema:"external_id"`
-	EventTypeID        *int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID        *int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	NumberOfBartenders *int    `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
-	Guests             *int    `json:"guests" form:"guests" schema:"guests"`
-	Hours              *int    `json:"hours" form:"hours" schema:"hours"`
-	EventDate          *int64  `json:"event_date" form:"event_date" schema:"event_date"`
+	CSRFToken          *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	QuoteID            *int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	LeadID             *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	ExternalID         *string  `json:"external_id" form:"external_id" schema:"external_id"`
+	EventTypeID        *int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID        *int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	NumberOfBartenders *int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+	Guests             *int     `json:"guests" form:"guests" schema:"guests"`
+	Hours              *float64 `json:"hours" form:"hours" schema:"hours"`
+	EventDate          *int64   `json:"event_date" form:"event_date" schema:"event_date"`
 }
 
 type QuoteDetails struct {
@@ -507,7 +507,7 @@ type ExternalQuoteDetails struct {
 	EventType           string  `json:"event_type" form:"event_type" schema:"event_type"`
 	VenueType           string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
 	Guests              int     `json:"guests" form:"guests" schema:"guests"`
-	Hours               int     `json:"hours" form:"hours" schema:"hours"`
+	Hours               float64 `json:"hours" form:"hours" schema:"hours"`
 	EventDate           string  `json:"event_date" form:"event_date" schema:"event_date"`
 	EventDateTimestamp  int64   `json:"event_date_timestamp" form:"event_date_timestamp" schema:"event_date_timestamp"`
 	NumberOfBartenders  int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
@@ -557,7 +557,7 @@ type QuoteServiceList struct {
 	ServiceID      int     `json:"service_id" form:"service_id" schema:"service_id"`
 	QuoteID        int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
 	Service        string  `json:"service" form:"service" schema:"service"`
-	Units          int     `json:"units" form:"units" schema:"units"`
+	Units          float64 `json:"units" form:"units" schema:"units"`
 	PricePerUnit   float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
 	Total          float64 `json:"total" form:"total" schema:"total"`
 }
@@ -573,7 +573,7 @@ type QuoteServiceForm struct {
 	QuoteServiceID *int     `json:"quote_service_id" form:"quote_service_id" schema:"quote_service_id"`
 	ServiceID      *int     `json:"service_id" form:"service_id" schema:"service_id"`
 	QuoteID        *int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	Units          *int     `json:"units" form:"units" schema:"units"`
+	Units          *float64 `json:"units" form:"units" schema:"units"`
 	PricePerUnit   *float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
 }
 
@@ -655,14 +655,14 @@ type LeadConversation struct {
 }
 
 type QuickQuoteForm struct {
-	CSRFToken          *string `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	LeadID             *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	EventDate          *int64  `json:"event_date_service" form:"event_date_service" schema:"event_date_service"`
-	Hours              *int    `json:"hours_service" form:"hours_service" schema:"hours_service"`
-	Guests             *int    `json:"guests_service" form:"guests_service" schema:"guests_service"`
-	NumberOfBartenders *int    `json:"number_of_bartenders_service" form:"number_of_bartenders_service" schema:"number_of_bartenders_service"`
-	EventTypeID        *int    `json:"event_type_id_service" form:"event_type_id_service" schema:"event_type_id_service"`
-	VenueTypeID        *int    `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
+	CSRFToken          *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	LeadID             *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventDate          *int64   `json:"event_date_service" form:"event_date_service" schema:"event_date_service"`
+	Hours              *float64 `json:"hours_service" form:"hours_service" schema:"hours_service"`
+	Guests             *int     `json:"guests_service" form:"guests_service" schema:"guests_service"`
+	NumberOfBartenders *int     `json:"number_of_bartenders_service" form:"number_of_bartenders_service" schema:"number_of_bartenders_service"`
+	EventTypeID        *int     `json:"event_type_id_service" form:"event_type_id_service" schema:"event_type_id_service"`
+	VenueTypeID        *int     `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
 
 	// Must be parsed from JSON
 	QuoteServices *string `json:"quote_services" form:"quote_services" schema:"quote_services"`

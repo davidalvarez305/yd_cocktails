@@ -1561,7 +1561,7 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 		utils.CreateNullInt(form.LeadID),
 		utils.CreateNullInt(form.NumberOfBartenders),
 		utils.CreateNullInt(form.Guests),
-		utils.CreateNullInt(form.Hours),
+		utils.CreateNullFloat64(form.Hours),
 		utils.CreateNullInt(form.EventTypeID),
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),
@@ -1720,7 +1720,7 @@ func UpdateLeadQuote(form types.LeadQuoteForm) error {
 		utils.CreateNullInt(form.QuoteID),
 		utils.CreateNullInt(form.NumberOfBartenders),
 		utils.CreateNullInt(form.Guests),
-		utils.CreateNullInt(form.Hours),
+		utils.CreateNullFloat64(form.Hours),
 		utils.CreateNullInt(form.EventTypeID),
 		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),
@@ -1895,10 +1895,10 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 
 	var quoteDetails types.ExternalQuoteDetails
 
-	var bartenders, guests, hours sql.NullInt64
+	var bartenders, guests sql.NullInt64
 	var eventDate sql.NullTime
 	var eventType, venueType, email sql.NullString
-	var amount, depositAmount, remainingAmount sql.NullFloat64
+	var amount, depositAmount, remainingAmount, hours sql.NullFloat64
 
 	row := DB.QueryRow(query, externalQuoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID, constants.FullInvoiceTypeID, constants.RemainingInvoiceTypeID, constants.PaidInvoiceStatusID)
 
@@ -1936,7 +1936,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		quoteDetails.Guests = int(guests.Int64)
 	}
 	if hours.Valid {
-		quoteDetails.Hours = int(hours.Int64)
+		quoteDetails.Hours = hours.Float64
 	}
 	if eventType.Valid {
 		quoteDetails.EventType = eventType.String
@@ -2490,7 +2490,7 @@ func CreateQuoteService(form types.QuoteServiceForm) error {
 	_, err = stmt.Exec(
 		utils.CreateNullInt(form.ServiceID),
 		utils.CreateNullInt(form.QuoteID),
-		utils.CreateNullInt(form.Units),
+		utils.CreateNullFloat64(form.Units),
 		utils.CreateNullFloat64(form.PricePerUnit),
 	)
 	if err != nil {
@@ -2516,7 +2516,7 @@ func CreateQuoteServicesMany(tx *sql.Tx, services []types.QuoteServiceForm) erro
 		_, err = stmt.Exec(
 			utils.CreateNullInt(service.ServiceID),
 			utils.CreateNullInt(service.QuoteID),
-			utils.CreateNullInt(service.Units),
+			utils.CreateNullFloat64(service.Units),
 			utils.CreateNullFloat64(service.PricePerUnit),
 		)
 		if err != nil {
@@ -2541,7 +2541,7 @@ func UpdateQuoteService(form types.QuoteServiceForm) error {
 
 	_, err = stmt.Exec(
 		utils.CreateNullFloat64(form.PricePerUnit),
-		utils.CreateNullInt(form.Units),
+		utils.CreateNullFloat64(form.Units),
 		utils.CreateNullInt(form.QuoteServiceID),
 	)
 	if err != nil {
@@ -3383,7 +3383,7 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quoteServices []types.Quo
 		utils.CreateNullInt(quickQuote.LeadID),
 		utils.CreateNullInt(quickQuote.NumberOfBartenders),
 		utils.CreateNullInt(quickQuote.Guests),
-		utils.CreateNullInt(quickQuote.Hours),
+		utils.CreateNullFloat64(quickQuote.Hours),
 		utils.CreateNullInt(quickQuote.EventTypeID),
 		utils.CreateNullInt(quickQuote.VenueTypeID),
 		utils.CreateNullInt64(quickQuote.EventDate),
