@@ -463,13 +463,14 @@ type ConversionReporting struct {
 }
 
 type LeadQuoteList struct {
-	LeadID    int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	QuoteID   int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	EventType string  `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
-	Guests    int     `json:"guests" form:"guests" schema:"guests"`
-	EventDate string  `json:"event_date" form:"event_date" schema:"event_date"`
-	Amount    float64 `json:"amount" form:"amount" schema:"amount"`
+	LeadID     int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	QuoteID    int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	ExternalID string  `json:"external_id" form:"external_id" schema:"external_id"`
+	EventType  string  `json:"event_type" form:"event_type" schema:"event_type"`
+	VenueType  string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
+	Guests     int     `json:"guests" form:"guests" schema:"guests"`
+	EventDate  string  `json:"event_date" form:"event_date" schema:"event_date"`
+	Amount     float64 `json:"amount" form:"amount" schema:"amount"`
 }
 
 type LeadQuoteForm struct {

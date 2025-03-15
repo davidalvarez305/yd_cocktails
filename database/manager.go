@@ -1577,7 +1577,7 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 	var leads []types.LeadQuoteList
 
-	query := `SELECT q.quote_id, e.name, v.name, q.event_date, q.guests, 
+	query := `SELECT q.quote_id, q.external_id, e.name, v.name, q.event_date, q.guests, 
 		SUM(qs.units * qs.price_per_unit::NUMERIC) AS total_price, 
 		q.lead_id
 	FROM quote AS q
@@ -1597,11 +1597,12 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 	for rows.Next() {
 		var lead types.LeadQuoteList
 		var eventDate time.Time
-		var venueType, eventType sql.NullString
+		var venueType, eventType, externalId sql.NullString
 		var guests sql.NullInt64
 		var amount sql.NullFloat64
 
 		err := rows.Scan(&lead.QuoteID,
+			&externalId,
 			&venueType,
 			&eventType,
 			&eventDate,
@@ -1612,6 +1613,10 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
 		lead.EventDate = utils.FormatTimestamp(eventDate.Unix())
+
+		if externalId.Valid {
+			lead.ExternalID = externalId.String
+		}
 
 		if venueType.Valid {
 			lead.VenueType = venueType.String
@@ -3431,27 +3436,6 @@ func ArchivedLeadsWithLastContactOverTwoWeeks() error {
 			WHERE (lc.date_created IS NULL AND l.created_at <= NOW() - INTERVAL '7 days')
 			OR lc.date_created <= NOW() - INTERVAL '14 days'
 		);
-		SELECT DISTINCT ON (phone_number) phone_number, date_created
-		FROM (
-			SELECT text_from AS phone_number, date_created FROM message
-			UNION ALL
-			SELECT text_to AS phone_number, date_created FROM message
-			UNION ALL
-			SELECT call_from AS phone_number, date_created FROM phone_call
-			UNION ALL
-			SELECT call_to AS phone_number, date_created FROM phone_call
-		) AS combined_communications
-		ORDER BY phone_number, date_created DESC
-	)
-	UPDATE lead
-	SET lead_status_id = $1
-	WHERE lead_id IN (
-		SELECT l.lead_id
-		FROM lead AS l
-		LEFT JOIN latest_communication AS lc ON lc.phone_number = l.phone_number
-		WHERE (lc.date_created <= NOW() - INTERVAL '14 days'
-		OR (lc.date_created IS NULL AND l.date_created <= NOW() - INTERVAL '7 days'))
-	);
 	`
 
 	_, err := DB.Exec(query, constants.ArchivedLeadStatusID)
