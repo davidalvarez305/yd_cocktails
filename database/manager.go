@@ -419,6 +419,11 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 				l.search_vector @@ plainto_tsquery('english', $5::TEXT)
 				OR l.full_name ILIKE '%' || $5 || '%'
 				OR l.phone_number ILIKE '%' || $5 || '%'
+				OR EXISTS (
+					SELECT 1 FROM lead_note ln 
+					WHERE ln.lead_id = l.lead_id 
+					AND ln.note ILIKE '%' || $5 || '%'
+				)
 			)
 		)
 		OR 
