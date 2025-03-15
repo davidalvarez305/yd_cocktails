@@ -1583,16 +1583,7 @@ func GetServices(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	pageNum := 1
-	hasPageNum := r.URL.Query().Has("page_num")
-
-	if hasPageNum {
-		num, err := strconv.Atoi(r.URL.Query().Get("page_num"))
-		if err == nil && num > 1 {
-			pageNum = num
-		}
-	}
-
+	pageNum := helpers.ParsePageNum(r.URL.Query().Get("page_num"))
 	services, totalRows, err := database.GetServicesList(pageNum)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -1669,7 +1660,7 @@ func PostService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageNum := 1
+	pageNum := helpers.ParsePageNum(r.URL.Query().Get("page_num"))
 	services, totalRows, err := database.GetServicesList(pageNum)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -1746,7 +1737,7 @@ func PutService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageNum := 1
+	pageNum := helpers.ParsePageNum(r.URL.Query().Get("page_num"))
 	services, totalRows, err := database.GetServicesList(pageNum)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -1812,7 +1803,7 @@ func DeleteService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageNum := 1
+	pageNum := helpers.ParsePageNum(r.URL.Query().Get("page_num"))
 	services, totalRows, err := database.GetServicesList(pageNum)
 	if err != nil {
 		fmt.Printf("%+v\n", err)

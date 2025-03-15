@@ -288,6 +288,14 @@ func ParseInt64(value string) int64 {
 	return parsedValue
 }
 
+func ParsePageNum(value string) int {
+	parsedValue, err := strconv.Atoi(value)
+	if err != nil {
+		return 1
+	}
+	return parsedValue
+}
+
 func GetFirstIDAfterPrefix(r *http.Request, prefix string) (int, error) {
 	trimmedPath := strings.TrimPrefix(r.URL.Path, prefix)
 	trimmedPath = strings.Trim(trimmedPath, "/")

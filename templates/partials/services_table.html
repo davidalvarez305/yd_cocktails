@@ -173,7 +173,7 @@
 			body.set("csrf_token", csrfToken.value);
 		}
 
-        fetch(`/crm/service/${serviceId}`, {
+        fetch(`/crm/service/${serviceId}` + window.location.search, {
             method: "PUT",
             credentials: "include",
             body: body

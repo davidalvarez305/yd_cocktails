@@ -2325,8 +2325,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 
 	offset := (pageNum - 1) * int(constants.LeadsPerPage)
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio,
-			COUNT(*) OVER() AS total_rows
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio, COUNT(*) OVER() AS total_rows
 			FROM "service"
 			OFFSET $1
 			LIMIT $2`, offset, constants.LeadsPerPage)
@@ -2414,7 +2413,7 @@ func UpdateService(form types.ServiceForm) error {
 	stmt, err := DB.Prepare(`
 		UPDATE service
 		SET service = COALESCE($1, service),
-		suggested_price = $2,
+		suggested_price = COALESCE($2, suggested_price),
 		service_type_id = COALESCE($3, service_type_id),
 		guest_ratio = $4
 		WHERE service_id = $5
