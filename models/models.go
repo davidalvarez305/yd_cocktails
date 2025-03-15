@@ -181,15 +181,15 @@ type CocktailIngredient struct {
 }
 
 type Quote struct {
-	QuoteID            int    `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	ExternalID         string `json:"external_id" form:"external_id" schema:"external_id"`
-	LeadID             int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	EventTypeID        int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID        int    `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	Guests             int    `json:"guests" form:"guests" schema:"guests"`
-	Hours              int    `json:"hours" form:"hours" schema:"hours"`
-	NumberOfBartenders int    `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
-	EventDate          int64  `json:"event_date" form:"event_date" schema:"event_date"`
+	QuoteID            int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	ExternalID         string  `json:"external_id" form:"external_id" schema:"external_id"`
+	LeadID             int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventTypeID        int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
+	VenueTypeID        int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
+	Guests             int     `json:"guests" form:"guests" schema:"guests"`
+	Hours              float64 `json:"hours" form:"hours" schema:"hours"`
+	NumberOfBartenders int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
+	EventDate          int64   `json:"event_date" form:"event_date" schema:"event_date"`
 }
 
 type InvoiceType struct {
@@ -248,7 +248,7 @@ type QuoteService struct {
 	QuoteServiceID int     `json:"quote_service_id" form:"quote_service_id" schema:"quote_service_id"`
 	ServiceID      int     `json:"service_id" form:"service_id" schema:"service_id"`
 	QuoteID        int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	Units          int     `json:"units" form:"units" schema:"units"`
+	Units          float64 `json:"units" form:"units" schema:"units"`
 	PricePerUnit   float64 `json:"price_per_unit" form:"price_per_unit" schema:"price_per_unit"`
 }
 

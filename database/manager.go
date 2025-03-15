@@ -1664,8 +1664,9 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 
 	var quoteDetails models.Quote
 
-	var leadID, bartenders, guests, hours, eventTypeID, venueTypeID sql.NullInt64
+	var leadID, bartenders, guests, eventTypeID, venueTypeID sql.NullInt64
 	var eventDate sql.NullTime
+	var hours sql.NullFloat64
 
 	row := DB.QueryRow(query, quoteId)
 
@@ -1697,7 +1698,7 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 		quoteDetails.Guests = int(guests.Int64)
 	}
 	if hours.Valid {
-		quoteDetails.Hours = int(hours.Int64)
+		quoteDetails.Hours = hours.Float64
 	}
 	if eventTypeID.Valid {
 		quoteDetails.EventTypeID = int(eventTypeID.Int64)
