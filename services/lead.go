@@ -56,7 +56,13 @@ func checkSpreadsheets() {
 			continue
 		}
 
-		exists, err := database.IsPhoneNumberInDB(helpers.SafeString(form.PhoneNumber))
+		phoneNumber := helpers.SafeString(form.PhoneNumber)
+
+		if phoneNumber == "" {
+			continue
+		}
+
+		exists, err := database.IsPhoneNumberInDB(phoneNumber)
 
 		// Skip if lead has already been saved before
 		if exists || err != nil {
