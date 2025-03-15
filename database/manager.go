@@ -2325,7 +2325,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 
 	offset := (pageNum - 1) * int(constants.LeadsPerPage)
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio,
 			COUNT(*) OVER() AS total_rows
 			FROM "service"
 			OFFSET $1
@@ -3342,7 +3342,7 @@ func GetPaginatedEventList(pageNum int) ([]types.EventListView, int, error) {
 func GetServiceTypes() ([]models.ServiceType, error) {
 	var serviceTypes []models.ServiceType
 
-	rows, err := DB.Query(`SELECT service_type_id, type FROM "service_type"`)
+	rows, err := DB.Query(`SELECT service_type_id, service_type FROM "service_type"`)
 	if err != nil {
 		return serviceTypes, fmt.Errorf("error executing query: %w", err)
 	}
