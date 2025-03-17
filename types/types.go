@@ -2,8 +2,6 @@ package types
 
 import (
 	"time"
-
-	"github.com/davidalvarez305/yd_cocktails/models"
 )
 
 type QuoteForm struct {
@@ -268,34 +266,32 @@ type IncomingPhoneCallDialStatus struct {
 }
 
 type WebsiteContext struct {
-	PageTitle                    string             `json:"page_title" form:"page_title"`
-	MetaDescription              string             `json:"meta_description" form:"meta_description"`
-	SiteName                     string             `json:"site_name" form:"site_name"`
-	StaticPath                   string             `json:"static_path" form:"static_path"`
-	MediaPath                    string             `json:"media_path" form:"media_path"`
-	PhoneNumber                  string             `json:"phone_number" form:"phone_number"`
-	CurrentYear                  int                `json:"current_year" form:"current_year"`
-	GoogleAnalyticsID            string             `json:"google_analytics_id" form:"google_analytics_id"`
-	FacebookDataSetID            string             `json:"facebook_data_set_id" form:"facebook_data_set_id"`
-	CompanyName                  string             `json:"company_name" form:"company_name"`
-	PagePath                     string             `json:"page_path" form:"page_path"`
-	Nonce                        string             `json:"nonce" form:"nonce"`
-	Features                     []string           `json:"features" form:"features"`
-	CSRFToken                    string             `json:"csrf_token" form:"csrf_token"`
-	EventTypes                   []models.EventType `json:"event_types" form:"event_types"`
-	VenueTypes                   []models.VenueType `json:"venue_types" form:"venue_types"`
-	ExternalID                   string             `json:"external_id" form:"external_id"`
-	GoogleAdsID                  string             `json:"google_ads_id"`
-	GoogleAdsCallConversionLabel string             `json:"google_ads_call_conversion_label"`
-	LeadEventName                string             `json:"lead_event_name"`
-	LeadGeneratedEventName       string             `json:"lead_generated_event_name"`
-	DefaultCurrency              string             `json:"default_currency"`
-	YovaHeroImage                string             `json:"yova_hero_image"`
-	YovaMostPopularPackage       string             `json:"yova_most_popular_package"`
-	YovaBasicPackage             string             `json:"yova_basic_package"`
-	YovaOpenBarPackage           string             `json:"yova_open_bar_package"`
-	IsMobile                     bool               `json:"is_bool"`
-	DefaultLeadValue             float64            `json:"default_lead_value"`
+	PageTitle                    string   `json:"page_title" form:"page_title"`
+	MetaDescription              string   `json:"meta_description" form:"meta_description"`
+	SiteName                     string   `json:"site_name" form:"site_name"`
+	StaticPath                   string   `json:"static_path" form:"static_path"`
+	MediaPath                    string   `json:"media_path" form:"media_path"`
+	PhoneNumber                  string   `json:"phone_number" form:"phone_number"`
+	CurrentYear                  int      `json:"current_year" form:"current_year"`
+	GoogleAnalyticsID            string   `json:"google_analytics_id" form:"google_analytics_id"`
+	FacebookDataSetID            string   `json:"facebook_data_set_id" form:"facebook_data_set_id"`
+	CompanyName                  string   `json:"company_name" form:"company_name"`
+	PagePath                     string   `json:"page_path" form:"page_path"`
+	Nonce                        string   `json:"nonce" form:"nonce"`
+	Features                     []string `json:"features" form:"features"`
+	CSRFToken                    string   `json:"csrf_token" form:"csrf_token"`
+	ExternalID                   string   `json:"external_id" form:"external_id"`
+	GoogleAdsID                  string   `json:"google_ads_id"`
+	GoogleAdsCallConversionLabel string   `json:"google_ads_call_conversion_label"`
+	LeadEventName                string   `json:"lead_event_name"`
+	LeadGeneratedEventName       string   `json:"lead_generated_event_name"`
+	DefaultCurrency              string   `json:"default_currency"`
+	YovaHeroImage                string   `json:"yova_hero_image"`
+	YovaMostPopularPackage       string   `json:"yova_most_popular_package"`
+	YovaBasicPackage             string   `json:"yova_basic_package"`
+	YovaOpenBarPackage           string   `json:"yova_open_bar_package"`
+	IsMobile                     bool     `json:"is_bool"`
+	DefaultLeadValue             float64  `json:"default_lead_value"`
 }
 
 type FacebookUserData struct {
@@ -376,8 +372,6 @@ type EventList struct {
 	EventTime string  `json:"event_time" form:"event_time" schema:"event_time"`
 	LeadName  string  `json:"lead_name" form:"lead_name" schema:"lead_name"`
 	Bartender string  `json:"bartender" form:"bartender" schema:"bartender"`
-	EventType string  `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
 	Guests    int     `json:"guests" form:"guests" schema:"guests"`
 }
 
@@ -385,8 +379,6 @@ type EventDetails struct {
 	EventID     int `json:"event_id" form:"event_id" schema:"event_id"`
 	LeadID      int `json:"lead_id" form:"lead_id" schema:"lead_id"`
 	BartenderID int `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
-	EventTypeID int `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueTypeID int `json:"venue_type" form:"venue_type" schema:"venue_type"`
 
 	StreetAddress string  `json:"street_address" form:"street_address" schema:"street_address"`
 	City          string  `json:"city" form:"city" schema:"city"`
@@ -405,8 +397,6 @@ type EventForm struct {
 	LeadID    *int    `json:"lead_id" form:"lead_id" schema:"lead_id"`
 
 	BartenderID *int `json:"bartender_id" form:"bartender_id" schema:"bartender_id"`
-	EventTypeID *int `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID *int `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
 
 	StreetAddress *string  `json:"street_address" form:"street_address" schema:"street_address"`
 	City          *string  `json:"city" form:"city" schema:"city"`
@@ -466,24 +456,19 @@ type LeadQuoteList struct {
 	LeadID     int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
 	QuoteID    int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
 	ExternalID string  `json:"external_id" form:"external_id" schema:"external_id"`
-	EventType  string  `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType  string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
 	Guests     int     `json:"guests" form:"guests" schema:"guests"`
 	EventDate  string  `json:"event_date" form:"event_date" schema:"event_date"`
 	Amount     float64 `json:"amount" form:"amount" schema:"amount"`
 }
 
 type LeadQuoteForm struct {
-	CSRFToken          *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	QuoteID            *int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	LeadID             *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	ExternalID         *string  `json:"external_id" form:"external_id" schema:"external_id"`
-	EventTypeID        *int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID        *int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	NumberOfBartenders *int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
-	Guests             *int     `json:"guests" form:"guests" schema:"guests"`
-	Hours              *float64 `json:"hours" form:"hours" schema:"hours"`
-	EventDate          *int64   `json:"event_date" form:"event_date" schema:"event_date"`
+	CSRFToken  *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	QuoteID    *int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	LeadID     *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	ExternalID *string  `json:"external_id" form:"external_id" schema:"external_id"`
+	Guests     *int     `json:"guests" form:"guests" schema:"guests"`
+	Hours      *float64 `json:"hours" form:"hours" schema:"hours"`
+	EventDate  *int64   `json:"event_date" form:"event_date" schema:"event_date"`
 }
 
 type QuoteDetails struct {
@@ -505,13 +490,10 @@ type ExternalQuoteDetails struct {
 	Amount              float64 `json:"amount" form:"amount" schema:"amount"`
 	Deposit             float64 `json:"deposit" form:"deposit" schema:"deposit"`
 	RemainingAmount     float64 `json:"remaining_amount" form:"remaining_amount" schema:"remaining_amount"`
-	EventType           string  `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType           string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
 	Guests              int     `json:"guests" form:"guests" schema:"guests"`
 	Hours               float64 `json:"hours" form:"hours" schema:"hours"`
 	EventDate           string  `json:"event_date" form:"event_date" schema:"event_date"`
 	EventDateTimestamp  int64   `json:"event_date_timestamp" form:"event_date_timestamp" schema:"event_date_timestamp"`
-	NumberOfBartenders  int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
 	FullName            string  `json:"full_name" form:"full_name" schema:"full_name"`
 	PhoneNumber         string  `json:"phone_number" form:"phone_number" schema:"phone_number"`
 	Email               string  `json:"email" form:"email" schema:"email"`
@@ -534,8 +516,6 @@ type InvoiceQuoteDetails struct {
 	FullName         string  `json:"full_name" form:"full_name" schema:"full_name"`
 	StripeCustomerID string  `json:"stripe_customer_id" form:"stripe_customer_id" schema:"stripe_customer_id"`
 	Amount           float64 `json:"amount" form:"amount" schema:"amount"`
-	EventTypeID      int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID      int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
 	LeadID           int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
 	QuoteID          int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
 	Guests           int     `json:"guests" form:"guests" schema:"guests"`
@@ -656,14 +636,11 @@ type LeadConversation struct {
 }
 
 type QuickQuoteForm struct {
-	CSRFToken          *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
-	LeadID             *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	EventDate          *int64   `json:"event_date_service" form:"event_date_service" schema:"event_date_service"`
-	Hours              *float64 `json:"hours_service" form:"hours_service" schema:"hours_service"`
-	Guests             *int     `json:"guests_service" form:"guests_service" schema:"guests_service"`
-	NumberOfBartenders *int     `json:"number_of_bartenders_service" form:"number_of_bartenders_service" schema:"number_of_bartenders_service"`
-	EventTypeID        *int     `json:"event_type_id_service" form:"event_type_id_service" schema:"event_type_id_service"`
-	VenueTypeID        *int     `json:"venue_type_id_service" form:"venue_type_id_service" schema:"venue_type_id_service"`
+	CSRFToken *string  `json:"csrf_token" form:"csrf_token" schema:"csrf_token"`
+	LeadID    *int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	EventDate *int64   `json:"event_date_service" form:"event_date_service" schema:"event_date_service"`
+	Hours     *float64 `json:"hours_service" form:"hours_service" schema:"hours_service"`
+	Guests    *int     `json:"guests_service" form:"guests_service" schema:"guests_service"`
 
 	// Must be parsed from JSON
 	QuoteServices *string `json:"quote_services" form:"quote_services" schema:"quote_services"`
@@ -677,8 +654,6 @@ type EventListView struct {
 	EventTime          string  `json:"event_time" form:"event_time" schema:"event_time"`
 	LeadName           string  `json:"lead_name" form:"lead_name" schema:"lead_name"`
 	Bartender          string  `json:"bartender" form:"bartender" schema:"bartender"`
-	EventType          string  `json:"event_type" form:"event_type" schema:"event_type"`
-	VenueType          string  `json:"venue_type" form:"venue_type" schema:"venue_type"`
 	Guests             int     `json:"guests" form:"guests" schema:"guests"`
 	ShouldSendReminder bool    `json:"should_send_reminder" form:"should_send_reminder" schema:"should_send_reminder"`
 }

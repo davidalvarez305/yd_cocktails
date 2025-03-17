@@ -319,56 +319,6 @@ func GetUserByUsername(username string) (models.User, error) {
 	return user, nil
 }
 
-func GetEventTypes() ([]models.EventType, error) {
-	var eventTypes []models.EventType
-
-	rows, err := DB.Query(`SELECT event_type_id, name FROM "event_type"`)
-	if err != nil {
-		return eventTypes, fmt.Errorf("error executing query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var et models.EventType
-		err := rows.Scan(&et.EventTypeID, &et.Name)
-		if err != nil {
-			return eventTypes, fmt.Errorf("error scanning row: %w", err)
-		}
-		eventTypes = append(eventTypes, et)
-	}
-
-	if err := rows.Err(); err != nil {
-		return eventTypes, fmt.Errorf("error iterating rows: %w", err)
-	}
-
-	return eventTypes, nil
-}
-
-func GetVenueTypes() ([]models.VenueType, error) {
-	var venueTypes []models.VenueType
-
-	rows, err := DB.Query(`SELECT venue_type_id, name FROM "venue_type"`)
-	if err != nil {
-		return venueTypes, fmt.Errorf("error executing query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var vt models.VenueType
-		err := rows.Scan(&vt.VenueTypeID, &vt.Name)
-		if err != nil {
-			return venueTypes, fmt.Errorf("error scanning row: %w", err)
-		}
-		venueTypes = append(venueTypes, vt)
-	}
-
-	if err := rows.Err(); err != nil {
-		return venueTypes, fmt.Errorf("error iterating rows: %w", err)
-	}
-
-	return venueTypes, nil
-}
-
 func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
@@ -1229,16 +1179,16 @@ func UpdateLeadStatus(id, leadStatusId int) error {
 func CreateEvent(form types.EventForm) error {
 	query := `
 		INSERT INTO event (
-			bartender_id, lead_id, event_type_id, venue_type_id, street_address, city, zip_code,
+			bartender_id, lead_id, street_address, city, zip_code,
 			start_time, end_time, date_created, date_paid, amount, tip, guests
 		)
 		VALUES (
-			$1, $2, $3, $4, $5, $6, $7,
+			$1, $2, $3, $4, $5,
+			to_timestamp($6)::timestamptz AT TIME ZONE 'America/New_York',
+			to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York',
 			to_timestamp($8)::timestamptz AT TIME ZONE 'America/New_York',
 			to_timestamp($9)::timestamptz AT TIME ZONE 'America/New_York',
-			to_timestamp($10)::timestamptz AT TIME ZONE 'America/New_York',
-			to_timestamp($11)::timestamptz AT TIME ZONE 'America/New_York',
-			$12, $13, $14
+			$10, $11, $12
 		)
 	`
 
@@ -1246,8 +1196,6 @@ func CreateEvent(form types.EventForm) error {
 		query,
 		utils.CreateNullInt(form.BartenderID),
 		utils.CreateNullInt(form.LeadID),
-		utils.CreateNullInt(form.EventTypeID),
-		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullString(form.StreetAddress),
 		utils.CreateNullString(form.City),
 		utils.CreateNullString(form.ZipCode),
@@ -1271,17 +1219,15 @@ func UpdateEvent(form types.EventForm) error {
 		UPDATE event
 		SET 
 			bartender_id = COALESCE($2, bartender_id),
-			event_type_id = COALESCE($3, event_type_id),
-			venue_type_id = COALESCE($4, venue_type_id),
-			street_address = $5,
-			city = $6,
-			zip_code = $7,
-			start_time = to_timestamp($8)::timestamptz AT TIME ZONE 'America/New_York',
-			end_time = to_timestamp($9)::timestamptz AT TIME ZONE 'America/New_York',
-			date_paid = to_timestamp($10)::timestamptz AT TIME ZONE 'America/New_York',
-			amount = $11,
-			tip = $12,
-			guests = $13
+			street_address = $3,
+			city = $4,
+			zip_code = $5,
+			start_time = to_timestamp($6)::timestamptz AT TIME ZONE 'America/New_York',
+			end_time = to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York',
+			date_paid = to_timestamp($8)::timestamptz AT TIME ZONE 'America/New_York',
+			amount = $9,
+			tip = $10,
+			guests = $11
 		WHERE event_id = $1;
 	`
 
@@ -1289,8 +1235,6 @@ func UpdateEvent(form types.EventForm) error {
 		query,
 		utils.CreateNullInt(form.EventID),
 		utils.CreateNullInt(form.BartenderID),
-		utils.CreateNullInt(form.EventTypeID),
-		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullString(form.StreetAddress),
 		utils.CreateNullString(form.City),
 		utils.CreateNullString(form.ZipCode),
@@ -1330,16 +1274,12 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 		COALESCE(e.amount::NUMERIC, 0) + COALESCE(e.tip::NUMERIC, 0) AS revenue,
 		l.full_name,
 		CONCAT(b.first_name, ' ', b.last_name) AS bartender,
-		et.name AS event_type,
-		vt.name AS venue_type,
 		e.guests,
 		e.start_time,
 		e.end_time
 	FROM event AS e
 	JOIN lead AS l ON l.lead_id = e.lead_id
 	LEFT JOIN "user" AS b ON b.user_id = e.bartender_id
-	JOIN event_type AS et ON et.event_type_id = e.event_type_id
-	JOIN venue_type AS vt ON vt.venue_type_id = e.venue_type_id
 	WHERE e.lead_id = $1
 	ORDER BY e.date_created ASC;
 	`, leadId)
@@ -1360,8 +1300,6 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 			&event.Amount,
 			&event.LeadName,
 			&bartender,
-			&event.EventType,
-			&event.VenueType,
 			&guests,
 			&eventStart,
 			&eventEnd,
@@ -1411,8 +1349,6 @@ func GetEventDetails(eventId string) (models.Event, error) {
 		date_paid,
 		amount::NUMERIC,
 		tip::NUMERIC,
-		event_type_id,
-		venue_type_id,
 		guests
 	FROM event 
 	WHERE event_id = $1`
@@ -1423,7 +1359,7 @@ func GetEventDetails(eventId string) (models.Event, error) {
 	var streetAddress, city, zipCode sql.NullString
 	var startTime, endTime, dateCreated, datePaid sql.NullTime
 	var amount, tip sql.NullFloat64
-	var bartenderID, eventTypeID, venueTypeID, guests sql.NullInt64
+	var bartenderID, guests sql.NullInt64
 
 	row := DB.QueryRow(query, eventId)
 
@@ -1440,8 +1376,6 @@ func GetEventDetails(eventId string) (models.Event, error) {
 		&datePaid,
 		&amount,
 		&tip,
-		&eventTypeID,
-		&venueTypeID,
 		&guests,
 	)
 
@@ -1482,12 +1416,6 @@ func GetEventDetails(eventId string) (models.Event, error) {
 	}
 	if bartenderID.Valid {
 		eventDetails.BartenderID = int(bartenderID.Int64)
-	}
-	if eventTypeID.Valid {
-		eventDetails.EventTypeID = int(eventTypeID.Int64)
-	}
-	if venueTypeID.Valid {
-		eventDetails.VenueTypeID = int(venueTypeID.Int64)
 	}
 	if guests.Valid {
 		eventDetails.Guests = int(guests.Int64)
@@ -1546,29 +1474,21 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 	query := `
 		INSERT INTO quote (
 			lead_id, 
-			number_of_bartenders, 
 			guests, 
-			hours, 
-			event_type_id, 
-			venue_type_id, 
+			hours,
 			event_date, 
 			external_id
 		)
 		VALUES (
-			$1, $2, $3, $4, 
-			$5, $6, to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York', 
-			$8
+			$1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5
 		);
 	`
 
 	_, err := DB.Exec(
 		query,
 		utils.CreateNullInt(form.LeadID),
-		utils.CreateNullInt(form.NumberOfBartenders),
 		utils.CreateNullInt(form.Guests),
 		utils.CreateNullFloat64(form.Hours),
-		utils.CreateNullInt(form.EventTypeID),
-		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),
 		uuid.New().String(),
 	)
@@ -1582,15 +1502,13 @@ func CreateLeadQuote(form types.LeadQuoteForm) error {
 func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 	var leads []types.LeadQuoteList
 
-	query := `SELECT q.quote_id, q.external_id, e.name, v.name, q.event_date, q.guests, 
+	query := `SELECT q.quote_id, q.external_id, q.event_date, q.guests, 
 		SUM(qs.units * qs.price_per_unit::NUMERIC) AS total_price, 
 		q.lead_id
 	FROM quote AS q
-	LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
-	LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
 	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	WHERE q.lead_id = $1
-	GROUP BY q.quote_id, e.name, v.name, q.event_date, q.guests, q.lead_id
+	GROUP BY q.quote_id, q.event_date, q.guests, q.lead_id
 	ORDER BY q.event_date ASC;`
 
 	rows, err := DB.Query(query, leadId)
@@ -1602,14 +1520,12 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 	for rows.Next() {
 		var lead types.LeadQuoteList
 		var eventDate time.Time
-		var venueType, eventType, externalId sql.NullString
+		var externalId sql.NullString
 		var guests sql.NullInt64
 		var amount sql.NullFloat64
 
 		err := rows.Scan(&lead.QuoteID,
 			&externalId,
-			&venueType,
-			&eventType,
 			&eventDate,
 			&guests,
 			&amount,
@@ -1621,14 +1537,6 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 
 		if externalId.Valid {
 			lead.ExternalID = externalId.String
-		}
-
-		if venueType.Valid {
-			lead.VenueType = venueType.String
-		}
-
-		if eventType.Valid {
-			lead.EventType = eventType.String
 		}
 
 		if guests.Valid {
@@ -1655,8 +1563,6 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 		number_of_bartenders,
 		guests,
 		hours,
-		event_type_id,
-		venue_type_id,
 		event_date AT TIME ZONE 'America/New_York' AT TIME ZONE 'UTC',
 		quote_id
 	FROM quote 
@@ -1664,7 +1570,7 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 
 	var quoteDetails models.Quote
 
-	var leadID, bartenders, guests, eventTypeID, venueTypeID sql.NullInt64
+	var leadID, bartenders, guests sql.NullInt64
 	var eventDate sql.NullTime
 	var hours sql.NullFloat64
 
@@ -1675,8 +1581,6 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 		&bartenders,
 		&guests,
 		&hours,
-		&eventTypeID,
-		&venueTypeID,
 		&eventDate,
 		&quoteDetails.QuoteID,
 	)
@@ -1691,20 +1595,11 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 	if leadID.Valid {
 		quoteDetails.LeadID = int(leadID.Int64)
 	}
-	if bartenders.Valid {
-		quoteDetails.NumberOfBartenders = int(bartenders.Int64)
-	}
 	if guests.Valid {
 		quoteDetails.Guests = int(guests.Int64)
 	}
 	if hours.Valid {
 		quoteDetails.Hours = hours.Float64
-	}
-	if eventTypeID.Valid {
-		quoteDetails.EventTypeID = int(eventTypeID.Int64)
-	}
-	if venueTypeID.Valid {
-		quoteDetails.VenueTypeID = int(venueTypeID.Int64)
 	}
 	if eventDate.Valid {
 		quoteDetails.EventDate = eventDate.Time.Unix()
@@ -1717,23 +1612,17 @@ func UpdateLeadQuote(form types.LeadQuoteForm) error {
 	query := `
 		UPDATE quote
 		SET 
-			number_of_bartenders = COALESCE($2, number_of_bartenders),
-			guests = COALESCE($3, guests),
-			hours = COALESCE($4, hours),
-			event_type_id = COALESCE($5, event_type_id),
-			venue_type_id = COALESCE($6, venue_type_id),
-			event_date = COALESCE(to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York', event_date)
+			guests = COALESCE($2, guests),
+			hours = COALESCE($3, hours),
+			event_date = COALESCE(to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', event_date)
 		WHERE quote_id = $1
 	`
 
 	_, err := DB.Exec(
 		query,
 		utils.CreateNullInt(form.QuoteID),
-		utils.CreateNullInt(form.NumberOfBartenders),
 		utils.CreateNullInt(form.Guests),
 		utils.CreateNullFloat64(form.Hours),
-		utils.CreateNullInt(form.EventTypeID),
-		utils.CreateNullInt(form.VenueTypeID),
 		utils.CreateNullInt64(form.EventDate),
 	)
 	if err != nil {
@@ -1856,11 +1745,8 @@ func GetLeadQuoteInvoiceDetails(leadID, quoteId string) (types.QuoteDetails, err
 func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails, error) {
 	query := `SELECT 
 		q.quote_id,
-		number_of_bartenders,
 		guests,
 		hours,
-		e.name AS event_type,
-		v.name AS venue_type,
 		event_date,
 		SUM(qs.units * qs.price_per_unit::NUMERIC) AS full_amount,
 		l.full_name,
@@ -1892,8 +1778,6 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 			WHERE deposit_invoice.quote_id = q.quote_id
 		) AS is_deposit_paid
 	FROM quote AS q
-	LEFT JOIN event_type AS e ON q.event_type_id = e.event_type_id
-	LEFT JOIN venue_type AS v ON q.venue_type_id = v.venue_type_id
 	JOIN lead AS l ON q.lead_id = l.lead_id
 	JOIN invoice AS i ON i.quote_id = q.quote_id
 	JOIN invoice_type AS it ON it.invoice_type_id = i.invoice_type_id AND it.invoice_type_id = $3
@@ -1906,20 +1790,17 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 
 	var quoteDetails types.ExternalQuoteDetails
 
-	var bartenders, guests sql.NullInt64
+	var guests sql.NullInt64
 	var eventDate sql.NullTime
-	var eventType, venueType, email sql.NullString
+	var email sql.NullString
 	var amount, depositAmount, remainingAmount, hours sql.NullFloat64
 
 	row := DB.QueryRow(query, externalQuoteId, constants.OpenInvoiceStatusID, constants.DepositInvoiceTypeID, constants.FullInvoiceTypeID, constants.RemainingInvoiceTypeID, constants.PaidInvoiceStatusID)
 
 	err := row.Scan(
 		&quoteDetails.QuoteID,
-		&bartenders,
 		&guests,
 		&hours,
-		&eventType,
-		&venueType,
 		&eventDate,
 		&amount,
 		&quoteDetails.FullName,
@@ -1939,21 +1820,11 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 		}
 		return quoteDetails, fmt.Errorf("error scanning row: %w", err)
 	}
-
-	if bartenders.Valid {
-		quoteDetails.NumberOfBartenders = int(bartenders.Int64)
-	}
 	if guests.Valid {
 		quoteDetails.Guests = int(guests.Int64)
 	}
 	if hours.Valid {
 		quoteDetails.Hours = hours.Float64
-	}
-	if eventType.Valid {
-		quoteDetails.EventType = eventType.String
-	}
-	if venueType.Valid {
-		quoteDetails.VenueType = venueType.String
 	}
 	if eventDate.Valid {
 		eventTimestamp := eventDate.Time.Unix()
@@ -2044,8 +1915,6 @@ func SetInvoiceStatusToPaid(stripeInvoiceId string, datePaid int64) error {
 func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuoteDetails, error) {
 	query := `SELECT 
 		l.lead_id,
-		q.event_type_id,
-		q.venue_type_id,
 		SUM(qs.units * qs.price_per_unit::NUMERIC),
 		q.guests,
 		l.phone_number,
@@ -2057,19 +1926,17 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 	JOIN lead l ON l.lead_id = q.lead_id
 	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	WHERE i.stripe_invoice_id = $1
-	GROUP BY l.lead_id, q.event_type_id, q.venue_type_id, q.guests, l.phone_number, q.event_date, q.quote_id;`
+	GROUP BY l.lead_id, q.guests, l.phone_number, q.event_date, q.quote_id;`
 
 	var invoiceQuoteDetails types.InvoiceQuoteDetails
 
 	row := DB.QueryRow(query, stripeInvoiceId)
 
-	var eventTypeId, venueTypeId, guests sql.NullInt64
+	var guests sql.NullInt64
 	var eventDate time.Time
 
 	err := row.Scan(
 		&invoiceQuoteDetails.LeadID,
-		&eventTypeId,
-		&venueTypeId,
 		&invoiceQuoteDetails.Amount,
 		&guests,
 		&invoiceQuoteDetails.PhoneNumber,
@@ -2082,14 +1949,6 @@ func GetQuoteDetailsByStripeInvoiceID(stripeInvoiceId string) (types.InvoiceQuot
 			return invoiceQuoteDetails, fmt.Errorf("no lead found with stripeInvoiceId: %s", stripeInvoiceId)
 		}
 		return invoiceQuoteDetails, fmt.Errorf("error scanning row: %w", err)
-	}
-
-	if eventTypeId.Valid {
-		invoiceQuoteDetails.EventTypeID = int(eventTypeId.Int64)
-	}
-
-	if venueTypeId.Valid {
-		invoiceQuoteDetails.VenueTypeID = int(venueTypeId.Int64)
 	}
 
 	if guests.Valid {
@@ -3246,8 +3105,6 @@ func GetPaginatedEventList(pageNum int) ([]types.EventListView, int, error) {
 		COALESCE(e.amount::NUMERIC, 0) + COALESCE(e.tip::NUMERIC, 0) AS revenue,
 		l.full_name,
 		CONCAT(b.first_name, ' ', b.last_name) AS bartender,
-		et.name AS event_type,
-		vt.name AS venue_type,
 		e.guests,
 		e.start_time,
 		e.end_time,
@@ -3267,8 +3124,6 @@ func GetPaginatedEventList(pageNum int) ([]types.EventListView, int, error) {
 	FROM event AS e
 	JOIN lead AS l ON l.lead_id = e.lead_id
 	LEFT JOIN "user" AS b ON b.user_id = e.bartender_id
-	JOIN event_type AS et ON et.event_type_id = e.event_type_id
-	JOIN venue_type AS vt ON vt.venue_type_id = e.venue_type_id
 	LEFT JOIN quote AS q ON q.lead_id = l.lead_id
 	ORDER BY e.start_time DESC
 	OFFSET $1
@@ -3292,8 +3147,6 @@ func GetPaginatedEventList(pageNum int) ([]types.EventListView, int, error) {
 			&event.Amount,
 			&event.LeadName,
 			&bartender,
-			&event.EventType,
-			&event.VenueType,
 			&guests,
 			&eventStart,
 			&eventEnd,
@@ -3383,19 +3236,16 @@ func CreateQuickQuote(quickQuote types.QuickQuoteForm, quoteServices []types.Quo
 
 	// Insert into quote table
 	query := `
-		INSERT INTO quote (lead_id, number_of_bartenders, guests, hours, event_type_id, venue_type_id, event_date, external_id)
-		VALUES ($1, $2, $3, $4, $5, $6, to_timestamp($7)::timestamptz AT TIME ZONE 'America/New_York', $8)
+		INSERT INTO quote (lead_id, guests, hours, event_date, external_id)
+		VALUES ($1, $2, $3, to_timestamp($4)::timestamptz AT TIME ZONE 'America/New_York', $5)
 		RETURNING quote_id;
 	`
 
 	err = tx.QueryRow(
 		query,
 		utils.CreateNullInt(quickQuote.LeadID),
-		utils.CreateNullInt(quickQuote.NumberOfBartenders),
 		utils.CreateNullInt(quickQuote.Guests),
 		utils.CreateNullFloat64(quickQuote.Hours),
-		utils.CreateNullInt(quickQuote.EventTypeID),
-		utils.CreateNullInt(quickQuote.VenueTypeID),
 		utils.CreateNullInt64(quickQuote.EventDate),
 		quoteExternalId,
 	).Scan(&quoteId)

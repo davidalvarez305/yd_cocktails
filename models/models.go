@@ -1,15 +1,5 @@
 package models
 
-type EventType struct {
-	EventTypeID int    `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	Name        string `json:"name" form:"name" schema:"name"`
-}
-
-type VenueType struct {
-	VenueTypeID int    `json:"vending_location_id" form:"vending_location_id" schema:"vending_location_id"`
-	Name        string `json:"name" form:"name" schema:"name"`
-}
-
 type User struct {
 	UserID             int    `json:"user_id" form:"user_id" schema:"user_id"`
 	Username           string `json:"username" form:"username" schema:"username"`
@@ -133,8 +123,6 @@ type Event struct {
 	DatePaid      int64   `json:"date_paid" form:"date_paid" schema:"date_paid"`
 	Amount        float64 `json:"amount" form:"amount" schema:"amount"`
 	Tip           float64 `json:"tip" form:"tip" schema:"tip"`
-	EventTypeID   int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID   int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
 	Guests        int     `json:"guests" form:"guests" schema:"guests"`
 }
 
@@ -181,15 +169,12 @@ type CocktailIngredient struct {
 }
 
 type Quote struct {
-	QuoteID            int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
-	ExternalID         string  `json:"external_id" form:"external_id" schema:"external_id"`
-	LeadID             int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
-	EventTypeID        int     `json:"event_type_id" form:"event_type_id" schema:"event_type_id"`
-	VenueTypeID        int     `json:"venue_type_id" form:"venue_type_id" schema:"venue_type_id"`
-	Guests             int     `json:"guests" form:"guests" schema:"guests"`
-	Hours              float64 `json:"hours" form:"hours" schema:"hours"`
-	NumberOfBartenders int     `json:"number_of_bartenders" form:"number_of_bartenders" schema:"number_of_bartenders"`
-	EventDate          int64   `json:"event_date" form:"event_date" schema:"event_date"`
+	QuoteID    int     `json:"quote_id" form:"quote_id" schema:"quote_id"`
+	ExternalID string  `json:"external_id" form:"external_id" schema:"external_id"`
+	LeadID     int     `json:"lead_id" form:"lead_id" schema:"lead_id"`
+	Guests     int     `json:"guests" form:"guests" schema:"guests"`
+	Hours      float64 `json:"hours" form:"hours" schema:"hours"`
+	EventDate  int64   `json:"event_date" form:"event_date" schema:"event_date"`
 }
 
 type InvoiceType struct {

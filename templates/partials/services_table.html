@@ -195,6 +195,7 @@
             .then(html => {
                 const table = document.getElementById('servicesTable');
                 table.outerHTML = html;
+                handleBindPagination();
                 handleBindServiceTableActions();
             })
             .catch(err => {

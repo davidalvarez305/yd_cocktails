@@ -85,32 +85,6 @@
                     </div>
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div class="grow space-y-1">
-                            <label for="event_type_id" class="font-medium">Event Type*</label>
-                            <select id="event_type_id" name="event_type_id" required
-                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                                <option></option>
-                                {{ range .EventTypes }}
-                                <option value="{{ .EventTypeID }}" {{ if eq .EventTypeID $.Event.EventTypeID }}selected{{ end }}>
-                                    {{ .Name }}
-                                </option>
-                                {{ end }}
-                            </select>
-                        </div>
-                        <div class="grow space-y-1">
-                            <label for="venue_type_id" class="font-medium">Venue Type*</label>
-                            <select id="venue_type_id" name="venue_type_id" required
-                                class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
-                                <option></option>
-                                {{ range .VenueTypes }}
-                                <option value="{{ .VenueTypeID }}" {{ if eq .VenueTypeID $.Event.VenueTypeID }}selected{{ end }}>
-                                    {{ .Name }}
-                                </option>
-                                {{ end }}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                        <div class="grow space-y-1">
                             <label for="date_created" class="font-medium">Date Created</label>
                             <input type="datetime-local" id="date_created" name="date_created" data-timestamp="{{ .Event.DateCreated }}" required
                                 class="dateField block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
@@ -162,7 +136,7 @@
         });
     </script>
     <!-- END Event Staff -->
-     <!-- Divider: With Heading -->
+    <!-- Divider: With Heading -->
     <h3 class="my-8 flex items-center">
         <span aria-hidden="true" class="h-0.5 grow rounded bg-gray-200 dark:bg-gray-700/75"></span>
         <span class="mx-3 text-lg font-medium">Cocktails</span>
