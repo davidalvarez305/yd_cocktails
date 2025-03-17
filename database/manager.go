@@ -1828,7 +1828,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	}
 	if eventDate.Valid {
 		eventTimestamp := eventDate.Time.Unix()
-		quoteDetails.EventDate = utils.FormatTimestamp(eventTimestamp)
+		quoteDetails.EventDate = eventDate.Time.Format("Jan 2, 2006")
 
 		quoteDetails.EventDateTimestamp = eventTimestamp
 	}
