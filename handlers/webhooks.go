@@ -94,8 +94,6 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 		if inv.InvoiceTypeID == constants.DepositInvoiceTypeID || inv.InvoiceTypeID == constants.FullInvoiceTypeID {
 			eventForm := types.EventForm{
 				LeadID:      &quote.LeadID,
-				EventTypeID: &quote.EventTypeID,
-				VenueTypeID: &quote.VenueTypeID,
 				DateCreated: &dateEventCreated,
 				DatePaid:    &datePaid,
 				Amount:      &quote.Amount,

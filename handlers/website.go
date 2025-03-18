@@ -122,19 +122,6 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 		http.Error(w, "Error retrieving nonce.", http.StatusInternalServerError)
 		return
 	}
-	eventTypes, err := database.GetEventTypes()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting event types.", http.StatusInternalServerError)
-		return
-	}
-
-	venueTypes, err := database.GetVenueTypes()
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting venue types.", http.StatusInternalServerError)
-		return
-	}
 
 	csrfToken, ok := r.Context().Value("csrf_token").(string)
 	if !ok {
@@ -157,8 +144,6 @@ func GetHome(w http.ResponseWriter, r *http.Request, ctx types.WebsiteContext) {
 		"Our bartenders are highly skilled with years of experience so your cocktails come out delish.",
 	}
 	data.CSRFToken = csrfToken
-	data.VenueTypes = venueTypes
-	data.EventTypes = eventTypes
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
