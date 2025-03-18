@@ -33,7 +33,7 @@
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div class="grow space-y-1">
                                         <label for="event_date_service" class="font-medium">Cual sería la hora y fecha del evento?</label>
-                                        <input type="datetime" id="event_date_service" name="event_date_service"
+                                        <input type="date" id="event_date_service" name="event_date_service"
                                             class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                     </div>
                                     <div class="grow space-y-1">
@@ -268,7 +268,6 @@
         const form = document.getElementById("createQuickQuoteForm");
         const leadId = "{{ .Lead.LeadID }}";
         const customFields = document.querySelectorAll(".customField");
-        const bartenders = document.getElementById("number_of_bartenders_service");
         const guests = document.getElementById("guests_service");
         const hours = document.getElementById("hours_service");
 
@@ -276,8 +275,10 @@
         const body = new FormData();
 
         for (const [key, value] of data.entries()) {
-            if (key === "event_date_service" && value) {
-                body.set(key, new Date(value).getTime() / 1000);
+            if (key === "event_date_service") {
+                const date = new Date(value);
+                if (!isNaN(date.getTime())) body.set(key, date.getTime() / 1000);
+
                 continue;
             }
 

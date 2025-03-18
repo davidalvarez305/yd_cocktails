@@ -1550,12 +1550,20 @@ func GetServices(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
+	unitTypes, err := database.GetUnitTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting unit types from DB.", http.StatusInternalServerError)
+		return
+	}
+
 	data := ctx
 	data["PageTitle"] = "Services — " + constants.CompanyName
 	data["Nonce"] = nonce
 	data["CSRFToken"] = csrfToken
 	data["Services"] = services
 	data["ServiceTypes"] = serviceTypes
+	data["UnitTypes"] = unitTypes
 	data["MaxPages"] = helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage)
 	data["CurrentPage"] = pageNum
 

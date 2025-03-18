@@ -3793,3 +3793,28 @@ func GetCocktailDetails(cocktailId string) (models.Cocktail, error) {
 
 	return cocktailDetails, nil
 }
+
+func GetUnitTypes() ([]models.UnitType, error) {
+	var unitTypes []models.UnitType
+
+	rows, err := DB.Query(`SELECT unit_type_id, unit_type FROM "unit_type"`)
+	if err != nil {
+		return unitTypes, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ut models.UnitType
+		err := rows.Scan(&ut.UnitTypeID, &ut.Type)
+		if err != nil {
+			return unitTypes, fmt.Errorf("error scanning row: %w", err)
+		}
+		unitTypes = append(unitTypes, ut)
+	}
+
+	if err := rows.Err(); err != nil {
+		return unitTypes, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return unitTypes, nil
+}
