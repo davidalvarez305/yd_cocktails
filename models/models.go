@@ -222,6 +222,7 @@ type Service struct {
 	Service        string  `json:"service" form:"service" schema:"service"`
 	SuggestedPrice float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
 	GuestRatio     int     `json:"guest_ratio" form:"guest_ratio" schema:"guest_ratio"`
+	UnitTypeID     int     `json:"unit_type_id" form:"unit_type_id" schema:"unit_type_id"`
 }
 
 type ServiceType struct {
@@ -265,4 +266,9 @@ type EventStaff struct {
 	EventID      int     `json:"event_id" form:"event_id" schema:"event_id"`
 	EventRoleID  int     `json:"event_role_id" form:"event_role_id" schema:"event_role_id"`
 	HourlyRate   float64 `json:"hourly_rate" form:"hourly_rate" schema:"hourly_rate"`
+}
+
+type UnitType struct {
+	UnitTypeID int    `json:"unit_type_id" form:"unit_type_id" schema:"unit_type_id"`
+	Type       string `json:"type" form:"type" schema:"type"`
 }

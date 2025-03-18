@@ -565,6 +565,7 @@ type ServiceForm struct {
 	Service        *string  `json:"service" form:"service" schema:"service"`
 	SuggestedPrice *float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
 	GuestRatio     *int     `json:"guest_ratio" form:"guest_ratio" schema:"guest_ratio"`
+	UnitTypeID     *int     `json:"unit_type_id" form:"unit_type_id" schema:"unit_type_id"`
 }
 
 type FrontendMessage struct {

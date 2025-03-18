@@ -2312,13 +2312,16 @@ func GetQuoteServices(quoteId int) ([]types.QuoteServiceList, error) {
 	for rows.Next() {
 		var service types.QuoteServiceList
 
+		var guestRatio sql.NullFloat64
+
 		err := rows.Scan(&service.QuoteID,
 			&service.ServiceID,
 			&service.Service,
 			&service.Units,
 			&service.PricePerUnit,
 			&service.Total,
-			&service.QuoteServiceID)
+			&service.QuoteServiceID,
+			&guestRatio)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
