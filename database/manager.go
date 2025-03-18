@@ -1560,7 +1560,6 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 	query := `SELECT 
 		lead_id,
-		number_of_bartenders,
 		guests,
 		hours,
 		event_date AT TIME ZONE 'America/New_York' AT TIME ZONE 'UTC',
@@ -1570,7 +1569,7 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 
 	var quoteDetails models.Quote
 
-	var leadID, bartenders, guests sql.NullInt64
+	var leadID, guests sql.NullInt64
 	var eventDate sql.NullTime
 	var hours sql.NullFloat64
 
@@ -1578,7 +1577,6 @@ func GetLeadQuoteDetails(quoteId string) (models.Quote, error) {
 
 	err := row.Scan(
 		&leadID,
-		&bartenders,
 		&guests,
 		&hours,
 		&eventDate,
@@ -1783,7 +1781,7 @@ func GetExternalQuoteDetails(externalQuoteId string) (types.ExternalQuoteDetails
 	JOIN invoice_type AS it ON it.invoice_type_id = i.invoice_type_id AND it.invoice_type_id = $3
 	LEFT JOIN quote_service qs ON qs.quote_id = q.quote_id
 	WHERE q.external_id = $1
-	GROUP BY q.quote_id, number_of_bartenders, guests, hours, e.name, v.name, event_date, 
+	GROUP BY q.quote_id, guests, hours, event_date, 
 			l.full_name, l.phone_number, l.email, i.url, it.amount_percentage, i.date_created
 	ORDER BY i.date_created DESC
 	LIMIT 1;`
