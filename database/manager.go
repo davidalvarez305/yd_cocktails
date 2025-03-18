@@ -3015,7 +3015,7 @@ func GetDepositStripeInvoiceID(quoteId int) (string, error) {
 func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 	var services []models.Service
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio, unit_type_id
 				FROM service
 				WHERE service_type_id = $1`, serviceTypeId)
 	if err != nil {
@@ -3026,7 +3026,7 @@ func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 	for rows.Next() {
 		var service models.Service
 		var suggestedPrice sql.NullFloat64
-		var guestRatio sql.NullInt32
+		var guestRatio, unitTypeId sql.NullInt32
 		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &guestRatio)
 		if err != nil {
 			return services, fmt.Errorf("error scanning row: %w", err)
@@ -3036,6 +3036,9 @@ func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 		}
 		if guestRatio.Valid {
 			service.GuestRatio = int(guestRatio.Int32)
+		}
+		if unitTypeId.Valid {
+			service.UnitTypeID = int(unitTypeId.Int32)
 		}
 		services = append(services, service)
 	}
