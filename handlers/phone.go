@@ -144,7 +144,6 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 	}
 
 	recordingCallbackURL := fmt.Sprintf("%s%s", constants.RootDomain, constants.TwilioRecordingCallbackWebhook)
-	amdCallbackURL := fmt.Sprintf("%s%s", constants.RootDomain, constants.TwilioAmdCallbackWebhook)
 
 	twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 	<Response>
@@ -152,12 +151,9 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 			  recordingStatusCallback="%s"
 			  recordingStatusCallbackEvent="completed"
 			  answerOnBridge="true"
-			  asyncAmd="true"
-			  asyncAmdStatusCallback="%s"
 			  action="%s">%s</Dial>
 	</Response>`,
 		recordingCallbackURL,
-		amdCallbackURL,
 		constants.RootDomain+constants.TwilioCallbackWebhook,
 		"+1"+to)
 

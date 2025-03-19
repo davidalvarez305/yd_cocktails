@@ -49,6 +49,10 @@ func InitiateOutboundCall(from, twiML string) (openapi.ApiV2010Call, error) {
 	params.SetMethod("POST")
 	params.SetRecord(true)
 
+	// Add AMD status callback
+	params.SetAsyncAmdStatusCallback(fmt.Sprintf("%s%s", constants.RootDomain, constants.TwilioAmdCallbackWebhook))
+	params.SetAsyncAmd("true")
+
 	outboundCall, err := client.Api.CreateCall(&params)
 
 	if err != nil || outboundCall == nil {
