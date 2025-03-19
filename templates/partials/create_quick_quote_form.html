@@ -53,7 +53,7 @@
                                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
                                         {{ range .BartendingHourlyServices }}
                                         <label class="group relative flex">
-                                            <input type="checkbox" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}"
+                                            <input type="checkbox" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}" data-service-type-id="{{ .ServiceTypeID }}"
                                                 class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="absolute top-0 right-0 bottom-0 z-1 flex scale-50 cursor-pointer items-center px-4 text-primary-600 opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100 sm:bottom-auto sm:h-14">
@@ -82,7 +82,7 @@
                                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
                                         {{ range .BarRentalQuoteServices }}
                                         <label class="group relative flex">
-                                            <input type="radio" name="radio_cooler" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}"
+                                            <input type="radio" name="radio_cooler" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}" data-service-type-id="{{ .ServiceTypeID }}"
                                                 class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="absolute top-0 right-0 bottom-0 z-1 flex scale-50 cursor-pointer items-center px-4 text-primary-600 opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100 sm:bottom-auto sm:h-14">
@@ -111,7 +111,7 @@
                                     <div class="grid grid-cols-1 gap-2 md:grid-cols-3">
                                         {{ range .CoolerRentalQuoteServices }}
                                         <label class="group relative flex">
-                                            <input type="checkbox" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}"
+                                            <input type="checkbox" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}" data-service-type-id="{{ .ServiceTypeID }}"
                                                 class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="relative flex grow cursor-pointer rounded-lg border border-gray-200 p-4 group-hover:border-primary-500 peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-focus:ring-3 peer-focus:ring-primary-100 dark:border-gray-700 dark:group-hover:border-primary-600 dark:peer-checked:border-primary-600 dark:peer-checked:bg-primary-800/10 dark:peer-focus:ring-primary-900">
@@ -152,7 +152,7 @@
                                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
                                         {{ range .AlcoholQuoteServices }}
                                         <label class="group relative flex">
-                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}" name="radio_alcohol"
+                                            <input type="radio" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}" data-service-type-id="{{ .ServiceTypeID }}" name="radio_alcohol"
                                                 class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="absolute top-0 right-0 bottom-0 z-1 flex scale-50 cursor-pointer items-center px-4 text-primary-600 opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100 sm:bottom-auto sm:h-14">
@@ -181,7 +181,7 @@
                                 <div class="space-y-2 dark:text-gray-100">
                                     <div class="grid grid-cols-1 gap-2">
                                         <label class="group relative flex">
-                                            <input type="checkbox" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}" class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
+                                            <input type="checkbox" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}" data-service-type-id="{{ .ServiceTypeID }}" class="customField peer absolute top-0 left-0 appearance-none opacity-0" />
                                             <span
                                                 class="absolute top-0 right-0 bottom-0 z-1 flex scale-50 cursor-pointer items-center px-4 text-primary-600 opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100">
                                                 <svg class="hi-mini hi-check-circle inline-block size-5"
@@ -274,6 +274,7 @@
             const serviceId = parseInt(field.dataset.serviceId, 10);
             const suggestedPrice = parseFloat(field.dataset.suggestedPrice);
             const unitTypeId = parseInt(field.dataset.unitTypeId, 10);
+            const serviceTypeId = parseInt(field.dataset.serviceTypeId, 10);
             const guestRatio = parseFloat(field.dataset.guestRatio);
 
             // Ensure serviceId and suggestedPrice are valid numbers
@@ -299,7 +300,7 @@
                     units = guestRatio > 0 ? Math.ceil(guests / guestRatio) : 0;
 
                     // cases like servers, bartenders, etc...
-                    if (serviceId === HOURLY_SERVICE_TYPE_ID && hours > 0)  units *= hours;
+                    if (serviceTypeId === HOURLY_SERVICE_TYPE_ID && hours > 0)  units *= hours;
 
                     break;
                 case AD_HOC:

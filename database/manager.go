@@ -3074,7 +3074,7 @@ func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 func GetQuickQuoteServiceListByTypeID(serviceTypeId int) ([]types.QuickQuoteServiceList, error) {
 	var services []types.QuickQuoteServiceList
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, guest_ratio, unit_type_id
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, guest_ratio, unit_type_id, service_type_id
 	FROM service WHERE service_type_id = $1;
 	`, serviceTypeId)
 	if err != nil {
@@ -3086,7 +3086,7 @@ func GetQuickQuoteServiceListByTypeID(serviceTypeId int) ([]types.QuickQuoteServ
 		var service types.QuickQuoteServiceList
 		var suggestedPrice sql.NullFloat64
 		var guestRatio sql.NullInt32
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &guestRatio, &service.UnitTypeID)
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &guestRatio, &service.UnitTypeID, &service.ServiceTypeID)
 		if err != nil {
 			return services, fmt.Errorf("error scanning row: %w", err)
 		}
