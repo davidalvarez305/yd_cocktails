@@ -176,7 +176,7 @@
 
                 if (cell.tagName === "SELECT") {
                     console.log("=======================================");
-                    console.log('cell.tagName: ', cell.tagName)
+                    console.log('cell.tagName: ', cell.dataset.fieldName)
                     console.log('val: ', cell.options[cell.selectedIndex]?.value);
                     console.log("=======================================");
                     value = cell.options[cell.selectedIndex]?.value || "";
