@@ -2204,6 +2204,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 
 	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio, unit_type_id, COUNT(*) OVER() AS total_rows
 			FROM "service"
+			ORDER BY service_id ASC
 			OFFSET $1
 			LIMIT $2`, offset, constants.LeadsPerPage)
 	if err != nil {
