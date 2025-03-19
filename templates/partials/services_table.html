@@ -175,6 +175,10 @@
                 let value;
 
                 if (cell.tagName === "SELECT") {
+                    console.log("=======================================");
+                    console.log('cell.tagName: ', cell.tagName)
+                    console.log('val: ', cell.options[cell.selectedIndex]?.value);
+                    console.log("=======================================");
                     value = cell.options[cell.selectedIndex]?.value || "";
                 } else {
                     value = cell.value;
