@@ -351,73 +351,105 @@ func handleCallRecordingCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleAmdStatusCallback(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Received request for AMD status callback")
+
+	// Parse request form data
 	if err := r.ParseForm(); err != nil {
+		fmt.Println("ERROR: Failed to parse form data:", err)
 		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
 		return
 	}
 
+	// Extract Twilio parameters
 	callSid := r.FormValue("CallSid")
 	amdStatus := r.FormValue("AnsweredBy") // Possible values: 'human', 'machine_start', etc.
 
+	fmt.Printf("Parsed AMD Callback Data - CallSid: %s, AnsweredBy: %s\n", callSid, amdStatus)
+
+	// Validate required parameters
 	if callSid == "" || amdStatus == "" {
+		fmt.Println("ERROR: Missing required parameters (CallSid or AnsweredBy)")
 		http.Error(w, "Missing required parameters (CallSid, AnsweredBy)", http.StatusBadRequest)
 		return
 	}
 
+	// If a human answered, no further action is needed
 	if amdStatus == "human" {
+		fmt.Println("Call was answered by a human, no further action required.")
 		w.WriteHeader(http.StatusOK)
 		return
 	}
+	fmt.Println("CALL NOT HUMAN.")
 
 	// Fetch the existing call record from the database
+	fmt.Println("Fetching phone call record from database...")
 	phoneCall, err := database.GetPhoneCallBySID(callSid)
 	if err != nil {
-		fmt.Printf("FAILED TO GET PHONE CALL RECORD: %+v\n", err)
+		fmt.Printf("ERROR: Failed to get phone call record (CallSid: %s) - %+v\n", callSid, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Printf("Successfully fetched phone call record: %+v\n", phoneCall)
 
+	// Get user details based on the caller's phone number
+	fmt.Println("Fetching user details from database...")
 	user, err := database.GetUserByPhoneNumber(phoneCall.CallFrom)
 	if err != nil {
-		fmt.Printf("FAILED TO GET USER FROM PHONE NUMBER: %+v\n", err)
+		fmt.Printf("ERROR: Failed to get user from phone number (%s) - %+v\n", phoneCall.CallFrom, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Printf("Successfully fetched user: %+v\n", user)
 
+	// Mark call as "missed"
 	phoneCall.Status = "missed"
-
+	fmt.Println("Updating phone call status to 'missed'...")
 	if err := database.UpdatePhoneCall(phoneCall); err != nil {
-		fmt.Printf("FAILED TO UPDATE PHONE CALL RECORD: %+v\n", err)
+		fmt.Printf("ERROR: Failed to update phone call record - %+v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Println("Successfully updated phone call status to 'missed'.")
 
+	// Check if this is the first time this lead has been contacted
+	fmt.Println("Checking if this is the first lead contact...")
 	isFirstCall, err := database.CheckIsFirstLeadContact(phoneCall.CallTo)
 	if err != nil {
-		fmt.Printf("ERROR CHECKING IF PHONE CALL IS FIRST LEAD CONTACT: %+v\n", err)
+		fmt.Printf("ERROR: Failed to check if first lead contact - %+v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Printf("Is first lead contact: %v\n", isFirstCall)
 
+	// If not the first call, we can stop here
 	if !isFirstCall {
+		fmt.Println("Not the first lead contact. No further action required.")
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
+	// Send follow-up text for a missed call
+	fmt.Println("Sending missed call follow-up text...")
 	err = services.MissedCallFollowUpText(phoneCall, user)
 	if err != nil {
-		fmt.Printf("ERROR SENDING MISSED CALL TEXT: %+v\n", err)
+		fmt.Printf("ERROR: Failed to send missed call follow-up text - %+v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Println("Successfully sent missed call follow-up text.")
 
+	// Fetch the lead ID from the phone number
+	fmt.Println("Fetching lead ID from phone number...")
 	leadId, err := database.GetLeadIDFromPhoneNumber(phoneCall.CallTo)
 	if err != nil {
-		fmt.Printf("FAILED TO GET USER FROM PHONE NUMBER: %+v\n", err)
+		fmt.Printf("ERROR: Failed to get lead ID from phone number - %+v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Printf("Successfully fetched lead ID: %d\n", leadId)
 
+	// Schedule the next follow-up action
+	fmt.Println("Scheduling first follow-up action...")
 	firstFollowUpActionID := constants.FirstFollowUpActionID
 	twentyFourHours := time.Now().Add(24 * time.Hour).Unix()
 
@@ -426,12 +458,14 @@ func handleAmdStatusCallback(w http.ResponseWriter, r *http.Request) {
 		LeadID:         &leadId,
 		NextActionDate: &twentyFourHours,
 	})
-
 	if err != nil {
-		fmt.Printf("ERROR SAVING NEXT LEAD ACTION: %+v\n", err)
+		fmt.Printf("ERROR: Failed to save next lead action - %+v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Println("Successfully scheduled first follow-up action.")
 
+	// Send success response
 	w.WriteHeader(http.StatusOK)
+	fmt.Println("AMD callback processing completed successfully.")
 }
