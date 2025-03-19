@@ -319,6 +319,25 @@ func GetUserByUsername(username string) (models.User, error) {
 	return user, nil
 }
 
+func GetUserByPhoneNumber(phoneNumber string) (models.User, error) {
+	var user models.User
+
+	stmt, err := DB.Prepare(`SELECT user_id, username, password, user_role_id, phone_number, first_name, last_name FROM "user" WHERE "phone_number" = $1`)
+	if err != nil {
+		return user, fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(phoneNumber)
+
+	err = row.Scan(&user.UserID, &user.Username, &user.Password, &user.UserRoleID, &user.PhoneNumber, &user.FirstName, &user.LastName)
+	if err != nil {
+		return user, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	return user, nil
+}
+
 func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 	var leads []types.LeadList
 
@@ -3027,7 +3046,7 @@ func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 		var service models.Service
 		var suggestedPrice sql.NullFloat64
 		var guestRatio, unitTypeId sql.NullInt32
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &guestRatio)
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &unitTypeId, &guestRatio)
 		if err != nil {
 			return services, fmt.Errorf("error scanning row: %w", err)
 		}

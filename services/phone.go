@@ -95,19 +95,17 @@ func DownloadFileFromTwilio(fileURL, localFilePath string) error {
 	return nil
 }
 
-func MissedCallFollowUpText(phoneCall models.PhoneCall) error {
+func MissedCallFollowUpText(phoneCall models.PhoneCall, user models.User) error {
 	var textMessageTemplateNotification = fmt.Sprintf(
-		`We missed you!
-		%s
-		`, `Hey! This is David with YD Cocktails.
+		`Hey! This is %s with YD Cocktails.
 		
 		We're reaching out to you about your bartending service inquiry. We tried giving you a call but couldn't connect.
 		
 		Please give us a call back when you have a chance or let us know how we can help you.
 		
-		Todos hablamos español perfecto!`)
+		Si prefiere español dejenos saber!`, user.FirstName)
 
-	sentMessage, err := SendTextMessage(phoneCall.CallTo, constants.CompanyPhoneNumber, textMessageTemplateNotification)
+	sentMessage, err := SendTextMessage(phoneCall.CallTo, user.PhoneNumber, textMessageTemplateNotification)
 
 	if err != nil {
 		fmt.Printf("ERROR SENDING MISSED CALL NOTIFICATION MSG: %+v\n", err)
@@ -120,7 +118,7 @@ func MissedCallFollowUpText(phoneCall models.PhoneCall) error {
 	msg := models.Message{
 		ExternalID:  externalID,
 		Text:        textMessageTemplateNotification,
-		TextFrom:    constants.CompanyPhoneNumber,
+		TextFrom:    user.PhoneNumber,
 		TextTo:      phoneCall.CallTo,
 		IsInbound:   false,
 		DateCreated: time.Now().Unix(),

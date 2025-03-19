@@ -123,24 +123,6 @@ func handleInboundCallEnd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	callMissed := phoneCall.CallDuration < 45
-
-	isFirstCall, err := database.CheckIsFirstLeadContact(phoneCall.CallTo)
-	if err != nil {
-		fmt.Printf("ERROR CHECKING IF PHONE CALL IS FIRST LEAD CONTACT: %+v\n", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if callMissed && isFirstCall && !phoneCall.IsInbound {
-		err = services.MissedCallFollowUpText(phoneCall)
-		if err != nil {
-			fmt.Printf("ERROR SENDING MISSED CALL TEXT: %+v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-
 	w.Header().Set("Content-Type", "application/xml")
 	w.WriteHeader(http.StatusOK)
 }
@@ -160,11 +142,22 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 	}
 
 	recordingCallbackURL := fmt.Sprintf("%s%s", constants.RootDomain, constants.TwilioRecordingCallbackWebhook)
+	amdCallbackURL := fmt.Sprintf("%s%s", constants.RootDomain, constants.TwilioAmdCallbackWebhook)
 
 	twiML := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 	<Response>
-		<Dial record="true" recordingStatusCallback="%s" recordingStatusCallbackEvent="completed" action="%s">%s</Dial>
-	</Response>`, recordingCallbackURL, constants.RootDomain+constants.TwilioCallbackWebhook, "+1"+to)
+		<Dial record="true"
+			  recordingStatusCallback="%s"
+			  recordingStatusCallbackEvent="completed"
+			  answerOnBridge="true"
+			  asyncAmd="true"
+			  asyncAmdStatusCallback="%s"
+			  action="%s">%s</Dial>
+	</Response>`,
+		recordingCallbackURL,
+		amdCallbackURL,
+		constants.RootDomain+constants.TwilioCallbackWebhook,
+		"+1"+to)
 
 	outboundCall, err := services.InitiateOutboundCall(from, twiML)
 	if err != nil {
@@ -357,5 +350,94 @@ func handleCallRecordingCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/xml")
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleAmdStatusCallback(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
+		return
+	}
+
+	callSid := r.FormValue("CallSid")
+	amdStatus := r.FormValue("AnsweredBy") // Possible values: 'human', 'machine_start', etc.
+
+	if callSid == "" || amdStatus == "" {
+		http.Error(w, "Missing required parameters (CallSid, AnsweredBy)", http.StatusBadRequest)
+		return
+	}
+
+	if amdStatus != "machine_start" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Fetch the existing call record from the database
+	phoneCall, err := database.GetPhoneCallBySID(callSid)
+	if err != nil {
+		fmt.Printf("FAILED TO GET PHONE CALL RECORD: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	user, err := database.GetUserByPhoneNumber(phoneCall.CallFrom)
+	if err != nil {
+		fmt.Printf("FAILED TO GET USER FROM PHONE NUMBER: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	phoneCall.Status = "missed"
+
+	if err := database.UpdatePhoneCall(phoneCall); err != nil {
+		fmt.Printf("FAILED TO UPDATE PHONE CALL RECORD: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Write follow-up text message
+	// Mark lead as to be followed up with in 24 hours
+
+	isFirstCall, err := database.CheckIsFirstLeadContact(phoneCall.CallTo)
+	if err != nil {
+		fmt.Printf("ERROR CHECKING IF PHONE CALL IS FIRST LEAD CONTACT: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isFirstCall {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	err = services.MissedCallFollowUpText(phoneCall, user)
+	if err != nil {
+		fmt.Printf("ERROR SENDING MISSED CALL TEXT: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	leadId, err := database.GetLeadIDFromPhoneNumber(phoneCall.CallTo)
+	if err != nil {
+		fmt.Printf("FAILED TO GET USER FROM PHONE NUMBER: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	firstFollowUpActionID := constants.FirstFollowUpActionID
+	twentyFourHours := time.Now().Add(24 * time.Hour).Unix()
+
+	err = database.CreateLeadNextAction(types.LeadNextActionForm{
+		NextActionID:   &firstFollowUpActionID,
+		LeadID:         &leadId,
+		NextActionDate: &twentyFourHours,
+	})
+
+	if err != nil {
+		fmt.Printf("ERROR SAVING NEXT LEAD ACTION: %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 }

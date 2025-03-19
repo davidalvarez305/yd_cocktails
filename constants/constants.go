@@ -46,6 +46,7 @@ const (
 	ArchivedLeadStatusID int = 7
 
 	InitialContactActionID int = 1
+	FirstFollowUpActionID  int = 3
 
 	SocialMediaAdsMedium  = "paid"
 	SocialMediaAdsChannel = "social"
@@ -54,6 +55,7 @@ const (
 	LeadsPerPage                   = 10
 	TwilioCallbackWebhook          = "/call/inbound/end"
 	TwilioRecordingCallbackWebhook = "/call/inbound/recording-callback"
+	TwilioAmdCallbackWebhook       = "/call/amd"
 )
 
 var (

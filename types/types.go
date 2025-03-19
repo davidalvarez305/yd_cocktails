@@ -547,6 +547,8 @@ type QuickQuoteServiceList struct {
 	ServiceID      int     `json:"service_id" form:"service_id" schema:"service_id"`
 	Service        string  `json:"service" form:"service" schema:"service"`
 	SuggestedPrice float64 `json:"suggested_price" form:"suggested_price" schema:"suggested_price"`
+	UnitTypeID     int     `json:"unit_type_id" form:"unit_type_id" schema:"unit_type_id"`
+	GuestRatio     int     `json:"guest_ratio" form:"guest_ratio" schema:"guest_ratio"`
 }
 
 type QuoteServiceForm struct {
