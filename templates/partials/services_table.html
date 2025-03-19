@@ -48,6 +48,7 @@
                 <td class="p-3 text-center">
                     <select data-service-id="{{ $service.ServiceID }}" data-field-name="service_type_id"
                         class="tableCell inline-flex items-center justify-center w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                        <option></option>
                         {{ range $.ServiceTypes }}
                         <option value="{{ .ServiceTypeID }}" {{ if eq .ServiceTypeID $service.ServiceTypeID }}selected{{ end }}>
                             {{ .Type }}
@@ -58,6 +59,7 @@
                 <td class="p-3 text-center">
                     <select data-unit-type-id="{{ $service.UnitTypeID }}" data-field-name="unit_type_id"
                         class="tableCell inline-flex items-center justify-center w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
+                        <option></option>
                         {{ range $.UnitTypes }}
                         <option value="{{ .UnitTypeID }}" {{ if eq .UnitTypeID $service.UnitTypeID }}selected{{ end }}>
                             {{ .Type }}

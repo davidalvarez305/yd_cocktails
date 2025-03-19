@@ -3814,7 +3814,7 @@ func GetCocktailDetails(cocktailId string) (models.Cocktail, error) {
 func GetUnitTypes() ([]models.UnitType, error) {
 	var unitTypes []models.UnitType
 
-	rows, err := DB.Query(`SELECT unit_type_id, unit_type FROM "unit_type"`)
+	rows, err := DB.Query(`SELECT unit_type_id, type FROM "unit_type"`)
 	if err != nil {
 		return unitTypes, fmt.Errorf("error executing query: %w", err)
 	}
