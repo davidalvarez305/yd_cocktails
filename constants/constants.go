@@ -55,7 +55,7 @@ const (
 	LeadsPerPage                   = 10
 	TwilioCallbackWebhook          = "/call/inbound/end"
 	TwilioRecordingCallbackWebhook = "/call/inbound/recording-callback"
-	TwilioAmdCallbackWebhook       = "/call/amd"
+	TwilioAmdCallbackWebhook       = "/call/inbound/amd"
 )
 
 var (
