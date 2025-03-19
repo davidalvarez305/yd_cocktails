@@ -499,14 +499,14 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 		return
 	}
 
-	quickQuoteServices, err := database.GetQuickQuoteServices()
+	bartendingAddOnServices, err := database.GetQuickQuoteServiceListByTypeID(constants.BartendingAddOnServiceTypeID)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
-		http.Error(w, "Error getting quick quote services.", http.StatusInternalServerError)
+		http.Error(w, "Error getting bartending add on services.", http.StatusInternalServerError)
 		return
 	}
 
-	hourlyServices, err := database.GetServiceListByType(constants.HourlyServiceTypeID)
+	bartendingHourlyServices, err := database.GetServiceListByType(constants.BartendingServiceTypeID)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		http.Error(w, "Error getting bartending service.", http.StatusInternalServerError)
@@ -531,8 +531,8 @@ func GetLeadDetail(w http.ResponseWriter, r *http.Request, ctx map[string]any) {
 	data["BarRentalQuoteServices"] = barRentalQuoteServices
 	data["CoolerRentalQuoteServices"] = coolerRentalQuoteServices
 	data["AlcoholQuoteServices"] = alcoholQuoteServices
-	data["QuickQuoteServices"] = quickQuoteServices
-	data["HourlyServices"] = hourlyServices
+	data["BartendingAddOnServices"] = bartendingAddOnServices
+	data["BartendingHourlyServices"] = bartendingHourlyServices
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 

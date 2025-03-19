@@ -32,11 +32,12 @@ const (
 	VoidInvoiceStatusID int = 2
 	PaidInvoiceStatusID int = 3
 
-	AlcoholServiceTypeID      int = 1
-	BarRentalServiceTypeID    int = 2
-	CoolerRentalServiceTypeID int = 3
-	GeneralServiceTypeID      int = 4
-	HourlyServiceTypeID       int = 5
+	AlcoholServiceTypeID         int = 1
+	BarRentalServiceTypeID       int = 2
+	CoolerRentalServiceTypeID    int = 3
+	BartendingAddOnServiceTypeID int = 4
+	BartendingServiceTypeID      int = 5
+	ExtraServiceTypeID           int = 6
 
 	CupsStrawsNapkinsServiceID int = 14
 

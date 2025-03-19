@@ -3066,15 +3066,12 @@ func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 	return services, nil
 }
 
-func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
+func GetQuickQuoteServiceListByTypeID(serviceTypeId int) ([]types.QuickQuoteServiceList, error) {
 	var services []types.QuickQuoteServiceList
 
-	rows, err := DB.Query(`SELECT service_id, 
-		service, 
-		suggested_price::NUMERIC
-	FROM "service"
-	WHERE service_type_id = $1;
-	`, constants.GeneralServiceTypeID)
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, guest_ratio, unit_type_id
+	FROM service WHERE service_type_id = $1;
+	`, serviceTypeId)
 	if err != nil {
 		return services, fmt.Errorf("error executing query: %w", err)
 	}
@@ -3083,7 +3080,8 @@ func GetQuickQuoteServices() ([]types.QuickQuoteServiceList, error) {
 	for rows.Next() {
 		var service types.QuickQuoteServiceList
 		var suggestedPrice sql.NullFloat64
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice)
+		var guestRatio sql.NullInt32
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &guestRatio, &service.UnitTypeID)
 		if err != nil {
 			return services, fmt.Errorf("error scanning row: %w", err)
 		}
