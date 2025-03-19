@@ -364,7 +364,7 @@ func handleAmdStatusCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if amdStatus != "human" {
+	if amdStatus == "human" {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
@@ -391,9 +391,6 @@ func handleAmdStatusCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// Write follow-up text message
-	// Mark lead as to be followed up with in 24 hours
 
 	isFirstCall, err := database.CheckIsFirstLeadContact(phoneCall.CallTo)
 	if err != nil {
