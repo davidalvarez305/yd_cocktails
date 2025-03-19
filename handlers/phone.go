@@ -364,7 +364,7 @@ func handleAmdStatusCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if amdStatus != "machine_start" {
+	if amdStatus != "human" {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
