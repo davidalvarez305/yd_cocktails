@@ -2298,14 +2298,14 @@ func UpdateService(form types.ServiceForm) error {
 		service_type_id = COALESCE($3, service_type_id),
 		guest_ratio = $4,
 		unit_type_id = COALESCE($5, unit_type_id)
-		WHERE service_id = $5
+		WHERE service_id = $6
 	`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice), utils.CreateNullInt(form.ServiceTypeID), utils.CreateNullInt(form.GuestRatio), utils.CreateNullInt(form.ServiceID))
+	_, err = stmt.Exec(utils.CreateNullString(form.Service), utils.CreateNullFloat64(form.SuggestedPrice), utils.CreateNullInt(form.ServiceTypeID), utils.CreateNullInt(form.GuestRatio), utils.CreateNullInt(form.UnitTypeID), utils.CreateNullInt(form.ServiceID))
 	if err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
