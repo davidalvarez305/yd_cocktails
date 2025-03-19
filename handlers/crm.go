@@ -1728,12 +1728,20 @@ func PutService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	unitTypes, err := database.GetUnitTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting unit types from DB.", http.StatusInternalServerError)
+		return
+	}
+
 	tmplCtx := types.DynamicPartialTemplate{
 		TemplateName: "services_table.html",
 		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "services_table.html",
 		Data: map[string]any{
 			"Services":     services,
 			"ServiceTypes": serviceTypes,
+			"UnitTypes":    unitTypes,
 			"CurrentPage":  pageNum,
 			"MaxPages":     helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage),
 		},
@@ -1802,12 +1810,20 @@ func DeleteService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	unitTypes, err := database.GetUnitTypes()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		http.Error(w, "Error getting unit types from DB.", http.StatusInternalServerError)
+		return
+	}
+
 	tmplCtx := types.DynamicPartialTemplate{
 		TemplateName: "services_table.html",
 		TemplatePath: constants.PARTIAL_TEMPLATES_DIR + "services_table.html",
 		Data: map[string]any{
 			"Services":     services,
 			"ServiceTypes": serviceTypes,
+			"UnitTypes":    unitTypes,
 			"CurrentPage":  pageNum,
 			"MaxPages":     helpers.CalculateMaxPages(totalRows, constants.LeadsPerPage),
 		},
