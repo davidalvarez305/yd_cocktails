@@ -237,10 +237,14 @@ func checkPhoneCallTranscription() {
 func StartTranscriptionService() {
 	go func() {
 		for {
-			checkPhoneCallTranscription()
-
 			// Sleep for five minutes before the next run
 			time.Sleep(5 * time.Minute)
+
+			if !constants.Production {
+				continue
+			}
+
+			checkPhoneCallTranscription()
 		}
 	}()
 }
