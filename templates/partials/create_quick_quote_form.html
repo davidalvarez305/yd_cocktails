@@ -264,8 +264,8 @@
         }
 
         let quoteServices = [];
-        const guests = parseInt(document.getElementById("guests_service").value, 10);
-        const hours = parseInt(document.getElementById("hours_service").value, 10);
+        const guests = parseInt(document.getElementById("guests_service")?.value || "0", 10);
+        const hours = parseFloat(document.getElementById("hours_service")?.value || "0");
 
         customFields.forEach(field => {
 
@@ -273,7 +273,7 @@
 
             const serviceId = parseInt(field.dataset.serviceId, 10);
             const suggestedPrice = parseFloat(field.dataset.suggestedPrice);
-            const unitTypeId = parseFloat(field.dataset.unitTypeId);
+            const unitTypeId = parseInt(field.dataset.unitTypeId, 10);
             const guestRatio = parseFloat(field.dataset.guestRatio);
 
             // Ensure serviceId and suggestedPrice are valid numbers
@@ -296,10 +296,10 @@
                     units = hours;
                     break;
                 case RATIO:
-                    units = Math.ceil(guests / guestRatio);
+                    units = guestRatio > 0 ? Math.ceil(guests / guestRatio) : 0;
 
                     // cases like servers, bartenders, etc...
-                    if (serviceId === HOURLY_SERVICE_TYPE_ID) units = units * hours;
+                    if (serviceId === HOURLY_SERVICE_TYPE_ID && hours > 0)  units *= hours;
 
                     break;
                 case AD_HOC:
