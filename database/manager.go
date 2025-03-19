@@ -2202,7 +2202,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 
 	offset := (pageNum - 1) * int(constants.LeadsPerPage)
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio, COUNT(*) OVER() AS total_rows
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio, unit_type_id, COUNT(*) OVER() AS total_rows
 			FROM "service"
 			OFFSET $1
 			LIMIT $2`, offset, constants.LeadsPerPage)
@@ -2214,9 +2214,9 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 	for rows.Next() {
 		var service models.Service
 		var suggestedPrice sql.NullFloat64
-		var guestRatio sql.NullInt32
+		var guestRatio, unitTypeId sql.NullInt32
 
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &guestRatio, &totalRows)
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &guestRatio, &unitTypeId, &totalRows)
 		if err != nil {
 			return services, totalRows, fmt.Errorf("error scanning row: %w", err)
 		}
@@ -2225,6 +2225,9 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 		}
 		if guestRatio.Valid {
 			service.GuestRatio = int(guestRatio.Int32)
+		}
+		if unitTypeId.Valid {
+			service.UnitTypeID = int(unitTypeId.Int32)
 		}
 		services = append(services, service)
 	}
