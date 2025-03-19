@@ -31,6 +31,8 @@ func PhoneServiceHandler(w http.ResponseWriter, r *http.Request) {
 			handleInboundSMS(w, r)
 		case "/sms/outbound":
 			handleOutboundSMS(w, r)
+		case "/call/amd":
+			handleAmdStatusCallback(w, r)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
