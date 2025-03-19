@@ -283,8 +283,9 @@
 
             const PER_PERSON_UNIT_TYPE = 1;
             const HOURLY_UNIT_TYPE = 2;
-            const RATIO = 3;
-            const AD_HOC = 4;
+            const RATIO = 4;
+            const AD_HOC = 5;
+            const FIXED = 6;
             const HOURLY_SERVICE_TYPE_ID = 5;
 
             switch (unitTypeId) {
@@ -298,7 +299,7 @@
                     units = Math.ceil(guests / guestRatio);
 
                     // cases like servers, bartenders, etc...
-                    if (serviceId === HOURLY_SERVICE_TYPE_ID) units * hours;
+                    if (serviceId === HOURLY_SERVICE_TYPE_ID) units = units * hours;
 
                     break;
                 case AD_HOC:
