@@ -174,7 +174,7 @@
             if (cell.dataset.serviceId === serviceId) {
                 let value;
 
-                if (cell.dataset.fieldName === "service_type_id" && cell.tagName === "SELECT") {
+                if (cell.tagName === "SELECT") {
                     value = cell.options[cell.selectedIndex]?.value || "";
                 } else {
                     value = cell.value;
