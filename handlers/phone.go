@@ -150,7 +150,6 @@ func handleOutboundCall(w http.ResponseWriter, r *http.Request) {
 		<Dial record="true"
 			  recordingStatusCallback="%s"
 			  recordingStatusCallbackEvent="completed"
-			  answerOnBridge="true"
 			  action="%s">%s</Dial>
 	</Response>`,
 		recordingCallbackURL,
