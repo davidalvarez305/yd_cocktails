@@ -3043,7 +3043,7 @@ func GetServiceListByType(serviceTypeId int) ([]models.Service, error) {
 		var service models.Service
 		var suggestedPrice sql.NullFloat64
 		var guestRatio, unitTypeId sql.NullInt32
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &unitTypeId, &guestRatio)
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &guestRatio, &unitTypeId)
 		if err != nil {
 			return services, fmt.Errorf("error scanning row: %w", err)
 		}

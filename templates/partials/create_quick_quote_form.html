@@ -268,6 +268,7 @@
         const hours = parseInt(document.getElementById("hours_service").value, 10);
 
         customFields.forEach(field => {
+
             if (!field.dataset.selector && !field.checked) return;
 
             const serviceId = parseInt(field.dataset.serviceId, 10);
@@ -280,10 +281,10 @@
 
             let units = 0;
 
-            const PER_PERSON_UNIT_TYPE = "1";
-            const HOURLY_UNIT_TYPE = "2";
-            const RATIO = "3";
-            const AD_HOC = "4";
+            const PER_PERSON_UNIT_TYPE = 1;
+            const HOURLY_UNIT_TYPE = 2;
+            const RATIO = 3;
+            const AD_HOC = 4;
             const HOURLY_SERVICE_TYPE_ID = 5;
 
             switch (unitTypeId) {
