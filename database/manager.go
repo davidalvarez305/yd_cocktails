@@ -2296,7 +2296,8 @@ func UpdateService(form types.ServiceForm) error {
 		SET service = COALESCE($1, service),
 		suggested_price = COALESCE($2, suggested_price),
 		service_type_id = COALESCE($3, service_type_id),
-		guest_ratio = $4
+		guest_ratio = $4,
+		unit_type_id = COALESCE($5, unit_type_id)
 		WHERE service_id = $5
 	`)
 	if err != nil {
