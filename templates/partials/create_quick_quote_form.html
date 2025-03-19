@@ -305,6 +305,9 @@
                 case AD_HOC:
                     units = handleFindAdHocUnitsByServiceId(serviceId, field.dataset.selector);
                     break;
+                case FIXED:
+                    units = 1;
+                    break;
             }
 
             // Units can not be zero
