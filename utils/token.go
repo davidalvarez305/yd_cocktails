@@ -24,3 +24,9 @@ func FormatDateMMDDYYYY(timestamp int64) string {
 	formattedTime := t.Format("01/02/2006")
 	return formattedTime
 }
+
+func FormatDateJanDDYYYY(timestamp int64) string {
+	t := time.Unix(timestamp, 0)
+	formattedTime := t.Format("Jan 2, 2006")
+	return formattedTime
+}
