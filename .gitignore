@@ -6,6 +6,7 @@
 *.xls
 *.py
 *.csv
+*.mp3
 node_modules
 env.md
 exec
