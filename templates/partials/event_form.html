@@ -157,7 +157,7 @@
                 if (value) {
                     const localDate = new Date(value);
                     
-                    const utcDate = new Date(localDate.toISOString()).getTime() / 1000;
+                    const utcDate = new Date(localDate.toLocaleString('en-US', { timeZone: 'UTC' })).getTime() / 1000;
 
                     data.set(key, utcDate);
                 }
