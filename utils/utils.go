@@ -49,14 +49,14 @@ func ConvertTimestampToESTDateTime(timestamp int64) (time.Time, error) {
 	return estTime, nil
 }
 
-func ParseDateInLocation(timestamp int64) (int64, error) {
+func ConvertTimestampToEST(timestamp int64) int64 {
 	loc, err := time.LoadLocation(constants.TimeZone)
 	if err != nil {
-		return 0, fmt.Errorf("error loading location: %w", err)
+		return 0
 	}
 
 	localTime := time.Unix(timestamp, 0).In(loc)
-	return localTime.Unix(), nil
+	return localTime.Unix()
 }
 
 func UrlsListHasCurrentPath(urls []string, url string) bool {

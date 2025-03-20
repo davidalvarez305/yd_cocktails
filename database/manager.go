@@ -1552,7 +1552,7 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
-		lead.EventDate = utils.FormatTimestamp(eventDate.Unix())
+		lead.EventDate = utils.FormatDateJanDDYYYY(eventDate.Unix())
 
 		if externalId.Valid {
 			lead.ExternalID = externalId.String
