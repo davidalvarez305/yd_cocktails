@@ -173,12 +173,11 @@
 <div id="alertModal"></div>
 
 <script nonce="{{ .Nonce }}">
+    import { convertTimestampToEst } from "{{ .StaticPath }}/helpers/dateUtils.js";
+
     const dateFields = document.querySelectorAll('.dateField');
 
-    dateFields.forEach(field => {
-        const date = new Date(field.dataset.timestamp * 1000);
-        field.value = date.toISOString().slice(0, 16);
-    });
+    dateFields.forEach(field => field.value = convertTimestampToEst(field.dataset.timestamp));
 
     function handleSaveEventChanges(e) {
         e.preventDefault();
