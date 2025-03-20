@@ -105,13 +105,12 @@
 
 <div id="alertModal"></div>
 
-<script nonce="{{ .Nonce }}">
+<script nonce="{{ .Nonce }}" type="module">
+	import { convertTimestampToEst } from "{{ .StaticPath }}/static/dateUtils.js";
+
 	const dateFields = document.querySelectorAll('.dateField');
 
-	dateFields.forEach(field => {
-		const date = new Date(field.dataset.timestamp * 1000);
-		field.value = date.toISOString().slice(0, 16);
-	});
+	dateFields.forEach(field => field.value = convertTimestampToEst(field.dataset.timestamp));
 
 	function handleLeadQuoteChanges(e) {
 		const alertModal = document.getElementById("alertModal");
