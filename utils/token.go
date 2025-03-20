@@ -20,13 +20,13 @@ func FormatTimestamp(timestamp int64) string {
 }
 
 func FormatDateMMDDYYYY(timestamp int64) string {
-	t := time.Unix(timestamp, 0)
+	t := time.Unix(timestamp, 0).UTC()
 	formattedTime := t.Format("01/02/2006")
 	return formattedTime
 }
 
 func FormatDateJanDDYYYY(timestamp int64) string {
-	t := time.Unix(timestamp, 0)
+	t := time.Unix(timestamp, 0).UTC()
 	formattedTime := t.Format("Jan 2, 2006")
 	return formattedTime
 }
