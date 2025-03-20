@@ -243,7 +243,7 @@
             if (key === "event_date_service") {
                 const date = new Date(value);
                 if (!isNaN(date.getTime())) {
-                    const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' })).getTime() / 1000;
+                    const utcTimestamp = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' })).getTime() / 1000;
                     body.set(key, utcTimestamp);
                 }
 
