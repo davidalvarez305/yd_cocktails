@@ -106,7 +106,7 @@
 <div id="alertModal"></div>
 
 <script nonce="{{ .Nonce }}" type="module">
-	import { convertTimestampToEst } from "{{ .StaticPath }}/static/dateUtils.js";
+	import { convertTimestampToEst } from "{{ .StaticPath }}/helpers/dateUtils.js";
 
 	const dateFields = document.querySelectorAll('.dateField');
 
