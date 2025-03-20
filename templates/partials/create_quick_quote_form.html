@@ -237,13 +237,15 @@
         const body = new FormData();
 
         for (const [key, value] of data.entries()) {
-
             // Exclude inputs with radio_ because it will be handled in quote services
             if (key.includes("radio_")) continue;
 
             if (key === "event_date_service") {
                 const date = new Date(value);
-                if (!isNaN(date.getTime())) body.set(key, date.getTime() / 1000);
+                if (!isNaN(date.getTime())) {
+                    const utcTimestamp = new Date(date.toISOString()).getTime() / 1000;
+                    body.set(key, utcTimestamp);
+                }
 
                 continue;
             }

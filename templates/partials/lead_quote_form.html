@@ -93,7 +93,13 @@
 
         new FormData(form).forEach((value, key) => {
             if (key.includes("_date")) {
-                if (value) data.set(key, new Date(value).getTime() / 1000);
+                if (value) {
+                    const localDate = new Date(value);
+                    
+                    const utcDate = new Date(localDate.toISOString()).getTime() / 1000;
+
+                    data.set(key, utcDate);
+                }
             } else if (value) {
                 data.set(key, value);
             }
