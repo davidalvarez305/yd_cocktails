@@ -471,18 +471,18 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 			return nil, 0, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		lead.CreatedAt = utils.FormatDateMMDDYYYY(createdAt.Unix())
+		lead.CreatedAt = utils.FormatTimestampWithOptions(createdAt.Unix(), &types.TimestampFormatOptions{Format: "01/02/2006"})
 
 		if nextActionDate.Valid {
-			lead.NextActionDate = utils.FormatTimestampEST(nextActionDate.Time.Unix())
+			lead.NextActionDate = utils.FormatTimestampWithOptions(nextActionDate.Time.Unix(), nil)
 		}
 
 		if lastContactDate.Valid {
-			lead.LastContactDate = utils.FormatTimestampEST(lastContactDate.Time.Unix())
+			lead.LastContactDate = utils.FormatTimestampWithOptions(lastContactDate.Time.Unix(), nil)
 		}
 
 		if eventDate.Valid {
-			lead.EventDate = utils.FormatDateMMDDYYYY(eventDate.Time.Unix())
+			lead.EventDate = utils.FormatTimestampWithOptions(eventDate.Time.Unix(), &types.TimestampFormatOptions{Format: "01/02/2006"})
 		}
 
 		if language.Valid {
@@ -1334,10 +1334,9 @@ func GetEventList(leadId int) ([]types.EventList, error) {
 		if eventStart.Valid && eventEnd.Valid {
 			event.EventTime = fmt.Sprintf(
 				"%s - %s",
-				utils.FormatTimestamp(eventStart.Time.Unix()),
-				utils.FormatTimestamp(eventEnd.Time.Unix()),
+				utils.FormatTimestampWithOptions(eventStart.Time.Unix(), nil),
+				utils.FormatTimestampWithOptions(eventEnd.Time.Unix(), nil),
 			)
-
 		}
 
 		if guests.Valid {
@@ -1552,7 +1551,7 @@ func GetLeadQuotes(leadId int) ([]types.LeadQuoteList, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
-		lead.EventDate = utils.FormatDateJanDDYYYY(eventDate.Unix())
+		lead.EventDate = utils.FormatTimestampWithOptions(eventDate.Unix(), &types.TimestampFormatOptions{Format: "Jan 2, 2006"})
 
 		if externalId.Valid {
 			lead.ExternalID = externalId.String
@@ -2523,7 +2522,7 @@ func GetMessagesByLeadID(leadId int) ([]types.FrontendMessage, error) {
 			return messages, err
 		}
 
-		message.DateCreated = utils.FormatTimestamp(dateCreated.Unix())
+		message.DateCreated = utils.FormatTimestampWithOptions(dateCreated.Unix(), nil)
 		messages = append(messages, message)
 	}
 
@@ -2586,7 +2585,7 @@ func GetLeadNotesByLeadID(leadId int) ([]types.FrontendNote, error) {
 			return notes, err
 		}
 
-		note.DateAdded = utils.FormatTimestamp(dateAdded.Unix())
+		note.DateAdded = utils.FormatTimestampWithOptions(dateAdded.Unix(), nil)
 		notes = append(notes, note)
 	}
 
@@ -2859,7 +2858,7 @@ func GetLeadNextActionsByLeadID(leadId int) ([]types.LeadNextActionList, error) 
 			return leadNextActions, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		leadNextAction.NextActionDate = utils.FormatTimestamp(nextActionDate.Unix())
+		leadNextAction.NextActionDate = utils.FormatTimestampWithOptions(nextActionDate.Unix(), nil)
 
 		leadNextActions = append(leadNextActions, leadNextAction)
 	}
@@ -3196,8 +3195,8 @@ func GetPaginatedEventList(pageNum int) ([]types.EventListView, int, error) {
 		if eventStart.Valid && eventEnd.Valid {
 			event.EventTime = fmt.Sprintf(
 				"%s - %s",
-				utils.FormatTimestamp(eventStart.Time.Unix()),
-				utils.FormatTimestamp(eventEnd.Time.Unix()),
+				utils.FormatTimestampWithOptions(eventStart.Time.Unix(), nil),
+				utils.FormatTimestampWithOptions(eventEnd.Time.Unix(), nil),
 			)
 		}
 

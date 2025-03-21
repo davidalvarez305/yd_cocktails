@@ -3,30 +3,30 @@ package utils
 import (
 	"time"
 
-	"github.com/davidalvarez305/yd_cocktails/constants"
+	"github.com/davidalvarez305/yd_cocktails/types"
 )
 
-func FormatTimestampEST(timestamp int64) string {
-	loc, _ := time.LoadLocation(constants.TimeZone)
-	t := time.Unix(timestamp, 0).In(loc)
-	formattedTime := t.Format("01/02/2006 03:04:05 PM")
-	return formattedTime
-}
+func FormatTimestampWithOptions(timestamp int64, opts *types.TimestampFormatOptions) string {
+	if opts == nil {
+		opts = &types.TimestampFormatOptions{
+			Format:   "01/02/2006 03:04:05 PM", // Default format
+			TimeZone: "",                       // Default to UTC
+		}
+	}
 
-func FormatTimestamp(timestamp int64) string {
-	t := time.Unix(timestamp, 0)
-	formattedTime := t.Format("01/02/2006 03:04:05 PM")
-	return formattedTime
-}
+	var loc *time.Location
+	var err error
+	if opts.TimeZone != "" {
+		loc, err = time.LoadLocation(opts.TimeZone)
+		if err != nil {
+			loc = time.UTC
+		}
+	} else {
+		loc = time.UTC
+	}
 
-func FormatDateMMDDYYYY(timestamp int64) string {
 	t := time.Unix(timestamp, 0)
-	formattedTime := t.Format("01/02/2006")
-	return formattedTime
-}
+	t = t.In(loc)
 
-func FormatDateJanDDYYYY(timestamp int64) string {
-	t := time.Unix(timestamp, 0)
-	formattedTime := t.Format("Jan 2, 2006")
-	return formattedTime
+	return t.Format(opts.Format)
 }

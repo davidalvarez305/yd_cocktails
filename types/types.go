@@ -719,3 +719,13 @@ type CocktailForm struct {
 	CocktailID *int    `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
 	Name       *string `json:"name" form:"name" schema:"name"`
 }
+
+type TimestampFormatOptions struct {
+	// DEFAULT: 01/02/2006 12:56:05 PM
+	// MMDDYYYY -> 01/02/2006
+	// Jan 2, 2006
+	Format string
+
+	// constants.TimeZone
+	TimeZone string
+}

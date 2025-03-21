@@ -199,7 +199,7 @@ func handleStripeInvoicePayment(w http.ResponseWriter, r *http.Request) {
 	
 				Date: %s,
 				Full Name: %s
-			`, utils.FormatDateJanDDYYYY(quote.EventDate), quote.FullName)
+			`, utils.FormatTimestampWithOptions(quote.EventDate, &types.TimestampFormatOptions{Format: "Jan 2, 2006"}), quote.FullName)
 
 				_, err := services.SendTextMessage(phoneNumber, constants.CompanyPhoneNumber, textMessageTemplateNotification)
 
