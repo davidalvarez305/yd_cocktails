@@ -474,11 +474,11 @@ func GetLeadList(params types.GetLeadsParams) ([]types.LeadList, int, error) {
 		lead.CreatedAt = utils.FormatDateMMDDYYYY(createdAt.Unix())
 
 		if nextActionDate.Valid {
-			lead.NextActionDate = utils.FormatTimestamp(nextActionDate.Time.Unix())
+			lead.NextActionDate = utils.FormatTimestampEST(nextActionDate.Time.Unix())
 		}
 
 		if lastContactDate.Valid {
-			lead.LastContactDate = utils.FormatTimestamp(lastContactDate.Time.Unix())
+			lead.LastContactDate = utils.FormatTimestampEST(lastContactDate.Time.Unix())
 		}
 
 		if eventDate.Valid {
