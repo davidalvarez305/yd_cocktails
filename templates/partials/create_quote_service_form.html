@@ -35,7 +35,7 @@
 										class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
 										<option></option>
 										{{ range .Services }}
-										<option value="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}">
+										<option value="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}" data-service-type-id="{{ .ServiceTypeID }}">
 											{{ .Service }} - ${{ .SuggestedPrice }}
 										</option>
 										{{ end }}
@@ -80,6 +80,8 @@
 	const service = document.getElementById("service_id");
 	const pricePerUnit = document.getElementById("price_per_unit");
 	const units = document.getElementById("units");
+	const hours = parseInt(document.getElementById("hours").value, 10) || 0;
+	const guests = parseInt(document.getElementById("guests").value, 10) || 0;
 
 	function handleSelectService(e) {
 		const selectedOption = service.options[service.selectedIndex];
@@ -94,13 +96,12 @@
 			units.value = 1;
 		}
 
-		const bartenderRegex = /\bBartending\b/;
+		const bartenderRegex = /\bBartender\b/;
 
 		if (bartenderRegex.test(selectedOption.text)) {
-			const hours = parseInt(hoursInput.value, 10) || 0;
-			const bartenders = parseInt(bartendersInput.value, 10) || 0;
-			units.value = hours;
-			pricePerUnit.value = hours * bartenders;
+			const bartenders = Math.ceil(guests / 50);
+			units.value = bartenders * hours;
+			pricePerUnit.value = suggestedPrice;
 		}
 	}
 

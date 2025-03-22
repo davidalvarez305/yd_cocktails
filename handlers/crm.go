@@ -23,14 +23,15 @@ var crmFooterFilePath = constants.CRM_TEMPLATES_DIR + "footer.html"
 
 func createCrmContext() map[string]any {
 	return map[string]any{
-		"PageTitle":       constants.CompanyName,
-		"MetaDescription": "Get a quote for mobile bartending services in Miami, FL.",
-		"SiteName":        constants.SiteName,
-		"StaticPath":      constants.StaticPath,
-		"MediaPath":       constants.MediaPath,
-		"PhoneNumber":     constants.DavidPhoneNumber,
-		"CurrentYear":     time.Now().Year(),
-		"CompanyName":     constants.CompanyName,
+		"PageTitle":                           constants.CompanyName,
+		"MetaDescription":                     "Get a quote for mobile bartending services in Miami, FL.",
+		"SiteName":                            constants.SiteName,
+		"StaticPath":                          constants.StaticPath,
+		"MediaPath":                           constants.MediaPath,
+		"PhoneNumber":                         constants.DavidPhoneNumber,
+		"CurrentYear":                         time.Now().Year(),
+		"CompanyName":                         constants.CompanyName,
+		"AssumedBaseHoursForPerPersonPricing": constants.AssumedBaseHoursForPerPersonPricing,
 	}
 }
 

@@ -18,6 +18,8 @@ const (
 	LeadEventName            string = "Lead"
 	EventSourceCRM           string = "crm"
 
+	AssumedBaseHoursForPerPersonPricing float64 = 4.00
+
 	DefaultCurrency          string  = "USD"
 	DefaultLeadValue         float64 = 150.00
 	InvoicePaymentDueInHours int     = 48

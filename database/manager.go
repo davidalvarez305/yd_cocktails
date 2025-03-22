@@ -2242,7 +2242,7 @@ func GetServicesList(pageNum int) ([]models.Service, int, error) {
 func GetServices() ([]models.Service, error) {
 	var services []models.Service
 
-	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio FROM "service";`)
+	rows, err := DB.Query(`SELECT service_id, service, suggested_price::NUMERIC, service_type_id, guest_ratio, unit_type_id FROM "service";`)
 	if err != nil {
 		return services, fmt.Errorf("error executing query: %w", err)
 	}
@@ -2252,7 +2252,7 @@ func GetServices() ([]models.Service, error) {
 		var service models.Service
 		var suggestedPrice sql.NullFloat64
 		var guestRatio sql.NullInt32
-		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &guestRatio)
+		err := rows.Scan(&service.ServiceID, &service.Service, &suggestedPrice, &service.ServiceTypeID, &guestRatio, &service.UnitTypeID)
 		if err != nil {
 			return services, fmt.Errorf("error scanning row: %w", err)
 		}

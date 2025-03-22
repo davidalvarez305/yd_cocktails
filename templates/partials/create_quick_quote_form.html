@@ -261,11 +261,11 @@
 
             if (!field.dataset.selector && !field.checked) return;
 
-            const serviceId = parseInt(field.dataset.serviceId, 10);
-            const suggestedPrice = parseFloat(field.dataset.suggestedPrice);
-            const unitTypeId = parseInt(field.dataset.unitTypeId, 10);
-            const serviceTypeId = parseInt(field.dataset.serviceTypeId, 10);
-            const guestRatio = parseFloat(field.dataset.guestRatio);
+            let serviceId = parseInt(field.dataset.serviceId, 10);
+            let suggestedPrice = parseFloat(field.dataset.suggestedPrice);
+            let unitTypeId = parseInt(field.dataset.unitTypeId, 10);
+            let serviceTypeId = parseInt(field.dataset.serviceTypeId, 10);
+            let guestRatio = parseFloat(field.dataset.guestRatio);
 
             // Ensure serviceId and suggestedPrice are valid numbers
             if (isNaN(serviceId) || isNaN(suggestedPrice)) return;
@@ -278,10 +278,16 @@
             const AD_HOC = 5;
             const FIXED = 6;
             const HOURLY_SERVICE_TYPE_ID = 5;
+            const BASE_HOURLY_RATE_ADJUSTMENT = parseFloat("{{ .AssumedBaseHoursForPerPersonPricing }}");
 
             switch (unitTypeId) {
                 case PER_PERSON_UNIT_TYPE:
                     units = guests;
+
+                    // Adjust per person price depending on number of hours
+                    // This logic adjusts price based on expected consumption rate
+                    suggestedPrice *= (hours / BASE_HOURLY_RATE_ADJUSTMENT);
+
                     break;
                 case HOURLY_UNIT_TYPE:
                     units = hours;
