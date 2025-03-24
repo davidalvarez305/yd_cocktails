@@ -35,7 +35,7 @@
 										class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-primary">
 										<option></option>
 										{{ range .Services }}
-										<option value="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}" data-service-type-id="{{ .ServiceTypeID }}">
+										<option value="{{ .ServiceID }}" data-service-id="{{ .ServiceID }}" data-suggested-price="{{ .SuggestedPrice }}" data-unit-type-id="{{ .UnitTypeID }}" data-guest-ratio="{{ .GuestRatio }}" data-service-type-id="{{ .ServiceTypeID }}">
 											{{ .Service }} - ${{ .SuggestedPrice }}
 										</option>
 										{{ end }}
@@ -76,36 +76,29 @@
 
 <div id="alertModal"></div>
 
-<script nonce="{{ .Nonce }}">
-	const service = document.getElementById("service_id");
-	const pricePerUnit = document.getElementById("price_per_unit");
-	const units = document.getElementById("units");
+<script nonce="{{ .Nonce }}" type="module">
+	import { handleQuoteService } from "{{ .StaticPath }}/helpers/service.js";
+
+	const serviceId = document.getElementById("service_id");
+	const pricePerUnitInput = document.getElementById("price_per_unit");
+	const unitsInput = document.getElementById("units");
 	const hours = parseInt(document.getElementById("hours").value, 10) || 0;
 	const guests = parseInt(document.getElementById("guests").value, 10) || 0;
+	const BASE_HOURLY_RATE_ADJUSTMENT = parseFloat("{{ .AssumedBaseHoursForPerPersonPricing }}");
 
 	function handleSelectService(e) {
-		const selectedOption = service.options[service.selectedIndex];
+		const selectedOption = serviceId.options[serviceId.selectedIndex];
 
-		const suggestedPrice = selectedOption.dataset.suggestedPrice || null;
+		const { units, suggestedPrice } =  handleQuoteService(selectedOption, guests, hours, BASE_HOURLY_RATE_ADJUSTMENT);
+		console.log({ units, suggestedPrice });
 
-		if (suggestedPrice) pricePerUnit.value = suggestedPrice;
+		if (units === 0) return;
 
-		const rentalRegex = /\bRental\b/;
-
-		if (rentalRegex.test(selectedOption.text)) {
-			units.value = 1;
-		}
-
-		const bartenderRegex = /\bBartender\b/;
-
-		if (bartenderRegex.test(selectedOption.text)) {
-			const bartenders = Math.ceil(guests / 50);
-			units.value = bartenders * hours;
-			pricePerUnit.value = suggestedPrice;
-		}
+		unitsInput.value = units;
+		pricePerUnitInput.value = suggestedPrice;
 	}
 
-	service.addEventListener("change", handleSelectService);
+	serviceId.addEventListener("change", handleSelectService);
 </script>
 
 
