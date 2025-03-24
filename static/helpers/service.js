@@ -4,6 +4,11 @@ export function handleQuoteService(field, guests, hours, assumedBaseHours, handl
         return;
     }
 
+    // If the field is a checkbox or radio, ensure it is checked before proceeding
+    if ((field.type === "radio" || field.type === "checkbox") && !field.checked) {
+        return;
+    }
+
     let serviceId = parseInt(field.dataset.serviceId, 10);
     let suggestedPrice = parseFloat(field.dataset.suggestedPrice);
     let unitTypeId = parseInt(field.dataset.unitTypeId, 10);

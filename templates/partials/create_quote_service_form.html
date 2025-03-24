@@ -89,14 +89,27 @@
 	function handleSelectService(e) {
 		const selectedOption = serviceId.options[serviceId.selectedIndex];
 
-		const { units, suggestedPrice } =  handleQuoteService(selectedOption, guests, hours, BASE_HOURLY_RATE_ADJUSTMENT);
-		console.log({ units, suggestedPrice });
+		const result = handleQuoteService(selectedOption, guests, hours, BASE_HOURLY_RATE_ADJUSTMENT);
+
+		if (!result || typeof result.units === "undefined" || typeof result.suggestedPrice === "undefined") {
+			console.warn("Warning: handleQuoteService returned an invalid result for selectedOption", selectedOption);
+			return;
+		}
+
+		const { units, suggestedPrice } = result;
+		let serviceIdValue = parseInt(selectedOption.dataset.serviceId, 10);
+
+		if (isNaN(serviceIdValue)) {
+			console.error("Error: Invalid serviceId. 'serviceId' must be a valid number.", { selectedOption, dataset: selectedOption.dataset });
+			return;
+		}
 
 		if (units === 0) return;
 
 		unitsInput.value = units;
 		pricePerUnitInput.value = suggestedPrice;
 	}
+
 
 	serviceId.addEventListener("change", handleSelectService);
 </script>

@@ -213,7 +213,9 @@
 
 <div id="alertModal"></div>
 
-<script nonce="{{ .Nonce }}">
+<script nonce="{{ .Nonce }}" type="module">
+	import { handleQuoteService } from "{{ .StaticPath }}/helpers/service.js";
+
     const cancelQuickQuoteForm = document.getElementById("cancelQuickQuoteForm");
     const closeQuickQuoteForm = document.getElementById("closeQuickQuoteForm");
     const submitQuickQuoteForm = document.getElementById("submitQuickQuoteForm");
@@ -256,60 +258,26 @@
         let quoteServices = [];
         const guests = parseInt(document.getElementById("guests_service")?.value || "0", 10);
         const hours = parseFloat(document.getElementById("hours_service")?.value || "0");
+        const BASE_HOURLY_RATE_ADJUSTMENT = parseFloat("{{ .AssumedBaseHoursForPerPersonPricing }}");
 
         customFields.forEach(field => {
+            const result = handleQuoteService(field, guests, hours, BASE_HOURLY_RATE_ADJUSTMENT, handleFindAdHocUnitsByServiceId);
 
-            if (!field.dataset.selector && !field.checked) return;
-
-            let serviceId = parseInt(field.dataset.serviceId, 10);
-            let suggestedPrice = parseFloat(field.dataset.suggestedPrice);
-            let unitTypeId = parseInt(field.dataset.unitTypeId, 10);
-            let serviceTypeId = parseInt(field.dataset.serviceTypeId, 10);
-            let guestRatio = parseFloat(field.dataset.guestRatio);
-
-            // Ensure serviceId and suggestedPrice are valid numbers
-            if (isNaN(serviceId) || isNaN(suggestedPrice)) return;
-
-            let units = 0;
-
-            const PER_PERSON_UNIT_TYPE = 1;
-            const HOURLY_UNIT_TYPE = 2;
-            const RATIO = 4;
-            const AD_HOC = 5;
-            const FIXED = 6;
-            const HOURLY_SERVICE_TYPE_ID = 5;
-            const BASE_HOURLY_RATE_ADJUSTMENT = parseFloat("{{ .AssumedBaseHoursForPerPersonPricing }}");
-
-            switch (unitTypeId) {
-                case PER_PERSON_UNIT_TYPE:
-                    units = guests;
-
-                    // Adjust per person price depending on number of hours
-                    // This logic adjusts price based on expected consumption rate
-                    suggestedPrice *= (hours / BASE_HOURLY_RATE_ADJUSTMENT);
-
-                    break;
-                case HOURLY_UNIT_TYPE:
-                    units = hours;
-                    break;
-                case RATIO:
-                    units = guestRatio > 0 ? Math.ceil(guests / guestRatio) : 0;
-
-                    // cases like servers, bartenders, etc...
-                    if (serviceTypeId === HOURLY_SERVICE_TYPE_ID && hours > 0)  units *= hours;
-
-                    break;
-                case AD_HOC:
-                    units = handleFindAdHocUnitsByServiceId(serviceId, field.dataset.selector);
-                    break;
-                case FIXED:
-                    units = 1;
-                    break;
+            if (!result || typeof result.units === "undefined" || typeof result.suggestedPrice === "undefined") {
+                console.warn("Warning: handleQuoteService returned an invalid result for field", field);
+                return;
             }
 
-            // Units can not be zero
+            const { units, suggestedPrice } = result;
+            let serviceId = parseInt(field.dataset.serviceId, 10);
+
+            if (isNaN(serviceId)) {
+                console.error("Error: Invalid serviceId. 'serviceId' must be a valid number.", { field, dataset: field.dataset });
+                return;
+            }
+
             if (units === 0) return;
-    
+
             quoteServices.push({ service_id: serviceId, price_per_unit: suggestedPrice, lead_id: leadId, units: units });
         });
 
