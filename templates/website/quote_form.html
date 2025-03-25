@@ -35,7 +35,8 @@
                                 </div>
                                 <div class="space-y-1">
                                     <label for="phone_number" class="font-medium">Phone Number*</label>
-                                    <input type="tel" id="phone_number" name="phone_number" autocomplete="tel-national" required
+                                    <input type="tel" id="phone_number" pattern="^\+?[1-9]\d{1,14}$" minlength="10"
+                                        title="Enter a valid phone number (e.g., +1234567890 or 123-456-7890)" name="phone_number" autocomplete="tel-national" required
                                         class="block w-full rounded-lg border border-gray-200 px-5 py-3 leading-6 placeholder-gray-500 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:placeholder-gray-400 dark:focus:border-primary" />
                                 </div>
                                 <div class="space-y-1">
@@ -137,6 +138,8 @@
     const submitQuoteForm = document.getElementById("submitQuoteForm");
 
     function handleQuoteFormSubmit() {
+        if (!validateForm()) return;
+
         const form = document.getElementById("quoteForm");
         const alertModal = document.getElementById("alertModal");
 
@@ -210,6 +213,27 @@
                 handleCloseFormModal();
                 form.reset();
             });
+    }
+
+    function validateForm() {
+        let isValid = true;
+
+        const fullNameInput = document.getElementById("full_name");
+        if (!fullNameInput || fullNameInput.value.trim().length < 3) {
+            alert("Full Name must be at least 3 characters long.");
+            fullNameInput.focus();
+            isValid = false;
+        }
+
+        const phoneInput = document.getElementById("phone_number");
+        const phonePattern = /^[0-9]{10,}$/; // Ensures at least 10 digits
+        if (!phoneInput || !phonePattern.test(phoneInput.value.trim())) {
+            alert("Please enter a valid phone number with at least 10 digits.");
+            phoneInput.focus();
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     submitQuoteForm.addEventListener("click", () => handleQuoteFormSubmit());
