@@ -132,18 +132,6 @@ type EventCocktail struct {
 	EventID         int `json:"event_id" form:"event_id" schema:"event_id"`
 }
 
-type EventExpense struct {
-	EventExpenseID     int     `json:"event_expense_id" form:"event_expense_id" schema:"event_expense_id"`
-	EventExpenseTypeID int     `json:"event_expense_type_id" form:"event_expense_type_id" schema:"event_expense_type_id"`
-	Name               string  `json:"name" form:"name" schema:"name"`
-	Amount             float64 `json:"amount" form:"amount" schema:"amount"`
-}
-
-type EventExpenseType struct {
-	EventExpenseTypeID int    `json:"event_expense_type_id" form:"event_expense_type_id" schema:"event_expense_type_id"`
-	Type               string `json:"type" form:"type" schema:"type"`
-}
-
 type Cocktail struct {
 	CocktailID int    `json:"cocktail_id" form:"cocktail_id" schema:"cocktail_id"`
 	Name       string `json:"name" form:"name" schema:"name"`
